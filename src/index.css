@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background_primary: #1c1f1d;
+  --background_secondary: #121714;
+  --text: #e0e4e4;
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+  background: #1c1f1d;
+  color: var(--text);
+
+  font-size: 0.85rem /* 14px */;
+  line-height: 1.5rem;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #121714;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #434343;
+  border-radius: 20px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #505050;
+}
