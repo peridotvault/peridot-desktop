@@ -10,7 +10,7 @@ export const VerticalCard = ({
   price: number;
 }) => {
   return (
-    <button className="w-full flex flex-col gap-3 group">
+    <a href="/home/gamename" className="w-full flex flex-col gap-3 group">
       <div className="w-full aspect-[3/4] overflow-hidden bg-white rounded-xl duration-300">
         <img
           src={imgUrl}
@@ -29,6 +29,6 @@ export const VerticalCard = ({
         />
         <p>{price.toLocaleString()} PER</p>
       </div>
-    </button>
+    </a>
   );
 };

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { walletService } from "../../utils/WalletService";
 import { useNavigate } from "react-router-dom";
+import { PasswordPage } from "./PasswordPage";
 
 export default function ImportWallet() {
   const {
@@ -20,6 +21,14 @@ export default function ImportWallet() {
       navigate("/home");
     }
   }, [isPasswordCreated, navigate]);
+
+  const clearSeedPhrase = () => {
+    setIsGeneratedSeedPhrase(false);
+    setWallet((prevWallet) => ({
+      ...prevWallet,
+      seedPhrase: null,
+    }));
+  };
 
   const handleImport = useCallback(
     async (seedPhrase: string) => {
@@ -71,38 +80,13 @@ export default function ImportWallet() {
     }
 
     return (
-      <main className="flex justify-center items-center p-6 flex-col gap-5">
-        <button
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          back
-        </button>
-        <p>Create Password</p>
-        <input
-          type="password"
-          name="password"
-          className="border p-2 rounded text-black"
-          placeholder="Enter your password"
-          value={wallet.password || ""}
-          onChange={(e) =>
-            setWallet((prev) => ({
-              ...prev,
-              password: e.target.value,
-            }))
-          }
-        />
-        <button
-          onClick={() => {
-            handleImport(wallet.seedPhrase || "");
-            setIsPasswordCreated(true);
-          }}
-          className="bg-white text-black py-2 px-5 rounded-full"
-        >
-          Create Password
-        </button>
-      </main>
+      <PasswordPage
+        backFunction={clearSeedPhrase}
+        handlePassword={() => {
+          handleImport(wallet.seedPhrase || "");
+          setIsPasswordCreated(true);
+        }}
+      />
     );
   }
 

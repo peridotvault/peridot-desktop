@@ -1,5 +1,5 @@
 https://dribbble.com/shots/15124806-Crypto-Investment-Wallet-Animation
-
+https://api.geckoterminal.com/api/v2/networks/icp/tokens/ryjl3-tyaaa-aaaaa-aaaba-cai
 
 Karena logo Anda menggunakan gradasi hijau dari #90EE90 ke #4D8A6A, berikut adalah beberapa saran untuk palet warna dark theme neumorphism yang cocok dengan logo Anda:
 

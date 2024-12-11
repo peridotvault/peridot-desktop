@@ -18,10 +18,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenProfile }) => {
   };
 
   return (
-    <div className="bg-background_primary shadow-lg flex justify-between items-center gap-5 px-6 fixed w-full z-50">
-      <div className="flex gap-5 py-6">
-        <a href="">Vault</a>
-        <a href="">Library</a>
+    <div className="bg-background_primary shadow-lg flex justify-between items-center gap-5 px-6 fixed w-full z-50 ">
+      <div className="flex gap-5 py-6 font-medium text-lg">
+        <a href="/home">Vault</a>
+        <a href="/home/library">Library</a>
         <a href="">Market</a>
       </div>
       <div className="flex gap-5 items-center">

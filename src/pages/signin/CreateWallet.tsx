@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { walletService } from "../../utils/WalletService";
 import { useNavigate } from "react-router-dom";
+import { PasswordPage } from "./PasswordPage";
 
 export default function CreateWallet() {
   const {
@@ -54,17 +55,18 @@ export default function CreateWallet() {
   if (!isPasswordCreated) {
     if (!isGeneratedSeedPhrase) {
       return (
-        <main className="flex justify-center items-center p-6 flex-col gap-5">
+        <main className="flex justify-center items-center h-screen p-6 flex-col gap-6">
           <button
+            className="fixed left-5 top-5"
             onClick={() => {
               navigate("/");
             }}
           >
             back
           </button>
-          <p>Generate Your Wallet</p>
+          <p className="text-lg">Generate Your Wallet</p>
           <button
-            className="border p-3 w-[300px] text-lg"
+            className="rounded-xl text-center shadow-sunken-sm hover:shadow-flat-lg hover:bg-white/5 duration-300 border border-white/10 hover:border-white/5 p-6 w-[300px] h-[150px] text-lg"
             onClick={generateSeedPhrase}
           >
             {!wallet.seedPhrase ? (
@@ -73,9 +75,10 @@ export default function CreateWallet() {
               <p>{wallet.seedPhrase}</p>
             )}
           </button>
+          <div className="h-3"></div>
           <button
             onClick={() => setIsGeneratedSeedPhrase(true)}
-            className="bg-white text-black py-2 px-5 rounded-full"
+            className="bg-white text-black py-3 px-10 rounded-full"
           >
             Continue
           </button>
@@ -84,32 +87,13 @@ export default function CreateWallet() {
     }
 
     return (
-      <main className="flex justify-center items-center p-6 flex-col gap-5">
-        <button onClick={clearSeedPhrase}>back</button>
-        <p>Create Password</p>
-        <input
-          type="password"
-          name="password"
-          className="border p-2 rounded text-black"
-          placeholder="Enter your password"
-          value={wallet.password || ""}
-          onChange={(e) =>
-            setWallet((prev) => ({
-              ...prev,
-              password: e.target.value,
-            }))
-          }
-        />
-        <button
-          onClick={() => {
-            handleGenerateWallet();
-            setIsPasswordCreated(true);
-          }}
-          className="bg-white text-black py-2 px-5 rounded-full"
-        >
-          Create Password
-        </button>
-      </main>
+      <PasswordPage
+        backFunction={clearSeedPhrase}
+        handlePassword={() => {
+          handleGenerateWallet();
+          setIsPasswordCreated(true);
+        }}
+      />
     );
   }
 

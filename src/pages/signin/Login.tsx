@@ -17,12 +17,18 @@ export default function Login() {
   });
 
   return (
-    <main className="flex flex-col justify-center w-full min-h-dvh items-center gap-5">
-      <p>PerWallet</p>
-      <a href="/import_wallet" className="p-2 bg-white text-black">
+    <main className="flex flex-col justify-center w-full min-h-dvh items-center gap-6">
+      <p className="text-lg">Sign In</p>
+      <a
+        href="/import_wallet"
+        className="px-6 py-4 text-white w-72 rounded-xl text-center shadow-sunken-sm hover:shadow-flat-lg hover:bg-white/5 duration-300 border border-white/10 hover:border-white/5"
+      >
         Import Wallet
       </a>
-      <a href="/create_wallet" className="p-2 bg-white text-black">
+      <a
+        href="/create_wallet"
+        className="px-6 py-4 text-whites w-72 rounded-xl text-center shadow-sunken-sm hover:shadow-flat-lg hover:bg-white/5 duration-300 border border-white/10 hover:border-white/5"
+      >
         Create Wallet
       </a>
     </main>
