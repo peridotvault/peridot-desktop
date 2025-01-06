@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { WalletData } from "../utils/WalletService";
+import type { WalletData } from "../utils/WalletService";
 import { saveWalletData, getWalletData } from "../utils/StoreService";
+import type { EncryptedData } from "../utils/StotechEncrypt";
 
 interface WalletContextData {
   wallet: WalletData;
@@ -15,10 +16,10 @@ const WalletContext = createContext<WalletContextData | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [wallet, setWallet] = useState<WalletData>({
-    seedPhrase: null,
+    encryptedSeedPhrase: null,
     principalId: null,
     accountId: null,
-    privateKey: null,
+    encryptedPrivateKey: null,
     password: null,
   });
 
@@ -32,8 +33,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         const storedWallet = await getWalletData();
         if (storedWallet) {
           setWallet(storedWallet);
-          // Set other states based on stored data
-          setIsGeneratedSeedPhrase(!!storedWallet.seedPhrase);
+          // Set other states based on stored encrypted data
+          setIsGeneratedSeedPhrase(!!storedWallet.encryptedSeedPhrase);
           setIsPasswordCreated(!!storedWallet.password);
         }
       } catch (error) {
@@ -48,7 +49,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const saveWallet = async () => {
       try {
-        if (wallet.seedPhrase || wallet.password) {
+        // Only save if we have either encrypted seed phrase or password
+        if (wallet.encryptedSeedPhrase || wallet.password) {
           await saveWalletData(wallet);
         }
       } catch (error) {
@@ -59,19 +61,27 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     saveWallet();
   }, [wallet]);
 
+  const value = React.useMemo(
+    () => ({
+      wallet,
+      setWallet,
+      isGeneratedSeedPhrase,
+      setIsGeneratedSeedPhrase,
+      isPasswordCreated,
+      setIsPasswordCreated,
+    }),
+    [
+      wallet,
+      setWallet,
+      isGeneratedSeedPhrase,
+      setIsGeneratedSeedPhrase,
+      isPasswordCreated,
+      setIsPasswordCreated,
+    ]
+  );
+
   return (
-    <WalletContext.Provider
-      value={{
-        wallet,
-        setWallet,
-        isGeneratedSeedPhrase,
-        setIsGeneratedSeedPhrase,
-        isPasswordCreated,
-        setIsPasswordCreated,
-      }}
-    >
-      {children}
-    </WalletContext.Provider>
+    <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
   );
 }
 
@@ -81,4 +91,32 @@ export function useWallet() {
     throw new Error("useWallet must be used within a WalletProvider");
   }
   return context;
+}
+
+// Helper types for better type checking
+export type UpdateWalletParams = Partial<WalletData>;
+
+// Helper hooks for common operations
+export function useWalletUpdate() {
+  const { setWallet } = useWallet();
+
+  return React.useCallback(
+    (updates: UpdateWalletParams) => {
+      setWallet((currentWallet) => ({
+        ...currentWallet,
+        ...updates,
+      }));
+    },
+    [setWallet]
+  );
+}
+
+export function useEncryptedSeedPhrase(): EncryptedData | null {
+  const { wallet } = useWallet();
+  return wallet.encryptedSeedPhrase;
+}
+
+export function useEncryptedPrivateKey(): EncryptedData | null {
+  const { wallet } = useWallet();
+  return wallet.encryptedPrivateKey;
 }

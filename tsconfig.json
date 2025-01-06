@@ -26,6 +26,7 @@
     ],
     
   },
-  "include": ["src", "electron","**/*.ts", "**/*.tsx"],
+  // "include": ["src", "electron","**/*.ts", "**/*.tsx"],
+  "include": ["src", "electron", "**/*.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

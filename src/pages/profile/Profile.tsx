@@ -6,6 +6,7 @@ import { Actor, HttpAgent } from "@dfinity/agent";
 import { icrc1IdlFactory } from "../../hooks/idl/icrc1";
 import { Principal } from "@dfinity/principal";
 import { motion } from "framer-motion";
+import type { EncryptedData } from "../../utils/StotechEncrypt";
 
 interface NavbarProps {
   onClose: () => void;
@@ -72,10 +73,10 @@ export const Profile: React.FC<NavbarProps> = ({ onClose }) => {
 
       // Reset wallet state to initial values
       setWallet({
-        seedPhrase: null,
+        encryptedSeedPhrase: null,
         principalId: null,
         accountId: null,
-        privateKey: null,
+        encryptedPrivateKey: null,
         password: null,
       });
 
@@ -84,6 +85,13 @@ export const Profile: React.FC<NavbarProps> = ({ onClose }) => {
     } catch (error) {
       console.error("Error clearing wallet data:", error);
     }
+  };
+
+  const getDisplayText = (data: EncryptedData | string | null) => {
+    if (!data) return null;
+
+    const textToDisplay = typeof data === "string" ? data : data.data;
+    return textToDisplay;
   };
 
   return (
@@ -106,10 +114,10 @@ export const Profile: React.FC<NavbarProps> = ({ onClose }) => {
           </button>
           <p className="text-xl font-bold text-center mb-5">Wallet Details</p>
           <div className="">
-            <p>Seed Phrase: {wallet.seedPhrase}</p>
+            <p>Seed Phrase: {getDisplayText(wallet.encryptedSeedPhrase)}</p>
             <p>Principal ID: {wallet.principalId}</p>
             <p>Account ID: {wallet.accountId}</p>
-            <p>Private Key: {wallet.privateKey}</p>
+            <p>Private Key: {getDisplayText(wallet.encryptedPrivateKey)}</p>
             <p>Password: {wallet.password}</p>
           </div>
           <section className="flex flex-col gap-3">

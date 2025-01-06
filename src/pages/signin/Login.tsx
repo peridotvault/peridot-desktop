@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { useNavigate } from "react-router-dom";
@@ -8,8 +9,12 @@ export default function Login() {
 
   useEffect(() => {
     function checkWallet() {
-      if (wallet.principalId && wallet.accountId && wallet.privateKey) {
-        navigate("/home");
+      if (
+        wallet.principalId &&
+        wallet.accountId &&
+        wallet.encryptedPrivateKey
+      ) {
+        navigate("/");
       }
     }
 

@@ -1,22 +1,37 @@
-import React, { useState } from "react";
+// @ts-ignore
+import React, { useEffect, useState } from "react";
 import { Navbar } from "./Navbar";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Wallet } from "../../pages/profile/Wallet";
 import { AnimatePresence } from "framer-motion";
+import { useWallet } from "../../contexts/WalletContext";
 
-export const MainLayout = () => {
-  const [isOpenProfile, setIsOpenProfile] = useState(false);
+export default function MainLayout() {
+  const [isOpenWallet, setIOpenWallet] = useState(false);
+  const { wallet } = useWallet();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    function checkWallet() {
+      if (
+        !wallet.principalId &&
+        !wallet.accountId &&
+        !wallet.encryptedPrivateKey &&
+        !wallet.encryptedSeedPhrase
+      ) {
+        navigate("/login");
+      }
+    }
+
+    checkWallet();
+  });
   return (
     <main className="overflow-x-hidden">
-      <Navbar onOpenProfile={() => setIsOpenProfile(true)} />
+      <Navbar onOpenWallet={() => setIOpenWallet(true)} />
       <Outlet />
       <AnimatePresence>
-        {isOpenProfile ? (
-          <Wallet onClose={() => setIsOpenProfile(false)} />
-        ) : (
-          ""
-        )}
+        {isOpenWallet ? <Wallet onClose={() => setIOpenWallet(false)} /> : ""}
       </AnimatePresence>
     </main>
   );
-};
+}

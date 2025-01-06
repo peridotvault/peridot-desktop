@@ -1,18 +1,19 @@
+// @ts-ignore
 import React, { useEffect, useState } from "react";
 import { VerticalCard } from "../components/cards/VerticalCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 
-export default function Home() {
+export default function VaultPage() {
   // Components
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [isHoverComponent, setIsHoverComponent] = useState(false);
 
   const images: string[] = [
-    "https://wallpapers-clan.com/wp-content/uploads/2023/10/aesthetic-assassin-creed-desktop-wallpaper-cover.jpg",
-    "https://wallpapers-clan.com/wp-content/uploads/2023/10/aesthetic-assassin-creed-desktop-wallpaper-cover.jpg",
-    "https://wallpapers-clan.com/wp-content/uploads/2023/10/aesthetic-assassin-creed-desktop-wallpaper-cover.jpg",
+    "/assets/vault/Content1.png",
+    "/assets/vault/Content2.png",
+    "/assets/vault/Content3.png",
   ];
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export default function Home() {
       {/* section 1  */}
       <section className="w-full h-[30rem] pt-20 mb-4 relative">
         <img
-          src="https://www.rgj.com/gcdn/presto/2023/06/29/PREN/ce59bfc5-9afe-4ac4-9eb5-d54f7f71058d-Steam_Summer_Sale_2023.jpg"
+          src="https://i.imgur.com/ZlbIhY2.gif"
           alt=""
           className="w-full h-full object-cover"
         />
@@ -52,18 +53,18 @@ export default function Home() {
       </section>
 
       {/* section 2  */}
-      <section className="flex justify-center">
-        <div className="flex gap-6 p-6 container">
+      <section className="flex justify-center px-12 py-6">
+        <div className="flex gap-6 xl:gap-12 duration-300 w-full max-w-[1400px]">
           {images.map((image, index) => (
             <div
               key={index}
               className={`w-1/3 aspect-video rounded-xl bg-background_primary overflow-hidden duration-300 flex items-center justify-center 
-            ${
-              activeIndex === index
-                ? "scale-105 opacity-100 shadow-flat"
-                : "scale-100 opacity-70"
-            }
-          `}
+          ${
+            activeIndex === index
+              ? "scale-105 opacity-100 shadow-flat"
+              : "scale-100 opacity-70"
+          }
+        `}
               onMouseEnter={() => handleMouseEnter(index)}
               onMouseLeave={() => handleMouseLeave()}
             >
@@ -78,8 +79,8 @@ export default function Home() {
       </section>
 
       {/* section 3  */}
-      <section className="flex justify-center">
-        <div className="p-6 flex flex-col gap-6 container">
+      <section className="flex justify-center px-12 py-6">
+        <div className="flex flex-col gap-6 w-full max-w-[1400px]">
           {/* title  */}
           <button className="flex items-center gap-3">
             <p className="text-xl font-semibold">
@@ -101,9 +102,9 @@ export default function Home() {
               price={47000}
             />
             <VerticalCard
-              imgUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwgCR-vS9eaaZlau4l5dRX0ct-oQq25RIsTg&s"
-              title="Star Wars Outlaws Gold"
-              price={1269000}
+              imgUrl="https://dtujc-7yaaa-aaaap-ahkfq-cai.icp0.io/img/games/Cover.jpg"
+              title="Infinity"
+              price={0}
             />
             <VerticalCard
               imgUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdp_ZPzOzPD_xMZ7CIAEQj5EPocc3ix3DxvQ&s"
@@ -120,8 +121,8 @@ export default function Home() {
       </section>
 
       {/* section 4  */}
-      <section className="flex justify-center">
-        <div className="p-6 flex flex-col gap-6 container">
+      <section className="flex justify-center px-12 py-6">
+        <div className="flex flex-col gap-6  w-full max-w-[1400px]">
           {/* title  */}
           <button className="flex items-center gap-3">
             <p className="text-xl font-semibold">

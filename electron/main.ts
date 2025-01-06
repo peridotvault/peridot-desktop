@@ -1,4 +1,4 @@
-import { app, BrowserWindow,ipcMain } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { setupStoreHandlers } from './store';
@@ -27,9 +27,8 @@ let win: BrowserWindow | null
 
 function createWindow() {
   win = new BrowserWindow({
-    // width: 600,
-    width: 800,
-    minWidth: 800,
+    width: 1000,
+    minWidth: 1000,
     height: 600,
     minHeight:600,
     alwaysOnTop: false,

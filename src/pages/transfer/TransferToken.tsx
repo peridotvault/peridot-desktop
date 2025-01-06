@@ -1,7 +1,8 @@
-import { Actor, HttpAgent } from "@dfinity/agent";
+// @ts-ignore
 import React, { useState } from "react";
-import { icrc1IdlFactory } from "../../hooks/idl/icrc1";
-import { Principal } from "@dfinity/principal";
+// import { Actor, HttpAgent } from "@dfinity/agent";
+// import { icrc1IdlFactory } from "../../hooks/idl/icrc1";
+// import { Principal } from "@dfinity/principal";
 
 interface metadata {
   decimals: number;
@@ -20,46 +21,46 @@ export default function TransferToken({
   const [toPrincipalId, setToPrincipalId] = useState("");
   const [amount, setAmount] = useState(0);
 
-  async function transfer(toPrincipalId: string, amount: number) {
-    const agent = new HttpAgent({
-      host: "https://ic0.app",
-      // identity: this.identity
-    });
-    // await agent.fetchRootKey(); // Important for local development
+  // async function transfer(toPrincipalId: string, amount: number) {
+  //   const agent = new HttpAgent({
+  //     host: "https://ic0.app",
+  //     // identity: this.identity
+  //   });
+  //   // await agent.fetchRootKey(); // Important for local development
 
-    const ledgerActor = Actor.createActor(icrc1IdlFactory, {
-      agent,
-      canisterId: "4u7dm-7qaaa-aaaam-acvdq-cai",
-    });
+  //   const ledgerActor = Actor.createActor(icrc1IdlFactory, {
+  //     agent,
+  //     canisterId: "4u7dm-7qaaa-aaaam-acvdq-cai",
+  //   });
 
-    // Convert amount to e8s (smallest unit)
-    const amountInE8s = BigInt(Math.floor(amount * args.decimals));
+  //   // Convert amount to e8s (smallest unit)
+  //   const amountInE8s = BigInt(Math.floor(amount * args.decimals));
 
-    const transferRecord = {
-      to: {
-        owner: Principal.fromText(toPrincipalId),
-        subaccount: [],
-      },
-      fee: [args.fee],
-      memo: [],
-      from_subaccount: [],
-      created_at_time: [],
-      amount: amountInE8s,
-    };
+  //   const transferRecord = {
+  //     to: {
+  //       owner: Principal.fromText(toPrincipalId),
+  //       subaccount: [],
+  //     },
+  //     fee: [args.fee],
+  //     memo: [],
+  //     from_subaccount: [],
+  //     created_at_time: [],
+  //     amount: amountInE8s,
+  //   };
 
-    try {
-      const result = await ledgerActor.icrc1_transfer(transferRecord);
-      return {
-        success: true,
-        result: result,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: (error as Error).message,
-      };
-    }
-  }
+  //   try {
+  //     const result = await ledgerActor.icrc1_transfer(transferRecord);
+  //     return {
+  //       success: true,
+  //       result: result,
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       success: false,
+  //       error: (error as Error).message,
+  //     };
+  //   }
+  // }
 
   return (
     <div>

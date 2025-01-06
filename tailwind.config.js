@@ -12,12 +12,17 @@ export default {
 
         "background_primary": "var(--background_primary)",
         "background_secondary": "var(--background_secondary)",
-        "background_disabled": "gray",
+        "background_disabled": "#333333",
         "text": "var(--text)",
         "text_disabled": "gray",
 
         "shadow_primary": "#0F120F",
         "shadow_secondary": "#2A3B30",
+
+        // danger
+        "danger": "#c5604c",
+        "warning": "#deb887",
+
 
 
         // subscribe 

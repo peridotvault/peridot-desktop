@@ -1,3 +1,4 @@
+// @ts-ignore
 import React, { useEffect, useState } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { Actor, HttpAgent } from "@dfinity/agent";
@@ -134,7 +135,8 @@ export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
       </div>
       <div className="flex flex-col items-end">
         <p>$42,324</p>
-        <p className="text-xs text-red-500">-0.3%</p>
+        <p className="text-xs text-accent_primary">+9.3%</p>
+        {/* <p className="text-xs text-red-500">-0.3%</p> */}
       </div>
     </div>
   );
