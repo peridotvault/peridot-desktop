@@ -1,30 +1,24 @@
-import { ipcRenderer, contextBridge } from 'electron'
+import { ipcRenderer } from 'electron'
+import type { WalletData } from '../src/utils/WalletService'
+import { EncryptedData } from '../src/utils/AntiganeEncrypt';
 
-// --------- Expose some API to the Renderer process ---------
-contextBridge.exposeInMainWorld('ipcRenderer', {
-  on(...args: Parameters<typeof ipcRenderer.on>) {
-    const [channel, listener] = args
-    return ipcRenderer.on(channel, (event, ...args) => listener(event, ...args))
-  },
-  off(...args: Parameters<typeof ipcRenderer.off>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.off(channel, ...omit)
-  },
-  send(...args: Parameters<typeof ipcRenderer.send>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.send(channel, ...omit)
-  },
-  invoke(...args: Parameters<typeof ipcRenderer.invoke>) {
-    const [channel, ...omit] = args
-    return ipcRenderer.invoke(channel, ...omit)
-  },
+interface SerializedWalletData {
+  // Add your serialized wallet data properties here based on your WalletData type
+  encryptedSeedPhrase: EncryptedData | null;
+    principalId: string | null;
+    accountId: string | null;
+    encryptedPrivateKey: EncryptedData | null;
+    password: string | null;
+}
 
-  // You can expose other APTs you need here.
-  // ...
-})
-
-contextBridge.exposeInMainWorld('electronAPI', {
-  saveWallet: (data: any) => ipcRenderer.invoke('save-wallet', data),
-  getWallet: () => ipcRenderer.invoke('get-wallet'),
-  clearWallet: () => ipcRenderer.invoke('clear-wallet')
-})
+// Attach electronAPI methods with types matching types.d.ts
+window.electronAPI = {
+  saveWallet: (data: SerializedWalletData | WalletData): Promise<{ success: boolean; error?: string }> => 
+    ipcRenderer.invoke('save-wallet', data),
+    
+  getWallet: (): Promise<{ success: boolean; data?: SerializedWalletData; error?: string }> => 
+    ipcRenderer.invoke('get-wallet'),
+    
+  clearWallet: (): Promise<{ success: boolean; error?: string }> => 
+    ipcRenderer.invoke('clear-wallet')
+}

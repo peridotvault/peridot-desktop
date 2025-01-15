@@ -15,7 +15,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ICRC1Coin } from "../../components/wallet/ICRC1Coin";
-import type { EncryptedData } from "../../utils/StotechEncrypt";
+import type { EncryptedData } from "../../utils/AntiganeEncrypt";
 import { InputField } from "../../components/InputField";
 import { walletService } from "../../utils/WalletService";
 
@@ -38,7 +38,6 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
         principalId: null,
         accountId: null,
         encryptedPrivateKey: null,
-        password: null,
       });
       navigate("/login");
     } catch (error) {
@@ -65,12 +64,13 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
 
   return (
     <motion.div
-      className="bg-black/40 fixed top-0 right-0 w-full h-full z-50 flex justify-end py-10 overflow-x-hidden"
+      className="fixed inset-0 bg-black/40 z-50 flex justify-end"
       onClick={onClose}
       animate={{ opacity: 1 }}
+      data-lenis-prevent
     >
       <motion.main
-        className="w-[370px] h-full bg-background_primary rounded-l-3xl overflow-x-hidden"
+        className="w-[370px] bg-background_primary h-screen overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         initial={{ x: 400 }}
         animate={{ x: 0 }}
@@ -89,7 +89,7 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
               </button>
               {/* MODAL =================================================== */}
               <div
-                className={`absolute right-[370px] top-16 ${
+                className={`absolute right-[370px] top-6 ${
                   isOpenWalletAddress ? "flex" : "hidden"
                 } justify-start flex-col bg-background_primary py-6 px-10 mx-6 rounded-b-2xl rounded-tl-2xl gap-5 duration-300`}
               >

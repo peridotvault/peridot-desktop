@@ -5,20 +5,10 @@ import { RouterProvider } from "react-router-dom";
 import router from "./routes";
 import { WalletProvider } from "./contexts/WalletContext";
 import { Buffer } from "buffer";
-import Lenis from "lenis";
 
 if (typeof window !== "undefined") {
   window.Buffer = Buffer;
 }
-
-// Initialize Lenis smooth scrolling
-const lenis = new Lenis();
-
-function raf(time: any) {
-  lenis.raf(time);
-  requestAnimationFrame(raf);
-}
-requestAnimationFrame(raf);
 
 // Create a root wrapper component
 const Root = () => {
@@ -34,6 +24,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 );
 
 // Use contextBridge
-window.ipcRenderer.on("main-process-message", (_event, message) => {
-  console.log(message);
-});
+// window.ipcRenderer.on("main-process-message", (_event, message) => {
+//   console.log(message);
+// });

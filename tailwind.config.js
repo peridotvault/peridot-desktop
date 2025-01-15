@@ -11,6 +11,7 @@ export default {
         "accent_secondary": "#4D8A6A",
 
         "background_primary": "var(--background_primary)",
+        "background_primary/50": "#1c1f1d8c",
         "background_secondary": "var(--background_secondary)",
         "background_disabled": "#333333",
         "text": "var(--text)",

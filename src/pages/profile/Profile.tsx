@@ -6,7 +6,7 @@ import { Actor, HttpAgent } from "@dfinity/agent";
 import { icrc1IdlFactory } from "../../hooks/idl/icrc1";
 import { Principal } from "@dfinity/principal";
 import { motion } from "framer-motion";
-import type { EncryptedData } from "../../utils/StotechEncrypt";
+import type { EncryptedData } from "../../utils/AntiganeEncrypt";
 
 interface NavbarProps {
   onClose: () => void;
@@ -77,7 +77,6 @@ export const Profile: React.FC<NavbarProps> = ({ onClose }) => {
         principalId: null,
         accountId: null,
         encryptedPrivateKey: null,
-        password: null,
       });
 
       // Navigate back to login page
@@ -118,7 +117,6 @@ export const Profile: React.FC<NavbarProps> = ({ onClose }) => {
             <p>Principal ID: {wallet.principalId}</p>
             <p>Account ID: {wallet.accountId}</p>
             <p>Private Key: {getDisplayText(wallet.encryptedPrivateKey)}</p>
-            <p>Password: {wallet.password}</p>
           </div>
           <section className="flex flex-col gap-3">
             <div className="flex items-center gap-3">

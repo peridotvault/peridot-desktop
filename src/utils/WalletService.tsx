@@ -6,7 +6,7 @@ import { Principal } from "@dfinity/principal";
 import { AccountIdentifier } from "@dfinity/ledger-icp";
 import { Buffer } from "buffer";
 import * as ecc from "tiny-secp256k1";
-import { createEncryptionService, EncryptedData } from "./StotechEncrypt";
+import { createEncryptionService, EncryptedData } from "./AntiganeEncrypt";
 
 const bip32 = BIP32Factory(ecc);
 
@@ -15,7 +15,6 @@ export interface WalletData {
   principalId: string | null;
   accountId: string | null;
   encryptedPrivateKey: EncryptedData | null;
-  password: string | null;
 }
 
 export interface WalletGenerateSuccess {
@@ -35,7 +34,7 @@ export type WalletGenerateResult = WalletGenerateSuccess | WalletGenerateError;
 
 class WalletService {
   // Use larger parameters for better security
-  private encryption = createEncryptionService(128, 64);
+  private encryption = createEncryptionService();
 
   async generateWallet(
     seedPhrase: string,

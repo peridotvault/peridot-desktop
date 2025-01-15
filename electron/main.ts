@@ -27,8 +27,8 @@ let win: BrowserWindow | null
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 1000,
-    minWidth: 1000,
+    width: 1100,
+    minWidth: 1100,
     height: 600,
     minHeight:600,
     alwaysOnTop: false,
@@ -38,9 +38,10 @@ function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
+      contextIsolation: false,
+      // contextIsolation: true,
+      nodeIntegration: true,
+      sandbox: false,
     },
   })
 

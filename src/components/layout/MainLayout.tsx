@@ -5,11 +5,36 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Wallet } from "../../pages/profile/Wallet";
 import { AnimatePresence } from "framer-motion";
 import { useWallet } from "../../contexts/WalletContext";
+import Lenis from "lenis";
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
   const { wallet } = useWallet();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     function checkWallet() {
@@ -26,9 +51,11 @@ export default function MainLayout() {
     checkWallet();
   });
   return (
-    <main className="overflow-x-hidden">
+    <main className="min-h-screen flex flex-col">
       <Navbar onOpenWallet={() => setIOpenWallet(true)} />
-      <Outlet />
+      <div className="flex-1">
+        <Outlet />
+      </div>
       <AnimatePresence>
         {isOpenWallet ? <Wallet onClose={() => setIOpenWallet(false)} /> : ""}
       </AnimatePresence>

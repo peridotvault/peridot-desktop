@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "build": "rimraf release dist dist-electron && tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -53,5 +53,53 @@
     "vite-plugin-electron": "^0.28.6",
     "vite-plugin-electron-renderer": "^0.14.5"
   },
-  "main": "dist-electron/main.js"
+  "main": "dist-electron/main.js",
+  "build": {
+    "appId": "com.example.peridot",
+    "productName": "Peridot",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "public"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "public/assets/FullLogoColor.png",
+      "category": "public.app-category.game"
+    },
+    "dmg": {
+      "background": "public/assets/FullLogoColor.png",
+      "icon": "public/assets/FullLogoColor.png",
+      "iconSize": 80,
+      "window": {
+        "width": 544,
+        "height": 408
+      },
+      "contents": [
+        {
+          "x": 145,
+          "y": 257,
+          "type": "file"
+        },
+        {
+          "x": 400,
+          "y": 255,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  }
 }

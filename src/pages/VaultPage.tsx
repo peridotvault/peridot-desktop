@@ -11,9 +11,9 @@ export default function VaultPage() {
   const [isHoverComponent, setIsHoverComponent] = useState(false);
 
   const images: string[] = [
-    "/assets/vault/Content1.png",
-    "/assets/vault/Content2.png",
-    "/assets/vault/Content3.png",
+    "./assets/vault/Content1.png",
+    "./assets/vault/Content2.png",
+    "./assets/vault/Content3.png",
   ];
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function VaultPage() {
   };
 
   return (
-    <main className="flex flex-col gap-3">
+    <main className="flex flex-col gap-3 ">
       {/* section 1  */}
       <section className="w-full h-[30rem] pt-20 mb-4 relative">
         <img
@@ -54,7 +54,7 @@ export default function VaultPage() {
 
       {/* section 2  */}
       <section className="flex justify-center px-12 py-6">
-        <div className="flex gap-6 xl:gap-12 duration-300 w-full max-w-[1400px]">
+        <div className="flex gap-6 xl:gap-12 duration-300 w-full container">
           {images.map((image, index) => (
             <div
               key={index}
@@ -80,7 +80,7 @@ export default function VaultPage() {
 
       {/* section 3  */}
       <section className="flex justify-center px-12 py-6">
-        <div className="flex flex-col gap-6 w-full max-w-[1400px]">
+        <div className="flex flex-col gap-6 w-full container">
           {/* title  */}
           <button className="flex items-center gap-3">
             <p className="text-xl font-semibold">
@@ -122,7 +122,7 @@ export default function VaultPage() {
 
       {/* section 4  */}
       <section className="flex justify-center px-12 py-6">
-        <div className="flex flex-col gap-6  w-full max-w-[1400px]">
+        <div className="flex flex-col gap-6  w-full container">
           {/* title  */}
           <button className="flex items-center gap-3">
             <p className="text-xl font-semibold">

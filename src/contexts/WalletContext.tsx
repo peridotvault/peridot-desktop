@@ -1,15 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { WalletData } from "../utils/WalletService";
 import { saveWalletData, getWalletData } from "../utils/StoreService";
-import type { EncryptedData } from "../utils/StotechEncrypt";
+import type { EncryptedData } from "../utils/AntiganeEncrypt";
 
 interface WalletContextData {
   wallet: WalletData;
   setWallet: React.Dispatch<React.SetStateAction<WalletData>>;
   isGeneratedSeedPhrase: boolean;
   setIsGeneratedSeedPhrase: React.Dispatch<React.SetStateAction<boolean>>;
-  isPasswordCreated: boolean;
-  setIsPasswordCreated: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const WalletContext = createContext<WalletContextData | undefined>(undefined);
@@ -20,11 +18,9 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     principalId: null,
     accountId: null,
     encryptedPrivateKey: null,
-    password: null,
   });
 
   const [isGeneratedSeedPhrase, setIsGeneratedSeedPhrase] = useState(false);
-  const [isPasswordCreated, setIsPasswordCreated] = useState(false);
 
   // Load wallet data when component mounts
   useEffect(() => {
@@ -35,7 +31,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           setWallet(storedWallet);
           // Set other states based on stored encrypted data
           setIsGeneratedSeedPhrase(!!storedWallet.encryptedSeedPhrase);
-          setIsPasswordCreated(!!storedWallet.password);
         }
       } catch (error) {
         console.error("Error loading initial wallet data:", error);
@@ -50,7 +45,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     const saveWallet = async () => {
       try {
         // Only save if we have either encrypted seed phrase or password
-        if (wallet.encryptedSeedPhrase || wallet.password) {
+        if (wallet.encryptedSeedPhrase) {
           await saveWalletData(wallet);
         }
       } catch (error) {
@@ -67,17 +62,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       setWallet,
       isGeneratedSeedPhrase,
       setIsGeneratedSeedPhrase,
-      isPasswordCreated,
-      setIsPasswordCreated,
     }),
-    [
-      wallet,
-      setWallet,
-      isGeneratedSeedPhrase,
-      setIsGeneratedSeedPhrase,
-      isPasswordCreated,
-      setIsPasswordCreated,
-    ]
+    [wallet, setWallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase]
   );
 
   return (

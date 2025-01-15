@@ -1,17 +1,22 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
-import {  SerializedWalletData, WalletData } from '../src/utils/WalletService';
+import { WalletData } from '../src/utils/WalletService';
+
+// Define the store schema to match WalletData
+interface StoreSchema {
+  wallet: WalletData;
+}
 
 // Make store persistent
-const store = new Store({
-  name: 'wallet-data', // Give a specific name to your store file
-  clearInvalidConfig: true, // Clear if the store structure is invalid
+const store = new Store<StoreSchema>({
+  name: 'wallet-data',
+  clearInvalidConfig: true,
   defaults: {
     wallet: {
-      seedPhrase: null,
+      encryptedSeedPhrase: null,
       principalId: null,
       accountId: null,
-      privateKey: null,
+      encryptedPrivateKey: null,
       password: null,
     },
   },
@@ -28,29 +33,63 @@ export const setupStoreHandlers = () => {
     }
   });
 
-  ipcMain.handle('save-wallet', async (_, data: WalletData | SerializedWalletData) => {
+  // Update save-wallet handler to handle EncryptedData
+  ipcMain.handle('save-wallet', async (_, data: WalletData) => {
     try {
-      store.set('wallet', data);
+      // Validate the structure before saving
+      const validatedData: WalletData = {
+        encryptedSeedPhrase: data.encryptedSeedPhrase,
+        principalId: data.principalId,
+        accountId: data.accountId,
+        encryptedPrivateKey: data.encryptedPrivateKey,
+        password: data.password,
+      };
+
+      store.set('wallet', validatedData);
       return { success: true };
     } catch (error) {
+      console.error('Error saving wallet data:', error);
       return { success: false, error: (error as Error).message };
     }
   });
 
+  // Get wallet handler with type safety
   ipcMain.handle('get-wallet', async () => {
     try {
       const data = store.get('wallet');
-      return { success: true, data };
+      // Validate the structure of retrieved data
+      if (data) {
+        const validatedData: WalletData = {
+          encryptedSeedPhrase: data.encryptedSeedPhrase,
+          principalId: data.principalId,
+          accountId: data.accountId,
+          encryptedPrivateKey: data.encryptedPrivateKey,
+          password: data.password,
+        };
+        return { success: true, data: validatedData };
+      }
+      return { success: true, data: null };
     } catch (error) {
+      console.error('Error getting wallet data:', error);
       return { success: false, error: (error as Error).message };
     }
   });
 
+  // Clear wallet handler
   ipcMain.handle('clear-wallet', async () => {
     try {
       store.delete('wallet');
+      // Reset to default values
+      store.set('wallet', {
+        encryptedSeedPhrase: null,
+        principalId: null,
+        accountId: null,
+        encryptedPrivateKey: null,
+        password: null,
+      });
       return { success: true };
     } catch (error) {
+      console.error('Error clearing wallet data:', error);
       return { success: false, error: (error as Error).message };
     }
   });

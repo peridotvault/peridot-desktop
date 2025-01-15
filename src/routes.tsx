@@ -1,15 +1,17 @@
 // @ts-ignore
 import React from "react";
 
-import { createBrowserRouter } from "react-router-dom";
+import { createHashRouter } from "react-router-dom";
 
 import Login from "./pages/signin/Login";
 import CreateWallet from "./pages/signin/CreateWallet";
 import ImportWallet from "./pages/signin/ImportWallet";
 import VaultPage from "./pages/VaultPage";
 import MainLayout from "./components/layout/MainLayout";
-import Library from "./pages/library/Library";
+import GameDetailLibrary from "./pages/library/GameDetailLibrary";
 import GameDetail from "./pages/game_detail/GameDetail";
+import LibraryMainLayout from "./components/layout/library/LibraryMainLayout";
+import { Library } from "./pages/library/Library";
 
 // import React, { lazy, Suspense } from "react";
 // const Login = lazy(() => import("./pages/signin/Login"));
@@ -20,7 +22,7 @@ import GameDetail from "./pages/game_detail/GameDetail";
 // const Library = lazy(() => import("./pages/Library"));
 // const GameDetail = lazy(() => import("./pages/game_detail/GameDetail"));
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   // home
   {
     path: "/",
@@ -32,7 +34,17 @@ const router = createBrowserRouter([
       },
       {
         path: "library",
-        element: <Library />,
+        element: <LibraryMainLayout />,
+        children: [
+          {
+            index: true,
+            element: <Library />,
+          },
+          {
+            path: ":game",
+            element: <GameDetailLibrary />,
+          },
+        ],
       },
       {
         path: ":game",

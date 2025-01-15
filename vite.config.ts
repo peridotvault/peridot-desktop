@@ -45,7 +45,7 @@ export default defineConfig({
   define: {
     'global': 'globalThis',
     'process.env': process.env,
-    'process.version': '"v16.0.0"',
+    // 'process.version': '"v16.0.0"',
   },
   optimizeDeps: {
     esbuildOptions: {
@@ -62,8 +62,11 @@ export default defineConfig({
       '@dfinity/candid',
     ],
   },
+  base: './',
   build: {
     target: 'esnext',
+    outDir: 'dist',
+    assetsDir: 'assets',
     rollupOptions: {
       external: ['electron-store'],
       output: {

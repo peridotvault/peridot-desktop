@@ -9,23 +9,18 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { clearWalletData } from "../../utils/StoreService";
 
 export default function ImportWallet() {
-  const {
-    setWallet,
-    isGeneratedSeedPhrase,
-    setIsGeneratedSeedPhrase,
-    isPasswordCreated,
-    setIsPasswordCreated,
-  } = useWallet();
+  const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } =
+    useWallet();
 
   const navigate = useNavigate();
   const [newSeedPhrase, setNewSeedPhrase] = useState("");
   const [tempSeedPhrase, setTempSeedPhrase] = useState("");
 
   useEffect(() => {
-    if (isPasswordCreated) {
+    if (wallet.encryptedPrivateKey) {
       navigate("/");
     }
-  }, [isPasswordCreated, navigate]);
+  }, [wallet.encryptedPrivateKey, navigate]);
 
   const clearSeedPhrase = async () => {
     await clearWalletData();
@@ -62,7 +57,7 @@ export default function ImportWallet() {
     [setWallet, navigate]
   );
 
-  if (!isPasswordCreated) {
+  if (!wallet.encryptedPrivateKey) {
     if (!isGeneratedSeedPhrase) {
       return (
         <main className="flex justify-center items-center h-screen p-6 flex-col gap-6">
@@ -106,7 +101,6 @@ export default function ImportWallet() {
         backFunction={clearSeedPhrase}
         handlePassword={(password: string) => {
           handleImport(tempSeedPhrase, password);
-          setIsPasswordCreated(true);
         }}
       />
     );
