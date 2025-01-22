@@ -39,11 +39,12 @@ export default {
       boxShadow: {
         // black background
         // large black background
-        'flat-lg': '27px 27px 55px #181a19, -27px -27px 55px #202421',
-        'sunken-lg': 'inset 27px 27px 55px #181a19, inset -27px -27px 55px #202421',
+        'flat-lg': '27px 27px 55px #0c0d0c, -27px -27px 55px #2c312e',
+        'sunken-lg': 'inset 27px 27px 55px #0c0d0c, inset -27px -27px 55px #2c312e',
         // small 
-        "sunken-sm": "inset 5px 5px 10px #181a19, inset -5px -5px 10px #202421",
-        "arise-sm": "inset 2px 2px 5px #181a19,inset -2px -2px 5px #202421, 2px 2px 5px #181a19, -2px -2px 5px #202421",
+        'flat-sm': '3px 3px 6px #0c0d0c, -3px -3px 6px #2c312e',
+        "sunken-sm": "inset 5px 5px 10px #0c0d0c, inset -5px -5px 10px #2c312e",
+        "arise-sm": "inset 2px 2px 5px #0c0d0c,inset -2px -2px 5px #2c312e, 2px 2px 5px #0c0d0c, -2px -2px 5px #2c312e",
 
         // green background 
         "sunken-md-green": "inset 5px 5px 10px #2e483a, inset -5px -5px 10px #3e624e",

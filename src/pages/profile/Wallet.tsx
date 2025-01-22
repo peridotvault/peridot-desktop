@@ -29,6 +29,14 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
   const [isOpenWalletAddress, setIsOpenWalletAddress] = useState(false);
   const [isModalOpenKey, setIsModalOpenKey] = useState(false);
   const [isModalOpenKeyPKSP, setIsModalOpenKeyPKSP] = useState("");
+  const [tokenPrincipal, setTokenPrincipal] = useState([
+    "mxzaz-hqaaa-aaaar-qaada-cai",
+    "cngnf-vqaaa-aaaar-qag4q-cai",
+    "xevnm-gaaaa-aaaar-qafnq-cai",
+    "4u7dm-7qaaa-aaaam-acvdq-cai",
+    "ca6gz-lqaaa-aaaaq-aacwa-cai",
+    "atbfz-diaaa-aaaaq-aacyq-cai",
+  ]);
 
   const handleClearData = async () => {
     try {
@@ -198,15 +206,11 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
                 />
               </button>
             </div>
-            <p className="text-3xl font-semibold">$26,345,600</p>
+            <p className="text-4xl my-3 font-semibold">$26,345,600</p>
             <div className="flex flex-col gap-3">
               <div className="">
-                <p className="text-sm">Return</p>
-                <p className="text-lg font-medium">3.2%</p>
-              </div>
-              <div className="">
-                <p className="text-sm">P&L</p>
-                <p className="text-lg font-medium">$12,920</p>
+                <p className="text-sm">Total Token</p>
+                <p className="text-lg font-medium">3</p>
               </div>
             </div>
             <div className="flex gap-4">
@@ -262,12 +266,9 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
           {/* section 2  */}
           <section className="flex flex-col gap-4 p-6">
             <ICRC1Coin canisterId="ryjl3-tyaaa-aaaaa-aaaba-cai" />
-            <ICRC1Coin canisterId="cngnf-vqaaa-aaaar-qag4q-cai" />
-            <ICRC1Coin canisterId="mxzaz-hqaaa-aaaar-qaada-cai" />
-            <ICRC1Coin canisterId="xevnm-gaaaa-aaaar-qafnq-cai" />
-            <ICRC1Coin canisterId="4u7dm-7qaaa-aaaam-acvdq-cai" />
-            <ICRC1Coin canisterId="ca6gz-lqaaa-aaaaq-aacwa-cai" />
-            <ICRC1Coin canisterId="atbfz-diaaa-aaaaq-aacyq-cai" />
+            {tokenPrincipal.map((principal, index) => (
+              <ICRC1Coin key={index} canisterId={principal} />
+            ))}
           </section>
         </div>
       </motion.main>

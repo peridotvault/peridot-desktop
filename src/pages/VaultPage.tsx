@@ -102,11 +102,6 @@ export default function VaultPage() {
               price={47000}
             />
             <VerticalCard
-              imgUrl="https://dtujc-7yaaa-aaaap-ahkfq-cai.icp0.io/img/games/Cover.jpg"
-              title="Infinity"
-              price={0}
-            />
-            <VerticalCard
               imgUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdp_ZPzOzPD_xMZ7CIAEQj5EPocc3ix3DxvQ&s"
               title="The Casting of Frank Stone™ Deluxe Edition"
               price={415000}
@@ -115,6 +110,11 @@ export default function VaultPage() {
               imgUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwgCR-vS9eaaZlau4l5dRX0ct-oQq25RIsTg&s"
               title="Star Wars Outlaws Gold"
               price={1269000}
+            />
+            <VerticalCard
+              imgUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwgCR-vS9eaaZlau4l5dRX0ct-oQq25RIsTg&s"
+              title="Star Wars Outlaws Gold"
+              price={0}
             />
           </div>
         </div>

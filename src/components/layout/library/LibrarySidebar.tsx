@@ -138,7 +138,7 @@ export const Sidebar = () => {
     <div className="flex flex-col h-full shadow-arise-sm w-[230px] z-10">
       <div className="mt-3"></div>
       {/* Search  */}
-      <div className="px-5 py-2">
+      <div className="px-5 py-2 mb-3">
         <div className="relative">
           <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
             <FontAwesomeIcon
@@ -156,18 +156,16 @@ export const Sidebar = () => {
         </div>
       </div>
       {/* List Games  */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col gap-1 px-3">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="flex flex-col gap-1">
           {filteredGames.map((item, i) => {
             const isActive = location.pathname === item.path;
             return (
               <button
                 onClick={() => handleGameClick(item.path)}
-                className={`flex gap-3 px-4 py-2 items-center rounded-r-md hover:bg-gradient-to-l hover:from-accent_primary/10 hover:border-r border-accent_primary duration-100
+                className={`flex gap-3 px-7 py-2 items-center  duration-100
               ${
-                isActive
-                  ? "bg-gradient-to-l from-accent_primary/10 border-r border-accent_primary hover:from-accent_primary/30"
-                  : ""
+                isActive ? "shadow-flat-sm scale-110" : "hover:shadow-arise-sm "
               }`}
                 key={i}
               >

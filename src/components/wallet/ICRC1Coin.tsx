@@ -16,6 +16,7 @@ interface Metadata {
 export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
   const { wallet } = useWallet();
   const [icrc1, setIcrc1] = useState<Metadata>();
+  const [priceUsd, setPriceUsd] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchBalance() {
@@ -25,8 +26,28 @@ export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
       }
     }
 
+    async function fetchMarketData() {
+      try {
+        const response = await fetch(
+          `https://api.geckoterminal.com/api/v2/networks/icp/tokens/${canisterId}`
+        );
+        if (!response.ok) {
+          console.warn(
+            `Token not found for canisterId: ${canisterId}. Status: ${response.status}`
+          );
+          return;
+        }
+        const data = await response.json();
+        const price_usd = data.data.attributes.price_usd;
+        setPriceUsd(price_usd);
+      } catch (error) {
+        setPriceUsd("0");
+      }
+    }
+
     fetchBalance();
-  }, [wallet.principalId]);
+    fetchMarketData();
+  }, [wallet.principalId, canisterId]);
 
   async function checkBalance(icrc1CanisterId: string) {
     if (!wallet.principalId) {
@@ -45,7 +66,6 @@ export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
 
       // Call balance method
       const metadataResult = (await actor.icrc1_metadata()) as any[][];
-      // console.log(metadataResult[0][1].Text);
       const balanceResult = await actor.icrc1_balance_of({
         owner: Principal.fromText(wallet.principalId),
         subaccount: [],
@@ -96,6 +116,20 @@ export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
     }
   }
 
+  const formatUsd = (
+    value: string | null,
+    decimalPlaces: number = 2
+  ): string => {
+    if (value === null) return "";
+    const number = parseFloat(value);
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: decimalPlaces,
+      maximumFractionDigits: decimalPlaces,
+    }).format(number);
+  };
+
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-3">
@@ -133,11 +167,19 @@ export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
           </div>
         </div>
       </div>
-      <div className="flex flex-col items-end">
-        <p>$42,324</p>
-        <p className="text-xs text-accent_primary">+9.3%</p>
-        {/* <p className="text-xs text-red-500">-0.3%</p> */}
-      </div>
+      {priceUsd != null && priceUsd != "0" && icrc1?.balance != null ? (
+        <div className="flex flex-col items-end">
+          <p>
+            {formatUsd(
+              (parseFloat(priceUsd) * parseFloat(icrc1.balance)).toString(),
+              2
+            )}
+          </p>
+          <p className="text-xs text-text_disabled">{formatUsd(priceUsd)}</p>
+        </div>
+      ) : (
+        <div className="w-12 h-5 bg-background_disabled rounded-full animate-pulse"></div>
+      )}
     </div>
   );
 };

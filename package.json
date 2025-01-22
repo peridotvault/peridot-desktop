@@ -20,6 +20,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.1",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@rollup/plugin-node-resolve": "^15.3.0",
+    "axios": "^1.7.9",
     "bip32": "^5.0.0-rc.0",
     "bip39": "^3.1.0",
     "buffer": "^6.0.3",

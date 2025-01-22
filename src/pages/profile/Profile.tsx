@@ -1,141 +1,127 @@
-import React, { useEffect, useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
-import { clearWalletData } from "../../utils/StoreService";
-import { useNavigate } from "react-router-dom";
-import { Actor, HttpAgent } from "@dfinity/agent";
-import { icrc1IdlFactory } from "../../hooks/idl/icrc1";
-import { Principal } from "@dfinity/principal";
-import { motion } from "framer-motion";
-import type { EncryptedData } from "../../utils/AntiganeEncrypt";
+// @ts-ignore
+import React from "react";
+import {
+  faCircleNotch,
+  faDollarSign,
+  faEdit,
+  faGun,
+  faPaw,
+  faShirt,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link } from "react-router-dom";
 
-interface NavbarProps {
-  onClose: () => void;
-}
-
-export const Profile: React.FC<NavbarProps> = ({ onClose }) => {
-  const { wallet, setWallet } = useWallet();
-  const navigate = useNavigate();
-  const [ifalBalance, setIfalBalance] = useState("");
-  const [icpBalance, setICPBalance] = useState("");
-
-  useEffect(() => {
-    async function fetchBalance() {
-      if (wallet.principalId) {
-        try {
-          const resultIfal = await checkBalance("4u7dm-7qaaa-aaaam-acvdq-cai");
-          const resultICP = await checkBalance("ryjl3-tyaaa-aaaaa-aaaba-cai");
-
-          setIfalBalance(resultIfal);
-          setICPBalance(resultICP);
-        } catch (error) {
-          setIfalBalance("Error fetching balance");
-          setICPBalance("Error fetching balance");
-        }
-      }
-    }
-
-    fetchBalance();
-  }, [wallet.principalId]);
-
-  async function checkBalance(icrc1CanisterId: string) {
-    if (!wallet.principalId) {
-      throw new Error("Not Logged in");
-    }
-    try {
-      // Initialize agent with identity
-      const agent = new HttpAgent({
-        host: "https://ic0.app",
-      });
-
-      const actor = Actor.createActor(icrc1IdlFactory, {
-        agent,
-        canisterId: icrc1CanisterId,
-      });
-
-      // Call balance method
-      const balanceResult = await actor.icrc1_balance_of({
-        owner: Principal.fromText(wallet.principalId),
-        subaccount: [],
-      });
-
-      // Convert balance to number and format
-      const standardBalance = Number(balanceResult) / 100000000;
-      return standardBalance.toString();
-    } catch (error) {
-      return (error as Error).message.toString();
-    }
-  }
-
-  const handleClearData = async () => {
-    try {
-      // Clear data from electron store
-      await clearWalletData();
-
-      // Reset wallet state to initial values
-      setWallet({
-        encryptedSeedPhrase: null,
-        principalId: null,
-        accountId: null,
-        encryptedPrivateKey: null,
-      });
-
-      // Navigate back to login page
-      navigate("/");
-    } catch (error) {
-      console.error("Error clearing wallet data:", error);
-    }
-  };
-
-  const getDisplayText = (data: EncryptedData | string | null) => {
-    if (!data) return null;
-
-    const textToDisplay = typeof data === "string" ? data : data.data;
-    return textToDisplay;
-  };
-
+export const Profile = () => {
   return (
-    <motion.div
-      className="bg-black/40 fixed top-0 right-0 w-full h-full z-50 flex justify-end py-10 overflow-x-hidden"
-      onClick={onClose}
-      animate={{ opacity: 1 }}
-    >
-      <motion.main
-        className="w-[400px] h-full bg-background_primary rounded-l-3xl"
-        onClick={(e) => e.stopPropagation()}
-        initial={{ x: 400 }}
-        animate={{ x: 0 }}
-        exit={{ x: 400 }}
-        transition={{ type: "tween", duration: 0.2 }}
-      >
-        <div className="p-6 flex flex-col gap-3">
-          <button className="text-red-500" onClick={handleClearData}>
-            Logout
-          </button>
-          <p className="text-xl font-bold text-center mb-5">Wallet Details</p>
-          <div className="">
-            <p>Seed Phrase: {getDisplayText(wallet.encryptedSeedPhrase)}</p>
-            <p>Principal ID: {wallet.principalId}</p>
-            <p>Account ID: {wallet.accountId}</p>
-            <p>Private Key: {getDisplayText(wallet.encryptedPrivateKey)}</p>
-          </div>
-          <section className="flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-12 aspect-square bg-white rounded-full"></div>
-              <div className="">
-                <p className="">ICP</p>
-                <p className="text-xs">{icpBalance} ICP</p>
+    <main className="pt-20 flex flex-col items-center mb-10">
+      <div className="container flex gap-6 mt-6">
+        {/* left   ============================ */}
+        <div className="w-2/3 flex flex-col gap-6">
+          <section className="p-6 bg-background_primary rounded-3xl shadow-arise-sm">
+            {/* cover  */}
+            <div className="w-full h-[11rem]">
+              <img
+                src="https://img.lovepik.com/bg/20240325/Metaverse-NFT-Land-for-Sale-Stunning-3D-Illustration-of-the_5580347_wh1200.jpg"
+                className="w-full h-[15rem] object-cover rounded-t-2xl rounded-b-[5rem] "
+                alt=""
+              />
+            </div>
+            {/* profile  */}
+            <div className="px-20 relative flex items-end gap-6">
+              <div className="w-36 h-36 bg-background_primary shadow-2xl rounded-full z-10 overflow-hidden p-2">
+                <img
+                  src="https://cdn.antaranews.com/cache/1200x800/2022/03/19/WhatsApp-Image-2022-03-19-at-09.29.12.jpeg"
+                  className="w-full h-full object-cover rounded-full"
+                  alt=""
+                />
+              </div>
+              <div className="flex flex-col">
+                <div className="flex gap-2 items-center">
+                  <p className="font-bold text-2xl">Gamer.89Max</p>
+                  <Link to="/create_profile">
+                    <FontAwesomeIcon icon={faEdit} />
+                  </Link>
+                </div>
+                <p className="text-text_disabled text-lg">Black Samurai</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 aspect-square bg-white rounded-full"></div>
-              <div className="">
-                <p className="">IFAL</p>
-                <p className="text-xs">{ifalBalance} IFAL</p>
+            {/* achievements  */}
+            <div className="mt-7 flex gap-8 justify-center px-20">
+              {/* number 1  */}
+              <div className="flex flex-col items-center gap-2 w-[75px]">
+                <FontAwesomeIcon
+                  icon={faDollarSign}
+                  className="text-3xl mb-4"
+                />
+                <progress
+                  value="70"
+                  max="100"
+                  className="h-1 w-full [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-background_disabled [&::-webkit-progress-value]:bg-white [&::-moz-progress-bar]:bg-background_disabled"
+                ></progress>
+                <p className="">70%</p>
+              </div>
+              {/* number 2  */}
+              <div className="flex flex-col items-center gap-2 w-[75px]">
+                <FontAwesomeIcon icon={faGun} className="text-3xl mb-4" />
+                <progress
+                  value="70"
+                  max="100"
+                  className="h-1 w-full [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-background_disabled [&::-webkit-progress-value]:bg-white [&::-moz-progress-bar]:bg-background_disabled"
+                ></progress>
+                <p className="">70%</p>
+              </div>
+              {/* number 3  */}
+              <div className="flex flex-col items-center gap-2 w-[75px]">
+                <FontAwesomeIcon icon={faShirt} className="text-3xl mb-4" />
+                <progress
+                  value="30"
+                  max="100"
+                  className="h-1 w-full [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-background_disabled [&::-webkit-progress-value]:bg-white [&::-moz-progress-bar]:bg-background_disabled"
+                ></progress>
+                <p className="">30%</p>
+              </div>
+              {/* number 4  */}
+              <div className="flex flex-col items-center gap-2 w-[75px]">
+                <FontAwesomeIcon icon={faPaw} className="text-3xl mb-4" />
+                <progress
+                  value="30"
+                  max="100"
+                  className="h-1 w-full [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-background_disabled [&::-webkit-progress-value]:bg-white [&::-moz-progress-bar]:bg-background_disabled"
+                ></progress>
+                <p className="">30%</p>
+              </div>
+              {/* number 4  */}
+              <div className="flex flex-col items-center gap-2 w-[75px]">
+                <FontAwesomeIcon
+                  icon={faCircleNotch}
+                  className="text-3xl mb-4"
+                />
+                <progress
+                  value="30"
+                  max="100"
+                  className="h-1 w-full [&::-webkit-progress-bar]:rounded-lg [&::-webkit-progress-value]:rounded-lg [&::-webkit-progress-bar]:bg-background_disabled [&::-webkit-progress-value]:bg-white [&::-moz-progress-bar]:bg-background_disabled"
+                ></progress>
+                <p className="">30%</p>
               </div>
             </div>
           </section>
+          <section className="flex gap-6">
+            <div className="w-1/3 bg-background_primary shadow-arise-sm aspect-square rounded-3xl"></div>
+            <div className="w-1/3 bg-background_primary shadow-arise-sm aspect-square rounded-3xl"></div>
+            <div className="w-1/3 bg-background_primary shadow-arise-sm aspect-square rounded-3xl"></div>
+          </section>
         </div>
-      </motion.main>
-    </motion.div>
+        {/* right  ============================ */}
+        <div className="w-1/3 flex flex-col gap-6">
+          <section className="aspect-[3/4] rounded-3xl overflow-hidden shadow-flat-sm">
+            <img
+              src="https://i.pinimg.com/736x/e0/c1/11/e0c1114baf11244075041ea00cfca531.jpg"
+              className="w-full h-full object-cover"
+              alt=""
+            />
+          </section>
+        </div>
+      </div>
+    </main>
   );
 };

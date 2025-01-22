@@ -1,5 +1,4 @@
 import React from "react";
-import CSS from "csstype";
 import { useWallet } from "../../contexts/WalletContext";
 import { faWallet } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,10 +10,6 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenWallet }) => {
   const { wallet } = useWallet();
-
-  const profileStyle: CSS.Properties = {
-    boxShadow: "3px 3px 6px #181a19, -3px -3px 6px #202421",
-  };
 
   const shortenAddress = (address: string | null) => {
     if (address) return `${address.slice(0, 4)}...${address.slice(-3)}`;
@@ -31,19 +26,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenWallet }) => {
         />
         <Link to="/">Vault</Link>
         <Link to="/library">Library</Link>
-        <Link to="/market">Market</Link> {/* Tambahkan path untuk Market */}
+        <Link to="/market">Market</Link>
       </div>
       <div className="flex gap-5 items-center">
         <button
-          className="bg-background_primary py-3 px-6 rounded-xl shadow-sunken-sm hover:shadow-arise-sm duration-300 flex items-center gap-2 text-text_disabled hover:text-white"
+          className="bg-background_primary py-3 px-6 rounded-xl hover:shadow-arise-sm shadow-flat-sm duration-300 flex items-center gap-2 text-text_disabled hover:text-white"
           onClick={onOpenWallet}
         >
           <FontAwesomeIcon icon={faWallet} />
           <p>{shortenAddress(wallet.principalId)}</p>
         </button>
-        <button
-          className="bg-background_primary pt-6 pb-3 mb-3 px-3 rounded-b-full"
-          style={profileStyle}
+        <Link
+          to="/profile"
+          className="bg-background_primary pt-6 pb-3 mb-3 px-3 rounded-b-full hover:shadow-arise-sm shadow-flat-sm duration-300"
         >
           <div className="w-8 h-8 rounded-full bg-background_secondary overflow-hidden">
             <img
@@ -52,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenWallet }) => {
               className="w-full h-full object-cover"
             />
           </div>
-        </button>
+        </Link>
       </div>
     </div>
   );
