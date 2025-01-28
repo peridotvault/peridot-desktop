@@ -7,6 +7,8 @@ import { PasswordPage } from "./PasswordPage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { clearWalletData } from "../../utils/StoreService";
+import { getUserByPrincipalId } from "../../contexts/UserContext";
+// import { getUserByPrincipalId } from "../../contexts/UserContext";
 
 export default function CreateWallet() {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } =
@@ -16,9 +18,22 @@ export default function CreateWallet() {
   const [newSeedPhrase, setNewSeedPhrase] = useState("");
 
   useEffect(() => {
-    if (wallet.encryptedPrivateKey) {
-      navigate("/");
+    async function userHandle() {
+      if (wallet.encryptedPrivateKey) {
+        const isUserExist = await getUserByPrincipalId("ifal12", wallet);
+        if (
+          isUserExist &&
+          typeof isUserExist === "object" &&
+          "ok" in isUserExist
+        ) {
+          navigate("/");
+        } else {
+          navigate("/create_profile");
+        }
+      }
     }
+
+    userHandle();
   }, [wallet.encryptedPrivateKey, navigate]);
 
   const generateSeedPhrase = () => {

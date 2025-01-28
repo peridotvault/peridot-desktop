@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { WalletData } from "../utils/WalletService";
 import { saveWalletData, getWalletData } from "../utils/StoreService";
-import type { EncryptedData } from "../utils/AntiganeEncrypt";
+import { EncryptedData } from "../utils/AntiganeEncrypt";
 
 interface WalletContextData {
   wallet: WalletData;

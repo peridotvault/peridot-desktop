@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
 import type { WalletData } from '../src/utils/WalletService'
-import { EncryptedData } from '../src/utils/AntiganeEncrypt';
+import { EncryptedData } from '@antigane/encryption';
 
 interface SerializedWalletData {
   // Add your serialized wallet data properties here based on your WalletData type

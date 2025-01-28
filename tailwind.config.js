@@ -16,6 +16,7 @@ export default {
         "background_disabled": "#333333",
         "text": "var(--text)",
         "text_disabled": "gray",
+        "text_link": "blue",
 
         "shadow_primary": "#0F120F",
         "shadow_secondary": "#2A3B30",
@@ -23,6 +24,7 @@ export default {
         // danger
         "danger": "#c5604c",
         "warning": "#deb887",
+        "success": "#00FF00",
 
 
 

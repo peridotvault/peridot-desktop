@@ -17,7 +17,6 @@ const store = new Store<StoreSchema>({
       principalId: null,
       accountId: null,
       encryptedPrivateKey: null,
-      password: null,
     },
   },
 });
@@ -42,7 +41,6 @@ export const setupStoreHandlers = () => {
         principalId: data.principalId,
         accountId: data.accountId,
         encryptedPrivateKey: data.encryptedPrivateKey,
-        password: data.password,
       };
 
       store.set('wallet', validatedData);
@@ -64,7 +62,6 @@ export const setupStoreHandlers = () => {
           principalId: data.principalId,
           accountId: data.accountId,
           encryptedPrivateKey: data.encryptedPrivateKey,
-          password: data.password,
         };
         return { success: true, data: validatedData };
       }

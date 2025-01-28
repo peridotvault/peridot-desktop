@@ -7,6 +7,7 @@ import { PasswordPage } from "./PasswordPage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { clearWalletData } from "../../utils/StoreService";
+import { getUserByPrincipalId } from "../../contexts/UserContext";
 
 export default function ImportWallet() {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } =
@@ -17,9 +18,22 @@ export default function ImportWallet() {
   const [tempSeedPhrase, setTempSeedPhrase] = useState("");
 
   useEffect(() => {
-    if (wallet.encryptedPrivateKey) {
-      navigate("/");
+    async function userHandle() {
+      if (wallet.encryptedPrivateKey) {
+        const isUserExist = await getUserByPrincipalId("ifal12", wallet);
+        if (
+          isUserExist &&
+          typeof isUserExist === "object" &&
+          "ok" in isUserExist
+        ) {
+          navigate("/");
+        } else {
+          navigate("/create_profile");
+        }
+      }
     }
+
+    userHandle();
   }, [wallet.encryptedPrivateKey, navigate]);
 
   const clearSeedPhrase = async () => {
@@ -49,7 +63,6 @@ export default function ImportWallet() {
           encryptedPrivateKey: result.encryptedPrivateKey,
           password: password,
         }));
-        navigate("/");
       } else {
         console.error("Error importing wallet:", result.error);
       }

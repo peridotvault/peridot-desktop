@@ -15,9 +15,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ICRC1Coin } from "../../components/wallet/ICRC1Coin";
-import type { EncryptedData } from "../../utils/AntiganeEncrypt";
 import { InputField } from "../../components/InputField";
 import { walletService } from "../../utils/WalletService";
+import { EncryptedData } from "../../utils/AntiganeEncrypt";
 
 interface NavbarProps {
   onClose: () => void;
@@ -29,7 +29,7 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
   const [isOpenWalletAddress, setIsOpenWalletAddress] = useState(false);
   const [isModalOpenKey, setIsModalOpenKey] = useState(false);
   const [isModalOpenKeyPKSP, setIsModalOpenKeyPKSP] = useState("");
-  const [tokenPrincipal, setTokenPrincipal] = useState([
+  const [tokenPrincipal] = useState([
     "mxzaz-hqaaa-aaaar-qaada-cai",
     "cngnf-vqaaa-aaaar-qag4q-cai",
     "xevnm-gaaaa-aaaar-qafnq-cai",

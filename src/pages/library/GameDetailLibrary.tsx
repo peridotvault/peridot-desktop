@@ -67,18 +67,15 @@ export default function GameDetailLibrary() {
         </div>
         {/* right column ========================================== */}
         <div className="w-1/3 min-w-[300px] flex flex-col gap-8">
-          {/* Glass  */}
-          <section className="bg-white/5 border border-white/20 backdrop-blur-lg w-full px-6 py-4 rounded-xl flex flex-col gap-6">
+          {/* price  */}
+          <section className="bg-background_primary shadow-arise-sm w-full p-6 rounded-2xl flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <p>current price</p>
-              <div className="flex items-end gap-2">
-                <p className="text-3xl font-bold">$271,15</p>
-                <p className="text-sm text-accent_primary">+3%</p>
-              </div>
+              <p className="text-3xl font-bold">$271,15</p>
             </div>
             {/* button  */}
             <div className="flex flex-col gap-4">
-              <button className="bg-green-600 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
+              <button className="bg-grad px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
                 <FontAwesomeIcon icon={faPlay} />
                 Launch
               </button>
