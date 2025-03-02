@@ -1,24 +1,32 @@
+// preload.ts
 import { ipcRenderer } from 'electron'
 import type { WalletData } from '../src/utils/WalletService'
 import { EncryptedData } from '@antigane/encryption';
 
 interface SerializedWalletData {
-  // Add your serialized wallet data properties here based on your WalletData type
   encryptedSeedPhrase: EncryptedData | null;
-    principalId: string | null;
-    accountId: string | null;
-    encryptedPrivateKey: EncryptedData | null;
-    password: string | null;
+  principalId: string | null;
+  accountId: string | null;
+  encryptedPrivateKey: EncryptedData | null;
+  password: string | null;
 }
-
 // Attach electronAPI methods with types matching types.d.ts
 window.electronAPI = {
-  saveWallet: (data: SerializedWalletData | WalletData): Promise<{ success: boolean; error?: string }> => 
+  goBack: (): void => {
+    ipcRenderer.send('go-back');
+  },
+  goForward: (): void => {
+    ipcRenderer.send('go-forward');
+  },
+
+  // wallet 
+  saveWallet: (data: SerializedWalletData | WalletData): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('save-wallet', data),
-    
-  getWallet: (): Promise<{ success: boolean; data?: SerializedWalletData; error?: string }> => 
+
+  getWallet: (): Promise<{ success: boolean; data?: SerializedWalletData; error?: string }> =>
     ipcRenderer.invoke('get-wallet'),
-    
-  clearWallet: (): Promise<{ success: boolean; error?: string }> => 
-    ipcRenderer.invoke('clear-wallet')
+
+  clearWallet: (): Promise<{ success: boolean; error?: string }> =>
+    ipcRenderer.invoke('clear-wallet'),
+
 }

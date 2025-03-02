@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { setupStoreHandlers } from './store';
@@ -30,7 +30,7 @@ function createWindow() {
     width: 1100,
     minWidth: 1100,
     height: 600,
-    minHeight:600,
+    minHeight: 600,
     alwaysOnTop: false,
     vibrancy: 'under-window',
     visualEffectState: 'active',
@@ -39,7 +39,6 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       contextIsolation: false,
-      // contextIsolation: true,
       nodeIntegration: true,
       sandbox: false,
     },
@@ -58,6 +57,18 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
+
+  ipcMain.on('go-back', () => {
+    if (win) {
+      win.webContents.goBack();
+    }
+  });
+
+  ipcMain.on('go-forward', () => {
+    if (win) {
+      win.webContents.goForward();
+    }
+  });
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -81,4 +92,5 @@ app.on('activate', () => {
 app.whenReady().then(() => {
   setupStoreHandlers();
   createWindow();
+
 });

@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
-import { clearWalletData } from "../../utils/StoreService";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useWallet } from "../../../contexts/WalletContext";
+import { clearWalletData } from "../../../utils/StoreService";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -9,27 +9,44 @@ import {
   faClone,
   faKey,
   faLock,
+  faPaperPlane,
+  faPlus,
+  faPuzzlePiece,
+  faQrcode,
   faSeedling,
   faTriangleExclamation,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ICRC1Coin } from "../../components/wallet/ICRC1Coin";
-import { InputField } from "../../components/InputField";
-import { walletService } from "../../utils/WalletService";
-import { EncryptedData } from "../../utils/AntiganeEncrypt";
+import { ICRC1Coin } from "../../../components/wallet/ICRC1Coin";
+import { InputField } from "../../../components/InputField";
+import { walletService } from "../../../utils/WalletService";
+import { EncryptedData } from "@antigane/encryption";
+import { Manage } from "./Manage";
+import { Receive } from "./Receive";
 
 interface NavbarProps {
   onClose: () => void;
 }
 
 export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
-  const { wallet, setWallet } = useWallet();
+  const { wallet, setWallet, setIsGeneratedSeedPhrase } = useWallet();
   const navigate = useNavigate();
   const [isOpenWalletAddress, setIsOpenWalletAddress] = useState(false);
   const [isModalOpenKey, setIsModalOpenKey] = useState(false);
   const [isModalOpenKeyPKSP, setIsModalOpenKeyPKSP] = useState("");
+  const [myBalance, setMyBalance] = useState(0);
+  const [openButton, setOpenButton] = useState({
+    send: false,
+    receive: false,
+    manage: false,
+    items: false,
+  });
+  const [_tokenBalances, setTokenBalances] = useState<{
+    [canisterId: string]: number;
+  }>({});
   const [tokenPrincipal] = useState([
+    "ryjl3-tyaaa-aaaaa-aaaba-cai", // Adding ICP canister as well
     "mxzaz-hqaaa-aaaar-qaada-cai",
     "cngnf-vqaaa-aaaar-qag4q-cai",
     "xevnm-gaaaa-aaaar-qafnq-cai",
@@ -37,6 +54,22 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
     "ca6gz-lqaaa-aaaaq-aacwa-cai",
     "atbfz-diaaa-aaaaq-aacyq-cai",
   ]);
+
+  // Function to update a token's balance and recalculate total
+  const updateTokenBalance = useCallback(
+    (canisterId: string, balanceUsd: number) => {
+      setTokenBalances((prev) => {
+        const newBalances = { ...prev, [canisterId]: balanceUsd };
+        const total = Object.values(newBalances).reduce(
+          (sum, value) => sum + value,
+          0
+        );
+        setMyBalance(total);
+        return newBalances;
+      });
+    },
+    []
+  );
 
   const handleClearData = async () => {
     try {
@@ -46,7 +79,10 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
         principalId: null,
         accountId: null,
         encryptedPrivateKey: null,
+        lock: null,
+        verificationData: null,
       });
+      setIsGeneratedSeedPhrase(false);
       navigate("/login");
     } catch (error) {
       console.error("Error clearing wallet data:", error);
@@ -87,7 +123,7 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
       >
         <div className="flex flex-col ">
           {/* section 1  */}
-          <section className="p-6 bg-gradient-to-tr from-accent_primary/50 via-accent_secondary/50 to-accent_secondary/50 flex flex-col gap-5">
+          <section className="p-6 bg-gradient-to-tr from-accent_primary/50 to-accent_secondary/50 flex flex-col gap-5">
             <div className="flex items-center gap-3 justify-between">
               <button
                 className="bg-white/20 w-10 h-10 flex justify-center items-center rounded-xl duration-300"
@@ -206,16 +242,72 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
                 />
               </button>
             </div>
-            <p className="text-4xl my-3 font-semibold">$26,345,600</p>
-            <div className="flex flex-col gap-3">
-              <div className="">
-                <p className="text-sm">Total Token</p>
-                <p className="text-lg font-medium">3</p>
-              </div>
-            </div>
+
+            <p className="text-5xl my-3 text-center font-semibold">
+              ${myBalance.toLocaleString()}
+            </p>
+
             <div className="flex gap-4">
-              <p className="bg-white/20 py-2 px-4 rounded-2xl">Send</p>
-              <p className="bg-white/20 py-2 px-4 rounded-2xl">Receive</p>
+              {/* Send */}
+              <button
+                className="bg-white/20 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 w-1/3 h-20 aspect-square hover:scale-105 duration-300"
+                onClick={() =>
+                  setOpenButton({
+                    send: true,
+                    receive: false,
+                    manage: false,
+                    items: false,
+                  })
+                }
+              >
+                <FontAwesomeIcon icon={faPaperPlane} className="size-6" />
+                <p className="text-sm">Send</p>
+              </button>
+              {/* Receive */}
+              <button
+                className="bg-white/20 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 w-1/3 h-20 aspect-square hover:scale-105 duration-300"
+                onClick={() =>
+                  setOpenButton({
+                    send: false,
+                    receive: true,
+                    manage: false,
+                    items: false,
+                  })
+                }
+              >
+                <FontAwesomeIcon icon={faQrcode} className="size-6" />
+                <p className="text-sm">Receive</p>
+              </button>
+              {/* Manage */}
+              <button
+                className="bg-white/20 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 w-1/3 h-20 aspect-square hover:scale-105 duration-300"
+                onClick={() =>
+                  setOpenButton({
+                    send: false,
+                    receive: false,
+                    manage: true,
+                    items: false,
+                  })
+                }
+              >
+                <FontAwesomeIcon icon={faPlus} className="size-6" />
+                <p className="text-sm">Manage</p>
+              </button>
+              {/* Items */}
+              <button
+                className="bg-white/20 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 w-1/3 h-20 aspect-square hover:scale-105 duration-300"
+                onClick={() =>
+                  setOpenButton({
+                    send: false,
+                    receive: false,
+                    manage: false,
+                    items: true,
+                  })
+                }
+              >
+                <FontAwesomeIcon icon={faPuzzlePiece} className="size-6" />
+                <p className="text-sm">Items</p>
+              </button>
             </div>
 
             {isModalOpenKey && (
@@ -265,11 +357,42 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
 
           {/* section 2  */}
           <section className="flex flex-col gap-4 p-6">
-            <ICRC1Coin canisterId="ryjl3-tyaaa-aaaaa-aaaba-cai" />
+            {/* Map through all tokens including ICP */}
             {tokenPrincipal.map((principal, index) => (
-              <ICRC1Coin key={index} canisterId={principal} />
+              <ICRC1Coin
+                key={index}
+                canisterId={principal}
+                onBalanceUpdate={updateTokenBalance}
+              />
             ))}
           </section>
+
+          {/* Modal Wallets  */}
+          {openButton.manage ? (
+            <Manage
+              onClose={() =>
+                setOpenButton({
+                  send: false,
+                  receive: false,
+                  manage: false,
+                  items: false,
+                })
+              }
+            />
+          ) : openButton.receive ? (
+            <Receive
+              onClose={() =>
+                setOpenButton({
+                  send: false,
+                  receive: false,
+                  manage: false,
+                  items: false,
+                })
+              }
+            />
+          ) : (
+            ""
+          )}
         </div>
       </motion.main>
     </motion.div>
@@ -287,6 +410,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
   onClose,
   onConfirm,
 }) => {
+  // ModalOpenKey component remains unchanged
   const [password, setPassword] = useState("");
   const [decryptedKey, setDecryptedKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -306,7 +430,6 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
       setError(null);
       const result = await onConfirm(password, pkORsp);
       setDecryptedKey(result);
-
       // Start countdown from
       setCountdown(60);
     } catch (err) {
@@ -387,6 +510,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
             text={password}
             onChange={setPassword}
             placeholder="Password"
+            disabled={decryptedKey !== null ? true : false}
           />
           {error && <p className="text-danger text-sm">{error}</p>}
           {decryptedKey && (

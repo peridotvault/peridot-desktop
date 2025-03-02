@@ -1,8 +1,12 @@
 import React from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { faWallet } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faArrowRight,
+  faWallet,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom"; // Import Link dari react-router-dom
+import { Link } from "react-router-dom";
 
 interface NavbarProps {
   onOpenWallet: () => void;
@@ -16,14 +20,33 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenWallet }) => {
     return "Connect Wallet"; // Tampilkan pesan jika tidak ada alamat
   };
 
+  const handleBack = () => {
+    window.electronAPI.goBack();
+  };
+
+  const handleForward = () => {
+    window.electronAPI.goForward();
+  };
+
   return (
     <div className="bg-background_primary shadow-lg flex justify-between items-center gap-5 px-6 fixed w-full z-50">
-      <div className="flex gap-5 py-6 font-medium text-lg items-center">
-        <img
-          src="./assets/SecondaryLogoWhite.png"
-          className="h-6 ml-3 mr-5"
-          alt="Logo"
-        />
+      <div className="flex gap-5 py-6 font-bold text-lg items-center">
+        {/* Button Action  */}
+        <div className="flex items-center gap-3">
+          <button
+            className="h-7 aspect-square justify-center flex items-center text-2xl"
+            onClick={handleBack}
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </button>
+          <button
+            className="h-7 aspect-square justify-center flex items-center text-2xl"
+            onClick={handleForward}
+          >
+            <FontAwesomeIcon icon={faArrowRight} />
+          </button>
+        </div>
+        {/* Menu  */}
         <Link to="/">Vault</Link>
         <Link to="/library">Library</Link>
         <Link to="/market">Market</Link>
@@ -37,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenWallet }) => {
           <p>{shortenAddress(wallet.principalId)}</p>
         </button>
         <Link
-          to="/profile"
+          to="/profile_user"
           className="bg-background_primary pt-6 pb-3 mb-3 px-3 rounded-b-full hover:shadow-arise-sm shadow-flat-sm duration-300"
         >
           <div className="w-8 h-8 rounded-full bg-background_secondary overflow-hidden">

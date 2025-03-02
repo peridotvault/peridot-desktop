@@ -13,8 +13,10 @@ import GameDetail from "./pages/game_detail/GameDetail";
 import LibraryMainLayout from "./components/layout/library/LibraryMainLayout";
 import { Library } from "./pages/library/Library";
 import { Market } from "./pages/market/Market";
-import { Profile } from "./pages/profile/Profile";
 import { CreateProfile } from "./pages/profile/CreateProfile";
+import { UpdateProfile } from "./pages/profile/UpdateProfile";
+import { ProfileUser } from "./pages/profile/ProfileUser";
+import { ProfileDeveloper } from "./pages/profile/ProfileDeveloper";
 
 // import React, { lazy, Suspense } from "react";
 // const Login = lazy(() => import("./pages/signin/Login"));
@@ -57,9 +59,18 @@ const router = createHashRouter([
         path: ":game",
         element: <GameDetail />,
       },
+      // profile
       {
-        path: "profile",
-        element: <Profile />,
+        path: "profile_user",
+        element: <ProfileUser />,
+      },
+      {
+        path: "profile_developer",
+        element: <ProfileDeveloper />,
+      },
+      {
+        path: "update_profile",
+        element: <UpdateProfile />,
       },
     ],
   },

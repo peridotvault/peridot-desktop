@@ -20,7 +20,7 @@ export default function ImportWallet() {
   useEffect(() => {
     async function userHandle() {
       if (wallet.encryptedPrivateKey) {
-        const isUserExist = await getUserByPrincipalId("ifal12", wallet);
+        const isUserExist = await getUserByPrincipalId(wallet);
         if (
           isUserExist &&
           typeof isUserExist === "object" &&
@@ -44,10 +44,11 @@ export default function ImportWallet() {
     setWallet((prevWallet) => ({
       ...prevWallet,
       encryptedSeedPhrase: null,
-      encryptedPrivateKey: null,
-      password: null,
       principalId: null,
       accountId: null,
+      encryptedPrivateKey: null,
+      lock: null,
+      verificationData: null,
     }));
   };
 
@@ -55,13 +56,18 @@ export default function ImportWallet() {
     async (seedPhrase: string, password: string) => {
       const result = await walletService.generateWallet(seedPhrase, password);
       if (result.success) {
+        const lock = await walletService.openLock(
+          password,
+          result.verificationData
+        );
         setWallet((prevWallet) => ({
           ...prevWallet,
           encryptedSeedPhrase: result.encryptedSeedPhrase,
           principalId: result.principalId,
           accountId: result.accountId,
           encryptedPrivateKey: result.encryptedPrivateKey,
-          password: password,
+          verificationData: result.verificationData,
+          lock: lock,
         }));
       } else {
         console.error("Error importing wallet:", result.error);

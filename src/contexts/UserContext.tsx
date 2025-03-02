@@ -1,97 +1,228 @@
 // UserContext.tsx
-
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { userIdlFactory } from "../hooks/idl_app/user";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import { walletService } from "../utils/WalletService";
 
-interface MetadataCreateUser {
+export interface MetadataCreateUser {
   username: string;
-  displayName: string;
+  display_name: string;
   email: string;
-  age: number | string;
-  gender: string;
+  birth_date: string;
+  gender: GenderVariant;
   country: string;
+}
+
+export type GenderVariant =
+  | {
+      male: null;
+    }
+  | {
+      female: null;
+    }
+  | {
+      other: null;
+    };
+
+export interface MetadataUpdateUser {
+  username: string;
+  display_name: string;
+  email: string;
+  image_url: string | null;
+  background_image_url: string | null;
+  user_demographics: {
+    birth_date: string;
+    gender: GenderVariant;
+    country: string;
+  };
+}
+
+// Define the UpdateUser interface to match the IDL
+interface UpdateUserPayload {
+  username: string;
+  display_name: string;
+  email: string;
+  image_url: [] | [string];
+  background_image_url: [] | [string];
+  user_demographics: {
+    birth_date: bigint;
+    gender: GenderVariant;
+    country: string;
+  };
+}
+
+function dateToNanoSeconds(dateStr: string): bigint {
+  const date = new Date(dateStr);
+  // Convert to nanoseconds (multiply by 1,000,000 to convert milliseconds to nanoseconds)
+  return BigInt(date.getTime()) * BigInt(1_000_000);
 }
 
 const appCanister = import.meta.env.VITE_PERIDOT_CANISTER_BACKEND;
 
-async function createAccount(
-  metadata: MetadataCreateUser,
-  password: string,
-  wallet: any
-) {
-  if (wallet.encryptedPrivateKey && password) {
-    const privateKey = await walletService.decryptWalletData(
-      wallet.encryptedPrivateKey,
-      password
+async function createAccount(metadata: MetadataCreateUser, wallet: any) {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
+  const secretKey = Buffer.from(privateKey, "hex");
+  try {
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+    });
+
+    const actor = Actor.createActor(userIdlFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+
+    const result = await actor.createUser(
+      metadata.username,
+      metadata.display_name,
+      metadata.email,
+      dateToNanoSeconds(metadata.birth_date),
+      metadata.gender,
+      metadata.country
     );
-    const secretKey = Buffer.from(privateKey, "hex");
-    try {
-      // Initialize agent with identity
-      const agent = new HttpAgent({
-        host: import.meta.env.VITE_HOST,
-        identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
-      });
 
-      const actor = Actor.createActor(userIdlFactory, {
-        agent,
-        canisterId: appCanister,
-      });
-
-      // Call balance method
-      const result = await actor.createUser(
-        metadata.username,
-        metadata.displayName,
-        metadata.email,
-        Number(metadata.age),
-        { [metadata.gender]: null },
-        metadata.country
-      );
-
-      return result;
-    } catch (error) {
-      console.warn(error);
-      return;
-    }
-  } else {
-    throw new Error("Not Logged in");
+    return result;
+  } catch (error) {
+    throw error;
   }
 }
 
-async function getUserByPrincipalId(password: string, wallet: any) {
-  if (wallet.encryptedPrivateKey && password) {
-    const privateKey = await walletService.decryptWalletData(
-      wallet.encryptedPrivateKey,
-      password
-    );
-    const secretKey = Buffer.from(privateKey, "hex");
+async function updateUser(metadata: MetadataUpdateUser, wallet: any) {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
+  const secretKey = Buffer.from(privateKey, "hex");
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+    });
 
-    try {
-      // Initialize agent with identity
-      const agent = new HttpAgent({
-        host: import.meta.env.VITE_HOST,
-        identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
-      });
+    const actor = Actor.createActor(userIdlFactory, {
+      agent,
+      canisterId: appCanister,
+    });
 
-      const actor = Actor.createActor(userIdlFactory, {
-        agent,
-        canisterId: appCanister,
-      });
+    const updatePayload: UpdateUserPayload = {
+      username: metadata.username,
+      display_name: metadata.display_name,
+      email: metadata.email,
+      image_url: metadata.image_url ? [metadata.image_url] : [],
+      background_image_url: metadata.background_image_url
+        ? [metadata.background_image_url]
+        : [],
+      user_demographics: {
+        // Convert the date string to nanoseconds timestamp
+        birth_date: dateToNanoSeconds(metadata.user_demographics.birth_date),
+        gender: metadata.user_demographics.gender,
+        country: metadata.user_demographics.country,
+      },
+    };
 
-      // Call balance method
-      const result = await actor.getUserByPrincipalId();
-      console.log(result);
+    // Call balance method
+    const result = await actor.updateUser(updatePayload);
 
-      return result;
-    } catch (error) {
-      console.warn(error);
-      return;
-    }
-  } else {
-    throw new Error("Not Logged in");
+    return result;
+  } catch (error) {
+    return;
+  }
+}
+
+async function getUserByPrincipalId(wallet: any) {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
+  const secretKey = Buffer.from(privateKey, "hex");
+
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+    });
+
+    const actor = Actor.createActor(userIdlFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+
+    // Call balance method
+    const result = await actor.getUserByPrincipalId();
+
+    return result;
+  } catch (error) {
+    throw new Error("Error : " + error);
+  }
+}
+
+async function searchUsersByPrefixWithLimit(
+  wallet: any,
+  prefix: string,
+  limit: number
+) {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
+  const secretKey = Buffer.from(privateKey, "hex");
+
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+    });
+
+    const actor = Actor.createActor(userIdlFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+
+    // Call balance method
+    const result = await actor.searchUsersByPrefixWithLimit(prefix, limit);
+
+    return result;
+  } catch (error) {
+    throw new Error("Error : " + error);
+  }
+}
+
+// User Friend
+async function getFriendRequestList(wallet: any) {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
+  const secretKey = Buffer.from(privateKey, "hex");
+
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+    });
+
+    const actor = Actor.createActor(userIdlFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+
+    // Call balance method
+    const result = await actor.getFriendRequestList();
+
+    return result;
+  } catch (error) {
+    throw new Error("Error : " + error);
   }
 }
 
 // Ekspor fungsi createAccount
-export { createAccount, getUserByPrincipalId };
+export {
+  createAccount,
+  updateUser,
+  getUserByPrincipalId,
+  searchUsersByPrefixWithLimit,
+  getFriendRequestList,
+};

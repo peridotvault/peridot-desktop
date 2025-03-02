@@ -12,7 +12,8 @@ export default function Login() {
       if (
         wallet.principalId &&
         wallet.accountId &&
-        wallet.encryptedPrivateKey
+        wallet.encryptedPrivateKey &&
+        wallet.verificationData
       ) {
         navigate("/");
       }

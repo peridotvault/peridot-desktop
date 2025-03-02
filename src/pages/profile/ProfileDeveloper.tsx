@@ -1,24 +1,76 @@
 // @ts-ignore
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
-  faAngleDown,
   faBookmark,
   faComment,
-  faEdit,
+  faGear,
   faHeart,
   faShare,
   faUpRightFromSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import { Setting } from "../slide/Setting";
+import { getUserByPrincipalId } from "../../contexts/UserContext";
+import { useWallet } from "../../contexts/WalletContext";
+import { LoadingScreen } from "../additional/LoadingScreen";
 
-export const Profile = () => {
-  const profileUrl =
-    "https://images.unsplash.com/photo-1668261200441-95a4667b1720?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
-  const coverUrl =
-    "https://plus.unsplash.com/premium_photo-1666700698920-d2d2bba589f8?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+interface UserDataInterface {
+  ok: {
+    username: string;
+    display_name: string;
+    description: string;
+    link: string;
+    email: string;
+    image_url: string;
+    background_image_url: string;
+    total_playtime: number;
+    created_at: string;
+    user_demographics: {
+      birth_date: string;
+      gender: string;
+      country: string;
+    };
+    user_interactions: [
+      {
+        app_id: string;
+        interaction: string;
+        created_at: string;
+      }
+    ];
+    user_libraries: string;
+    developer: string;
+  };
+}
+
+export const ProfileDeveloper = () => {
+  const { wallet } = useWallet();
+  const [userData, setUserData] = useState<UserDataInterface | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isOpenWallet, setIOpenWallet] = useState(false);
+
+  useEffect(() => {
+    async function checkUser() {
+      const isUserExist = await getUserByPrincipalId(wallet);
+      if (
+        isUserExist &&
+        typeof isUserExist === "object" &&
+        "ok" in isUserExist
+      ) {
+        setUserData(isUserExist as UserDataInterface);
+        setIsLoading(false);
+      }
+    }
+    checkUser();
+  }, [wallet]);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
-    <main className="pt-20 flex flex-col items-center mb-10">
+    <main className="pt-20 flex flex-col items-center mb-10 px-10">
       <div className="container flex gap-6 mt-6">
         {/* left   ============================ */}
         <div className="w-2/3 flex flex-col gap-6">
@@ -27,7 +79,7 @@ export const Profile = () => {
             {/* cover  */}
             <div className="w-full h-[11rem]">
               <img
-                src={coverUrl}
+                src={userData?.ok.background_image_url}
                 className="w-full h-[15rem] object-cover rounded-2xl "
                 alt=""
               />
@@ -36,7 +88,7 @@ export const Profile = () => {
             <div className="px-10 relative flex items-end gap-6">
               <div className="w-36 h-36 bg-background_primary shadow-2xl rounded-full z-10 overflow-hidden p-2">
                 <img
-                  src={profileUrl}
+                  src={userData?.ok.image_url}
                   className="w-full h-full object-cover rounded-full"
                   alt=""
                 />
@@ -59,13 +111,12 @@ export const Profile = () => {
             {/* bio  */}
             <div className="flex flex-col gap-3 mt-3 px-10">
               <div className="flex flex-col gap-1">
-                <div className="flex gap-2 items-center">
-                  <p className="font-medium text-2xl">Gamer.89Max</p>
-                  <Link to="/create_profile">
-                    <FontAwesomeIcon icon={faEdit} />
-                  </Link>
-                </div>
-                <p className="text-text_disabled text-lg">@blacksamurai</p>
+                <p className="font-medium text-2xl">
+                  {userData?.ok.display_name}
+                </p>
+                <p className="text-text_disabled text-lg">
+                  @{userData?.ok.username}
+                </p>
               </div>
               <p>
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit
@@ -85,20 +136,30 @@ export const Profile = () => {
             </div>
             {/* Follow  */}
             <div className="my-6 px-10 flex justify-between gap-6">
-              <button className="w-1/2 shadow-flat-sm rounded-lg text-accent_primary font-bold h-12">
+              <button className="w-1/2 shadow-flat-sm hover:shadow-arise-sm rounded-lg text-accent_primary font-bold h-12">
                 Follow
               </button>
-              <button className="w-1/2 shadow-sunken-sm rounded-lg h-12">
+              <button className="w-1/2 shadow-sunken-sm hover:shadow-arise-sm rounded-lg h-12">
                 Message
               </button>
-              <button className="shadow-sunken-sm w-12 h-12 rounded-lg">
+              <button
+                className="shadow-sunken-sm hover:shadow-arise-sm w-12 h-12 rounded-lg"
+                onClick={() => setIOpenWallet(true)}
+              >
                 <div className="w-12 h-12 flex justify-center items-center">
                   <FontAwesomeIcon
-                    icon={faAngleDown}
+                    icon={faGear}
                     className="shadow-sunken-sm "
                   />
                 </div>
               </button>
+              <AnimatePresence>
+                {isOpenWallet ? (
+                  <Setting onClose={() => setIOpenWallet(false)} />
+                ) : (
+                  ""
+                )}
+              </AnimatePresence>
             </div>
           </section>
           {/* Posts  */}
@@ -108,7 +169,7 @@ export const Profile = () => {
               {/* profile image  */}
               <div className="w-1/12">
                 <img
-                  src={profileUrl}
+                  src={userData?.ok.image_url}
                   className="w-full aspect-square object-cover rounded-full shadow-flat-sm"
                   alt=""
                 />
@@ -126,7 +187,7 @@ export const Profile = () => {
                 {/* image content */}
                 <div className="mt-3">
                   <img
-                    src={profileUrl}
+                    src={userData?.ok.image_url}
                     className="w-full h-full rounded-xl"
                     alt=""
                   />
@@ -162,7 +223,7 @@ export const Profile = () => {
               {/* profile image  */}
               <div className="w-1/12">
                 <img
-                  src={profileUrl}
+                  src={userData?.ok.image_url}
                   className="w-full aspect-square object-cover rounded-full shadow-flat-sm"
                   alt=""
                 />
@@ -180,7 +241,7 @@ export const Profile = () => {
                 {/* image content */}
                 <div className="mt-3">
                   <img
-                    src={coverUrl}
+                    src={userData?.ok.background_image_url}
                     className="w-full h-full rounded-xl"
                     alt=""
                   />
@@ -228,7 +289,7 @@ export const Profile = () => {
             {/* lists friend  */}
             <div className="flex gap-3 items-center">
               <img
-                src={profileUrl}
+                src={userData?.ok.image_url}
                 className="w-1/6 aspect-square object-cover rounded-lg shadow-arise-sm"
                 alt=""
               />

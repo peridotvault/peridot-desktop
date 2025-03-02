@@ -5,6 +5,7 @@ interface InputFieldProps {
   text: string;
   onChange: (value: string) => void;
   placeholder: string;
+  disabled?: boolean;
   type?: string;
   name?: string;
 }
@@ -13,6 +14,7 @@ export const InputField = ({
   text,
   onChange,
   placeholder,
+  disabled = false,
   type = "password",
   name = "Password",
 }: InputFieldProps) => {
@@ -24,6 +26,7 @@ export const InputField = ({
       placeholder={placeholder}
       value={text}
       onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
     />
   );
 };

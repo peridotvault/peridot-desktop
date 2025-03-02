@@ -13,7 +13,12 @@ interface Metadata {
   symbol: string | null;
 }
 
-export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
+interface ICRC1CoinProps {
+  canisterId: string;
+  onBalanceUpdate?: (canisterId: string, balanceUsd: number) => void;
+}
+
+export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
   const { wallet } = useWallet();
   const [icrc1, setIcrc1] = useState<Metadata>();
   const [priceUsd, setPriceUsd] = useState<string | null>(null);
@@ -48,6 +53,17 @@ export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
     fetchBalance();
     fetchMarketData();
   }, [wallet.principalId, canisterId]);
+
+  // Calculate and update the USD balance whenever price or balance changes
+  useEffect(() => {
+    if (icrc1?.balance && priceUsd && priceUsd !== "0" && onBalanceUpdate) {
+      const balanceUsd = parseFloat(priceUsd) * parseFloat(icrc1.balance);
+      onBalanceUpdate(canisterId, balanceUsd);
+    } else if (onBalanceUpdate) {
+      // Set to 0 if there's no valid balance or price
+      onBalanceUpdate(canisterId, 0);
+    }
+  }, [icrc1?.balance, priceUsd, canisterId, onBalanceUpdate]);
 
   async function checkBalance(icrc1CanisterId: string) {
     if (!wallet.principalId) {
@@ -125,7 +141,7 @@ export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-      minimumFractionDigits: decimalPlaces,
+      minimumFractionDigits: 1,
       maximumFractionDigits: decimalPlaces,
     }).format(number);
   };
@@ -171,8 +187,10 @@ export const ICRC1Coin = ({ canisterId }: { canisterId: string }) => {
         <div className="flex flex-col items-end">
           <p>
             {formatUsd(
-              (parseFloat(priceUsd) * parseFloat(icrc1.balance)).toString(),
-              2
+              (
+                parseFloat(priceUsd) * parseFloat(icrc1.balance)
+              ).toLocaleString(),
+              5
             )}
           </p>
           <p className="text-xs text-text_disabled">{formatUsd(priceUsd)}</p>

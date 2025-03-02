@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { WalletData } from "../utils/WalletService";
 import { saveWalletData, getWalletData } from "../utils/StoreService";
-import { EncryptedData } from "../utils/AntiganeEncrypt";
+import { EncryptedData } from "@antigane/encryption";
 
 interface WalletContextData {
   wallet: WalletData;
   setWallet: React.Dispatch<React.SetStateAction<WalletData>>;
   isGeneratedSeedPhrase: boolean;
   setIsGeneratedSeedPhrase: React.Dispatch<React.SetStateAction<boolean>>;
+  isCheckingWallet: boolean;
+  setIsCheckingWallet: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const WalletContext = createContext<WalletContextData | undefined>(undefined);
@@ -18,9 +20,12 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     principalId: null,
     accountId: null,
     encryptedPrivateKey: null,
+    lock: null,
+    verificationData: null,
   });
 
   const [isGeneratedSeedPhrase, setIsGeneratedSeedPhrase] = useState(false);
+  const [isCheckingWallet, setIsCheckingWallet] = useState(true);
 
   // Load wallet data when component mounts
   useEffect(() => {
@@ -32,8 +37,10 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           // Set other states based on stored encrypted data
           setIsGeneratedSeedPhrase(!!storedWallet.encryptedSeedPhrase);
         }
+        setIsCheckingWallet(false);
       } catch (error) {
         console.error("Error loading initial wallet data:", error);
+        setIsCheckingWallet(false);
       }
     };
 
@@ -62,8 +69,17 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       setWallet,
       isGeneratedSeedPhrase,
       setIsGeneratedSeedPhrase,
+      isCheckingWallet,
+      setIsCheckingWallet,
     }),
-    [wallet, setWallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase]
+    [
+      wallet,
+      setWallet,
+      isGeneratedSeedPhrase,
+      setIsGeneratedSeedPhrase,
+      isCheckingWallet,
+      setIsCheckingWallet,
+    ]
   );
 
   return (

@@ -24,7 +24,7 @@ export default {
         // danger
         "danger": "#c5604c",
         "warning": "#deb887",
-        "success": "#00FF00",
+        "success": "#2aa63d",
 
 
 

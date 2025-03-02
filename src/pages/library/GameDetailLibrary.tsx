@@ -12,8 +12,77 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function GameDetailLibrary() {
+  const [list_announcement] = useState([
+    {
+      date: "Dec 24, 2024",
+      announcements: [
+        {
+          img_url:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuELWiuZ7LLpj9Kr3sQ-8Shvsk0UrqmGhiGg&s",
+          type: "In-Game Event",
+          title: "World Tour | ISEUL-T Cup | Strike A Pose!",
+          description:
+            "As ISEUL-T’s generous sponsorship comes to an end they want to see your flashiest moves! This week, your team will be rewarded with some extra cash for showing off by emoting near a cashout that your team starts, steals, or completes! A dance floor appears whenever a player opens a vault, starts a cashout, steals a cashout or completes a cashout. When the dance floor appears you have 5 seconds to strike a pose, and hold that pose for at least 2 seconds - doing so awards your team with $1000. Everyone in your team can do it - so make sure to coordinate your best moves and maximize that cash!",
+        },
+        {
+          img_url: "https://pbs.twimg.com/media/GYZxIMcaMAMIzvR.jpg:large",
+          type: "Regular Update",
+          title: "Update 5.6.0",
+          description:
+            "The power levels are at an all-time high in The Arena this week as DISSUN unveils its newest advertisement in preparation for its takeover of the World Tour starting tomorrow. The fuel company has a lot in store for you, so get ready to celebrate Lunar New Year in a powerful way, as a brand-new throwable takes center stage in the festively decorated Arena!",
+        },
+      ],
+    },
+    {
+      date: "Dec 23, 2024",
+      announcements: [
+        {
+          img_url:
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuELWiuZ7LLpj9Kr3sQ-8Shvsk0UrqmGhiGg&s",
+          type: "In-Game Event",
+          title: "World Tour | ISEUL-T Cup | Strike A Pose!",
+          description:
+            "As ISEUL-T’s generous sponsorship comes to an end they want to see your flashiest moves! This week, your team will be rewarded with some extra cash for showing off by emoting near a cashout that your team starts, steals, or completes! A dance floor appears whenever a player opens a vault, starts a cashout, steals a cashout or completes a cashout. When the dance floor appears you have 5 seconds to strike a pose, and hold that pose for at least 2 seconds - doing so awards your team with $1000. Everyone in your team can do it - so make sure to coordinate your best moves and maximize that cash!",
+        },
+        {
+          img_url: "https://pbs.twimg.com/media/GYZxIMcaMAMIzvR.jpg:large",
+          type: "Regular Update",
+          title: "Update 5.6.0",
+          description:
+            "The power levels are at an all-time high in The Arena this week as DISSUN unveils its newest advertisement in preparation for its takeover of the World Tour starting tomorrow. The fuel company has a lot in store for you, so get ready to celebrate Lunar New Year in a powerful way, as a brand-new throwable takes center stage in the festively decorated Arena!",
+        },
+      ],
+    },
+  ]);
+  const AnnouncementContainer = ({
+    img_url,
+    type,
+    title,
+    description,
+  }: {
+    img_url: string;
+    type: string;
+    title: string;
+    description: string;
+  }) => {
+    return (
+      <section className="p-6 shadow-arise-sm hover:shadow-sunken-sm rounded-2xl flex gap-6">
+        <img
+          src={img_url}
+          alt=""
+          className="w-[300px] aspect-video shadow-sunken-sm object-cover rounded-xl"
+        />
+        <div className="gap-2 flex flex-col">
+          <p className="text-text_disabled uppercase line-clamp-1">{type}</p>
+          <p className="line-clamp-2 text-xl">{title}</p>
+          <p className="line-clamp-4 text-text_disabled">{description}</p>
+        </div>
+      </section>
+    );
+  };
+
   return (
-    <main className="flex flex-col items-center gap-5">
+    <main className="flex flex-col items-center gap-5 mb-32">
       <div className="bg-white w-full h-96 relative">
         <img
           src="https://cdn2.steamgriddb.com/hero/0a30a29822b9ea4efaa92d60a93c78cb.jpg"
@@ -24,7 +93,7 @@ export default function GameDetailLibrary() {
       </div>
 
       {/* column */}
-      <div className="container flex gap-8 px-6 z-10">
+      <div className="container flex gap-8 px-6 z-10 ">
         {/* left column ========================================== */}
         <div className="flex flex-col gap-8 w-2/3">
           {/* Header  */}
@@ -51,31 +120,36 @@ export default function GameDetailLibrary() {
             </div>
           </section>
 
-          {/* Description  */}
-          <section className="flex flex-col gap-4 bg-background_secondary px-6 py-4 rounded-xl">
-            <p className="text-xl font-medium">Description</p>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              Consequuntur accusantium deleniti dolor dolores, minus hic
-              doloremque ut cum mollitia alias modi sequi blanditiis totam.
-              Deserunt, necessitatibus et. Tempore, libero sint. Lorem ipsum
-              dolor sit amet, consectetur adipisicing elit. Ab veniam corrupti
-              reprehenderit temporibus doloremque distinctio, numquam vitae quod
-              animi eos.
-            </p>
-          </section>
+          {/* Announcements  */}
+          {list_announcement.map((item, index) => (
+            <div key={index} className="flex flex-col gap-5">
+              <div className="flex items-center">
+                <p className="text-xl w-[150px]">{item.date}</p>
+                <hr className="border-background_disabled w-full" />
+              </div>
+              {item.announcements.map((item, index) => (
+                <AnnouncementContainer
+                  key={index}
+                  img_url={item.img_url}
+                  description={item.description}
+                  title={item.title}
+                  type={item.type}
+                />
+              ))}
+            </div>
+          ))}
         </div>
         {/* right column ========================================== */}
         <div className="w-1/3 min-w-[300px] flex flex-col gap-8">
           {/* price  */}
-          <section className="bg-background_primary shadow-arise-sm w-full p-6 rounded-2xl flex flex-col gap-6">
+          <section className="bg-background_primary shadow-flat-sm w-full p-6 rounded-2xl flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <p>current price</p>
               <p className="text-3xl font-bold">$271,15</p>
             </div>
             {/* button  */}
             <div className="flex flex-col gap-4">
-              <button className="bg-grad px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
+              <button className="bg-success px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
                 <FontAwesomeIcon icon={faPlay} />
                 Launch
               </button>
