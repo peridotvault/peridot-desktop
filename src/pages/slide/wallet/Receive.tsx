@@ -3,6 +3,7 @@ import { faChevronLeft, faClone } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { useWallet } from "../../../contexts/WalletContext";
+import { shortenAddress } from "../../../components/AdditionalComponent";
 
 interface Props {
   onClose: () => void;
@@ -22,15 +23,6 @@ export const Receive: React.FC<Props> = ({ onClose }) => {
       logo: "/assets/logo-icp.svg",
     },
   ]);
-
-  const shortenAddress = (
-    address: string | null,
-    firstSlice: number,
-    secondSlice: number
-  ) => {
-    if (address)
-      return `${address.slice(0, firstSlice)}...${address.slice(-secondSlice)}`;
-  };
 
   const copyToClipboard = (data: EncryptedData | string | null) => {
     if (!data) return;

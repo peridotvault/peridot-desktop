@@ -121,8 +121,16 @@ export default function MainLayout() {
   return (
     <main className="min-h-screen flex flex-col">
       <Navbar onOpenWallet={() => setIOpenWallet(true)} />
-      <div className="flex-1">
-        <Outlet />
+      <div
+        className={`flex-1  ${
+          isRequiredPassword || isOpenWallet ? "overflow-y-hidden" : ""
+        } `}
+      >
+        <div
+          className={` ${isRequiredPassword || isOpenWallet ? "h-dvh" : ""} `}
+        >
+          <Outlet />
+        </div>
       </div>
 
       <AnimatePresence>
