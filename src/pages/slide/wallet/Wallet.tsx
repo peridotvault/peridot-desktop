@@ -25,6 +25,7 @@ import { EncryptedData } from "@antigane/encryption";
 import { Manage } from "./Manage";
 import { Receive } from "./Receive";
 import { Nft } from "./Nft";
+import { SendToken } from "./SendToken";
 
 interface NavbarProps {
   onClose: () => void;
@@ -381,7 +382,18 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
 
           {/* Modal Wallets  */}
           <div className="z-10">
-            {openButton.manage ? (
+            {openButton.send ? (
+              <SendToken
+                onClose={() =>
+                  setOpenButton({
+                    send: false,
+                    receive: false,
+                    manage: false,
+                    nft: false,
+                  })
+                }
+              />
+            ) : openButton.manage ? (
               <Manage
                 onClose={() =>
                   setOpenButton({
