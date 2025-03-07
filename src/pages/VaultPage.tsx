@@ -41,7 +41,7 @@ export default function VaultPage() {
   };
 
   return (
-    <main className="flex flex-col gap-3 ">
+    <main className="flex flex-col gap-3">
       {/* section 1  */}
       <section className="w-full h-[30rem] pt-20 mb-4 relative">
         <img
