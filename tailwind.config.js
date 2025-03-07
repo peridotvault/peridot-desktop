@@ -50,6 +50,9 @@ export default {
 
         // green background 
         "sunken-md-green": "inset 5px 5px 10px #2e483a, inset -5px -5px 10px #3e624e",
+      },
+      backgroundImage: {
+        'radial': "radial-gradient(#90EE90, #4D8A6A, #1c1f1d)",
       }
     },
   },

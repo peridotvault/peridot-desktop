@@ -78,12 +78,12 @@
           ]
         }
       ],
-      "icon": "public/assets/FullLogoColor.png",
+      "icon": "public/assets/coin-peridot.png",
       "category": "public.app-category.game"
     },
     "dmg": {
-      "background": "public/assets/FullLogoColor.png",
-      "icon": "public/assets/FullLogoColor.png",
+      "background": "public/assets/coin-peridot.png",
+      "icon": "public/assets/coin-peridot.png",
       "iconSize": 80,
       "window": {
         "width": 544,

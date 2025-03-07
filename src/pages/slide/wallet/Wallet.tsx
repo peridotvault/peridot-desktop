@@ -5,12 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   faArrowRightFromBracket,
+  faBitcoinSign,
   faBuildingColumns,
   faClone,
   faKey,
   faLock,
   faPaperPlane,
-  faPlus,
   faPuzzlePiece,
   faQrcode,
   faSeedling,
@@ -24,6 +24,7 @@ import { walletService } from "../../../utils/WalletService";
 import { EncryptedData } from "@antigane/encryption";
 import { Manage } from "./Manage";
 import { Receive } from "./Receive";
+import { Nft } from "./Nft";
 
 interface NavbarProps {
   onClose: () => void;
@@ -40,7 +41,7 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
     send: false,
     receive: false,
     manage: false,
-    items: false,
+    nft: false,
   });
   const [_tokenBalances, setTokenBalances] = useState<{
     [canisterId: string]: number;
@@ -123,10 +124,12 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
       >
         <div className="flex flex-col ">
           {/* section 1  */}
-          <section className="p-6 bg-gradient-to-tr from-accent_primary/50 to-accent_secondary/50 flex flex-col gap-5">
-            <div className="flex items-center gap-3 justify-between">
+          <section className="p-6 bg-background_primary flex flex-col gap-5 relative ">
+            {/* background  */}
+            <div className="bg-radial absolute top-0 left-0 w-full h-full z-0 opacity-30"></div>
+            <div className="flex items-center gap-3 justify-between z-10">
               <button
-                className="bg-white/20 w-10 h-10 flex justify-center items-center rounded-xl duration-300"
+                className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
                 onClick={() => setIsOpenWalletAddress(!isOpenWalletAddress)}
               >
                 <FontAwesomeIcon icon={faClone} className="text-md" />
@@ -234,7 +237,7 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
               {/* Logout  */}
               <button
                 onClick={handleClearData}
-                className="bg-white/20 w-10 h-10 flex justify-center items-center rounded-xl"
+                className="w-12 h-12 flex justify-center items-center rounded-xl bg-background_primary shadow-arise-sm hover:shadow-flat-sm opacity-80 hover:opacity-100 duration-300"
               >
                 <FontAwesomeIcon
                   icon={faArrowRightFromBracket}
@@ -243,71 +246,80 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
               </button>
             </div>
 
-            <p className="text-5xl my-3 text-center font-semibold">
+            <p className="text-5xl my-5 text-center z-10">
               ${myBalance.toLocaleString()}
             </p>
 
-            <div className="flex gap-4">
+            <div className="flex gap-7 z-10 items-center justify-center">
               {/* Send */}
-              <button
-                className="bg-white/20 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 w-1/3 h-20 aspect-square hover:scale-105 duration-300"
-                onClick={() =>
-                  setOpenButton({
-                    send: true,
-                    receive: false,
-                    manage: false,
-                    items: false,
-                  })
-                }
-              >
-                <FontAwesomeIcon icon={faPaperPlane} className="size-6" />
+              <div className=" flex flex-col items-center gap-3 opacity-80 hover:opacity-100 duration-300">
+                <button
+                  className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
+                  onClick={() =>
+                    setOpenButton({
+                      send: true,
+                      receive: false,
+                      manage: false,
+                      nft: false,
+                    })
+                  }
+                >
+                  <FontAwesomeIcon icon={faPaperPlane} className="size-5" />
+                </button>
                 <p className="text-sm">Send</p>
-              </button>
+              </div>
               {/* Receive */}
-              <button
-                className="bg-white/20 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 w-1/3 h-20 aspect-square hover:scale-105 duration-300"
-                onClick={() =>
-                  setOpenButton({
-                    send: false,
-                    receive: true,
-                    manage: false,
-                    items: false,
-                  })
-                }
-              >
-                <FontAwesomeIcon icon={faQrcode} className="size-6" />
+              <div className=" flex flex-col items-center gap-3 opacity-80 hover:opacity-100 duration-300">
+                <button
+                  className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
+                  onClick={() =>
+                    setOpenButton({
+                      send: false,
+                      receive: true,
+                      manage: false,
+                      nft: false,
+                    })
+                  }
+                >
+                  <FontAwesomeIcon icon={faQrcode} className="size-5" />
+                </button>
                 <p className="text-sm">Receive</p>
-              </button>
+              </div>
               {/* Manage */}
-              <button
-                className="bg-white/20 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 w-1/3 h-20 aspect-square hover:scale-105 duration-300"
-                onClick={() =>
-                  setOpenButton({
-                    send: false,
-                    receive: false,
-                    manage: true,
-                    items: false,
-                  })
-                }
-              >
-                <FontAwesomeIcon icon={faPlus} className="size-6" />
+              <div className=" flex flex-col items-center gap-3 opacity-80 hover:opacity-100 duration-300">
+                <button
+                  className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
+                  onClick={() =>
+                    setOpenButton({
+                      send: false,
+                      receive: false,
+                      manage: true,
+                      nft: false,
+                    })
+                  }
+                >
+                  <FontAwesomeIcon icon={faBitcoinSign} className="size-5" />
+                </button>
                 <p className="text-sm">Manage</p>
-              </button>
-              {/* Items */}
-              <button
-                className="bg-white/20 p-4 rounded-2xl flex flex-col items-center justify-center gap-1 w-1/3 h-20 aspect-square hover:scale-105 duration-300"
-                onClick={() =>
-                  setOpenButton({
-                    send: false,
-                    receive: false,
-                    manage: false,
-                    items: true,
-                  })
-                }
-              >
-                <FontAwesomeIcon icon={faPuzzlePiece} className="size-6" />
-                <p className="text-sm">Items</p>
-              </button>
+              </div>
+
+              {/* Nft */}
+              <div className=" flex flex-col items-center gap-3 opacity-80 hover:opacity-100 duration-300">
+                <button
+                  className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
+                  onClick={() =>
+                    setOpenButton({
+                      send: false,
+                      receive: false,
+                      manage: false,
+                      nft: true,
+                    })
+                  }
+                >
+                  <FontAwesomeIcon icon={faPuzzlePiece} className="size-5" />
+                </button>
+                <p className="text-sm">NFT</p>
+              </div>
             </div>
 
             {isModalOpenKey && (
@@ -368,31 +380,44 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
           </section>
 
           {/* Modal Wallets  */}
-          {openButton.manage ? (
-            <Manage
-              onClose={() =>
-                setOpenButton({
-                  send: false,
-                  receive: false,
-                  manage: false,
-                  items: false,
-                })
-              }
-            />
-          ) : openButton.receive ? (
-            <Receive
-              onClose={() =>
-                setOpenButton({
-                  send: false,
-                  receive: false,
-                  manage: false,
-                  items: false,
-                })
-              }
-            />
-          ) : (
-            ""
-          )}
+          <div className="z-10">
+            {openButton.manage ? (
+              <Manage
+                onClose={() =>
+                  setOpenButton({
+                    send: false,
+                    receive: false,
+                    manage: false,
+                    nft: false,
+                  })
+                }
+              />
+            ) : openButton.receive ? (
+              <Receive
+                onClose={() =>
+                  setOpenButton({
+                    send: false,
+                    receive: false,
+                    manage: false,
+                    nft: false,
+                  })
+                }
+              />
+            ) : openButton.nft ? (
+              <Nft
+                onClose={() =>
+                  setOpenButton({
+                    send: false,
+                    receive: false,
+                    manage: false,
+                    nft: false,
+                  })
+                }
+              />
+            ) : (
+              ""
+            )}
+          </div>
         </div>
       </motion.main>
     </motion.div>

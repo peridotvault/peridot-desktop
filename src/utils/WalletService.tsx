@@ -234,7 +234,6 @@ class WalletService {
       this.lock = lock;
       return lock;
     } catch (error) {
-      console.error("Open Lock error:", error);
       throw new Error("Failed to open lock: " + (error as Error).message);
     }
   }
@@ -255,12 +254,11 @@ class WalletService {
       }
       return await this.encryption.decrypt(encryptedData, password);
     } catch (error) {
-      console.error("Decryption error:", error);
-      throw new Error("Failed to decrypt data");
+      throw new Error("Decryption error:" + (error as Error).message);
     }
   }
 
-  isLockOpen(): boolean {
+  isLockOpen(): Boolean {
     return !!(this.lock && Date.now() <= this.lock.expiresAt);
   }
 

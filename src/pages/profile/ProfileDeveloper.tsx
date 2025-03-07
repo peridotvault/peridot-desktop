@@ -52,14 +52,18 @@ export const ProfileDeveloper = () => {
 
   useEffect(() => {
     async function checkUser() {
-      const isUserExist = await getUserByPrincipalId(wallet);
-      if (
-        isUserExist &&
-        typeof isUserExist === "object" &&
-        "ok" in isUserExist
-      ) {
-        setUserData(isUserExist as UserDataInterface);
-        setIsLoading(false);
+      if (wallet.encryptedPrivateKey) {
+        const isUserExist = await getUserByPrincipalId(
+          wallet.encryptedPrivateKey
+        );
+        if (
+          isUserExist &&
+          typeof isUserExist === "object" &&
+          "ok" in isUserExist
+        ) {
+          setUserData(isUserExist as UserDataInterface);
+          setIsLoading(false);
+        }
       }
     }
     checkUser();

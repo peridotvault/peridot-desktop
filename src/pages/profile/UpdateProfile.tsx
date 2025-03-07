@@ -1,11 +1,17 @@
 // @ts-ignore
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, {
+  ChangeEvent,
+  ChangeEventHandler,
+  useEffect,
+  useState,
+} from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import {
   updateUser,
   getUserByPrincipalId,
   MetadataUpdateUser,
   GenderVariant,
+  isUsernameValid,
 } from "../../contexts/UserContext";
 import {
   faEarthAsia,
@@ -55,6 +61,95 @@ interface UserDataInterface {
   };
 }
 
+const AccountSettingsInputField = ({
+  name,
+  icon,
+  type,
+  placeholder,
+  className,
+  value,
+  onChange,
+}: {
+  name: string;
+  icon: IconDefinition;
+  type: string;
+  placeholder: string;
+  className: string;
+  value: string;
+  onChange: ChangeEventHandler<HTMLInputElement>;
+}) => {
+  return (
+    <section className="flex flex-col gap-3">
+      <p className="capitalize font-semibold">
+        {placeholder} <label className="text-accent_primary"> *</label>
+      </p>
+      <div className="flex rounded-xl overflow-hidden border border-text_disabled/30">
+        <div className="h-14 w-14 flex justify-center items-center">
+          <FontAwesomeIcon icon={icon} className="text-text_disabled" />
+        </div>
+        <input
+          type={type}
+          name={name}
+          className={`w-full bg-transparent shadow-sunken-sm px-3 ${className}`}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+        />
+      </div>
+    </section>
+  );
+};
+
+const AccountSettingsDropdownField = ({
+  name,
+  icon,
+  placeholder,
+  className,
+  value,
+  options,
+  onChange,
+}: {
+  name: string;
+  icon: IconDefinition;
+  placeholder: string;
+  className: string;
+  value: string | GenderVariant;
+  options: { code: string; name: string }[];
+  onChange: ChangeEventHandler<HTMLSelectElement>;
+}) => {
+  const displayValue =
+    name === "gender" && typeof value === "object"
+      ? Object.keys(value)[0]
+      : String(value);
+  return (
+    <section className="flex flex-col gap-3">
+      <p className="capitalize font-semibold">
+        {placeholder} <label className="text-accent_primary"> *</label>
+      </p>
+      <div className="flex rounded-xl overflow-hidden border border-text_disabled/30">
+        <div className="h-14 w-14 flex justify-center items-center">
+          <FontAwesomeIcon icon={icon} className="text-text_disabled" />
+        </div>
+        <select
+          name={name}
+          className={`w-full bg-transparent shadow-sunken-sm px-3 ${className}`}
+          value={displayValue}
+          onChange={onChange}
+        >
+          <option value="" disabled>
+            {placeholder}
+          </option>
+          {options.map((option) => (
+            <option key={option.code} value={option.code}>
+              {option.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </section>
+  );
+};
+
 export const UpdateProfile = () => {
   const { wallet } = useWallet();
   const [userData, setUserData] = useState<UserDataInterface | null>(null);
@@ -71,6 +166,10 @@ export const UpdateProfile = () => {
         country: "",
       },
     });
+  const [isValidUsername, setIsValidUsername] = useState({
+    valid: true,
+    msg: "",
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   function timestampToDateString(timestamp: number): string {
@@ -80,35 +179,39 @@ export const UpdateProfile = () => {
 
   useEffect(() => {
     async function checkUser() {
-      const isUserExist = await getUserByPrincipalId(wallet);
-      if (
-        isUserExist &&
-        typeof isUserExist === "object" &&
-        "ok" in isUserExist
-      ) {
-        const theUserData = isUserExist as UserDataInterface;
-        const genderVariant =
-          theUserData.ok.user_demographics.gender.male === null
-            ? { male: null }
-            : theUserData.ok.user_demographics.gender.female === null
-            ? { female: null }
-            : { other: null };
-        setUserData(userData);
-        setMetadataUpdateUser({
-          username: theUserData.ok.username,
-          display_name: theUserData.ok.display_name,
-          email: theUserData.ok.email,
-          image_url: theUserData.ok.image_url || "",
-          background_image_url: theUserData.ok.background_image_url || "",
-          user_demographics: {
-            birth_date: timestampToDateString(
-              theUserData.ok.user_demographics.birth_date
-            ),
-            gender: genderVariant,
-            country: theUserData.ok.user_demographics.country,
-          },
-        });
-        setIsLoading(false);
+      if (wallet.encryptedPrivateKey) {
+        const isUserExist = await getUserByPrincipalId(
+          wallet.encryptedPrivateKey
+        );
+        if (
+          isUserExist &&
+          typeof isUserExist === "object" &&
+          "ok" in isUserExist
+        ) {
+          const theUserData = isUserExist as UserDataInterface;
+          const genderVariant =
+            theUserData.ok.user_demographics.gender.male === null
+              ? { male: null }
+              : theUserData.ok.user_demographics.gender.female === null
+              ? { female: null }
+              : { other: null };
+          setUserData(userData);
+          setMetadataUpdateUser({
+            username: theUserData.ok.username,
+            display_name: theUserData.ok.display_name,
+            email: theUserData.ok.email,
+            image_url: theUserData.ok.image_url || "",
+            background_image_url: theUserData.ok.background_image_url || "",
+            user_demographics: {
+              birth_date: timestampToDateString(
+                theUserData.ok.user_demographics.birth_date
+              ),
+              gender: genderVariant,
+              country: theUserData.ok.user_demographics.country,
+            },
+          });
+          setIsLoading(false);
+        }
       }
     }
     checkUser();
@@ -228,91 +331,6 @@ export const UpdateProfile = () => {
     }
   };
 
-  const AccountSettingsInputField = ({
-    name,
-    icon,
-    type,
-    placeholder,
-    className,
-    value,
-  }: {
-    name: string;
-    icon: IconDefinition;
-    type: string;
-    placeholder: string;
-    className: string;
-    value: string;
-  }) => {
-    return (
-      <section className="flex flex-col gap-3">
-        <p className="capitalize font-semibold">
-          {placeholder} <label className="text-accent_primary"> *</label>
-        </p>
-        <div className="flex rounded-xl overflow-hidden border border-text_disabled/30">
-          <div className="h-14 w-14 flex justify-center items-center">
-            <FontAwesomeIcon icon={icon} className="text-text_disabled" />
-          </div>
-          <input
-            type={type}
-            name={name}
-            className={`w-full bg-transparent shadow-sunken-sm px-3 ${className}`}
-            placeholder={placeholder}
-            value={value}
-            onChange={handleInputChange}
-          />
-        </div>
-      </section>
-    );
-  };
-
-  const AccountSettingsDropdownField = ({
-    name,
-    icon,
-    placeholder,
-    className,
-    value,
-    options,
-  }: {
-    name: string;
-    icon: IconDefinition;
-    placeholder: string;
-    className: string;
-    value: string | GenderVariant;
-    options: { code: string; name: string }[];
-  }) => {
-    const displayValue =
-      name === "gender" && typeof value === "object"
-        ? Object.keys(value)[0]
-        : String(value);
-    return (
-      <section className="flex flex-col gap-3">
-        <p className="capitalize font-semibold">
-          {placeholder} <label className="text-accent_primary"> *</label>
-        </p>
-        <div className="flex rounded-xl overflow-hidden border border-text_disabled/30">
-          <div className="h-14 w-14 flex justify-center items-center">
-            <FontAwesomeIcon icon={icon} className="text-text_disabled" />
-          </div>
-          <select
-            name={name}
-            className={`w-full bg-transparent shadow-sunken-sm px-3 ${className}`}
-            value={displayValue}
-            onChange={handleInputChange}
-          >
-            <option value="" disabled>
-              {placeholder}
-            </option>
-            {options.map((option) => (
-              <option key={option.code} value={option.code}>
-                {option.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </section>
-    );
-  };
-
   const genderOptions: CountryOption[] = [
     { code: "male", name: "Male" },
     { code: "female", name: "Female" },
@@ -388,20 +406,47 @@ export const UpdateProfile = () => {
                 will be displayed for other users.
               </p>
             </div>
-            <AccountSettingsInputField
-              name="username"
-              icon={faUser}
-              type="text"
-              placeholder="username"
-              className="lowercase"
-              value={metadataUpdateUser.username}
-            />
+            <div className="">
+              <AccountSettingsInputField
+                name="username"
+                icon={faUser}
+                type="text"
+                placeholder="username"
+                className="lowercase"
+                value={metadataUpdateUser.username}
+                onChange={async (e) => {
+                  handleInputChange(e);
+                  const result = await isUsernameValid(e.target.value);
+                  if (result && typeof result === "object" && "ok" in result) {
+                    setIsValidUsername({ valid: true, msg: "username valid" });
+                  } else if (
+                    result &&
+                    typeof result === "object" &&
+                    "err" in result
+                  ) {
+                    const error = result as { err: { InvalidInput: string } };
+                    setIsValidUsername({
+                      valid: false,
+                      msg: error.err.InvalidInput ?? "Invalid username",
+                    });
+                  }
+                }}
+              />
+              <p
+                className={` ${
+                  isValidUsername.valid ? "text-success" : "text-danger"
+                }`}
+              >
+                {isValidUsername.msg}
+              </p>
+            </div>
             <AccountSettingsInputField
               name="display_name"
               icon={faTv}
               type="text"
               placeholder="Display Name"
               className=""
+              onChange={handleInputChange}
               value={metadataUpdateUser.display_name}
             />
             <AccountSettingsInputField
@@ -411,6 +456,7 @@ export const UpdateProfile = () => {
               placeholder="Email"
               className=""
               value={metadataUpdateUser.email}
+              onChange={handleInputChange}
             />
             <AccountSettingsInputField
               name="birth_date"
@@ -419,6 +465,7 @@ export const UpdateProfile = () => {
               placeholder="Birth Date"
               className=""
               value={metadataUpdateUser.user_demographics.birth_date.toString()}
+              onChange={handleInputChange}
             />
             <AccountSettingsDropdownField
               name="gender"
@@ -427,6 +474,7 @@ export const UpdateProfile = () => {
               className=""
               value={metadataUpdateUser.user_demographics.gender}
               options={genderOptions}
+              onChange={handleInputChange}
             />
             <AccountSettingsDropdownField
               name="country"
@@ -435,6 +483,7 @@ export const UpdateProfile = () => {
               className=""
               value={metadataUpdateUser.user_demographics.country}
               options={countryOptions}
+              onChange={handleInputChange}
             />
           </div>
         </div>

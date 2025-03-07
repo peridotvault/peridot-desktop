@@ -145,6 +145,16 @@ export const userIdlFactory = ({ IDL }: { IDL: any }) => {
       ],
       []
     ),
+    isUsernameValid: IDL.Func(
+      [IDL.Text],
+      [
+        IDL.Variant({
+          ok: IDL.Bool,
+          err: Error,
+        }),
+      ],
+      []
+    ),
 
     // user friend
     getFriendRequestList: IDL.Func(

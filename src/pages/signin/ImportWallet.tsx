@@ -20,7 +20,9 @@ export default function ImportWallet() {
   useEffect(() => {
     async function userHandle() {
       if (wallet.encryptedPrivateKey) {
-        const isUserExist = await getUserByPrincipalId(wallet);
+        const isUserExist = await getUserByPrincipalId(
+          wallet.encryptedPrivateKey
+        );
         if (
           isUserExist &&
           typeof isUserExist === "object" &&

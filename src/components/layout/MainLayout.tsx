@@ -55,15 +55,15 @@ export default function MainLayout() {
         !wallet.verificationData
       ) {
         navigate("/login");
-        setIsCheckingWallet(false);
-        return;
       } else {
         try {
           if (wallet.lock) {
             const isValidSession = Date.now() <= wallet.lock.expiresAt;
-            if (isValidSession) {
+            if (isValidSession && walletService.isLockOpen()) {
               // Session is valid, check if user exists
-              const isUserExist = await getUserByPrincipalId(wallet);
+              const isUserExist = await getUserByPrincipalId(
+                wallet.encryptedPrivateKey
+              );
               setIsCheckingWallet(false);
               if (
                 isUserExist &&
@@ -83,13 +83,15 @@ export default function MainLayout() {
           console.error("Error checking wallet status:", error);
           setIsRequiredPassword(true);
         } finally {
-          setIsCheckingWallet(false);
+          setIsRequiredPassword(true);
         }
       }
     }
 
-    checkWallet();
-  }, [wallet, navigate]);
+    if (!isCheckingWallet) {
+      checkWallet();
+    }
+  }, [wallet, navigate, isCheckingWallet]);
 
   const handleConfirm = async () => {
     try {
@@ -109,7 +111,9 @@ export default function MainLayout() {
   if (isCheckingWallet) {
     return (
       <div className="min-h-screen flex justify-center items-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent_secondary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent_secondary">
+          Loading
+        </div>
       </div>
     );
   }

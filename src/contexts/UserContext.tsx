@@ -3,6 +3,7 @@ import { HttpAgent, Actor } from "@dfinity/agent";
 import { userIdlFactory } from "../hooks/idl_app/user";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import { walletService } from "../utils/WalletService";
+import { EncryptedData } from "@antigane/encryption";
 
 export interface MetadataCreateUser {
   username: string;
@@ -86,7 +87,7 @@ async function createAccount(metadata: MetadataCreateUser, wallet: any) {
 
     return result;
   } catch (error) {
-    throw error;
+    throw new Error("Error Context : " + error);
   }
 }
 
@@ -128,14 +129,33 @@ async function updateUser(metadata: MetadataUpdateUser, wallet: any) {
 
     return result;
   } catch (error) {
-    return;
+    throw new Error("Error Context : " + error);
   }
 }
 
-async function getUserByPrincipalId(wallet: any) {
-  const privateKey = await walletService.decryptWalletData(
-    wallet.encryptedPrivateKey
-  );
+async function isUsernameValid(username: string) {
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+    });
+
+    const actor = Actor.createActor(userIdlFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+
+    // Call balance method
+    const result = await actor.isUsernameValid(username);
+
+    return result;
+  } catch (error) {
+    throw new Error("Error Context : " + error);
+  }
+}
+
+async function getUserByPrincipalId(encryptedPrivateKey: EncryptedData) {
+  const privateKey = await walletService.decryptWalletData(encryptedPrivateKey);
   const secretKey = Buffer.from(privateKey, "hex");
 
   try {
@@ -155,7 +175,7 @@ async function getUserByPrincipalId(wallet: any) {
 
     return result;
   } catch (error) {
-    throw new Error("Error : " + error);
+    throw new Error("Error Context : " + error);
   }
 }
 
@@ -186,7 +206,7 @@ async function searchUsersByPrefixWithLimit(
 
     return result;
   } catch (error) {
-    throw new Error("Error : " + error);
+    throw new Error("Error Context : " + error);
   }
 }
 
@@ -214,7 +234,7 @@ async function getFriendRequestList(wallet: any) {
 
     return result;
   } catch (error) {
-    throw new Error("Error : " + error);
+    throw new Error("Error Context : " + error);
   }
 }
 
@@ -222,6 +242,7 @@ async function getFriendRequestList(wallet: any) {
 export {
   createAccount,
   updateUser,
+  isUsernameValid,
   getUserByPrincipalId,
   searchUsersByPrefixWithLimit,
   getFriendRequestList,

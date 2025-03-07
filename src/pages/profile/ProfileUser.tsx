@@ -68,22 +68,37 @@ export const ProfileUser = () => {
 
   useEffect(() => {
     async function checkUser() {
-      const isUserExist = await getUserByPrincipalId(wallet);
-      if (
-        isUserExist &&
-        typeof isUserExist === "object" &&
-        "ok" in isUserExist
-      ) {
-        setUserData(isUserExist as UserDataInterface);
-        setIsLoading(false);
+      if (wallet.encryptedPrivateKey) {
+        const isUserExist = await getUserByPrincipalId(
+          wallet.encryptedPrivateKey
+        );
+        if (
+          isUserExist &&
+          typeof isUserExist === "object" &&
+          "ok" in isUserExist
+        ) {
+          setUserData(isUserExist as UserDataInterface);
+          setIsLoading(false);
+        } else {
+          setIsLoading(false);
+        }
       }
     }
-    checkUser();
-  }, [wallet]);
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+    let isMounted = true;
+    const runCheck = async () => {
+      while (isMounted) {
+        checkUser();
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    };
+
+    runCheck();
+
+    return () => {
+      isMounted = false;
+    };
+  });
 
   const AnnouncementContainer = ({
     img_url,
@@ -209,6 +224,7 @@ export const ProfileUser = () => {
 
   return (
     <main className="pt-20 flex flex-col items-center mb-10 px-10">
+      {isLoading ? <LoadingScreen /> : ""}
       <div className="container flex gap-6 mt-6">
         {/* left   ============================ */}
         <div className="w-2/3 flex flex-col gap-6">
