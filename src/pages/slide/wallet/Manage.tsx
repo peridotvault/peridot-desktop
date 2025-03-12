@@ -37,13 +37,16 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
 
   return (
     <div className="fixed top-0 right-0 w-[370px] bg-background_primary h-full p-6 flex flex-col gap-4">
-      <div className="">
+      {/* header  */}
+      <div className="flex justify-between items-center">
         <button
           onClick={onClose}
           className=" w-10 h-10 flex justify-center items-center rounded-xl"
         >
           <FontAwesomeIcon icon={faChevronLeft} className="text-md" />
         </button>
+        <p className="text-lg font-semibold">Manage</p>
+        <div className="w-10 h-10"></div>
       </div>
 
       <InputField
