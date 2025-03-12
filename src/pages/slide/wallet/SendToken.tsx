@@ -1,6 +1,6 @@
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import React, { useState } from "react";
 import { InputField } from "../../../components/InputField";
 import { shortenAddress } from "../../../components/AdditionalComponent";
 
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export const SendToken: React.FC<Props> = ({ onClose }) => {
+  const [sendTokenAddress, setSendTokenAddress] = useState<string | null>(null);
   const friendLists = [
     {
       icon: "🦾",
@@ -20,7 +21,7 @@ export const SendToken: React.FC<Props> = ({ onClose }) => {
       icon: "🤖",
       username: "ssabrut",
       address:
-        "rvvbq-hdxby-qp72d-rkwmw-vfmiv-yf3e7-y3x2c-womvx-sylp2-23jfe-qae",
+        "ztjz4-2srpq-glea5-dxf6u-hbt3n-vypa3-zmnwl-bsh4s-nwczk-wgzji-xae",
     },
   ];
 
@@ -42,7 +43,7 @@ export const SendToken: React.FC<Props> = ({ onClose }) => {
       <section className="flex items-center">
         <p className="w-12 text-lg">To :</p>
         <InputField
-          onChange={(e) => {}}
+          onChange={() => {}}
           placeholder="Address, Principal or Contact"
           type="text"
           text={""}
@@ -55,7 +56,9 @@ export const SendToken: React.FC<Props> = ({ onClose }) => {
         {friendLists.map((item, index) => (
           <button
             key={index}
-            onClick={() => {}}
+            onClick={() => {
+              setSendTokenAddress(item.address);
+            }}
             className="flex gap-4 items-center justify-between hover:scale-105 duration-300"
           >
             <div className="flex gap-4 items-center">
@@ -70,6 +73,24 @@ export const SendToken: React.FC<Props> = ({ onClose }) => {
           </button>
         ))}
       </section>
+
+      {sendTokenAddress ? (
+        <div className="fixed top-0 right-0 w-[370px] bg-background_primary h-full p-6 flex flex-col gap-6">
+          {/* header  */}
+          <section className="flex justify-between items-center">
+            <button
+              onClick={() => setSendTokenAddress(null)}
+              className=" w-10 h-10 flex justify-center items-center rounded-xl"
+            >
+              <FontAwesomeIcon icon={faChevronLeft} className="text-md" />
+            </button>
+            <p className="text-lg font-semibold">Choose Coin</p>
+            <div className="w-10 h-10"></div>
+          </section>
+        </div>
+      ) : (
+        ""
+      )}
     </div>
   );
 };

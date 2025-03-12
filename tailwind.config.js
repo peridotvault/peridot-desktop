@@ -9,6 +9,8 @@ export default {
       colors: {
         "accent_primary": "#90EE90",
         "accent_secondary": "#4D8A6A",
+        // "accent_primary": "#47DA47",
+        // "accent_secondary": "#134125",
 
         "background_primary": "var(--background_primary)",
         "background_primary/50": "#1c1f1d8c",

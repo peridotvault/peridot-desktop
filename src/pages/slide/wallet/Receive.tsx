@@ -42,7 +42,7 @@ export const Receive: React.FC<Props> = ({ onClose }) => {
         >
           <FontAwesomeIcon icon={faChevronLeft} className="text-md" />
         </button>
-        <p className="text-lg font-semibold">Peridot Wallet Address</p>
+        <p className="text-lg font-semibold">Receive</p>
         <div className="w-10 h-10"></div>
       </div>
 
