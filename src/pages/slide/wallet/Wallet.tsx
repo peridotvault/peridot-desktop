@@ -125,16 +125,26 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
       >
         <div className="flex flex-col ">
           {/* section 1  */}
-          <section className="p-6 bg-background_primary flex flex-col gap-5 relative ">
+          <section className="p-6 bg-background_primary flex flex-col gap-8 relative ">
             {/* background  */}
             <div className="bg-radial absolute top-0 left-0 w-full h-full z-0 opacity-30"></div>
             <div className="flex items-center gap-3 justify-between z-10">
-              <button
-                className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
-                onClick={() => setIsOpenWalletAddress(!isOpenWalletAddress)}
-              >
-                <FontAwesomeIcon icon={faClone} className="text-md" />
-              </button>
+              {/* Network  */}
+              <div className="flex gap-6">
+                <button
+                  className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
+                  onClick={() => setIsOpenWalletAddress(!isOpenWalletAddress)}
+                >
+                  <FontAwesomeIcon icon={faClone} className="text-md" />
+                </button>
+                {/* Lock  */}
+                <button
+                  className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
+                  onClick={walletService.closeLock}
+                >
+                  <FontAwesomeIcon icon={faLock} className="text-md" />
+                </button>
+              </div>
               {/* MODAL =================================================== */}
               <div
                 className={`absolute right-[370px] top-6 ${
