@@ -149,7 +149,7 @@ export type WalletGenerateResult = WalletGenerateSuccess | WalletGenerateError;
 
 class WalletService {
   private encryption = createEncryptionService();
-  private lock: OpenLockConfig | null = null;
+  // private lock: OpenLockConfig | null = null;
 
   async generateWallet(
     seedPhrase: string,
@@ -231,7 +231,8 @@ class WalletService {
         encryptedPassword: encryptedPassword,
       };
 
-      this.lock = lock;
+      localStorage.setItem("key-lock", JSON.stringify(lock));
+
       return lock;
     } catch (error) {
       throw new Error("Failed to open lock: " + (error as Error).message);
@@ -243,11 +244,10 @@ class WalletService {
     password?: string
   ): Promise<string> {
     try {
-      if (this.isLockOpen() && this.lock?.encryptedPassword) {
+      const lock = JSON.parse(localStorage.getItem("key-lock")!);
+      if (this.isLockOpen() && lock?.encryptedPassword) {
         // Decrypt the stored password and use it
-        const decryptedPassword = await decryptPassword(
-          this.lock.encryptedPassword
-        );
+        const decryptedPassword = await decryptPassword(lock.encryptedPassword);
         return await this.encryption.decrypt(encryptedData, decryptedPassword);
       } else if (!password) {
         throw new Error("Password required when lock is not open");
@@ -259,15 +259,22 @@ class WalletService {
   }
 
   isLockOpen(): Boolean {
-    return !!(this.lock && Date.now() <= this.lock.expiresAt);
+    const lock = JSON.parse(localStorage.getItem("key-lock")!);
+    return !!(lock && Date.now() <= lock.expiresAt);
+  }
+
+  closeLock(): Boolean {
+    localStorage.removeItem("key-lock");
+    return true;
   }
 
   setLock(lock: OpenLockConfig | null) {
-    this.lock = lock;
+    localStorage.setItem("key-lock", JSON.stringify(lock));
   }
 
   getLock(): OpenLockConfig | null {
-    return this.lock;
+    const lock = JSON.parse(localStorage.getItem("key-lock")!);
+    return lock;
   }
 
   generateAccountId(principalId: string): string {

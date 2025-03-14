@@ -17,6 +17,7 @@ export default function MainLayout() {
   const [isRequiredPassword, setIsRequiredPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // const lock = JSON.parse(localStorage.getItem("key-lock")!);
 
   // Lenis smooth scroll setup
   useEffect(() => {
@@ -57,9 +58,10 @@ export default function MainLayout() {
         navigate("/login");
       } else {
         try {
-          if (wallet.lock) {
-            const isValidSession = Date.now() <= wallet.lock.expiresAt;
-            if (isValidSession && walletService.isLockOpen()) {
+          if (walletService.isLockOpen()) {
+            const isValidSession =
+              Date.now() <= walletService.getLock()!.expiresAt;
+            if (isValidSession) {
               // Session is valid, check if user exists
               const isUserExist = await getUserByPrincipalId(
                 wallet.encryptedPrivateKey
@@ -75,14 +77,13 @@ export default function MainLayout() {
                 navigate("/create_profile");
               }
             } else {
-              // No valid session, require password
               setIsRequiredPassword(true);
             }
+          } else {
+            setIsRequiredPassword(true);
           }
         } catch (error) {
           console.error("Error checking wallet status:", error);
-          setIsRequiredPassword(true);
-        } finally {
           setIsRequiredPassword(true);
         }
       }
