@@ -238,7 +238,7 @@ async function getFriendRequestList(wallet: any) {
   }
 }
 
-// Ekspor fungsi createAccount
+// Export function
 export {
   createAccount,
   updateUser,

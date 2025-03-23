@@ -23,14 +23,14 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
   const [icrc1, setIcrc1] = useState<Metadata>();
   const [priceUsd, setPriceUsd] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchBalance() {
-      if (wallet.principalId) {
-        const result = await checkBalance(canisterId);
-        setIcrc1(result);
-      }
+  async function fetchBalance() {
+    if (wallet.principalId) {
+      const result = await checkBalance(canisterId);
+      setIcrc1(result);
     }
+  }
 
+  useEffect(() => {
     async function fetchMarketData() {
       try {
         const response = await fetch(
@@ -52,6 +52,13 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
 
     fetchBalance();
     fetchMarketData();
+
+    // Polling setiap 5 detik untuk update balance
+    const interval = setInterval(() => {
+      fetchBalance();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [wallet.principalId, canisterId]);
 
   // Calculate and update the USD balance whenever price or balance changes
@@ -92,7 +99,7 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
       const result: Metadata = {
         balance: standardBalance.toString(),
         logo:
-          canisterId == "ryjl3-tyaaa-aaaaa-aaaba-cai"
+          icrc1CanisterId == "ryjl3-tyaaa-aaaaa-aaaba-cai"
             ? "https://s3.coinmarketcap.com/static-gravity/image/2fb1bc84c1494178beef0822179d137d.png"
             : null,
         decimals: 0n,
@@ -174,7 +181,7 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
               <div className="w-7 h-5 bg-background_disabled rounded-full animate-pulse"></div>
             )}
           </div>
-          <div className="text-xs">
+          <div className="text-xs text-start">
             {icrc1?.name != null ? (
               <p>{icrc1?.name}</p>
             ) : (

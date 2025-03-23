@@ -6,6 +6,7 @@ import { Principal } from "@dfinity/principal";
 import { AccountIdentifier } from "@dfinity/ledger-icp";
 import { Buffer } from "buffer";
 import * as ecc from "tiny-secp256k1";
+import localforage from "localforage";
 import { createEncryptionService, EncryptedData } from "@antigane/encryption";
 
 const bip32 = BIP32Factory(ecc);
@@ -231,7 +232,7 @@ class WalletService {
         encryptedPassword: encryptedPassword,
       };
 
-      localStorage.setItem("key-lock", JSON.stringify(lock));
+      await localforage.setItem("key-lock", lock);
 
       return lock;
     } catch (error) {
@@ -244,8 +245,8 @@ class WalletService {
     password?: string
   ): Promise<string> {
     try {
-      const lock = JSON.parse(localStorage.getItem("key-lock")!);
-      if (this.isLockOpen() && lock?.encryptedPassword) {
+      const lock = await localforage.getItem<OpenLockConfig>("key-lock");
+      if ((await this.isLockOpen()) && lock?.encryptedPassword) {
         // Decrypt the stored password and use it
         const decryptedPassword = await decryptPassword(lock.encryptedPassword);
         return await this.encryption.decrypt(encryptedData, decryptedPassword);
@@ -258,22 +259,22 @@ class WalletService {
     }
   }
 
-  isLockOpen(): Boolean {
-    const lock = JSON.parse(localStorage.getItem("key-lock")!);
+  async isLockOpen(): Promise<Boolean> {
+    const lock = await localforage.getItem<OpenLockConfig>("key-lock");
     return !!(lock && Date.now() <= lock.expiresAt);
   }
 
-  closeLock(): Boolean {
-    localStorage.removeItem("key-lock");
+  async closeLock(): Promise<Boolean> {
+    await localforage.removeItem("key-lock");
     return true;
   }
 
-  setLock(lock: OpenLockConfig | null) {
-    localStorage.setItem("key-lock", JSON.stringify(lock));
+  async setLock(lock: OpenLockConfig | null): Promise<void> {
+    await localforage.setItem("key-lock", lock);
   }
 
-  getLock(): OpenLockConfig | null {
-    const lock = JSON.parse(localStorage.getItem("key-lock")!);
+  async getLock(): Promise<OpenLockConfig | null> {
+    const lock = await localforage.getItem<OpenLockConfig>("key-lock");
     return lock;
   }
 

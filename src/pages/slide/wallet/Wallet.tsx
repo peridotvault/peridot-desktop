@@ -7,7 +7,7 @@ import {
   faArrowRightFromBracket,
   faBitcoinSign,
   faBuildingColumns,
-  faClone,
+  // faClone,
   faKey,
   faLock,
   faPaperPlane,
@@ -26,12 +26,25 @@ import { Manage } from "./Manage";
 import { Receive } from "./Receive";
 import { Nft } from "./Nft";
 import { SendToken } from "./SendToken";
+import localforage from "localforage";
+import theCoin from "./../../../assets/json/coins.json";
 
 interface NavbarProps {
   onClose: () => void;
+  onLockChanged: () => void;
 }
 
-export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
+interface Coin {
+  network: string;
+  address: string;
+  balance: number;
+  name: string;
+  symbol: string;
+  logo: string;
+  isChecked: boolean;
+}
+
+export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
   const { wallet, setWallet, setIsGeneratedSeedPhrase } = useWallet();
   const navigate = useNavigate();
   const [isOpenWalletAddress, setIsOpenWalletAddress] = useState(false);
@@ -47,15 +60,33 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
   const [_tokenBalances, setTokenBalances] = useState<{
     [canisterId: string]: number;
   }>({});
-  const [tokenPrincipal] = useState([
-    "ryjl3-tyaaa-aaaaa-aaaba-cai", // Adding ICP canister as well
-    "mxzaz-hqaaa-aaaar-qaada-cai",
-    "cngnf-vqaaa-aaaar-qag4q-cai",
-    "xevnm-gaaaa-aaaar-qafnq-cai",
-    "4u7dm-7qaaa-aaaam-acvdq-cai",
-    "ca6gz-lqaaa-aaaaq-aacwa-cai",
-    "atbfz-diaaa-aaaaq-aacyq-cai",
-  ]);
+  const [activeCoins, setActiveCoins] = useState<Coin[]>([]);
+  const defaultCoins: Coin[] = theCoin;
+
+  useEffect(() => {
+    async function loadCoins() {
+      try {
+        const savedCoins = await localforage.getItem<Coin[]>("coins");
+
+        if (savedCoins && savedCoins.length > 0) {
+          const activeSavedCoins = savedCoins.filter((coin) => coin.isChecked);
+          setActiveCoins(activeSavedCoins);
+        } else {
+          const activeDefaultCoins = defaultCoins.filter(
+            (coin) => coin.isChecked
+          );
+          setActiveCoins(activeDefaultCoins);
+        }
+      } catch (error) {
+        console.error("Error loading coins:", error);
+        setActiveCoins(defaultCoins);
+      }
+    }
+
+    if (!openButton.manage) {
+      loadCoins();
+    }
+  }, [openButton.manage]);
 
   // Function to update a token's balance and recalculate total
   const updateTokenBalance = useCallback(
@@ -108,6 +139,11 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
     });
   };
 
+  const handleCloseLock = async () => {
+    await walletService.closeLock();
+    onLockChanged();
+  };
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/40 z-50 flex justify-end"
@@ -131,16 +167,16 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
             <div className="flex items-center gap-3 justify-between z-10">
               {/* Network  */}
               <div className="flex gap-6">
-                <button
+                {/* <button
                   className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
                   onClick={() => setIsOpenWalletAddress(!isOpenWalletAddress)}
                 >
                   <FontAwesomeIcon icon={faClone} className="text-md" />
-                </button>
+                </button> */}
                 {/* Lock  */}
                 <button
                   className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
-                  onClick={walletService.closeLock}
+                  onClick={handleCloseLock}
                 >
                   <FontAwesomeIcon icon={faLock} className="text-md" />
                 </button>
@@ -381,10 +417,10 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
           {/* section 2  */}
           <section className="flex flex-col gap-4 p-6">
             {/* Map through all tokens including ICP */}
-            {tokenPrincipal.map((principal, index) => (
+            {activeCoins.map((item, index) => (
               <ICRC1Coin
                 key={index}
-                canisterId={principal}
+                canisterId={item.address}
                 onBalanceUpdate={updateTokenBalance}
               />
             ))}
@@ -402,6 +438,7 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose }) => {
                     nft: false,
                   })
                 }
+                onLockChanged={onLockChanged}
               />
             ) : openButton.manage ? (
               <Manage

@@ -22,7 +22,9 @@ export const InputField = ({
     <input
       type={type}
       name={name}
-      className="border border-white/10 shadow-sunken-lg p-3 w-full rounded-lg text-white bg-background_primary outline-none"
+      className={`border border-white/10 focus:shadow-arise-sm p-3 w-full duration-300 rounded-lg bg-background_primary outline-none ${
+        disabled ? "text-text_disabled shadow-flat-sm" : "shadow-sunken-sm "
+      }`}
       placeholder={placeholder}
       value={text}
       onChange={(e) => onChange(e.target.value)}

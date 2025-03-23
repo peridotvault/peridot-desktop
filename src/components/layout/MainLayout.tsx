@@ -17,7 +17,6 @@ export default function MainLayout() {
   const [isRequiredPassword, setIsRequiredPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  // const lock = JSON.parse(localStorage.getItem("key-lock")!);
 
   // Lenis smooth scroll setup
   useEffect(() => {
@@ -46,8 +45,9 @@ export default function MainLayout() {
 
   // Check wallet and session status
   useEffect(() => {
-    async function checkWallet() {
-      // Check if wallet exists
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    async function checkWalletAndScheduleExpiry() {
       if (
         !wallet.principalId ||
         !wallet.accountId ||
@@ -56,43 +56,63 @@ export default function MainLayout() {
         !wallet.verificationData
       ) {
         navigate("/login");
-      } else {
-        try {
-          if (walletService.isLockOpen()) {
-            const isValidSession =
-              Date.now() <= walletService.getLock()!.expiresAt;
-            if (isValidSession) {
-              // Session is valid, check if user exists
-              const isUserExist = await getUserByPrincipalId(
-                wallet.encryptedPrivateKey
-              );
-              setIsCheckingWallet(false);
-              if (
-                isUserExist &&
-                typeof isUserExist === "object" &&
-                "ok" in isUserExist
-              ) {
-                setIsRequiredPassword(false);
-              } else {
-                navigate("/create_profile");
-              }
+        return;
+      }
+      try {
+        if (await walletService.isLockOpen()) {
+          const lock = await walletService.getLock();
+          const isValidSession = lock ? Date.now() <= lock.expiresAt : false;
+          setIsCheckingWallet(false);
+          if (isValidSession) {
+            const isUserExist = await getUserByPrincipalId(
+              wallet.encryptedPrivateKey
+            );
+            if (
+              isUserExist &&
+              typeof isUserExist === "object" &&
+              "ok" in isUserExist
+            ) {
+              setIsRequiredPassword(false);
             } else {
-              setIsRequiredPassword(true);
+              navigate("/create_profile");
             }
           } else {
             setIsRequiredPassword(true);
           }
-        } catch (error) {
-          console.error("Error checking wallet status:", error);
+        } else {
           setIsRequiredPassword(true);
         }
+
+        // Schedule update state when lock expired
+        const lock = await walletService.getLock();
+        if (lock) {
+          const timeLeft = lock.expiresAt - Date.now();
+          if (timeLeft > 0) {
+            timer = setTimeout(() => {
+              setIsRequiredPassword(true);
+            }, timeLeft);
+          } else {
+            // If expired, Change state
+            setIsRequiredPassword(true);
+          }
+        } else {
+          setIsRequiredPassword(true);
+        }
+      } catch (error) {
+        console.error(
+          "Error checking wallet or scheduling lock expiry:",
+          error
+        );
+        setIsRequiredPassword(true);
       }
     }
 
-    if (!isCheckingWallet) {
-      checkWallet();
-    }
-  }, [wallet, navigate, isCheckingWallet]);
+    checkWalletAndScheduleExpiry();
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [isCheckingWallet, navigate, wallet]);
 
   const handleConfirm = async () => {
     try {
@@ -135,7 +155,12 @@ export default function MainLayout() {
       </div>
 
       <AnimatePresence>
-        {isOpenWallet && <Wallet onClose={() => setIOpenWallet(false)} />}
+        {isOpenWallet && (
+          <Wallet
+            onClose={() => setIOpenWallet(false)}
+            onLockChanged={() => setIsRequiredPassword(true)}
+          />
+        )}
       </AnimatePresence>
 
       {isRequiredPassword && (

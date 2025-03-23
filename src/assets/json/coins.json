@@ -1,0 +1,29 @@
+[
+    {
+        "network": "icp",
+        "address": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+        "balance": 0,
+        "name": "Internet Protocol",
+        "symbol": "ICP",
+        "logo": "",
+        "isChecked": true
+    },
+    {
+        "network": "icp",
+        "address": "4u7dm-7qaaa-aaaam-acvdq-cai",
+        "balance": 0,
+        "name": "Ifal",
+        "symbol": "FAL",
+        "logo": "",
+        "isChecked": true
+    },
+    {
+        "network": "icp",
+        "address": "mxzaz-hqaaa-aaaar-qaada-cai",
+        "balance": 0,
+        "name": "ckBTC",
+        "symbol": "ckBTC",
+        "logo": "",
+        "isChecked": false
+    }
+]
