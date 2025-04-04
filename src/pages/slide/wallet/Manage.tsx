@@ -153,7 +153,11 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
                   <img
                     src={item?.logo != null ? item?.logo : "null"}
                     alt=""
-                    className="w-full"
+                    className={`w-full ${
+                      item?.address == "ryjl3-tyaaa-aaaaa-aaaba-cai"
+                        ? "p-3"
+                        : ""
+                    }`}
                   />
                 ) : (
                   <div className="w-full h-full bg-background_disabled animate-pulse"></div>

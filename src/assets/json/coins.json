@@ -5,7 +5,7 @@
         "balance": 0,
         "name": "Internet Protocol",
         "symbol": "ICP",
-        "logo": "",
+        "logo": "./assets/logo-icp.svg",
         "isChecked": true
     },
     {
@@ -16,14 +16,5 @@
         "symbol": "FAL",
         "logo": "",
         "isChecked": true
-    },
-    {
-        "network": "icp",
-        "address": "mxzaz-hqaaa-aaaar-qaada-cai",
-        "balance": 0,
-        "name": "ckBTC",
-        "symbol": "ckBTC",
-        "logo": "",
-        "isChecked": false
     }
 ]

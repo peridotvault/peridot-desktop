@@ -34,7 +34,7 @@ export const SaveContact: React.FC<NavbarProps> = ({ onClose, address }) => {
   };
   return (
     <div
-      className="bg-black/40 absolute w-full h-full left-0 top-0 flex flex-col justify-end"
+      className="bg-black/40 z-10 absolute w-full h-full left-0 top-0 flex flex-col justify-end"
       onClick={onClose}
     >
       <div

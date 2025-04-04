@@ -15,12 +15,12 @@ export const Receive: React.FC<Props> = ({ onClose }) => {
     {
       address: wallet.principalId,
       network: "Principal ID",
-      logo: "/assets/logo-icp.svg",
+      logo: "./assets/logo-icp.svg",
     },
     {
       address: wallet.accountId,
       network: "Account ID",
-      logo: "/assets/logo-icp.svg",
+      logo: "./assets/logo-icp.svg",
     },
   ]);
 

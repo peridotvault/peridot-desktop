@@ -225,9 +225,9 @@ export const ProfileUser = () => {
   return (
     <main className="pt-20 flex flex-col items-center mb-10 px-10">
       {isLoading ? <LoadingScreen /> : ""}
-      <div className="container flex gap-6 mt-6">
+      <div className="container flex gap-6 mt-6 duration-300">
         {/* left   ============================ */}
-        <div className="w-2/3 flex flex-col gap-6">
+        <div className="w-full flex flex-col gap-6 duration-300 transition-all">
           {/* detail user  */}
           <section className="p-6 bg-background_primary rounded-3xl shadow-arise-sm">
             {/* cover  */}
@@ -297,7 +297,7 @@ export const ProfileUser = () => {
           </section>
         </div>
         {/* right  ============================ */}
-        <div className="w-1/3 flex flex-col gap-6">
+        <div className="w-2/5 max-w-[350px] flex flex-col gap-6 duration-300 transition-all">
           {/* Character Section  */}
           <section className="aspect-[3/4] rounded-3xl overflow-hidden shadow-flat-sm">
             <img
