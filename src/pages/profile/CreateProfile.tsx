@@ -19,6 +19,7 @@ import {
 import { useWallet } from "../../contexts/WalletContext";
 import { useNavigate } from "react-router-dom";
 import countriesData from "../../assets/json/countries.json";
+import { clearWalletData } from "../../utils/StoreService";
 
 interface CountryOption {
   code: string;
@@ -114,6 +115,7 @@ const AccountSettingsDropdownField = ({
 };
 
 export const CreateProfile = () => {
+  const { setWallet, setIsGeneratedSeedPhrase } = useWallet();
   const [isValidUsername, setIsValidUsername] = useState({
     valid: true,
     msg: "",
@@ -182,12 +184,29 @@ export const CreateProfile = () => {
   ];
   const countryOptions: CountryOption[] = countriesData;
 
+  const clearSeedPhrase = async () => {
+    await clearWalletData();
+    setIsGeneratedSeedPhrase(false);
+    setWallet((prevWallet) => ({
+      ...prevWallet,
+      encryptedSeedPhrase: null,
+      principalId: null,
+      accountId: null,
+      encryptedPrivateKey: null,
+      lock: null,
+      verificationData: null,
+    }));
+  };
+
   return (
     <main className="w-full min-h-dvh flex flex-col items-center">
       {/* Header  */}
       <div className="flex justify-between items-center w-full py-6">
         <button
-          onClick={() => {}}
+          onClick={() => {
+            clearSeedPhrase();
+            navigate("/login");
+          }}
           className=" w-10 h-10 flex justify-center items-center rounded-xl"
         >
           <FontAwesomeIcon icon={faChevronLeft} className="text-md" />

@@ -5,9 +5,10 @@ import { walletService } from "../../utils/WalletService";
 import { useNavigate } from "react-router-dom";
 import { PasswordPage } from "./PasswordPage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+import { faChevronLeft, faDice } from "@fortawesome/free-solid-svg-icons";
 import { clearWalletData } from "../../utils/StoreService";
 import { getUserByPrincipalId } from "../../contexts/UserContext";
+import { SeedPhraseInput } from "../../components/wallet/SeedPhraseInput";
 // import { getUserByPrincipalId } from "../../contexts/UserContext";
 
 export default function CreateWallet() {
@@ -34,7 +35,7 @@ export default function CreateWallet() {
         }
       }
     }
-
+    generateSeedPhrase();
     userHandle();
   }, [wallet.encryptedPrivateKey, navigate]);
 
@@ -91,39 +92,37 @@ export default function CreateWallet() {
     if (!isGeneratedSeedPhrase) {
       return (
         <main className="flex justify-center items-center h-screen p-6 flex-col gap-6">
-          <button
-            className="fixed left-5 top-5"
-            onClick={() => {
-              clearSeedPhrase();
-              navigate("/login");
-            }}
-          >
-            <FontAwesomeIcon icon={faChevronLeft} />
-          </button>
-          <p className="text-lg">Generate Your Wallet</p>
-          <button
-            className="rounded-xl text-center shadow-sunken-sm hover:shadow-flat-lg hover:bg-white/5 duration-300 border border-white/10 hover:border-white/5 p-6 w-[300px] h-[150px] text-lg"
-            onClick={generateSeedPhrase}
-          >
-            {!newSeedPhrase ? (
-              <p className="text-green-500">Tap to Reveal ur Seed Phrase</p>
-            ) : (
-              <p>{newSeedPhrase}</p>
-            )}
-          </button>
-          <div className="h-3"></div>
-          <button
-            onClick={() => {
+          <header className="fixed left-0 top-0 flex items-center justify-between w-full p-5">
+            <button
+              className="w-6"
+              onClick={() => {
+                clearSeedPhrase();
+                navigate("/login");
+              }}
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
+            <h1 className="text-lg">Create Your Wallet</h1>
+            <div className="w-6"></div>
+          </header>
+          {/* button  */}
+          <div className="flex w-full max-w-md justify-end gap-4">
+            <button
+              className="rounded-xl text-center shadow-sunken-sm hover:shadow-flat-lg hover:bg-white/5 duration-300 border border-white/10 hover:border-white/5 py-3 px-4 text-lg flex gap-2 w-full items-center justify-center"
+              onClick={generateSeedPhrase}
+            >
+              <FontAwesomeIcon icon={faDice} />
+              <p className="text-base">Generate another seed phrase</p>
+            </button>
+          </div>
+          <SeedPhraseInput
+            seedPhrase={newSeedPhrase}
+            onContinue={() => {
               if (newSeedPhrase !== "") {
                 setIsGeneratedSeedPhrase(true);
               }
             }}
-            className={`bg-white text-black py-3 px-10 rounded-full ${
-              newSeedPhrase !== "" ? "" : "opacity-30 cursor-not-allowed"
-            }`}
-          >
-            Continue
-          </button>
+          />
         </main>
       );
     }

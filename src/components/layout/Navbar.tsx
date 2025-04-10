@@ -7,12 +7,17 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import { getProfileImage } from "../AdditionalComponent";
 
 interface NavbarProps {
   onOpenWallet: () => void;
+  profileImage: string | undefined | null;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenWallet }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  onOpenWallet,
+  profileImage,
+}) => {
   const { wallet } = useWallet();
 
   const shortenAddress = (address: string | null) => {
@@ -65,7 +70,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenWallet }) => {
         >
           <div className="w-8 h-8 rounded-full bg-background_secondary overflow-hidden">
             <img
-              src="https://cdn.antaranews.com/cache/1200x800/2022/03/19/WhatsApp-Image-2022-03-19-at-09.29.12.jpeg"
+              src={getProfileImage(profileImage)}
               alt="Profile"
               className="w-full h-full object-cover"
             />

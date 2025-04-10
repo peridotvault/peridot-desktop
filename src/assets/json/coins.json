@@ -1,0 +1,20 @@
+[
+    {
+        "network": "icp",
+        "address": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+        "balance": 0,
+        "name": "Internet Protocol",
+        "symbol": "ICP",
+        "logo": "./assets/logo-icp.svg",
+        "isChecked": true
+    },
+    {
+        "network": "icp",
+        "address": "4u7dm-7qaaa-aaaam-acvdq-cai",
+        "balance": 0,
+        "name": "Ifal",
+        "symbol": "FAL",
+        "logo": "",
+        "isChecked": true
+    }
+]

@@ -1,0 +1,7 @@
+folder : 
+======================
+atoms/      => Basic components (such as buttons, inputs, text).
+molecules/  => A combination of atoms (for example, a login form).
+organisms/  => Large components made up of molecules (e.g., header, footer).
+templates/  => A main page layout (e.g., dashboard layout).
+layouts/    => Components that handle general layouts (e.g., sidebar + content).

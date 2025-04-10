@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "rimraf release dist dist-electron && tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build-win": "build -- -w"
   },
   "dependencies": {
     "@antigane/encryption": "^0.1.4",
@@ -29,6 +30,7 @@
     "electron-store": "^10.0.0",
     "framer-motion": "^11.13.1",
     "lenis": "^1.1.18",
+    "localforage": "^1.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.0.1",
@@ -102,6 +104,23 @@
           "path": "/Applications"
         }
       ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+      "icon": "public/assets/coin-peridot.png",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     }
   }
 }
