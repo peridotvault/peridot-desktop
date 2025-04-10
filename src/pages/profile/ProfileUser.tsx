@@ -13,6 +13,10 @@ import { useWallet } from "../../contexts/WalletContext";
 import { LoadingScreen } from "../additional/LoadingScreen";
 import { InputField } from "../../components/InputField";
 import { LoadingLogo } from "../additional/LoadingLogo";
+import {
+  getCoverImage,
+  getProfileImage,
+} from "../../components/AdditionalComponent";
 
 interface UserDataInterface {
   ok: {
@@ -38,7 +42,7 @@ interface UserDataInterface {
       }
     ];
     user_libraries: string;
-    developer: string;
+    developer: [];
   };
 }
 
@@ -233,7 +237,7 @@ export const ProfileUser = () => {
             {/* cover  */}
             <div className="w-full h-[11rem]">
               <img
-                src={userData?.ok.background_image_url}
+                src={getCoverImage(userData?.ok.background_image_url)}
                 className="w-full h-[15rem] object-cover rounded-2xl "
                 alt=""
               />
@@ -243,7 +247,7 @@ export const ProfileUser = () => {
               {/* Img  */}
               <div className="w-36 h-36 bg-background_primary shadow-2xl rounded-full z-10 overflow-hidden p-2">
                 <img
-                  src={userData?.ok.image_url}
+                  src={getProfileImage(userData?.ok.image_url)}
                   className="w-full h-full object-cover rounded-full"
                   alt=""
                 />
@@ -268,9 +272,21 @@ export const ProfileUser = () => {
             {/* bio  */}
             <div className="flex flex-col gap-3 mt-3 px-10">
               <div className="flex flex-col gap-1">
-                <p className="font-medium text-2xl">
-                  {userData?.ok.display_name}
-                </p>
+                <div className="flex gap-2">
+                  <p className="font-medium text-2xl">
+                    {userData?.ok.display_name}
+                  </p>
+                  {userData?.ok.developer.length != 0 ? (
+                    <div className="">
+                      <span className="px-2 py-1 rounded-full border-accent_primary/50 border text-xs text-accent_primary">
+                        dev
+                      </span>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                </div>
+
                 <p className="text-text_disabled text-lg">
                   @{userData?.ok.username}
                 </p>
@@ -321,7 +337,7 @@ export const ProfileUser = () => {
             {/* lists friend  */}
             <div className="flex gap-3 items-center">
               <img
-                src={userData?.ok.image_url}
+                src={getProfileImage(userData?.ok.image_url)}
                 className="w-1/6 aspect-square object-cover rounded-lg shadow-arise-sm"
                 alt=""
               />
@@ -332,7 +348,9 @@ export const ProfileUser = () => {
             </div>
             <div className="flex gap-3 items-center">
               <img
-                src="https://nnc-media.netralnews.com/2025/01/IMG-Netral-News-User-3610-NUWXYEMBS8.jpg"
+                src={getProfileImage(
+                  "https://nnc-media.netralnews.com/2025/01/IMG-Netral-News-User-3610-NUWXYEMBS8.jpg"
+                )}
                 className="w-1/6 aspect-square object-cover rounded-lg shadow-arise-sm"
                 alt=""
               />
@@ -343,7 +361,9 @@ export const ProfileUser = () => {
             </div>
             <div className="flex gap-3 items-center">
               <img
-                src="https://plus.unsplash.com/premium_photo-1664297541695-2620d79f4770?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src={getProfileImage(
+                  "https://plus.unsplash.com/premium_photo-1664297541695-2620d79f4770?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                )}
                 className="w-1/6 aspect-square object-cover rounded-lg shadow-arise-sm"
                 alt=""
               />

@@ -31,7 +31,10 @@ export const Setting: React.FC<NavbarProps> = ({ onClose }) => {
           >
             Account Setting
           </button>
-          <button className="shadow-arise-sm w-full py-4 px-6 text-start rounded-xl">
+          <button
+            className="shadow-arise-sm w-full py-4 px-6 text-start rounded-xl"
+            onClick={() => navigate("/create_developer")}
+          >
             Update to Developer Account
           </button>
         </div>

@@ -238,6 +238,39 @@ async function getFriendRequestList(wallet: any) {
   }
 }
 
+// Developer
+async function createDeveloperProfile(
+  wallet: any,
+  websiteUrl: string,
+  bio: string
+) {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
+
+  const secretKey = Buffer.from(privateKey, "hex");
+
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+    });
+
+    const actor = Actor.createActor(userIdlFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+
+    // Call balance method
+    const result = await actor.createDeveloperProfile(websiteUrl, bio);
+
+    return result;
+  } catch (error) {
+    throw new Error("Error Context : " + error);
+  }
+}
+
 // Export function
 export {
   createAccount,
@@ -246,4 +279,5 @@ export {
   getUserByPrincipalId,
   searchUsersByPrefixWithLimit,
   getFriendRequestList,
+  createDeveloperProfile,
 };

@@ -338,9 +338,9 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
               </div>
 
               {/* success modal */}
-              {showSuccess ? <TransactionSuccess /> : ""}
+              {showSuccess ? <TransactionSuccess msg="Success" /> : ""}
               {showFailed ? (
-                <TransactionFailed text="Your Session is Over" />
+                <TransactionFailed msg="Your Session is Over" />
               ) : (
                 ""
               )}

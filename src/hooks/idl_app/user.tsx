@@ -31,7 +31,7 @@ export const userIdlFactory = ({ IDL }: { IDL: any }) => {
     developer_followers: IDL.Opt(IDL.Vec(DeveloperFollower)),
     developer_bio: IDL.Text,
     developer_announcement: IDL.Opt(IDL.Vec(DeveloperAnnouncement)),
-    total_follower: IDL.Int,
+    total_follower: IDL.Nat,
     developer_website: IDL.Text,
   });
 
@@ -172,6 +172,18 @@ export const userIdlFactory = ({ IDL }: { IDL: any }) => {
       [
         IDL.Variant({
           ok: UserFriend,
+          err: Error,
+        }),
+      ],
+      []
+    ),
+
+    // Developer
+    createDeveloperProfile: IDL.Func(
+      [IDL.Text, IDL.Text],
+      [
+        IDL.Variant({
+          ok: User,
           err: Error,
         }),
       ],

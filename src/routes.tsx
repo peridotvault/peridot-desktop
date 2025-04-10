@@ -17,6 +17,7 @@ import { CreateProfile } from "./pages/profile/CreateProfile";
 import { UpdateProfile } from "./pages/profile/UpdateProfile";
 import { ProfileUser } from "./pages/profile/ProfileUser";
 import { ProfileDeveloper } from "./pages/profile/ProfileDeveloper";
+import { CreateDeveloper } from "./pages/developer/CreateDeveloper";
 
 // import React, { lazy, Suspense } from "react";
 // const Login = lazy(() => import("./pages/signin/Login"));
@@ -71,6 +72,11 @@ const router = createHashRouter([
       {
         path: "update_profile",
         element: <UpdateProfile />,
+      },
+      // Developer
+      {
+        path: "create_developer",
+        element: <CreateDeveloper />,
       },
     ],
   },

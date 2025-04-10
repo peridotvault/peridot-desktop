@@ -1,9 +1,11 @@
-import { EncryptedData } from "@antigane/encryption";
 import { faChevronLeft, faClone } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { useWallet } from "../../../contexts/WalletContext";
-import { shortenAddress } from "../../../components/AdditionalComponent";
+import {
+  copyToClipboard,
+  shortenAddress,
+} from "../../../components/AdditionalComponent";
 
 interface Props {
   onClose: () => void;
@@ -23,14 +25,6 @@ export const Receive: React.FC<Props> = ({ onClose }) => {
       logo: "./assets/logo-icp.svg",
     },
   ]);
-
-  const copyToClipboard = (data: EncryptedData | string | null) => {
-    if (!data) return;
-    const textToCopy = typeof data === "string" ? data : data.data;
-    navigator.clipboard.writeText(textToCopy).catch((err) => {
-      console.error("Failed to copy: ", err);
-    });
-  };
 
   return (
     <div className="fixed top-0 right-0 w-[370px] bg-background_primary h-full p-6 flex flex-col gap-8">

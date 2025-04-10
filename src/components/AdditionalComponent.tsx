@@ -1,3 +1,5 @@
+import { EncryptedData } from "@antigane/encryption";
+
 export const shortenAddress = (
   address: string | null,
   firstSlice: number,
@@ -5,4 +7,20 @@ export const shortenAddress = (
 ) => {
   if (address)
     return `${address.slice(0, firstSlice)}...${address.slice(-secondSlice)}`;
+};
+
+export const getProfileImage = (url: string | undefined) => {
+  return url == "" ? "./assets/img/profile_not_found.png" : url;
+};
+
+export const getCoverImage = (url: string | undefined) => {
+  return url == "" ? "./assets/img/cover_not_found.png" : url;
+};
+
+export const copyToClipboard = (data: EncryptedData | string | null) => {
+  if (!data) return;
+  const textToCopy = typeof data === "string" ? data : data.data;
+  navigator.clipboard.writeText(textToCopy).catch((err) => {
+    console.error("Failed to copy: ", err);
+  });
 };

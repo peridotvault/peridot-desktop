@@ -25,6 +25,12 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import countriesData from "../../assets/json/countries.json";
 import { LoadingScreen } from "../additional/LoadingScreen";
+import {
+  getCoverImage,
+  getProfileImage,
+} from "../../components/AdditionalComponent";
+import { TransactionSuccess } from "../additional/TransactionSuccess";
+import { TransactionFailed } from "../additional/TransactionFailed";
 
 interface CountryOption {
   code: string;
@@ -153,6 +159,8 @@ const AccountSettingsDropdownField = ({
 export const UpdateProfile = () => {
   const { wallet } = useWallet();
   const [userData, setUserData] = useState<UserDataInterface | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showFailed, setShowFailed] = useState(false);
   const [metadataUpdateUser, setMetadataUpdateUser] =
     useState<MetadataUpdateUser>({
       username: "",
@@ -325,9 +333,17 @@ export const UpdateProfile = () => {
       if (result) {
         // Handle successful creation
         console.log("Account updated successfully");
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 2000);
       }
     } catch (error) {
       console.error("Error updating account:", error);
+      setShowFailed(true);
+      setTimeout(() => {
+        setShowFailed(false);
+      }, 2000);
     }
   };
 
@@ -345,6 +361,12 @@ export const UpdateProfile = () => {
   return (
     <main className="pt-20  w-full flex flex-col">
       <div className="flex flex-col items-center">
+        {showSuccess ? (
+          <TransactionSuccess msg="Account Updated Successfully" />
+        ) : (
+          ""
+        )}
+        {showFailed ? <TransactionFailed msg="Account Updated Failed" /> : ""}
         <div className="mb-3 py-6 px-10 border-b border-background_disabled flex justify-between items-center w-full">
           <p className="text-2xl font-semibold">Account Settings</p>
           <button
@@ -363,7 +385,7 @@ export const UpdateProfile = () => {
                 <div className="shadow-arise-sm w-[230px] aspect-square rounded-full overflow-hidden">
                   {metadataUpdateUser.image_url && (
                     <img
-                      src={metadataUpdateUser.image_url}
+                      src={getProfileImage(metadataUpdateUser.image_url)}
                       className="w-full h-full object-cover"
                     />
                   )}
@@ -383,7 +405,9 @@ export const UpdateProfile = () => {
                 <div className="shadow-arise-sm w-full h-[15rem] rounded-xl overflow-hidden">
                   {metadataUpdateUser.background_image_url && (
                     <img
-                      src={metadataUpdateUser.background_image_url}
+                      src={getCoverImage(
+                        metadataUpdateUser.background_image_url
+                      )}
                       className="w-full h-full object-cover"
                     />
                   )}
