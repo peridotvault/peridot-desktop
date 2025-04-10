@@ -9,8 +9,6 @@ import { useWallet } from "../../contexts/WalletContext";
 import {
   updateUser,
   getUserByPrincipalId,
-  MetadataUpdateUser,
-  GenderVariant,
   isUsernameValid,
 } from "../../contexts/UserContext";
 import {
@@ -31,6 +29,8 @@ import {
 } from "../../components/AdditionalComponent";
 import { TransactionSuccess } from "../additional/TransactionSuccess";
 import { TransactionFailed } from "../additional/TransactionFailed";
+import { GenderVariant, MetadataUser } from "../../interfaces/User";
+import { saveUserInfo } from "../../utils/IndexedDb";
 
 interface CountryOption {
   code: string;
@@ -161,19 +161,18 @@ export const UpdateProfile = () => {
   const [userData, setUserData] = useState<UserDataInterface | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
-  const [metadataUpdateUser, setMetadataUpdateUser] =
-    useState<MetadataUpdateUser>({
-      username: "",
-      display_name: "",
-      email: "",
-      image_url: "",
-      background_image_url: "",
-      user_demographics: {
-        birth_date: "",
-        gender: { other: null },
-        country: "",
-      },
-    });
+  const [metadataUpdateUser, setMetadataUpdateUser] = useState<MetadataUser>({
+    username: "",
+    display_name: "",
+    email: "",
+    image_url: "",
+    background_image_url: "",
+    user_demographics: {
+      birth_date: "",
+      gender: { other: null },
+      country: "",
+    },
+  });
   const [isValidUsername, setIsValidUsername] = useState({
     valid: true,
     msg: "",
@@ -331,6 +330,7 @@ export const UpdateProfile = () => {
     try {
       const result = await updateUser(metadataUpdateUser, wallet);
       if (result) {
+        saveUserInfo(metadataUpdateUser);
         // Handle successful creation
         console.log("Account updated successfully");
         setShowSuccess(true);

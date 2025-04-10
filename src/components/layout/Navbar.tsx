@@ -11,7 +11,7 @@ import { getProfileImage } from "../AdditionalComponent";
 
 interface NavbarProps {
   onOpenWallet: () => void;
-  profileImage: string | undefined;
+  profileImage: string | undefined | null;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({

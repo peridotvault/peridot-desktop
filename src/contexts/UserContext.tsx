@@ -4,6 +4,7 @@ import { userIdlFactory } from "../hooks/idl_app/user";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import { walletService } from "../utils/WalletService";
 import { EncryptedData } from "@antigane/encryption";
+import { GenderVariant, MetadataUser } from "../interfaces/User";
 
 export interface MetadataCreateUser {
   username: string;
@@ -12,30 +13,6 @@ export interface MetadataCreateUser {
   birth_date: string;
   gender: GenderVariant;
   country: string;
-}
-
-export type GenderVariant =
-  | {
-      male: null;
-    }
-  | {
-      female: null;
-    }
-  | {
-      other: null;
-    };
-
-export interface MetadataUpdateUser {
-  username: string;
-  display_name: string;
-  email: string;
-  image_url: string | null;
-  background_image_url: string | null;
-  user_demographics: {
-    birth_date: string;
-    gender: GenderVariant;
-    country: string;
-  };
 }
 
 // Define the UpdateUser interface to match the IDL
@@ -91,7 +68,7 @@ async function createAccount(metadata: MetadataCreateUser, wallet: any) {
   }
 }
 
-async function updateUser(metadata: MetadataUpdateUser, wallet: any) {
+async function updateUser(metadata: MetadataUser, wallet: any) {
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );

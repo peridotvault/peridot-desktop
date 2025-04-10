@@ -9,8 +9,10 @@ export const shortenAddress = (
     return `${address.slice(0, firstSlice)}...${address.slice(-secondSlice)}`;
 };
 
-export const getProfileImage = (url: string | undefined) => {
-  return url == "" ? "./assets/img/profile_not_found.png" : url;
+export const getProfileImage = (url: string | undefined | null) => {
+  return url == "" || url == null || url == undefined
+    ? "./assets/img/profile_not_found.png"
+    : url;
 };
 
 export const getCoverImage = (url: string | undefined) => {

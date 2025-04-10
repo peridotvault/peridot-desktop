@@ -9,34 +9,8 @@ import Lenis from "lenis";
 import { getUserByPrincipalId } from "../../contexts/UserContext";
 import { InputField } from "../InputField";
 import { walletService } from "../../utils/WalletService";
-
-interface UserDataInterface {
-  ok: {
-    username: string;
-    display_name: string;
-    description: string;
-    link: string;
-    email: string;
-    image_url: string;
-    background_image_url: string;
-    total_playtime: number;
-    created_at: string;
-    user_demographics: {
-      birth_date: string;
-      gender: string;
-      country: string;
-    };
-    user_interactions: [
-      {
-        app_id: string;
-        interaction: string;
-        created_at: string;
-      }
-    ];
-    user_libraries: string;
-    developer: [];
-  };
-}
+import { getUserInfo } from "../../utils/IndexedDb";
+import { MetadataUser } from "../../interfaces/User";
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
@@ -45,7 +19,7 @@ export default function MainLayout() {
   const [isRequiredPassword, setIsRequiredPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<UserDataInterface | null>(null);
+  const [userData, setUserData] = useState<MetadataUser | null>(null);
 
   // Lenis smooth scroll setup
   useEffect(() => {
@@ -70,6 +44,24 @@ export default function MainLayout() {
     return () => {
       lenis.destroy();
     };
+  }, []);
+
+  // Memanggil getUserInfo di useEffect
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const userInfo = await getUserInfo();
+        if (userInfo) {
+          setUserData(userInfo);
+        } else {
+          console.log("User Can't Found");
+        }
+      } catch (error) {
+        console.error("Error : ", error);
+      }
+    };
+
+    fetchUserInfo();
   }, []);
 
   // Check wallet and session status
@@ -101,7 +93,6 @@ export default function MainLayout() {
               typeof isUserExist === "object" &&
               "ok" in isUserExist
             ) {
-              setUserData(isUserExist as UserDataInterface);
               setIsRequiredPassword(false);
             } else {
               navigate("/create_profile");
@@ -173,7 +164,7 @@ export default function MainLayout() {
     <main className="min-h-screen flex flex-col">
       <Navbar
         onOpenWallet={() => setIOpenWallet(true)}
-        profileImage={userData?.ok.image_url}
+        profileImage={userData?.image_url}
       />
       <div
         className={`flex-1  ${
