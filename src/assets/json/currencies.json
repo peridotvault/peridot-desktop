@@ -1,0 +1,14 @@
+[
+    {
+        "currency_name": "United States Dollar",
+        "currency": "USD",
+        "symbol": "$",
+        "rates": 1
+    },
+    {
+        "currency_name": "Indonesia Rupiah",
+        "currency": "IDR",
+        "symbol": "IDR",
+        "rates": 16881.759497
+    }
+]

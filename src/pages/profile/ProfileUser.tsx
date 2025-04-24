@@ -17,38 +17,11 @@ import {
   getCoverImage,
   getProfileImage,
 } from "../../components/AdditionalComponent";
-
-interface UserDataInterface {
-  ok: {
-    username: string;
-    display_name: string;
-    description: string;
-    link: string;
-    email: string;
-    image_url: string;
-    background_image_url: string;
-    total_playtime: number;
-    created_at: string;
-    user_demographics: {
-      birth_date: string;
-      gender: string;
-      country: string;
-    };
-    user_interactions: [
-      {
-        app_id: string;
-        interaction: string;
-        created_at: string;
-      }
-    ];
-    user_libraries: string;
-    developer: [];
-  };
-}
+import { MetadataUser } from "../../interfaces/User";
 
 export const ProfileUser = () => {
   const { wallet } = useWallet();
-  const [userData, setUserData] = useState<UserDataInterface | null>(null);
+  const [userData, setUserData] = useState<MetadataUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpenSettings, setIsOpenSettings] = useState(false);
   const [isOpenAddFriend, setIsOpenAddFriend] = useState(false);
@@ -81,7 +54,7 @@ export const ProfileUser = () => {
           typeof isUserExist === "object" &&
           "ok" in isUserExist
         ) {
-          setUserData(isUserExist as UserDataInterface);
+          setUserData(isUserExist as MetadataUser);
           setIsLoading(false);
         } else {
           setIsLoading(false);

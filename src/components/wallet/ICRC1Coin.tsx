@@ -1,17 +1,8 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { Actor, HttpAgent } from "@dfinity/agent";
-import { icrc1IdlFactory } from "../../hooks/idl/icrc1";
 import { Principal } from "@dfinity/principal";
-
-interface Metadata {
-  balance: string | null;
-  logo: string | null;
-  decimals: bigint | null;
-  name: string | null;
-  symbol: string | null;
-}
+import { checkBalance, ICRC1Metadata } from "../../contexts/CoinContext";
 
 interface ICRC1CoinProps {
   canisterId: string;
@@ -20,12 +11,12 @@ interface ICRC1CoinProps {
 
 export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
   const { wallet } = useWallet();
-  const [icrc1, setIcrc1] = useState<Metadata>();
+  const [icrc1, setIcrc1] = useState<ICRC1Metadata>();
   const [priceUsd, setPriceUsd] = useState<string | null>(null);
 
   async function fetchBalance() {
     if (wallet.principalId) {
-      const result = await checkBalance(canisterId);
+      const result = await checkBalance(Principal.fromText(canisterId), wallet);
       setIcrc1(result);
     }
   }
@@ -64,7 +55,7 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
   // Calculate and update the USD balance whenever price or balance changes
   useEffect(() => {
     if (icrc1?.balance && priceUsd && priceUsd !== "0" && onBalanceUpdate) {
-      const balanceUsd = parseFloat(priceUsd) * parseFloat(icrc1.balance);
+      const balanceUsd = parseFloat(priceUsd) * icrc1.balance;
       onBalanceUpdate(canisterId, balanceUsd);
     } else if (onBalanceUpdate) {
       // Set to 0 if there's no valid balance or price
@@ -72,72 +63,72 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
     }
   }, [icrc1?.balance, priceUsd, canisterId, onBalanceUpdate]);
 
-  async function checkBalance(icrc1CanisterId: string) {
-    if (!wallet.principalId) {
-      throw new Error("Not Logged in");
-    }
-    try {
-      // Initialize agent with identity
-      const agent = new HttpAgent({
-        host: "https://ic0.app",
-      });
+  // async function checkBalance(icrc1CanisterId: string) {
+  //   if (!wallet.principalId) {
+  //     throw new Error("Not Logged in");
+  //   }
+  //   try {
+  //     // Initialize agent with identity
+  //     const agent = new HttpAgent({
+  //       host: "https://ic0.app",
+  //     });
 
-      const actor = Actor.createActor(icrc1IdlFactory, {
-        agent,
-        canisterId: icrc1CanisterId,
-      });
+  //     const actor = Actor.createActor(icrc1IdlFactory, {
+  //       agent,
+  //       canisterId: icrc1CanisterId,
+  //     });
 
-      // Call balance method
-      const metadataResult = (await actor.icrc1_metadata()) as any[][];
-      const balanceResult = await actor.icrc1_balance_of({
-        owner: Principal.fromText(wallet.principalId),
-        subaccount: [],
-      });
+  //     // Call balance method
+  //     const metadataResult = (await actor.icrc1_metadata()) as any[][];
+  //     const balanceResult = await actor.icrc1_balance_of({
+  //       owner: Principal.fromText(wallet.principalId),
+  //       subaccount: [],
+  //     });
 
-      // Convert balance to number and format
-      const standardBalance = Number(balanceResult) / 100000000;
-      const result: Metadata = {
-        balance: standardBalance.toString(),
-        logo:
-          icrc1CanisterId == "ryjl3-tyaaa-aaaaa-aaaba-cai"
-            ? "https://s3.coinmarketcap.com/static-gravity/image/2fb1bc84c1494178beef0822179d137d.png"
-            : null,
-        decimals: 0n,
-        name: "",
-        symbol: "",
-      };
-      for (const metadata of metadataResult) {
-        const key = metadata[0];
-        const value = metadata[1];
+  //     // Convert balance to number and format
+  //     const standardBalance = Number(balanceResult) / 100000000;
+  //     const result: Metadata = {
+  //       balance: standardBalance.toString(),
+  //       logo:
+  //         icrc1CanisterId == "ryjl3-tyaaa-aaaaa-aaaba-cai"
+  //           ? "https://s3.coinmarketcap.com/static-gravity/image/2fb1bc84c1494178beef0822179d137d.png"
+  //           : null,
+  //       decimals: 0n,
+  //       name: "",
+  //       symbol: "",
+  //     };
+  //     for (const metadata of metadataResult) {
+  //       const key = metadata[0];
+  //       const value = metadata[1];
 
-        switch (key) {
-          case "icrc1:logo":
-            result.logo = value.Text;
-            break;
-          case "icrc1:decimals":
-            result.decimals = BigInt(value.Text || 0);
-            break;
-          case "icrc1:name":
-            result.name = value.Text;
-            break;
-          case "icrc1:symbol":
-            result.symbol = value.Text;
-            break;
-        }
-      }
+  //       switch (key) {
+  //         case "icrc1:logo":
+  //           result.logo = value.Text;
+  //           break;
+  //         case "icrc1:decimals":
+  //           result.decimals = BigInt(value.Text || 0);
+  //           break;
+  //         case "icrc1:name":
+  //           result.name = value.Text;
+  //           break;
+  //         case "icrc1:symbol":
+  //           result.symbol = value.Text;
+  //           break;
+  //       }
+  //     }
 
-      return result;
-    } catch (error) {
-      const result: Metadata = {
-        balance: null,
-        logo: null,
-        decimals: null,
-        name: null,
-        symbol: null,
-      };
-      return result;
-    }
-  }
+  //     return result;
+  //   } catch (error) {
+  //     const result: Metadata = {
+  //       balance: null,
+  //       logo: null,
+  //       decimals: null,
+  //       name: null,
+  //       symbol: null,
+  //     };
+  //     return result;
+  //   }
+  // }
 
   const formatUsd = (
     value: string | null,
@@ -161,7 +152,9 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
             <img
               src={icrc1?.logo != null ? icrc1?.logo : "null"}
               alt=""
-              className="w-full"
+              className={`w-full ${
+                canisterId == "ryjl3-tyaaa-aaaaa-aaaba-cai" ? "p-3" : ""
+              }`}
             />
           ) : (
             <div className="w-full h-full bg-background_disabled animate-pulse"></div>
@@ -194,9 +187,7 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
         <div className="flex flex-col items-end">
           <p>
             {formatUsd(
-              (
-                parseFloat(priceUsd) * parseFloat(icrc1.balance)
-              ).toLocaleString(),
+              (parseFloat(priceUsd) * icrc1.balance).toLocaleString(),
               5
             )}
           </p>

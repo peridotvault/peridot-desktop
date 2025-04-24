@@ -6,10 +6,10 @@ import { motion } from "framer-motion";
 import {
   faArrowRightFromBracket,
   faBitcoinSign,
-  faBuildingColumns,
-  // faClone,
+  faGear,
   faKey,
   faLock,
+  faMoneyBillTransfer,
   faPaperPlane,
   faPuzzlePiece,
   faQrcode,
@@ -21,13 +21,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ICRC1Coin } from "../../../components/wallet/ICRC1Coin";
 import { InputField } from "../../../components/InputField";
 import { walletService } from "../../../utils/WalletService";
-import { EncryptedData } from "@antigane/encryption";
 import { Manage } from "./Manage";
 import { Receive } from "./Receive";
 import { Nft } from "./Nft";
 import { SendToken } from "./SendToken";
 import localforage from "localforage";
 import theCoin from "./../../../assets/json/coins.json";
+import {
+  getCurrencyByCode,
+  getWalletInfo,
+  saveCurrencyToWallet,
+} from "../../../utils/IndexedDb";
+import { Currency } from "../../../interfaces/Currency";
+import { WalletInfo } from "../../../interfaces/Wallet";
 
 interface NavbarProps {
   onClose: () => void;
@@ -51,6 +57,12 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
   const [isModalOpenKey, setIsModalOpenKey] = useState(false);
   const [isModalOpenKeyPKSP, setIsModalOpenKeyPKSP] = useState("");
   const [myBalance, setMyBalance] = useState(0);
+  const [currency, setCurrency] = useState<Currency>({
+    currency_name: "",
+    currency: "",
+    symbol: "",
+    rates: 0,
+  });
   const [openButton, setOpenButton] = useState({
     send: false,
     receive: false,
@@ -66,6 +78,10 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
   useEffect(() => {
     async function loadCoins() {
       try {
+        const myCurrency = (await getWalletInfo()) as WalletInfo;
+        fetchAPICurrency(
+          myCurrency == null ? "USD" : myCurrency.currency.currency
+        );
         const savedCoins = await localforage.getItem<Coin[]>("coins");
 
         if (savedCoins && savedCoins.length > 0) {
@@ -122,21 +138,27 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
     }
   };
 
-  const shortenAddress = (
-    address: string | null,
-    firstSlice: number,
-    secondSlice: number
-  ) => {
-    if (address)
-      return `${address.slice(0, firstSlice)}...${address.slice(-secondSlice)}`;
-  };
+  const fetchAPICurrency = async (currency: string) => {
+    const url = "https://open.er-api.com/v6/latest/USD";
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
 
-  const copyToClipboard = (data: EncryptedData | string | null) => {
-    if (!data) return;
-    const textToCopy = typeof data === "string" ? data : data.data;
-    navigator.clipboard.writeText(textToCopy).catch((err) => {
-      console.error("Failed to copy: ", err);
-    });
+      const json = await response.json();
+      const cur = (await getCurrencyByCode(currency)) as Currency;
+      const result = {
+        currency_name: cur.currency_name,
+        currency: cur.currency,
+        symbol: cur.symbol,
+        rates: json.rates[currency],
+      };
+      setCurrency(result);
+      saveCurrencyToWallet(result);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleCloseLock = async () => {
@@ -167,12 +189,12 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
             <div className="flex items-center gap-3 justify-between z-10">
               {/* Network  */}
               <div className="flex gap-6">
-                {/* <button
+                <button
                   className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
                   onClick={() => setIsOpenWalletAddress(!isOpenWalletAddress)}
                 >
-                  <FontAwesomeIcon icon={faClone} className="text-md" />
-                </button> */}
+                  <FontAwesomeIcon icon={faGear} className="text-md" />
+                </button>
                 {/* Lock  */}
                 <button
                   className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
@@ -183,51 +205,34 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
               </div>
               {/* MODAL =================================================== */}
               <div
-                className={`absolute right-[370px] top-6 ${
+                className={`fixed right-[370px] top-6 ${
                   isOpenWalletAddress ? "flex" : "hidden"
                 } justify-start flex-col bg-background_primary py-6 px-10 mx-6 rounded-b-2xl rounded-tl-2xl gap-5 duration-300`}
               >
                 {/* Peridot Wallet Address */}
                 <div className="flex justify-between mb-1 items-center">
                   <div></div>
-                  <p className="text-lg font-semibold">
-                    Peridot Wallet Address
-                  </p>
+                  <p className="text-lg font-semibold">Settings</p>
                   <button onClick={() => setIsOpenWalletAddress(false)}>
                     <FontAwesomeIcon icon={faXmark} />
                   </button>
                 </div>
-                {/* Principal ID */}
+                {/* Change Currency  */}
                 <button
-                  onClick={() => copyToClipboard(wallet.principalId)}
-                  className="flex gap-3 items-center hover:scale-105 duration-300"
-                >
-                  <div className="w-12 h-12 shadow-arise-sm rounded-xl flex justify-center items-center">
-                    <img
-                      src="/assets/logo-icp.svg"
-                      alt="ICP Logo"
-                      className="size-5"
-                    />
-                  </div>
-                  <div className="flex flex-col items-start">
-                    <p className="text-md font-semibold">Principal ID</p>
-                    <p>{shortenAddress(wallet.principalId, 15, 10)}</p>
-                  </div>
-                </button>
-                {/* Account ID  */}
-                <button
-                  onClick={() => copyToClipboard(wallet.accountId)}
+                  onClick={() =>
+                    fetchAPICurrency(currency.currency == "USD" ? "IDR" : "USD")
+                  }
                   className="flex gap-3 items-center hover:scale-105 duration-300"
                 >
                   <div className="w-12 h-12 shadow-arise-sm rounded-xl flex justify-center items-center">
                     <FontAwesomeIcon
-                      icon={faBuildingColumns}
-                      className="text-yellow-100 size-5"
+                      icon={faMoneyBillTransfer}
+                      className="text-blue-400 size-5"
                     />
                   </div>
                   <div className="flex flex-col items-start">
-                    <p className="text-md font-semibold">Account ID</p>
-                    <p>{shortenAddress(wallet.accountId, 15, 10)}</p>
+                    <p className="text-md font-semibold">Change Currency</p>
+                    <p>{currency.currency + " - " + currency.currency_name}</p>
                   </div>
                 </button>
                 {/* Seed Phrase */}
@@ -294,7 +299,7 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
             </div>
 
             <p className="text-5xl my-5 text-center z-10">
-              ${myBalance.toLocaleString()}
+              {currency.symbol + (myBalance * currency.rates).toLocaleString()}
             </p>
 
             <div className="flex gap-7 z-10 items-center justify-center">
@@ -581,7 +586,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
   return (
     <div
       onClick={onClose}
-      className="bg-black/40 fixed top-0 right-0 w-full h-full flex justify-center items-center"
+      className="bg-black/40 fixed top-0 right-0 w-full h-full flex justify-center items-center  z-10"
     >
       <div
         onClick={(e) => e.stopPropagation()}

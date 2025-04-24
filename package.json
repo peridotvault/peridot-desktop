@@ -31,6 +31,7 @@
     "framer-motion": "^11.13.1",
     "lenis": "^1.1.18",
     "localforage": "^1.10.0",
+    "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.0.1",
@@ -39,6 +40,7 @@
     "vite-plugin-wasm": "^3.3.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.16",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@typescript-eslint/eslint-plugin": "^7.1.1",

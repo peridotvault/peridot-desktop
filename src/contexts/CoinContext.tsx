@@ -4,12 +4,13 @@ import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import { icrc1IdlFactory } from "../hooks/idl/icrc1";
 import { Principal } from "@dfinity/principal";
 
-interface Metadata {
+export interface ICRC1Metadata {
   balance: number | null;
   logo: string | null;
   decimals: bigint | null;
   name: string | null;
   symbol: string | null;
+  fee: bigint | null;
 }
 
 async function transferTokenICRC1(
@@ -72,6 +73,10 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
     });
 
     // Call balance method
+    const name = (await actor.icrc1_name()) as string;
+    const symbol = (await actor.icrc1_symbol()) as string;
+    const decimals = (await actor.icrc1_decimals()) as bigint;
+    const fee = (await actor.icrc1_fee()) as bigint;
     const metadataResult = (await actor.icrc1_metadata()) as any[][];
     const balanceResult = await actor.icrc1_balance_of({
       owner: Principal.fromText(wallet.principalId),
@@ -80,16 +85,21 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
 
     // Convert balance to number and format
     const standardBalance = Number(balanceResult) / 100000000;
-    const result: Metadata = {
+    const result: ICRC1Metadata = {
       balance: standardBalance,
       logo:
         icrc1CanisterId == Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai")
-          ? "https://s3.coinmarketcap.com/static-gravity/image/2fb1bc84c1494178beef0822179d137d.png"
+          ? "./assets/logo-icp.svg"
           : null,
       decimals: 0n,
       name: "",
       symbol: "",
+      fee: 0n,
     };
+    result.name = name;
+    result.symbol = symbol;
+    result.decimals = decimals;
+    result.fee = fee;
     for (const metadata of metadataResult) {
       const key = metadata[0];
       const value = metadata[1];
@@ -98,26 +108,18 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
         case "icrc1:logo":
           result.logo = value.Text;
           break;
-        case "icrc1:decimals":
-          result.decimals = BigInt(value.Text || 0);
-          break;
-        case "icrc1:name":
-          result.name = value.Text;
-          break;
-        case "icrc1:symbol":
-          result.symbol = value.Text;
-          break;
       }
     }
 
     return result;
   } catch (error) {
-    const result: Metadata = {
+    const result: ICRC1Metadata = {
       decimals: null,
       balance: null,
       name: null,
       symbol: null,
       logo: null,
+      fee: null,
     };
     return result;
   }

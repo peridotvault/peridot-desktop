@@ -1,23 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { faChevronLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faPlus,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { InputField } from "../../../components/InputField";
-import localforage from "localforage";
 import { AddCoin } from "../../additional/AddCoin";
 import theCoin from "./../../../assets/json/coins.json";
+import { Coin } from "../../../interfaces/Coin";
+import { deleteCoin, getCoin, saveCoin } from "../../../utils/IndexedDb";
 
 interface Props {
   onClose: () => void;
-}
-
-export interface Coin {
-  network: string;
-  address: string;
-  balance: number;
-  name: string;
-  symbol: string;
-  logo: string;
-  isChecked: boolean;
 }
 
 export const Manage: React.FC<Props> = ({ onClose }) => {
@@ -29,7 +24,7 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
 
   async function loadCoins() {
     try {
-      const savedCoins = await localforage.getItem<Coin[]>("coins");
+      const savedCoins = await getCoin();
 
       if (savedCoins && savedCoins.length > 0) {
         // Create a merged list with both saved and default coins
@@ -99,11 +94,23 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
       setListCoins(updatedList);
 
       // Save to localforage
-      await localforage.setItem("coins", updatedList);
+      await saveCoin(updatedList);
     } catch (error) {
       console.error("Error toggling coin:", error);
     }
   };
+
+  // const handleDelete = async (addressToDelete: string) => {
+  //   try {
+  //     const updatedCoins = listCoins.filter(
+  //       (coin) => coin.address !== addressToDelete
+  //     );
+  //     setListCoins(updatedCoins);
+  //     await localforage.setItem("coins", updatedCoins);
+  //   } catch (error) {
+  //     console.error("Error deleting coin:", error);
+  //   }
+  // };
 
   if (isLoading) {
     return (
@@ -180,7 +187,9 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
                 </div>
               </div>
             </div>
-            <div className="">
+            {/* Actions  */}
+            <div className="flex gap-4">
+              {/* Show To Main Wallet */}
               <label className="relative inline-block w-[3.4em] h-[1.5em]">
                 <input
                   type="checkbox"
@@ -194,13 +203,23 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
                   }`}
                 ></span>
                 <span
-                  className={`absolute content-[''] h-[.9em] w-[0.1em] rounded-none left-[0.5em] bottom-[0.3em] bg-white transition-transform duration-500 ${
+                  className={`absolute content-[''] h-[.9em] w-[0.1em] rounded-none left-[0.5em] bottom-[0.3em]  transition-transform duration-500 ${
                     item.isChecked
                       ? " bg-black translate-x-[2.4em] rotate-180"
-                      : ""
+                      : "bg-white"
                   }`}
                 ></span>
               </label>
+              {/* Delete Button */}
+              <button
+                className="text-danger hover:scale-110 duration-300 h-full aspect-square pl-2"
+                onClick={async () => {
+                  const newCoinList = await deleteCoin(item.address);
+                  setListCoins(newCoinList);
+                }}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
             </div>
           </div>
         ))}

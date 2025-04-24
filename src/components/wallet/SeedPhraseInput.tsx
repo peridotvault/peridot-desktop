@@ -15,7 +15,7 @@ export const SeedPhraseInput = ({
   seedPhrase,
 }: SeedPhraseInputProps) => {
   const [words, setWords] = useState(Array(12).fill(""));
-  const [errors, setErrors] = useState(Array(12).fill(false));
+  const [errors] = useState(Array(12).fill(false));
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 

@@ -11,15 +11,12 @@ import {
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  createAccount,
-  GenderVariant,
-  isUsernameValid,
-} from "../../contexts/UserContext";
+import { createAccount, isUsernameValid } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
 import { useNavigate } from "react-router-dom";
 import countriesData from "../../assets/json/countries.json";
 import { clearWalletData } from "../../utils/StoreService";
+import { GenderVariant } from "../../interfaces/User";
 
 interface CountryOption {
   code: string;

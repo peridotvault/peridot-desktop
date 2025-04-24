@@ -1,5 +1,10 @@
 export const icrc1IdlFactory = ({ IDL }: { IDL: any }) => {
   return IDL.Service({
+    icrc1_name: IDL.Func([], [IDL.Text], ["query"]),
+    icrc1_symbol: IDL.Func([], [IDL.Text], ["query"]),
+    icrc1_decimals: IDL.Func([], [IDL.Nat8], ["query"]),
+    icrc1_total_supply: IDL.Func([], [IDL.Nat], ["query"]),
+    icrc1_fee: IDL.Func([], [IDL.Nat], ["query"]),
     icrc1_metadata: IDL.Func(
       [],
       [

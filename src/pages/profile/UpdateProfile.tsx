@@ -162,15 +162,40 @@ export const UpdateProfile = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
   const [metadataUpdateUser, setMetadataUpdateUser] = useState<MetadataUser>({
-    username: "",
-    display_name: "",
-    email: "",
-    image_url: "",
-    background_image_url: "",
-    user_demographics: {
-      birth_date: "",
-      gender: { other: null },
-      country: "",
+    // username: "",
+    // display_name: "",
+    // email: "",
+    // image_url: "",
+    // background_image_url: "",
+    // user_demographics: {
+    //   birth_date: "",
+    //   gender: { other: null },
+    //   country: "",
+    // },
+    ok: {
+      username: "",
+      display_name: "",
+      description: "",
+      link: "",
+      email: "",
+      image_url: "",
+      background_image_url: "",
+      total_playtime: 0,
+      created_at: "",
+      user_demographics: {
+        birth_date: "",
+        gender: { other: null },
+        country: "",
+      },
+      user_interactions: [
+        {
+          app_id: "",
+          interaction: "",
+          created_at: "",
+        },
+      ],
+      user_libraries: "",
+      developer: [],
     },
   });
   const [isValidUsername, setIsValidUsername] = useState({
@@ -203,19 +228,25 @@ export const UpdateProfile = () => {
               ? { female: null }
               : { other: null };
           setUserData(userData);
-          setMetadataUpdateUser({
-            username: theUserData.ok.username,
-            display_name: theUserData.ok.display_name,
-            email: theUserData.ok.email,
-            image_url: theUserData.ok.image_url || "",
-            background_image_url: theUserData.ok.background_image_url || "",
-            user_demographics: {
-              birth_date: timestampToDateString(
-                theUserData.ok.user_demographics.birth_date
-              ),
-              gender: genderVariant,
-              country: theUserData.ok.user_demographics.country,
-            },
+          setMetadataUpdateUser((prev) => {
+            const result = {
+              ok: {
+                ...prev?.ok,
+                username: theUserData.ok.username,
+                display_name: theUserData.ok.display_name,
+                email: theUserData.ok.email,
+                image_url: theUserData.ok.image_url || "",
+                background_image_url: theUserData.ok.background_image_url || "",
+                user_demographics: {
+                  birth_date: timestampToDateString(
+                    theUserData.ok.user_demographics.birth_date
+                  ),
+                  gender: genderVariant,
+                  country: theUserData.ok.user_demographics.country,
+                },
+              },
+            };
+            return result;
           });
           setIsLoading(false);
         }
@@ -237,15 +268,15 @@ export const UpdateProfile = () => {
       setMetadataUpdateUser((prev) => ({
         ...prev,
         user_demographics: {
-          ...prev.user_demographics,
+          ...prev.ok.user_demographics,
           gender: genderVariant,
         },
       }));
-    } else if (name in metadataUpdateUser.user_demographics) {
+    } else if (name in metadataUpdateUser.ok.user_demographics) {
       setMetadataUpdateUser((prev) => ({
         ...prev,
         user_demographics: {
-          ...prev.user_demographics,
+          ...prev.ok.user_demographics,
           [name]:
             type === "number" ? (value === "" ? "" : Number(value)) : value,
         },
@@ -304,14 +335,13 @@ export const UpdateProfile = () => {
 
   const handleSubmit = async () => {
     // Validation before submission
-    const { username, display_name, email, user_demographics } =
-      metadataUpdateUser;
-    const { birth_date, gender, country } = user_demographics;
+    const { ok } = metadataUpdateUser;
+    const { birth_date, gender, country } = ok.user_demographics;
 
     if (
-      !username ||
-      !display_name ||
-      !email ||
+      !ok.username ||
+      !ok.display_name ||
+      !ok.email ||
       !birth_date ||
       !gender ||
       !country
@@ -322,7 +352,7 @@ export const UpdateProfile = () => {
 
     // Additional validation for email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(ok.email)) {
       alert("Please enter a valid email address");
       return;
     }
@@ -383,9 +413,9 @@ export const UpdateProfile = () => {
               <p className="capitalize font-semibold">Profile photo</p>
               <div className="flex justify-center">
                 <div className="shadow-arise-sm w-[230px] aspect-square rounded-full overflow-hidden">
-                  {metadataUpdateUser.image_url && (
+                  {metadataUpdateUser.ok.image_url && (
                     <img
-                      src={getProfileImage(metadataUpdateUser.image_url)}
+                      src={getProfileImage(metadataUpdateUser.ok.image_url)}
                       className="w-full h-full object-cover"
                     />
                   )}
@@ -403,10 +433,10 @@ export const UpdateProfile = () => {
               <p className="capitalize font-semibold">Background Image</p>
               <div className="flex justify-center">
                 <div className="shadow-arise-sm w-full h-[15rem] rounded-xl overflow-hidden">
-                  {metadataUpdateUser.background_image_url && (
+                  {metadataUpdateUser.ok.background_image_url && (
                     <img
                       src={getCoverImage(
-                        metadataUpdateUser.background_image_url
+                        metadataUpdateUser.ok.background_image_url
                       )}
                       className="w-full h-full object-cover"
                     />
@@ -437,7 +467,7 @@ export const UpdateProfile = () => {
                 type="text"
                 placeholder="username"
                 className="lowercase"
-                value={metadataUpdateUser.username}
+                value={metadataUpdateUser.ok.username}
                 onChange={async (e) => {
                   handleInputChange(e);
                   const result = await isUsernameValid(e.target.value);
@@ -471,7 +501,7 @@ export const UpdateProfile = () => {
               placeholder="Display Name"
               className=""
               onChange={handleInputChange}
-              value={metadataUpdateUser.display_name}
+              value={metadataUpdateUser.ok.display_name}
             />
             <AccountSettingsInputField
               name="email"
@@ -479,7 +509,7 @@ export const UpdateProfile = () => {
               type="email"
               placeholder="Email"
               className=""
-              value={metadataUpdateUser.email}
+              value={metadataUpdateUser.ok.email}
               onChange={handleInputChange}
             />
             <AccountSettingsInputField
@@ -488,7 +518,7 @@ export const UpdateProfile = () => {
               type="date"
               placeholder="Birth Date"
               className=""
-              value={metadataUpdateUser.user_demographics.birth_date.toString()}
+              value={metadataUpdateUser.ok.user_demographics.birth_date.toString()}
               onChange={handleInputChange}
             />
             <AccountSettingsDropdownField
@@ -496,7 +526,7 @@ export const UpdateProfile = () => {
               icon={faVenusMars}
               placeholder="Gender"
               className=""
-              value={metadataUpdateUser.user_demographics.gender}
+              value={metadataUpdateUser.ok.user_demographics.gender}
               options={genderOptions}
               onChange={handleInputChange}
             />
@@ -505,7 +535,7 @@ export const UpdateProfile = () => {
               icon={faEarthAsia}
               placeholder="Country"
               className=""
-              value={metadataUpdateUser.user_demographics.country}
+              value={metadataUpdateUser.ok.user_demographics.country}
               options={countryOptions}
               onChange={handleInputChange}
             />

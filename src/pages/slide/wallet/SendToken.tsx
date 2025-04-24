@@ -126,7 +126,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
 
   // Send Transaction Page
   const [finalCoinAddress, setFinalCoinAddress] = useState<Principal | null>();
-  const [amountCoin, setAmountCoin] = useState<number>(0);
+  const [amountCoin, setAmountCoin] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
 
@@ -134,7 +134,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
     try {
       const result = await transferTokenICRC1(
         finalAddress!,
-        amountCoin,
+        Number(amountCoin),
         finalCoinAddress!,
         wallet
       );
@@ -308,11 +308,24 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                 <div className="flex items-center gap-2">
                   <InputField
                     onChange={(e) => {
-                      setAmountCoin(Number(e));
+                      e = e.replace(/,/g, ".");
+
+                      if (e === "" || e === "0") {
+                        setAmountCoin(e);
+                        return;
+                      }
+
+                      if (/^0+[1-9][0-9]*$/.test(e)) {
+                        e = e.replace(/^0+/, "");
+                      }
+
+                      if (/^(0|([1-9][0-9]*))([.,][0-9]*)?$/.test(e)) {
+                        setAmountCoin(e);
+                      }
                     }}
                     placeholder="Amount"
-                    type="number"
-                    text={amountCoin ? amountCoin.toString() : ""}
+                    type="text"
+                    text={amountCoin ? amountCoin : ""}
                   />
                   <div className="flex gap-8 items-center">
                     <p className="text-lg">PER</p>

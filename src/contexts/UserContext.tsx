@@ -86,18 +86,18 @@ async function updateUser(metadata: MetadataUser, wallet: any) {
     });
 
     const updatePayload: UpdateUserPayload = {
-      username: metadata.username,
-      display_name: metadata.display_name,
-      email: metadata.email,
-      image_url: metadata.image_url ? [metadata.image_url] : [],
-      background_image_url: metadata.background_image_url
-        ? [metadata.background_image_url]
+      username: metadata.ok.username,
+      display_name: metadata.ok.display_name,
+      email: metadata.ok.email,
+      image_url: metadata.ok.image_url ? [metadata.ok.image_url] : [],
+      background_image_url: metadata.ok.background_image_url
+        ? [metadata.ok.background_image_url]
         : [],
       user_demographics: {
         // Convert the date string to nanoseconds timestamp
-        birth_date: dateToNanoSeconds(metadata.user_demographics.birth_date),
-        gender: metadata.user_demographics.gender,
-        country: metadata.user_demographics.country,
+        birth_date: dateToNanoSeconds(metadata.ok.user_demographics.birth_date),
+        gender: metadata.ok.user_demographics.gender,
+        country: metadata.ok.user_demographics.country,
       },
     };
 
