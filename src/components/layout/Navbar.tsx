@@ -7,7 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import { getProfileImage } from "../AdditionalComponent";
+import { getProfileImage } from "../../utils/Additional";
 
 interface NavbarProps {
   onOpenWallet: () => void;

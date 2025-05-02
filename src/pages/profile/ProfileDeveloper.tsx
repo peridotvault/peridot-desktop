@@ -14,7 +14,7 @@ import { AnimatePresence } from "framer-motion";
 import { Setting } from "../slide/Setting";
 import { getUserByPrincipalId } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
-import { LoadingScreen } from "../additional/LoadingScreen";
+import { LoadingScreen } from "../../components/organisms/LoadingScreen";
 
 interface UserDataInterface {
   ok: {

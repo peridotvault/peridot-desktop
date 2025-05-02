@@ -1,8 +1,8 @@
 // UserContext.tsx
 import { HttpAgent, Actor } from "@dfinity/agent";
-import { userIdlFactory } from "../hooks/idl_app/user";
+import { userIdlFactory } from "../blockchain/icp/idl/user";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
-import { walletService } from "../utils/WalletService";
+import { walletService } from "../features/wallet/services/WalletService";
 import { EncryptedData } from "@antigane/encryption";
 import { GenderVariant, MetadataUser } from "../interfaces/User";
 

@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useState } from "react";
-import { StarComponent } from "../../components/StarComponent";
+import { StarComponent } from "../../components/atoms/StarComponent";
 import { VerticalCard } from "../../components/cards/VerticalCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";

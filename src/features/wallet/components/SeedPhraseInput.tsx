@@ -1,7 +1,7 @@
 // @ts-ignore
 import React, { useState, useRef, useEffect } from "react";
-import { InputField } from "../InputField";
-import { copyToClipboard } from "../AdditionalComponent";
+import { InputField } from "../../../components/atoms/InputField";
+import { copyToClipboard } from "../../../utils/Additional";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClone } from "@fortawesome/free-solid-svg-icons";
 

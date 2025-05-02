@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { InputField } from "../../components/InputField";
+import { InputField } from "../../../components/atoms/InputField";
 import { Principal } from "@dfinity/principal";
-import { checkBalance } from "../../contexts/CoinContext";
-import { useWallet } from "../../contexts/WalletContext";
+import { useWallet } from "../../../contexts/WalletContext";
 import localforage from "localforage";
-import { Coin } from "../slide/wallet/Manage";
+import { Coin } from "../interfaces/Coin";
+import { checkBalance } from "../hooks/CoinContext";
 
 interface NavbarProps {
   onClose: () => void;
@@ -20,6 +20,7 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
     balance: 0,
     name: "",
     symbol: "",
+    fee: 0,
     logo: "",
     isChecked: false,
   });
@@ -35,6 +36,7 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
         balance: result.balance!,
         name: result.name!,
         symbol: result.symbol!,
+        fee: result.fee!,
         logo: result.logo!,
         isChecked: false,
       });

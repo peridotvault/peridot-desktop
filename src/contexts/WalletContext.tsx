@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import type { WalletData } from "../utils/WalletService";
+import type { WalletData } from "../features/wallet/services/WalletService";
 import { saveWalletData, getWalletData } from "../utils/StoreService";
 import { EncryptedData } from "@antigane/encryption";
 

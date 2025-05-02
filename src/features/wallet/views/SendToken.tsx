@@ -4,32 +4,34 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useCallback, useEffect, useState } from "react";
-import { InputField } from "../../../components/InputField";
-import { shortenAddress } from "../../../components/AdditionalComponent";
+import { InputField } from "../../../components/atoms/InputField";
+import { shortenAddress } from "../../../utils/Additional";
 import { Principal } from "@dfinity/principal";
 import localforage from "localforage";
-import { ICRC1Coin } from "../../../components/wallet/ICRC1Coin";
-import { transferTokenICRC1 } from "../../../contexts/CoinContext";
+import { ICRC1Coin } from "../components/ICRC1Coin";
 import { useWallet } from "../../../contexts/WalletContext";
-import { TransactionSuccess } from "../../additional/TransactionSuccess";
-import { SaveContact } from "../../additional/SaveContact";
-import { TransactionFailed } from "../../additional/TransactionFailed";
-import theCoin from "./../../../assets/json/coins.json";
+import { TransactionSuccess } from "../components/TransactionSuccess";
+import { SaveContact } from "../components/SaveContact";
+import { TransactionFailed } from "../components/TransactionFailed";
+import theCoin from "../../../assets/json/coins.json";
+import { Coin } from "../interfaces/Coin";
+import { getCoin, getCoinByAddress } from "../../../utils/IndexedDb";
+import { transferTokenICRC1 } from "../hooks/CoinContext";
 
 interface Props {
   onClose: () => void;
   onLockChanged: () => void;
 }
 
-interface Coin {
-  network: string;
-  address: string;
-  balance: number;
-  name: string;
-  symbol: string;
-  logo: string;
-  isChecked: boolean;
-}
+// interface Coin {
+//   network: string;
+//   address: string;
+//   balance: number;
+//   name: string;
+//   symbol: string;
+//   logo: string;
+//   isChecked: boolean;
+// }
 
 export interface Contact {
   icon: string;
@@ -62,7 +64,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
 
   async function loadCoins() {
     try {
-      const savedCoins = await localforage.getItem<Coin[]>("coins");
+      const savedCoins = await getCoin();
 
       if (savedCoins && savedCoins.length > 0) {
         // Create a merged list with both saved and default coins
@@ -126,6 +128,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
 
   // Send Transaction Page
   const [finalCoinAddress, setFinalCoinAddress] = useState<Principal | null>();
+  const [coinMetadata, setCoinMetadata] = useState<Coin | null>(null);
   const [amountCoin, setAmountCoin] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
@@ -136,6 +139,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
         finalAddress!,
         Number(amountCoin),
         finalCoinAddress!,
+        coinMetadata!.fee,
         wallet
       );
       if (result) {
@@ -234,6 +238,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                 setSendTokenAddress("");
                 setFinalAddress(null);
                 setFinalCoinAddress(null);
+                setCoinMetadata(null);
               }}
               className=" w-10 h-10 flex justify-center items-center rounded-xl"
             >
@@ -276,12 +281,18 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                   <button
                     key={index}
                     className="hover:scale-105 duration-300 px-2"
-                    onClick={() => {
+                    onClick={async () => {
                       try {
                         const coinAddress = Principal.fromText(item.address);
+                        const theCoinMetadata = await getCoinByAddress(
+                          item.address
+                        );
+
                         setFinalCoinAddress(coinAddress);
+                        setCoinMetadata(theCoinMetadata!);
                       } catch (err) {
                         setFinalCoinAddress(null);
+                        setCoinMetadata(null);
                       }
                     }}
                   >
@@ -328,7 +339,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                     text={amountCoin ? amountCoin : ""}
                   />
                   <div className="flex gap-8 items-center">
-                    <p className="text-lg">PER</p>
+                    <p className="text-lg">{coinMetadata?.symbol}</p>
                     {/* <button className="text-sm shadow-arise-sm hover:shadow-flat-sm py-2 px-4 rounded-full">
                       max
                     </button> */}

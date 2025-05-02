@@ -1,6 +1,6 @@
 // preload.ts
 import { ipcRenderer } from 'electron'
-import type { WalletData } from '../src/utils/WalletService'
+import type { WalletData } from '../src/features/wallet/services/WalletService'
 import { EncryptedData } from '@antigane/encryption';
 
 interface SerializedWalletData {

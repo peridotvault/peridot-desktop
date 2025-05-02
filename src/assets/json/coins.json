@@ -5,6 +5,7 @@
         "balance": 0,
         "name": "Internet Protocol",
         "symbol": "ICP",
+        "fee": 10000,
         "logo": "./assets/logo-icp.svg",
         "isChecked": true
     },
@@ -14,6 +15,7 @@
         "balance": 0,
         "name": "Ifal",
         "symbol": "FAL",
+        "fee": 0,
         "logo": "",
         "isChecked": true
     }

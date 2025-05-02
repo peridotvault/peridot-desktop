@@ -1,8 +1,9 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
+import { useWallet } from "../../../contexts/WalletContext";
 import { Principal } from "@dfinity/principal";
-import { checkBalance, ICRC1Metadata } from "../../contexts/CoinContext";
+import { checkBalance } from "../hooks/CoinContext";
+import { ICRC1Metadata } from "../interfaces/Coin";
 
 interface ICRC1CoinProps {
   canisterId: string;

@@ -22,13 +22,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import countriesData from "../../assets/json/countries.json";
-import { LoadingScreen } from "../additional/LoadingScreen";
-import {
-  getCoverImage,
-  getProfileImage,
-} from "../../components/AdditionalComponent";
-import { TransactionSuccess } from "../additional/TransactionSuccess";
-import { TransactionFailed } from "../additional/TransactionFailed";
+import { LoadingScreen } from "../../components/organisms/LoadingScreen";
+import { getCoverImage, getProfileImage } from "../../utils/Additional";
+import { TransactionSuccess } from "../../features/wallet/components/TransactionSuccess";
+import { TransactionFailed } from "../../features/wallet/components/TransactionFailed";
 import { GenderVariant, MetadataUser } from "../../interfaces/User";
 import { saveUserInfo } from "../../utils/IndexedDb";
 

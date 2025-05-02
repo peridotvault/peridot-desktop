@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
-import { WalletData } from '../src/utils/WalletService';
+import { WalletData } from '../src/features/wallet/services/WalletService';
 
 // Define the store schema to match WalletData
 interface StoreSchema {

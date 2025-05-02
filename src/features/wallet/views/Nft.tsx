@@ -1,12 +1,7 @@
+// @ts-ignore
 import React from "react";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-interface Props {
-  onClose: () => void;
-}
-
-export const Nft: React.FC<Props> = ({ onClose }) => {
+export const Nft = () => {
   const formatUsd = (
     value: string | null,
     decimalPlaces: number = 2
@@ -22,17 +17,10 @@ export const Nft: React.FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed top-0 right-0 w-[370px] bg-background_primary h-full p-6 flex flex-col gap-8">
+    <div className="bg-background_primary h-full p-6 flex flex-col gap-8">
       {/* Header  */}
-      <div className="flex justify-between items-center">
-        <button
-          onClick={onClose}
-          className=" w-10 h-10 flex justify-center items-center rounded-xl"
-        >
-          <FontAwesomeIcon icon={faChevronLeft} className="text-md" />
-        </button>
+      <div className="flex justify-center items-center">
         <p className="text-lg font-semibold">NFTs</p>
-        <div className="w-10 h-10"></div>
       </div>
 
       {/* Content  */}

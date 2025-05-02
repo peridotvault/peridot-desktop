@@ -1,22 +1,15 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
-import { walletService } from "../utils/WalletService";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
-import { icrc1IdlFactory } from "../hooks/idl/icrc1";
 import { Principal } from "@dfinity/principal";
-
-export interface ICRC1Metadata {
-  balance: number | null;
-  logo: string | null;
-  decimals: bigint | null;
-  name: string | null;
-  symbol: string | null;
-  fee: bigint | null;
-}
+import { walletService } from "../services/WalletService";
+import { icrc1IdlFactory } from "../services/idl/icrc1";
+import { ICRC1Metadata } from "../interfaces/Coin";
 
 async function transferTokenICRC1(
   to: Principal,
   amount: number,
   icrc1Address: Principal,
+  fee: number,
   wallet: any
 ) {
   const E8S_PER_TOKEN = 100000000; // 10^8 for 8 decimals
@@ -42,7 +35,7 @@ async function transferTokenICRC1(
         owner: to,
         subaccount: [],
       },
-      fee: [0n], // Optional fee
+      fee: [fee],
       memo: [],
       from_subaccount: [],
       created_at_time: [],
@@ -50,7 +43,7 @@ async function transferTokenICRC1(
     };
 
     const result = await actor.icrc1_transfer(transferRecord);
-
+    console.log(result);
     return result;
   } catch (error) {
     throw new Error("Error Transfer : " + error);
@@ -75,8 +68,8 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
     // Call balance method
     const name = (await actor.icrc1_name()) as string;
     const symbol = (await actor.icrc1_symbol()) as string;
-    const decimals = (await actor.icrc1_decimals()) as bigint;
-    const fee = (await actor.icrc1_fee()) as bigint;
+    const decimals = (await actor.icrc1_decimals()) as number;
+    const fee = (await actor.icrc1_fee()) as number;
     const metadataResult = (await actor.icrc1_metadata()) as any[][];
     const balanceResult = await actor.icrc1_balance_of({
       owner: Principal.fromText(wallet.principalId),
@@ -91,10 +84,10 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
         icrc1CanisterId == Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai")
           ? "./assets/logo-icp.svg"
           : null,
-      decimals: 0n,
+      decimals: 0,
       name: "",
       symbol: "",
-      fee: 0n,
+      fee: 0,
     };
     result.name = name;
     result.symbol = symbol;

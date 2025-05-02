@@ -1,9 +1,9 @@
 import localforage from "localforage";
 import { MetadataUser } from "../interfaces/User";
-import { Coin } from "../interfaces/Coin";
-import { Currency } from "../interfaces/Currency";
+import { Coin } from "../features/wallet/interfaces/Coin";
+import { Currency } from "../features/wallet/interfaces/Currency";
 import theCurrencies from "./../assets/json/currencies.json";
-import { WalletInfo } from "../interfaces/Wallet";
+import { WalletInfo } from "../features/wallet/interfaces/Wallet";
 
 // ✅ User
 export async function saveUserInfo(user: MetadataUser) {
@@ -44,6 +44,14 @@ export async function deleteCoin(addressToDelete: string): Promise<Coin[]> {
 
 export async function getCoin(): Promise<Coin[] | null> {
   const coin = await localforage.getItem<Coin[]>("coins");
+  return coin;
+}
+
+export async function getCoinByAddress(
+  address: string
+): Promise<Coin | undefined> {
+  const allCoin = (await getCoin()) as Coin[];
+  const coin = allCoin.find((item) => item.address === address);
   return coin;
 }
 

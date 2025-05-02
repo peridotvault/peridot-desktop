@@ -5,10 +5,10 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { InputField } from "../../../components/InputField";
-import { AddCoin } from "../../additional/AddCoin";
-import theCoin from "./../../../assets/json/coins.json";
-import { Coin } from "../../../interfaces/Coin";
+import { InputField } from "../../../components/atoms/InputField";
+import { AddCoin } from "../components/AddCoin";
+import theCoin from "../../../assets/json/coins.json";
+import { Coin } from "../interfaces/Coin";
 import { deleteCoin, getCoin, saveCoin } from "../../../utils/IndexedDb";
 
 interface Props {

@@ -2,13 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { Navbar } from "./Navbar";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Wallet } from "../../pages/slide/wallet/Wallet";
+import { Wallet } from "../../features/wallet/views/Wallet";
 import { AnimatePresence } from "framer-motion";
 import { useWallet } from "../../contexts/WalletContext";
 import Lenis from "lenis";
 import { getUserByPrincipalId } from "../../contexts/UserContext";
-import { InputField } from "../InputField";
-import { walletService } from "../../utils/WalletService";
+import { InputField } from "../atoms/InputField";
+import { walletService } from "../../features/wallet/services/WalletService";
 import { getUserInfo } from "../../utils/IndexedDb";
 import { MetadataUser } from "../../interfaces/User";
 import { saveUserInfo } from "../../utils/IndexedDb";

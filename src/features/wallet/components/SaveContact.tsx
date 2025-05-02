@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { InputField } from "../../components/InputField";
+import { InputField } from "../../../components/atoms/InputField";
 import localforage from "localforage";
-import { Contact } from "../slide/wallet/SendToken";
+import { Contact } from "../views/SendToken";
 
 interface NavbarProps {
   onClose: () => void;

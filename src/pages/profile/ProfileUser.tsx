@@ -10,13 +10,10 @@ import {
   searchUsersByPrefixWithLimit,
 } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
-import { LoadingScreen } from "../additional/LoadingScreen";
-import { InputField } from "../../components/InputField";
-import { LoadingLogo } from "../additional/LoadingLogo";
-import {
-  getCoverImage,
-  getProfileImage,
-} from "../../components/AdditionalComponent";
+import { LoadingScreen } from "../../components/organisms/LoadingScreen";
+import { InputField } from "../../components/atoms/InputField";
+import { LoadingLogo } from "../../components/organisms/LoadingLogo";
+import { getCoverImage, getProfileImage } from "../../utils/Additional";
 import { MetadataUser } from "../../interfaces/User";
 
 export const ProfileUser = () => {
