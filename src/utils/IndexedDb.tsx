@@ -65,6 +65,14 @@ export async function getCurrency(): Promise<Currency[] | null> {
   return currency;
 }
 
+export async function getCurrencyByCode(
+  code: string
+): Promise<Currency | undefined> {
+  const allCurrency = (await getCurrency()) as Currency[];
+  const currency = allCurrency.find((item) => item.currency === code);
+  return currency;
+}
+
 export async function saveCurrency(currencies: Currency[]) {
   try {
     await localforage.setItem("currencies", currencies);
@@ -74,12 +82,20 @@ export async function saveCurrency(currencies: Currency[]) {
   }
 }
 
-export async function getCurrencyByCode(
-  code: string
-): Promise<Currency | undefined> {
+export async function saveRatesByCode(
+  code: string,
+  rates: number
+): Promise<Currency[] | undefined> {
   const allCurrency = (await getCurrency()) as Currency[];
-  const currency = allCurrency.find((item) => item.currency === code);
-  return currency;
+  const updated = allCurrency.map((item) => {
+    if (item.currency === code) {
+      return { ...item, rates };
+    }
+    return item;
+  });
+  await saveCurrency(updated);
+  const result = updated.filter((item) => item.currency === code);
+  return result;
 }
 
 // Wallet

@@ -164,7 +164,7 @@ const WordInput = ({
       <InputField
         ref={inputRef}
         type="text"
-        text={value}
+        value={value}
         disabled={disabled}
         placeholder={(index + 1).toString()}
         onChange={(e) => onChange(index, e)}

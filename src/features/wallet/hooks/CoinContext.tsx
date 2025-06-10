@@ -43,7 +43,6 @@ async function transferTokenICRC1(
     };
 
     const result = await actor.icrc1_transfer(transferRecord);
-    console.log(result);
     return result;
   } catch (error) {
     throw new Error("Error Transfer : " + error);

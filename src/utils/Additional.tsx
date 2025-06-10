@@ -28,3 +28,8 @@ export const copyToClipboard = (data: EncryptedData | string | null) => {
     console.error("Failed to copy: ", err);
   });
 };
+
+export const formatPriceICP = (price: number | undefined) => {
+  const convertedPrice = Number(price) / 1e8;
+  return convertedPrice;
+};

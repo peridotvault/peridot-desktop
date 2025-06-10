@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { faGear, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AnimatePresence } from "framer-motion";
-import { Setting } from "../slide/Setting";
+
 import {
   getFriendRequestList,
   getUserByPrincipalId,
@@ -20,7 +19,6 @@ export const ProfileUser = () => {
   const { wallet } = useWallet();
   const [userData, setUserData] = useState<MetadataUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isOpenSettings, setIsOpenSettings] = useState(false);
   const [isOpenAddFriend, setIsOpenAddFriend] = useState(false);
   const [list_announcement] = useState([
     {
@@ -169,7 +167,7 @@ export const ProfileUser = () => {
             <InputField
               onChange={(e) => handleOnChange(e)}
               placeholder="Search Username or Principal Id"
-              text={username}
+              value={username}
               type="text"
               name="Friends"
             />
@@ -225,19 +223,12 @@ export const ProfileUser = () => {
               {/* Setting  */}
               <button
                 className="shadow-flat-sm hover:shadow-arise-sm w-12 h-12 rounded-lg"
-                onClick={() => setIsOpenSettings(true)}
+                onClick={() => {}}
               >
                 <div className="w-12 h-12 flex justify-center items-center">
                   <FontAwesomeIcon icon={faGear} />
                 </div>
               </button>
-              <AnimatePresence>
-                {isOpenSettings ? (
-                  <Setting onClose={() => setIsOpenSettings(false)} />
-                ) : (
-                  ""
-                )}
-              </AnimatePresence>
             </div>
             {/* bio  */}
             <div className="flex flex-col gap-3 mt-3 px-10">

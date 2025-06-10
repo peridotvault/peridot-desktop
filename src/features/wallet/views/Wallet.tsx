@@ -4,6 +4,7 @@ import { WalletNavigation } from "../components/WalletNavigation";
 import { Home } from "./Home";
 import { History } from "./History";
 import { Nft } from "./Nft";
+import { Settings } from "./Settings";
 
 interface NavbarProps {
   onClose: () => void;
@@ -36,7 +37,7 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
         ) : activeNav == "history" ? (
           <History />
         ) : activeNav == "settings" ? (
-          <History />
+          <Settings />
         ) : (
           <div className=""></div>
         )}

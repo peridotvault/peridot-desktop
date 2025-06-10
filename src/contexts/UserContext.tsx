@@ -35,7 +35,7 @@ function dateToNanoSeconds(dateStr: string): bigint {
   return BigInt(date.getTime()) * BigInt(1_000_000);
 }
 
-const appCanister = import.meta.env.VITE_PERIDOT_CANISTER_BACKEND;
+const userCanister = import.meta.env.VITE_PERIDOT_CANISTER_BACKEND;
 
 async function createAccount(metadata: MetadataCreateUser, wallet: any) {
   const privateKey = await walletService.decryptWalletData(
@@ -50,7 +50,7 @@ async function createAccount(metadata: MetadataCreateUser, wallet: any) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     const result = await actor.createUser(
@@ -82,7 +82,7 @@ async function updateUser(metadata: MetadataUser, wallet: any) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     const updatePayload: UpdateUserPayload = {
@@ -119,7 +119,7 @@ async function isUsernameValid(username: string) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method
@@ -144,7 +144,7 @@ async function getUserByPrincipalId(encryptedPrivateKey: EncryptedData) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method
@@ -175,7 +175,7 @@ async function searchUsersByPrefixWithLimit(
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method
@@ -203,7 +203,7 @@ async function getFriendRequestList(wallet: any) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method
@@ -236,7 +236,7 @@ async function createDeveloperProfile(
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method

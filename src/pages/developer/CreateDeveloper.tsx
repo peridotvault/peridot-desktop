@@ -1,7 +1,7 @@
 // @ts-ignore
 import React, { useState } from "react";
 import { InputField } from "../../components/atoms/InputField";
-import { ButtonTransaction } from "../../components/atoms/ButtonComponent";
+import { ButtonTransaction } from "../../components/atoms/ButtonTransaction";
 import { createDeveloperProfile } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
 

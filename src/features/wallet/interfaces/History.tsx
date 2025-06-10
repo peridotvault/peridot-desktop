@@ -52,6 +52,9 @@ export interface TrainedDataInterface {
   currency: string;
   sender: string;
   receiver: string;
+  isSender: boolean;
+  is_suspicious: boolean;
+  valueCategory: string;
 }
 
 export interface GroupByDayInterface {

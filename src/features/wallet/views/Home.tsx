@@ -27,6 +27,7 @@ import {
   getCurrencyByCode,
   getWalletInfo,
   saveCurrencyToWallet,
+  saveRatesByCode,
 } from "../../../utils/IndexedDb";
 import { Currency } from "../../../features/wallet/interfaces/Currency";
 import { WalletInfo } from "../../../features/wallet/interfaces/Wallet";
@@ -57,6 +58,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
     currency_name: "",
     currency: "",
     symbol: "",
+    flag_url: "",
     rates: 0,
   });
   const [openButton, setOpenButton] = useState({
@@ -148,9 +150,11 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
         currency: cur.currency,
         symbol: cur.symbol,
         rates: json.rates[currency],
+        flag_url: cur.flag_url,
       };
+      await saveRatesByCode(currency, json.rates[currency]);
+      await saveCurrencyToWallet(result);
       setCurrency(result);
-      saveCurrencyToWallet(result);
     } catch (error) {
       console.error(error);
     }
@@ -170,12 +174,12 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
         <div className="flex items-center gap-3 justify-between z-10">
           {/* Network  */}
           <div className="flex gap-6">
-            <button
+            {/* <button
               className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
               onClick={() => setIsOpenWalletAddress(!isOpenWalletAddress)}
             >
               <FontAwesomeIcon icon={faGear} className="text-md" />
-            </button>
+            </button> */}
             {/* Lock  */}
             <button
               className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
@@ -274,7 +278,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
         </div>
 
         <p className="text-5xl my-5 text-center z-10">
-          {currency.symbol + (myBalance * currency.rates).toLocaleString()}
+          {currency.symbol + myBalance.toLocaleString()}
         </p>
 
         <div className="flex gap-7 z-10 items-center justify-center">
@@ -534,7 +538,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
         <div className="flex flex-col gap-3 w-full ">
           <p>Enter your password</p>
           <InputField
-            text={password}
+            value={password}
             onChange={setPassword}
             placeholder="Password"
             disabled={decryptedKey !== null ? true : false}

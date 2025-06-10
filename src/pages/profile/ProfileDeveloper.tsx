@@ -11,7 +11,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import { Setting } from "../slide/Setting";
+import { Slide } from "../Slide";
 import { getUserByPrincipalId } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
 import { LoadingScreen } from "../../components/organisms/LoadingScreen";
@@ -159,7 +159,7 @@ export const ProfileDeveloper = () => {
               </button>
               <AnimatePresence>
                 {isOpenWallet ? (
-                  <Setting onClose={() => setIOpenWallet(false)} />
+                  <Slide onClose={() => setIOpenWallet(false)} />
                 ) : (
                   ""
                 )}

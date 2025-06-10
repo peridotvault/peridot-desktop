@@ -73,7 +73,7 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
       >
         <p className="text-lg font-semibold">Add Coin</p>
         <InputField
-          text={coinAddress}
+          value={coinAddress}
           onChange={(e) => handleOnChange(e)}
           placeholder="Coin Address"
           type="text"
@@ -81,14 +81,14 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
         {isCoinAvailable ? (
           <div className="flex flex-col gap-5 w-full">
             <InputField
-              text={metadata.name}
+              value={metadata.name}
               onChange={(e) => setMetadata((prev) => ({ ...prev, name: e }))}
               placeholder="Name"
               type="text"
               disabled={true}
             />
             <InputField
-              text={metadata.symbol}
+              value={metadata.symbol}
               onChange={(e) => setMetadata((prev) => ({ ...prev, symbol: e }))}
               placeholder="Symbol"
               type="text"

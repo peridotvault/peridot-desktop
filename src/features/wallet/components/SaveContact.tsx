@@ -75,7 +75,7 @@ export const SaveContact: React.FC<NavbarProps> = ({ onClose, address }) => {
           onChange={(e) => setUsername(e)}
           placeholder="@username"
           type="text"
-          text={username}
+          value={username}
         />
         {/* address  */}
         <InputField
@@ -83,7 +83,7 @@ export const SaveContact: React.FC<NavbarProps> = ({ onClose, address }) => {
           placeholder="Contact Address"
           type="text"
           disabled={true}
-          text={address}
+          value={address}
         />
 
         <button

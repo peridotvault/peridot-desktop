@@ -4,8 +4,9 @@ import { TrainedDataInterface } from "../interfaces/History";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { shortenAddress } from "../../../utils/Additional";
-import { ButtonTransaction } from "../../../components/atoms/ButtonComponent";
+import { ButtonTransaction } from "../../../components/atoms/ButtonTransaction";
 import { ipcRenderer } from "electron";
+import { millisecondsToTimestamp } from "../hooks/FetchDataRosetta";
 
 export const TransactionProof = ({
   parseMetadata,
@@ -46,7 +47,7 @@ export const TransactionProof = ({
     },
     {
       title: "Timestamp",
-      content: parseMetadata.date,
+      content: millisecondsToTimestamp(Number(parseMetadata.timestamp)),
     },
   ];
 
@@ -61,7 +62,7 @@ export const TransactionProof = ({
   }
 
   return (
-    <div className="absolute top-0 left-0 bg-background_primary w-full h-full flex flex-col p-8 gap-12 justify-between">
+    <div className="fixed right-0 w-[370px] top-0 bg-background_primary h-full flex flex-col p-8 gap-12 justify-between">
       {/* header  */}
       <header className="flex justify-between items-center">
         <button onClick={onCloseModal} className="w-6 aspect-square">

@@ -12,11 +12,11 @@ import { ICRC1Coin } from "../components/ICRC1Coin";
 import { useWallet } from "../../../contexts/WalletContext";
 import { TransactionSuccess } from "../components/TransactionSuccess";
 import { SaveContact } from "../components/SaveContact";
-import { TransactionFailed } from "../components/TransactionFailed";
 import theCoin from "../../../assets/json/coins.json";
 import { Coin } from "../interfaces/Coin";
 import { getCoin, getCoinByAddress } from "../../../utils/IndexedDb";
 import { transferTokenICRC1 } from "../hooks/CoinContext";
+import { AlertMessage } from "../components/AlertMessage";
 
 interface Props {
   onClose: () => void;
@@ -189,7 +189,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
           }}
           placeholder="Address, Principal or Contact"
           type="text"
-          text={sendTokenAddress ? sendTokenAddress : ""}
+          value={sendTokenAddress ? sendTokenAddress : ""}
         />
       </section>
 
@@ -336,7 +336,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                     }}
                     placeholder="Amount"
                     type="text"
-                    text={amountCoin ? amountCoin : ""}
+                    value={amountCoin ? amountCoin : ""}
                   />
                   <div className="flex gap-8 items-center">
                     <p className="text-lg">{coinMetadata?.symbol}</p>
@@ -362,11 +362,14 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
               </div>
 
               {/* success modal */}
-              {showSuccess ? <TransactionSuccess msg="Success" /> : ""}
-              {showFailed ? (
-                <TransactionFailed msg="Your Session is Over" />
-              ) : (
-                ""
+              {showSuccess && (
+                <AlertMessage msg="Success" isSuccess={showSuccess} />
+              )}
+              {showFailed && (
+                <AlertMessage
+                  msg="Your Session is Over"
+                  isSuccess={showFailed}
+                />
               )}
             </section>
           )}

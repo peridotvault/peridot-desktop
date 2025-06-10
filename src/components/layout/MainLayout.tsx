@@ -5,7 +5,6 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Wallet } from "../../features/wallet/views/Wallet";
 import { AnimatePresence } from "framer-motion";
 import { useWallet } from "../../contexts/WalletContext";
-import Lenis from "lenis";
 import { getUserByPrincipalId } from "../../contexts/UserContext";
 import { InputField } from "../atoms/InputField";
 import { walletService } from "../../features/wallet/services/WalletService";
@@ -22,31 +21,6 @@ export default function MainLayout() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<MetadataUser | null>(null);
-
-  // Lenis smooth scroll setup
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-      infinite: false,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
 
   const saveMetadata = async (
     oldUserMetadata: MetadataUser | null,
@@ -198,7 +172,7 @@ export default function MainLayout() {
               <p>Password Required</p>
               <InputField
                 type="password"
-                text={password}
+                value={password}
                 onChange={setPassword}
                 placeholder="Password"
                 onKeyDown={(e) => {

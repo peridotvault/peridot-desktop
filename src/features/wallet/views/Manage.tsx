@@ -139,7 +139,7 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
           onChange={(e) => setSearchToken(e)}
           placeholder="Enter Token Name"
           type="text"
-          text={searchToken}
+          value={searchToken}
         />
 
         <button

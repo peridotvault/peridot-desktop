@@ -2,7 +2,7 @@
 import React, { forwardRef } from "react";
 
 interface InputFieldProps {
-  text: string;
+  value: string;
   onChange: (value: string) => void;
   placeholder: string;
   disabled?: boolean;
@@ -15,7 +15,7 @@ interface InputFieldProps {
 export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   (
     {
-      text,
+      value,
       onChange,
       placeholder,
       disabled = false,
@@ -35,7 +35,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
           disabled ? "text-text_disabled shadow-flat-sm" : "shadow-sunken-sm "
         }`}
         placeholder={placeholder}
-        value={text}
+        value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={onKeyDown}
         onPaste={onPaste}

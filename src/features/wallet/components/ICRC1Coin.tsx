@@ -4,16 +4,23 @@ import { useWallet } from "../../../contexts/WalletContext";
 import { Principal } from "@dfinity/principal";
 import { checkBalance } from "../hooks/CoinContext";
 import { ICRC1Metadata } from "../interfaces/Coin";
+import { WalletInfo } from "../interfaces/Wallet";
+import { getWalletInfo } from "../../../utils/IndexedDb";
 
 interface ICRC1CoinProps {
   canisterId: string;
-  onBalanceUpdate?: (canisterId: string, balanceUsd: number) => void;
+  onBalanceUpdate?: (
+    canisterId: string,
+    balanceUsd: number,
+    balanceToken: number
+  ) => void;
 }
 
 export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
   const { wallet } = useWallet();
   const [icrc1, setIcrc1] = useState<ICRC1Metadata>();
-  const [priceUsd, setPriceUsd] = useState<string | null>(null);
+  const [rates, setRates] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<WalletInfo | null>(null);
 
   async function fetchBalance() {
     if (wallet.principalId) {
@@ -25,6 +32,8 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
   useEffect(() => {
     async function fetchMarketData() {
       try {
+        const wallet = await getWalletInfo();
+        setCurrency(wallet);
         const response = await fetch(
           `https://api.geckoterminal.com/api/v2/networks/icp/tokens/${canisterId}`
         );
@@ -35,10 +44,11 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
           return;
         }
         const data = await response.json();
-        const price_usd = data.data.attributes.price_usd;
-        setPriceUsd(price_usd);
+        const price_usd: Number =
+          data.data.attributes.price_usd * Number(wallet?.currency.rates);
+        setRates(price_usd.toString());
       } catch (error) {
-        setPriceUsd("0");
+        setRates("0");
       }
     }
 
@@ -55,83 +65,16 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
 
   // Calculate and update the USD balance whenever price or balance changes
   useEffect(() => {
-    if (icrc1?.balance && priceUsd && priceUsd !== "0" && onBalanceUpdate) {
-      const balanceUsd = parseFloat(priceUsd) * icrc1.balance;
-      onBalanceUpdate(canisterId, balanceUsd);
+    if (icrc1?.balance && rates && rates !== "0" && onBalanceUpdate) {
+      const balanceUsd = parseFloat(rates) * icrc1.balance;
+      onBalanceUpdate(canisterId, balanceUsd, icrc1?.balance);
     } else if (onBalanceUpdate) {
       // Set to 0 if there's no valid balance or price
-      onBalanceUpdate(canisterId, 0);
+      onBalanceUpdate(canisterId, 0, 0);
     }
-  }, [icrc1?.balance, priceUsd, canisterId, onBalanceUpdate]);
+  }, [icrc1?.balance, rates, canisterId, onBalanceUpdate]);
 
-  // async function checkBalance(icrc1CanisterId: string) {
-  //   if (!wallet.principalId) {
-  //     throw new Error("Not Logged in");
-  //   }
-  //   try {
-  //     // Initialize agent with identity
-  //     const agent = new HttpAgent({
-  //       host: "https://ic0.app",
-  //     });
-
-  //     const actor = Actor.createActor(icrc1IdlFactory, {
-  //       agent,
-  //       canisterId: icrc1CanisterId,
-  //     });
-
-  //     // Call balance method
-  //     const metadataResult = (await actor.icrc1_metadata()) as any[][];
-  //     const balanceResult = await actor.icrc1_balance_of({
-  //       owner: Principal.fromText(wallet.principalId),
-  //       subaccount: [],
-  //     });
-
-  //     // Convert balance to number and format
-  //     const standardBalance = Number(balanceResult) / 100000000;
-  //     const result: Metadata = {
-  //       balance: standardBalance.toString(),
-  //       logo:
-  //         icrc1CanisterId == "ryjl3-tyaaa-aaaaa-aaaba-cai"
-  //           ? "https://s3.coinmarketcap.com/static-gravity/image/2fb1bc84c1494178beef0822179d137d.png"
-  //           : null,
-  //       decimals: 0n,
-  //       name: "",
-  //       symbol: "",
-  //     };
-  //     for (const metadata of metadataResult) {
-  //       const key = metadata[0];
-  //       const value = metadata[1];
-
-  //       switch (key) {
-  //         case "icrc1:logo":
-  //           result.logo = value.Text;
-  //           break;
-  //         case "icrc1:decimals":
-  //           result.decimals = BigInt(value.Text || 0);
-  //           break;
-  //         case "icrc1:name":
-  //           result.name = value.Text;
-  //           break;
-  //         case "icrc1:symbol":
-  //           result.symbol = value.Text;
-  //           break;
-  //       }
-  //     }
-
-  //     return result;
-  //   } catch (error) {
-  //     const result: Metadata = {
-  //       balance: null,
-  //       logo: null,
-  //       decimals: null,
-  //       name: null,
-  //       symbol: null,
-  //     };
-  //     return result;
-  //   }
-  // }
-
-  const formatUsd = (
+  const formatCurrency = (
     value: string | null,
     decimalPlaces: number = 2
   ): string => {
@@ -139,7 +82,7 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
     const number = parseFloat(value);
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currency?.currency.currency,
       minimumFractionDigits: 1,
       maximumFractionDigits: decimalPlaces,
     }).format(number);
@@ -149,9 +92,16 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 shadow-arise-sm rounded-full flex justify-center items-center overflow-hidden">
-          {icrc1?.logo != null ? (
+          {canisterId == "ryjl3-tyaaa-aaaaa-aaaba-cai" ||
+          icrc1?.logo != null ? (
             <img
-              src={icrc1?.logo != null ? icrc1?.logo : "null"}
+              src={
+                canisterId == "ryjl3-tyaaa-aaaaa-aaaba-cai"
+                  ? "./assets/logo-icp.svg"
+                  : icrc1?.logo != null
+                  ? icrc1?.logo
+                  : "null"
+              }
               alt=""
               className={`w-full ${
                 canisterId == "ryjl3-tyaaa-aaaaa-aaaba-cai" ? "p-3" : ""
@@ -184,15 +134,15 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
           </div>
         </div>
       </div>
-      {priceUsd != null && priceUsd != "0" && icrc1?.balance != null ? (
+      {rates != null && rates != "0" && icrc1?.balance != null ? (
         <div className="flex flex-col items-end">
           <p>
-            {formatUsd(
-              (parseFloat(priceUsd) * icrc1.balance).toLocaleString(),
+            {formatCurrency(
+              (parseFloat(rates) * icrc1.balance).toLocaleString(),
               5
             )}
           </p>
-          <p className="text-xs text-text_disabled">{formatUsd(priceUsd)}</p>
+          <p className="text-xs text-text_disabled">{formatCurrency(rates)}</p>
         </div>
       ) : (
         <div className="w-12 h-5 bg-background_disabled rounded-full animate-pulse"></div>

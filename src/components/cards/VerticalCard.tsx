@@ -4,16 +4,25 @@ import { PriceCoin } from "./PriceCoin";
 import { Link } from "react-router-dom";
 
 export const VerticalCard = ({
+  id,
   imgUrl,
   title,
   price,
 }: {
+  id: number;
   imgUrl: string;
   title: string;
   price: number;
 }) => {
+  const convertedPrice = Number(price) / 1e8;
+  const formatTitle = (title: string): string => {
+    return title.toLowerCase().replace(/\s+/g, "_");
+  };
   return (
-    <Link to="/gamename" className="w-full flex flex-col gap-3 group">
+    <Link
+      to={`/${formatTitle(title)}/${id}`}
+      className="w-full flex flex-col gap-3 group"
+    >
       <div className="w-full aspect-[3/4] overflow-hidden bg-white rounded-xl duration-300">
         <img
           src={imgUrl}
@@ -26,7 +35,7 @@ export const VerticalCard = ({
         <p className="font-bold text-lg text-start line-clamp-2">{title}</p>
       </div>
       {/* price  */}
-      <PriceCoin price={price} />
+      <PriceCoin price={convertedPrice} />
     </Link>
   );
 };

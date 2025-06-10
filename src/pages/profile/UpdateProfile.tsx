@@ -1,10 +1,5 @@
 // @ts-ignore
-import React, {
-  ChangeEvent,
-  ChangeEventHandler,
-  useEffect,
-  useState,
-} from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import {
   updateUser,
@@ -18,16 +13,16 @@ import {
   faTv,
   faUser,
   faVenusMars,
-  IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import countriesData from "../../assets/json/countries.json";
 import { LoadingScreen } from "../../components/organisms/LoadingScreen";
 import { getCoverImage, getProfileImage } from "../../utils/Additional";
 import { TransactionSuccess } from "../../features/wallet/components/TransactionSuccess";
-import { TransactionFailed } from "../../features/wallet/components/TransactionFailed";
 import { GenderVariant, MetadataUser } from "../../interfaces/User";
 import { saveUserInfo } from "../../utils/IndexedDb";
+import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";
+import { DropDownComponent } from "../../components/atoms/DropDownComponent";
+import { AlertMessage } from "../../features/wallet/components/AlertMessage";
 
 interface CountryOption {
   code: string;
@@ -63,95 +58,6 @@ interface UserDataInterface {
     developer: string;
   };
 }
-
-const AccountSettingsInputField = ({
-  name,
-  icon,
-  type,
-  placeholder,
-  className,
-  value,
-  onChange,
-}: {
-  name: string;
-  icon: IconDefinition;
-  type: string;
-  placeholder: string;
-  className: string;
-  value: string;
-  onChange: ChangeEventHandler<HTMLInputElement>;
-}) => {
-  return (
-    <section className="flex flex-col gap-3">
-      <p className="capitalize font-semibold">
-        {placeholder} <label className="text-accent_primary"> *</label>
-      </p>
-      <div className="flex rounded-xl overflow-hidden border border-text_disabled/30">
-        <div className="h-14 w-14 flex justify-center items-center">
-          <FontAwesomeIcon icon={icon} className="text-text_disabled" />
-        </div>
-        <input
-          type={type}
-          name={name}
-          className={`w-full bg-transparent shadow-sunken-sm px-3 ${className}`}
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-        />
-      </div>
-    </section>
-  );
-};
-
-const AccountSettingsDropdownField = ({
-  name,
-  icon,
-  placeholder,
-  className,
-  value,
-  options,
-  onChange,
-}: {
-  name: string;
-  icon: IconDefinition;
-  placeholder: string;
-  className: string;
-  value: string | GenderVariant;
-  options: { code: string; name: string }[];
-  onChange: ChangeEventHandler<HTMLSelectElement>;
-}) => {
-  const displayValue =
-    name === "gender" && typeof value === "object"
-      ? Object.keys(value)[0]
-      : String(value);
-  return (
-    <section className="flex flex-col gap-3">
-      <p className="capitalize font-semibold">
-        {placeholder} <label className="text-accent_primary"> *</label>
-      </p>
-      <div className="flex rounded-xl overflow-hidden border border-text_disabled/30">
-        <div className="h-14 w-14 flex justify-center items-center">
-          <FontAwesomeIcon icon={icon} className="text-text_disabled" />
-        </div>
-        <select
-          name={name}
-          className={`w-full bg-transparent shadow-sunken-sm px-3 ${className}`}
-          value={displayValue}
-          onChange={onChange}
-        >
-          <option value="" disabled>
-            {placeholder}
-          </option>
-          {options.map((option) => (
-            <option key={option.code} value={option.code}>
-              {option.name}
-            </option>
-          ))}
-        </select>
-      </div>
-    </section>
-  );
-};
 
 export const UpdateProfile = () => {
   const { wallet } = useWallet();
@@ -389,11 +295,18 @@ export const UpdateProfile = () => {
     <main className="pt-20  w-full flex flex-col">
       <div className="flex flex-col items-center">
         {showSuccess ? (
-          <TransactionSuccess msg="Account Updated Successfully" />
+          <AlertMessage
+            msg="Account Updated Successfully"
+            isSuccess={showSuccess}
+          />
         ) : (
           ""
         )}
-        {showFailed ? <TransactionFailed msg="Account Updated Failed" /> : ""}
+        {showFailed ? (
+          <AlertMessage msg="Account Updated Failed" isSuccess={showFailed} />
+        ) : (
+          ""
+        )}
         <div className="mb-3 py-6 px-10 border-b border-background_disabled flex justify-between items-center w-full">
           <p className="text-2xl font-semibold">Account Settings</p>
           <button
@@ -458,12 +371,11 @@ export const UpdateProfile = () => {
               </p>
             </div>
             <div className="">
-              <AccountSettingsInputField
+              <InputFieldComponent
                 name="username"
                 icon={faUser}
                 type="text"
                 placeholder="username"
-                className="lowercase"
                 value={metadataUpdateUser.ok.username}
                 onChange={async (e) => {
                   handleInputChange(e);
@@ -491,34 +403,31 @@ export const UpdateProfile = () => {
                 {isValidUsername.msg}
               </p>
             </div>
-            <AccountSettingsInputField
+            <InputFieldComponent
               name="display_name"
               icon={faTv}
               type="text"
               placeholder="Display Name"
-              className=""
               onChange={handleInputChange}
               value={metadataUpdateUser.ok.display_name}
             />
-            <AccountSettingsInputField
+            <InputFieldComponent
               name="email"
               icon={faEnvelope}
               type="email"
               placeholder="Email"
-              className=""
               value={metadataUpdateUser.ok.email}
               onChange={handleInputChange}
             />
-            <AccountSettingsInputField
+            <InputFieldComponent
               name="birth_date"
               icon={faSeedling}
               type="date"
               placeholder="Birth Date"
-              className=""
               value={metadataUpdateUser.ok.user_demographics.birth_date.toString()}
               onChange={handleInputChange}
             />
-            <AccountSettingsDropdownField
+            <DropDownComponent
               name="gender"
               icon={faVenusMars}
               placeholder="Gender"
@@ -527,7 +436,7 @@ export const UpdateProfile = () => {
               options={genderOptions}
               onChange={handleInputChange}
             />
-            <AccountSettingsDropdownField
+            <DropDownComponent
               name="country"
               icon={faEarthAsia}
               placeholder="Country"

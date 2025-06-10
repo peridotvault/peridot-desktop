@@ -1,6 +1,10 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
-import { fetchDataRosetta } from "../hooks/FetchDataRosetta";
+import {
+  classifiedByDay,
+  classifiedByReceived,
+  fetchDataRosetta,
+} from "../hooks/FetchDataRosetta";
 import { useWallet } from "../../../contexts/WalletContext";
 import {
   GroupByDayInterface,
@@ -20,16 +24,34 @@ export const History = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [metadataModal, setMetadataModal] =
     useState<TrainedDataInterface | null>(null);
+  const [filter, setFilter] = useState("daily");
 
   useEffect(() => {
     async function fetchingData() {
       if (wallet?.accountId) {
         const data = await fetchDataRosetta(wallet.accountId);
-        setRelevantOperations(data);
+        setRelevantOperations(await classifiedByDay(data));
       }
     }
     fetchingData();
   }, [wallet]);
+
+  useEffect(() => {
+    handleChangeFilter();
+  }, [filter]);
+
+  async function handleChangeFilter() {
+    if (wallet?.accountId) {
+      const data = await fetchDataRosetta(wallet.accountId);
+      if (filter == "daily") {
+        setRelevantOperations(await classifiedByDay(data));
+      } else if (filter == "received") {
+        setRelevantOperations(await classifiedByReceived(data, "Received"));
+      } else if (filter == "sent") {
+        setRelevantOperations(await classifiedByReceived(data, "Sent"));
+      }
+    }
+  }
 
   function handleClick(op: TrainedDataInterface) {
     setIsDetailTransactionOpen(true);
@@ -46,7 +68,11 @@ export const History = () => {
   }
 
   return (
-    <div className="p-8 flex flex-col gap-8 relative">
+    <div
+      className={`p-8 flex flex-col gap-8 h-full relative ${
+        isFilterOpen ? "overflow-hidden" : "overflow-auto"
+      }`}
+    >
       {/* Header  */}
       <header className="flex items-center justify-between">
         <div className="w-12"></div>
@@ -67,10 +93,7 @@ export const History = () => {
             {transactions.map((tx, idx) => (
               <HistoryComponent
                 key={idx}
-                value={tx.value}
-                currency={tx.currency}
-                sender={tx.sender}
-                receiver={tx.receiver}
+                transaction_data={tx}
                 onClick={() => handleClick(tx)}
               />
             ))}
@@ -80,7 +103,15 @@ export const History = () => {
 
       {/* Modal ✅ */}
       {/* Detail Transaction */}
-      {isFilterOpen ? <FilterHistory /> : ""}
+      {isFilterOpen ? (
+        <FilterHistory
+          onCloseModal={() => setIsFilterOpen(false)}
+          filter={filter}
+          setFilter={setFilter}
+        />
+      ) : (
+        ""
+      )}
 
       {/* Detail Transaction */}
       {isDetailTransactionOpen ? (
