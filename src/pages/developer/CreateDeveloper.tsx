@@ -33,13 +33,13 @@ export const CreateDeveloper = () => {
             onChange={(e) => setWebsiteUrl(e)}
             type="text"
             placeholder="Website Url"
-            text={websiteUrl}
+            value={websiteUrl}
           />
           <InputField
             onChange={(e) => setBio(e)}
             type="text"
             placeholder="Bio"
-            text={bio}
+            value={bio}
           />
         </div>
         {/* Alert  */}
