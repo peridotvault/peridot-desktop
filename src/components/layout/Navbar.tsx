@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import {
   faArrowLeft,
@@ -7,7 +7,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import { getProfileImage } from "../AdditionalComponent";
+import { getProfileImage } from "../../utils/Additional";
+import { AnimatePresence } from "framer-motion";
+import { Slide } from "../../pages/Slide";
 
 interface NavbarProps {
   onOpenWallet: () => void;
@@ -19,6 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   profileImage,
 }) => {
   const { wallet } = useWallet();
+  const [isOpenSettings, setIsOpenSettings] = useState(false);
 
   const shortenAddress = (address: string | null) => {
     if (address) return `${address.slice(0, 4)}...${address.slice(-3)}`;
@@ -64,8 +67,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <FontAwesomeIcon icon={faWallet} />
           <p>{shortenAddress(wallet.principalId)}</p>
         </button>
-        <Link
-          to="/profile_user"
+        <button
+          onClick={() => setIsOpenSettings(true)}
+          // to="/profile_user"
           className="bg-background_primary pt-6 pb-3 mb-3 px-3 rounded-b-full hover:shadow-arise-sm shadow-flat-sm duration-300"
         >
           <div className="w-8 h-8 rounded-full bg-background_secondary overflow-hidden">
@@ -75,8 +79,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="w-full h-full object-cover"
             />
           </div>
-        </Link>
+        </button>
       </div>
+
+      <AnimatePresence>
+        {isOpenSettings ? (
+          <Slide onClose={() => setIsOpenSettings(false)} />
+        ) : (
+          ""
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { WalletData } from "./WalletService";
+import { WalletData } from "../features/wallet/services/WalletService";
 
 export const saveWalletData = async (data: WalletData): Promise<void> => {
   try {

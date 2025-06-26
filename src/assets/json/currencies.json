@@ -1,0 +1,30 @@
+[
+    {
+        "currency_name": "United States Dollar",
+        "currency": "USD",
+        "symbol": "$",
+        "flag_url": "./assets/img/countries/us_flag.webp",
+        "rates": 0
+    },
+    {
+        "currency_name": "Indonesia Rupiah",
+        "currency": "IDR",
+        "symbol": "IDR",
+        "flag_url": "./assets/img/countries/id_flag.webp",
+        "rates": 0
+    },
+    {
+        "currency_name": "Turkish Lira",
+        "currency": "TRY",
+        "symbol": "TRY",
+        "flag_url": "./assets/img/countries/tr_flag.webp",
+        "rates": 0
+    },
+    {
+        "currency_name": "Euro",
+        "currency": "EUR",
+        "symbol": "€",
+        "flag_url": "./assets/img/countries/eu_flag.webp",
+        "rates": 0
+    }
+]

@@ -2,15 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { Navbar } from "./Navbar";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Wallet } from "../../pages/slide/wallet/Wallet";
+import { Wallet } from "../../features/wallet/views/Wallet";
 import { AnimatePresence } from "framer-motion";
 import { useWallet } from "../../contexts/WalletContext";
-import Lenis from "lenis";
 import { getUserByPrincipalId } from "../../contexts/UserContext";
-import { InputField } from "../InputField";
-import { walletService } from "../../utils/WalletService";
+import { InputField } from "../atoms/InputField";
+import { walletService } from "../../features/wallet/services/WalletService";
 import { getUserInfo } from "../../utils/IndexedDb";
 import { MetadataUser } from "../../interfaces/User";
+import { saveUserInfo } from "../../utils/IndexedDb";
+import _ from "lodash";
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
@@ -21,48 +22,23 @@ export default function MainLayout() {
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<MetadataUser | null>(null);
 
-  // Lenis smooth scroll setup
-  useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-      infinite: false,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
-
-  // Memanggil getUserInfo di useEffect
-  useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const userInfo = await getUserInfo();
-        if (userInfo) {
-          setUserData(userInfo);
-        } else {
-          console.log("User Can't Found");
-        }
-      } catch (error) {
-        console.error("Error : ", error);
+  const saveMetadata = async (
+    oldUserMetadata: MetadataUser | null,
+    newMetadata: MetadataUser
+  ): Promise<void> => {
+    try {
+      if (!_.isEqual(oldUserMetadata, newMetadata)) {
+        console.log("check if not same");
+        await saveUserInfo(newMetadata);
       }
-    };
+    } catch (error) {
+      console.error;
+    }
+  };
 
-    fetchUserInfo();
-  }, []);
+  const isValidUser = (u: unknown): u is MetadataUser => {
+    return typeof u === "object" && u !== null && "ok" in u;
+  };
 
   // Check wallet and session status
   useEffect(() => {
@@ -81,18 +57,20 @@ export default function MainLayout() {
       }
       try {
         if (await walletService.isLockOpen()) {
+          const userInfo = await getUserInfo();
+          if (userInfo) {
+            setUserData(userInfo);
+          }
           const lock = await walletService.getLock();
           const isValidSession = lock ? Date.now() <= lock.expiresAt : false;
           setIsCheckingWallet(false);
           if (isValidSession) {
-            const isUserExist = await getUserByPrincipalId(
+            const isUserExist = (await getUserByPrincipalId(
               wallet.encryptedPrivateKey
-            );
-            if (
-              isUserExist &&
-              typeof isUserExist === "object" &&
-              "ok" in isUserExist
-            ) {
+            )) as MetadataUser;
+            if (isValidUser(isUserExist)) {
+              saveMetadata(userInfo, isUserExist);
+
               setIsRequiredPassword(false);
             } else {
               navigate("/create_profile");
@@ -164,7 +142,7 @@ export default function MainLayout() {
     <main className="min-h-screen flex flex-col">
       <Navbar
         onOpenWallet={() => setIOpenWallet(true)}
-        profileImage={userData?.image_url}
+        profileImage={userData?.ok.image_url}
       />
       <div
         className={`flex-1  ${
@@ -194,14 +172,14 @@ export default function MainLayout() {
               <p>Password Required</p>
               <InputField
                 type="password"
-                text={password}
+                value={password}
                 onChange={setPassword}
                 placeholder="Password"
-                // onKeyPress={(e) => {
-                //   if (e.key === 'Enter') {
-                //     handleConfirm();
-                //   }
-                // }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleConfirm();
+                  }
+                }}
               />
               {error && <p className="text-danger text-sm">{error}</p>}
             </div>

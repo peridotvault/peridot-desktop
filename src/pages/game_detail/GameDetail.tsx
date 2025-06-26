@@ -1,19 +1,39 @@
 // @ts-ignore
-import React, { useState } from "react";
-import { StarComponent } from "../../components/StarComponent";
+import React, { useEffect, useState } from "react";
+import { StarComponent } from "../../components/atoms/StarComponent";
 import { VerticalCard } from "../../components/cards/VerticalCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import { AppPayment } from "../../features/wallet/views/Payment";
+import { AppInterface } from "../../interfaces/App";
+import { getAllApps, getApp } from "../../contexts/AppContext";
+import { useParams } from "react-router-dom";
+import { formatPriceICP } from "../../utils/Additional";
 
 export default function GameDetail() {
-  const [price] = useState(30000);
+  const { app_id } = useParams();
+  const [isOnPayment, setIsOnPayment] = useState(false);
+  const [detailGame, setDetailGame] = useState<AppInterface | null>();
+  const [allGames, setAllGames] = useState<AppInterface[] | null>();
+
+  useEffect(() => {
+    async function fetchData() {
+      const resDetailGame = await getApp(Number(app_id));
+      setDetailGame(resDetailGame);
+      const resAllGames = await getAllApps();
+      setAllGames(resAllGames);
+    }
+
+    fetchData();
+  }, []);
+
   return (
     <main className="flex justify-center duration-300">
       <div className="max-w-[1400px] w-full flex flex-col gap-6 duration-300">
         <div className="mb-20"></div>
         {/* title */}
         <div className="px-12 py-6 flex flex-col gap-3">
-          <p className="text-3xl font-bold">Assassin Creed</p>
+          <p className="text-3xl font-bold">{detailGame?.title}</p>
           <StarComponent rate={4} />
         </div>
         {/* First Section */}
@@ -22,9 +42,13 @@ export default function GameDetail() {
           <div className="w-3/4 flex flex-col gap-12 text-lg">
             {/* overview */}
             <img
-              src="/assets/cover1.png"
+              src={
+                detailGame?.background_image
+                  ? detailGame.background_image
+                  : "/assets/cover1.png"
+              }
               alt=""
-              className="aspect-video rounded-xl shadow-arise-sm "
+              className="aspect-video rounded-xl object-cover shadow-arise-sm "
             />
             {/* section 1 */}
             <p>
@@ -65,7 +89,11 @@ export default function GameDetail() {
             <div className="flex items-center justify-center ">
               <div className="w-full aspect-video relative overflow-hidden shadow-arise-sm rounded-xl">
                 <img
-                  src="/assets/cover1.png"
+                  src={
+                    detailGame?.background_image
+                      ? detailGame.background_image
+                      : "/assets/cover1.png"
+                  }
                   className="w-full h-full object-cover"
                   alt=""
                 />
@@ -97,22 +125,33 @@ export default function GameDetail() {
             </div>
             {/* Buy Game  */}
             <div className="flex flex-col gap-4 py-3">
-              {price <= 0 ? (
+              {detailGame?.price && detailGame.price >= 0 ? (
+                <div className="flex gap-2 items-center text-start">
+                  {/* <img
+                    src="/assets/coin-peridot.png"
+                    className="h-6 aspect-square object-contain"
+                    /> */}
+                  <img
+                    src="/assets/logo-icp.svg"
+                    className="h-6 aspect-square object-contain"
+                  />
+                  <p className="text-lg">
+                    {formatPriceICP(detailGame?.price)} ICP
+                  </p>
+                  {/* <p className="opacity-80">
+                    / IDR {(1045800).toLocaleString()}
+                    </p> */}
+                </div>
+              ) : (
                 <div className="flex gap-2 items-center text-start text-lg font-bold">
                   <p>FREE</p>
                 </div>
-              ) : (
-                <div className="flex gap-2 items-center text-start">
-                  <img
-                    src="/assets/coin-peridot.png"
-                    className="h-6 aspect-square object-contain"
-                  />
-                  <p className="text-lg">{price.toLocaleString()} PER /</p>
-                  <p className="opacity-80">IDR {(1045800).toLocaleString()}</p>
-                </div>
               )}
 
-              <button className="w-full p-4 rounded-xl bg-accent_secondary ">
+              <button
+                className="w-full p-4 rounded-xl bg-accent_secondary"
+                onClick={() => setIsOnPayment(true)}
+              >
                 Buy Now
               </button>
               <button className="w-full p-4 rounded-xl shadow-sunken-sm hover:shadow-arise-sm duration-300">
@@ -136,34 +175,25 @@ export default function GameDetail() {
 
             {/* contents  */}
             <div className="flex gap-6">
-              <VerticalCard
-                imgUrl="https://image.api.playstation.com/vulcan/ap/rnd/202409/2013/96a84262e4562c459c213515a9dfd53d82547603b86a2c6a.png"
-                title="Lego Horizon Adventures"
-                price={879000}
-              />
-              <VerticalCard
-                imgUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLMvJe1GUTrDd-_hB5qNvvgCQyALn9rnwheg&s"
-                title="Necroking"
-                price={47000}
-              />
-              <VerticalCard
-                imgUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwgCR-vS9eaaZlau4l5dRX0ct-oQq25RIsTg&s"
-                title="Star Wars Outlaws Gold"
-                price={0}
-              />
-              <VerticalCard
-                imgUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdp_ZPzOzPD_xMZ7CIAEQj5EPocc3ix3DxvQ&s"
-                title="The Casting of Frank Stone™ Deluxe Edition"
-                price={415000}
-              />
-              <VerticalCard
-                imgUrl="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwgCR-vS9eaaZlau4l5dRX0ct-oQq25RIsTg&s"
-                title="Star Wars Outlaws Gold"
-                price={1269000}
-              />
+              {allGames?.slice(0, 5).map((item) => (
+                <VerticalCard
+                  key={item.id}
+                  id={item.id}
+                  imgUrl={item.cover_image}
+                  title={item.title}
+                  price={item.price}
+                />
+              ))}
             </div>
           </div>
         </section>
+        {isOnPayment && (
+          <AppPayment
+            onClose={() => setIsOnPayment(false)}
+            price={Number(formatPriceICP(detailGame?.price))}
+            app_id={Number(app_id)}
+          />
+        )}
         <div className="mb-20"></div>
       </div>
     </main>

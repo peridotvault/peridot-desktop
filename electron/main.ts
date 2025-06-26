@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { setupStoreHandlers } from './store';
@@ -44,7 +44,7 @@ function createWindow() {
     },
   })
 
-  // win.webContents.openDevTools();
+  win.webContents.openDevTools();
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
@@ -68,6 +68,10 @@ function createWindow() {
     if (win) {
       win.webContents.goForward();
     }
+  });
+
+  ipcMain.on('open-external-link', (_event, url) => {
+    shell.openExternal(url);
   });
 }
 

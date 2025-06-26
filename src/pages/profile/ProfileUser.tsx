@@ -2,55 +2,23 @@
 import React, { useEffect, useState } from "react";
 import { faGear, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AnimatePresence } from "framer-motion";
-import { Setting } from "../slide/Setting";
+
 import {
   getFriendRequestList,
   getUserByPrincipalId,
   searchUsersByPrefixWithLimit,
 } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
-import { LoadingScreen } from "../additional/LoadingScreen";
-import { InputField } from "../../components/InputField";
-import { LoadingLogo } from "../additional/LoadingLogo";
-import {
-  getCoverImage,
-  getProfileImage,
-} from "../../components/AdditionalComponent";
-
-interface UserDataInterface {
-  ok: {
-    username: string;
-    display_name: string;
-    description: string;
-    link: string;
-    email: string;
-    image_url: string;
-    background_image_url: string;
-    total_playtime: number;
-    created_at: string;
-    user_demographics: {
-      birth_date: string;
-      gender: string;
-      country: string;
-    };
-    user_interactions: [
-      {
-        app_id: string;
-        interaction: string;
-        created_at: string;
-      }
-    ];
-    user_libraries: string;
-    developer: [];
-  };
-}
+import { LoadingScreen } from "../../components/organisms/LoadingScreen";
+import { InputField } from "../../components/atoms/InputField";
+import { LoadingLogo } from "../../components/organisms/LoadingLogo";
+import { getCoverImage, getProfileImage } from "../../utils/Additional";
+import { MetadataUser } from "../../interfaces/User";
 
 export const ProfileUser = () => {
   const { wallet } = useWallet();
-  const [userData, setUserData] = useState<UserDataInterface | null>(null);
+  const [userData, setUserData] = useState<MetadataUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isOpenSettings, setIsOpenSettings] = useState(false);
   const [isOpenAddFriend, setIsOpenAddFriend] = useState(false);
   const [list_announcement] = useState([
     {
@@ -81,7 +49,7 @@ export const ProfileUser = () => {
           typeof isUserExist === "object" &&
           "ok" in isUserExist
         ) {
-          setUserData(isUserExist as UserDataInterface);
+          setUserData(isUserExist as MetadataUser);
           setIsLoading(false);
         } else {
           setIsLoading(false);
@@ -199,7 +167,7 @@ export const ProfileUser = () => {
             <InputField
               onChange={(e) => handleOnChange(e)}
               placeholder="Search Username or Principal Id"
-              text={username}
+              value={username}
               type="text"
               name="Friends"
             />
@@ -255,19 +223,12 @@ export const ProfileUser = () => {
               {/* Setting  */}
               <button
                 className="shadow-flat-sm hover:shadow-arise-sm w-12 h-12 rounded-lg"
-                onClick={() => setIsOpenSettings(true)}
+                onClick={() => {}}
               >
                 <div className="w-12 h-12 flex justify-center items-center">
                   <FontAwesomeIcon icon={faGear} />
                 </div>
               </button>
-              <AnimatePresence>
-                {isOpenSettings ? (
-                  <Setting onClose={() => setIsOpenSettings(false)} />
-                ) : (
-                  ""
-                )}
-              </AnimatePresence>
             </div>
             {/* bio  */}
             <div className="flex flex-col gap-3 mt-3 px-10">

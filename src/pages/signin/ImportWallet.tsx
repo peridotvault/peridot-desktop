@@ -1,14 +1,14 @@
 // @ts-ignore
 import React, { useCallback, useEffect, useState } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { walletService } from "../../utils/WalletService";
+import { walletService } from "../../features/wallet/services/WalletService";
 import { useNavigate } from "react-router-dom";
 import { PasswordPage } from "./PasswordPage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
 import { clearWalletData } from "../../utils/StoreService";
 import { getUserByPrincipalId } from "../../contexts/UserContext";
-import { SeedPhraseInput } from "../../components/wallet/SeedPhraseInput";
+import { SeedPhraseInput } from "../../features/wallet/components/SeedPhraseInput";
 
 export default function ImportWallet() {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } =

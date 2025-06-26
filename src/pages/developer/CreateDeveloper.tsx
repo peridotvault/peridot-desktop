@@ -1,7 +1,7 @@
 // @ts-ignore
 import React, { useState } from "react";
-import { InputField } from "../../components/InputField";
-import { ButtonTransaction } from "../../components/ButtonComponent";
+import { InputField } from "../../components/atoms/InputField";
+import { ButtonTransaction } from "../../components/atoms/ButtonTransaction";
 import { createDeveloperProfile } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
 
@@ -17,8 +17,8 @@ export const CreateDeveloper = () => {
   return (
     <div className="pt-20 w-full min-h-dvh flex justify-center items-center relative overflow-hidden">
       {/* form  */}
-      <form
-        action=""
+      <div
+        aria-label="form"
         className="w-[400px] p-8 flex flex-col gap-6 bg-background_primary rounded-2xl"
       >
         <div className="bg-background_secondary aspect-video rounded-xl flex flex-col justify-center items-center">
@@ -33,13 +33,13 @@ export const CreateDeveloper = () => {
             onChange={(e) => setWebsiteUrl(e)}
             type="text"
             placeholder="Website Url"
-            text={websiteUrl}
+            value={websiteUrl}
           />
           <InputField
             onChange={(e) => setBio(e)}
             type="text"
             placeholder="Bio"
-            text={bio}
+            value={bio}
           />
         </div>
         {/* Alert  */}
@@ -47,7 +47,7 @@ export const CreateDeveloper = () => {
           *Alert! you can not REFUND but You still can change this details later
         </p>
         <ButtonTransaction onClick={handlePayment} text="Pay" />
-      </form>
+      </div>
       {/* background  */}
       <div className="bg-radial absolute top-0 left-0 w-full h-full -z-10 opacity-30"></div>
     </div>

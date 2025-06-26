@@ -1,10 +1,5 @@
 // @ts-ignore
-import React, {
-  ChangeEvent,
-  ChangeEventHandler,
-  useEffect,
-  useState,
-} from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import {
   updateUser,
@@ -18,19 +13,16 @@ import {
   faTv,
   faUser,
   faVenusMars,
-  IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import countriesData from "../../assets/json/countries.json";
-import { LoadingScreen } from "../additional/LoadingScreen";
-import {
-  getCoverImage,
-  getProfileImage,
-} from "../../components/AdditionalComponent";
-import { TransactionSuccess } from "../additional/TransactionSuccess";
-import { TransactionFailed } from "../additional/TransactionFailed";
+import { LoadingScreen } from "../../components/organisms/LoadingScreen";
+import { getCoverImage, getProfileImage } from "../../utils/Additional";
+import { TransactionSuccess } from "../../features/wallet/components/TransactionSuccess";
 import { GenderVariant, MetadataUser } from "../../interfaces/User";
 import { saveUserInfo } from "../../utils/IndexedDb";
+import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";
+import { DropDownComponent } from "../../components/atoms/DropDownComponent";
+import { AlertMessage } from "../../features/wallet/components/AlertMessage";
 
 interface CountryOption {
   code: string;
@@ -67,110 +59,46 @@ interface UserDataInterface {
   };
 }
 
-const AccountSettingsInputField = ({
-  name,
-  icon,
-  type,
-  placeholder,
-  className,
-  value,
-  onChange,
-}: {
-  name: string;
-  icon: IconDefinition;
-  type: string;
-  placeholder: string;
-  className: string;
-  value: string;
-  onChange: ChangeEventHandler<HTMLInputElement>;
-}) => {
-  return (
-    <section className="flex flex-col gap-3">
-      <p className="capitalize font-semibold">
-        {placeholder} <label className="text-accent_primary"> *</label>
-      </p>
-      <div className="flex rounded-xl overflow-hidden border border-text_disabled/30">
-        <div className="h-14 w-14 flex justify-center items-center">
-          <FontAwesomeIcon icon={icon} className="text-text_disabled" />
-        </div>
-        <input
-          type={type}
-          name={name}
-          className={`w-full bg-transparent shadow-sunken-sm px-3 ${className}`}
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-        />
-      </div>
-    </section>
-  );
-};
-
-const AccountSettingsDropdownField = ({
-  name,
-  icon,
-  placeholder,
-  className,
-  value,
-  options,
-  onChange,
-}: {
-  name: string;
-  icon: IconDefinition;
-  placeholder: string;
-  className: string;
-  value: string | GenderVariant;
-  options: { code: string; name: string }[];
-  onChange: ChangeEventHandler<HTMLSelectElement>;
-}) => {
-  const displayValue =
-    name === "gender" && typeof value === "object"
-      ? Object.keys(value)[0]
-      : String(value);
-  return (
-    <section className="flex flex-col gap-3">
-      <p className="capitalize font-semibold">
-        {placeholder} <label className="text-accent_primary"> *</label>
-      </p>
-      <div className="flex rounded-xl overflow-hidden border border-text_disabled/30">
-        <div className="h-14 w-14 flex justify-center items-center">
-          <FontAwesomeIcon icon={icon} className="text-text_disabled" />
-        </div>
-        <select
-          name={name}
-          className={`w-full bg-transparent shadow-sunken-sm px-3 ${className}`}
-          value={displayValue}
-          onChange={onChange}
-        >
-          <option value="" disabled>
-            {placeholder}
-          </option>
-          {options.map((option) => (
-            <option key={option.code} value={option.code}>
-              {option.name}
-            </option>
-          ))}
-        </select>
-      </div>
-    </section>
-  );
-};
-
 export const UpdateProfile = () => {
   const { wallet } = useWallet();
   const [userData, setUserData] = useState<UserDataInterface | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
   const [metadataUpdateUser, setMetadataUpdateUser] = useState<MetadataUser>({
-    username: "",
-    display_name: "",
-    email: "",
-    image_url: "",
-    background_image_url: "",
-    user_demographics: {
-      birth_date: "",
-      gender: { other: null },
-      country: "",
+    // username: "",
+    // display_name: "",
+    // email: "",
+    // image_url: "",
+    // background_image_url: "",
+    // user_demographics: {
+    //   birth_date: "",
+    //   gender: { other: null },
+    //   country: "",
+    // },
+    ok: {
+      username: "",
+      display_name: "",
+      description: "",
+      link: "",
+      email: "",
+      image_url: "",
+      background_image_url: "",
+      total_playtime: 0,
+      created_at: "",
+      user_demographics: {
+        birth_date: "",
+        gender: { other: null },
+        country: "",
+      },
+      user_interactions: [
+        {
+          app_id: "",
+          interaction: "",
+          created_at: "",
+        },
+      ],
+      user_libraries: "",
+      developer: [],
     },
   });
   const [isValidUsername, setIsValidUsername] = useState({
@@ -203,19 +131,25 @@ export const UpdateProfile = () => {
               ? { female: null }
               : { other: null };
           setUserData(userData);
-          setMetadataUpdateUser({
-            username: theUserData.ok.username,
-            display_name: theUserData.ok.display_name,
-            email: theUserData.ok.email,
-            image_url: theUserData.ok.image_url || "",
-            background_image_url: theUserData.ok.background_image_url || "",
-            user_demographics: {
-              birth_date: timestampToDateString(
-                theUserData.ok.user_demographics.birth_date
-              ),
-              gender: genderVariant,
-              country: theUserData.ok.user_demographics.country,
-            },
+          setMetadataUpdateUser((prev) => {
+            const result = {
+              ok: {
+                ...prev?.ok,
+                username: theUserData.ok.username,
+                display_name: theUserData.ok.display_name,
+                email: theUserData.ok.email,
+                image_url: theUserData.ok.image_url || "",
+                background_image_url: theUserData.ok.background_image_url || "",
+                user_demographics: {
+                  birth_date: timestampToDateString(
+                    theUserData.ok.user_demographics.birth_date
+                  ),
+                  gender: genderVariant,
+                  country: theUserData.ok.user_demographics.country,
+                },
+              },
+            };
+            return result;
           });
           setIsLoading(false);
         }
@@ -237,15 +171,15 @@ export const UpdateProfile = () => {
       setMetadataUpdateUser((prev) => ({
         ...prev,
         user_demographics: {
-          ...prev.user_demographics,
+          ...prev.ok.user_demographics,
           gender: genderVariant,
         },
       }));
-    } else if (name in metadataUpdateUser.user_demographics) {
+    } else if (name in metadataUpdateUser.ok.user_demographics) {
       setMetadataUpdateUser((prev) => ({
         ...prev,
         user_demographics: {
-          ...prev.user_demographics,
+          ...prev.ok.user_demographics,
           [name]:
             type === "number" ? (value === "" ? "" : Number(value)) : value,
         },
@@ -304,14 +238,13 @@ export const UpdateProfile = () => {
 
   const handleSubmit = async () => {
     // Validation before submission
-    const { username, display_name, email, user_demographics } =
-      metadataUpdateUser;
-    const { birth_date, gender, country } = user_demographics;
+    const { ok } = metadataUpdateUser;
+    const { birth_date, gender, country } = ok.user_demographics;
 
     if (
-      !username ||
-      !display_name ||
-      !email ||
+      !ok.username ||
+      !ok.display_name ||
+      !ok.email ||
       !birth_date ||
       !gender ||
       !country
@@ -322,7 +255,7 @@ export const UpdateProfile = () => {
 
     // Additional validation for email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(ok.email)) {
       alert("Please enter a valid email address");
       return;
     }
@@ -362,11 +295,18 @@ export const UpdateProfile = () => {
     <main className="pt-20  w-full flex flex-col">
       <div className="flex flex-col items-center">
         {showSuccess ? (
-          <TransactionSuccess msg="Account Updated Successfully" />
+          <AlertMessage
+            msg="Account Updated Successfully"
+            isSuccess={showSuccess}
+          />
         ) : (
           ""
         )}
-        {showFailed ? <TransactionFailed msg="Account Updated Failed" /> : ""}
+        {showFailed ? (
+          <AlertMessage msg="Account Updated Failed" isSuccess={showFailed} />
+        ) : (
+          ""
+        )}
         <div className="mb-3 py-6 px-10 border-b border-background_disabled flex justify-between items-center w-full">
           <p className="text-2xl font-semibold">Account Settings</p>
           <button
@@ -383,9 +323,9 @@ export const UpdateProfile = () => {
               <p className="capitalize font-semibold">Profile photo</p>
               <div className="flex justify-center">
                 <div className="shadow-arise-sm w-[230px] aspect-square rounded-full overflow-hidden">
-                  {metadataUpdateUser.image_url && (
+                  {metadataUpdateUser.ok.image_url && (
                     <img
-                      src={getProfileImage(metadataUpdateUser.image_url)}
+                      src={getProfileImage(metadataUpdateUser.ok.image_url)}
                       className="w-full h-full object-cover"
                     />
                   )}
@@ -403,10 +343,10 @@ export const UpdateProfile = () => {
               <p className="capitalize font-semibold">Background Image</p>
               <div className="flex justify-center">
                 <div className="shadow-arise-sm w-full h-[15rem] rounded-xl overflow-hidden">
-                  {metadataUpdateUser.background_image_url && (
+                  {metadataUpdateUser.ok.background_image_url && (
                     <img
                       src={getCoverImage(
-                        metadataUpdateUser.background_image_url
+                        metadataUpdateUser.ok.background_image_url
                       )}
                       className="w-full h-full object-cover"
                     />
@@ -431,13 +371,12 @@ export const UpdateProfile = () => {
               </p>
             </div>
             <div className="">
-              <AccountSettingsInputField
+              <InputFieldComponent
                 name="username"
                 icon={faUser}
                 type="text"
                 placeholder="username"
-                className="lowercase"
-                value={metadataUpdateUser.username}
+                value={metadataUpdateUser.ok.username}
                 onChange={async (e) => {
                   handleInputChange(e);
                   const result = await isUsernameValid(e.target.value);
@@ -464,48 +403,45 @@ export const UpdateProfile = () => {
                 {isValidUsername.msg}
               </p>
             </div>
-            <AccountSettingsInputField
+            <InputFieldComponent
               name="display_name"
               icon={faTv}
               type="text"
               placeholder="Display Name"
-              className=""
               onChange={handleInputChange}
-              value={metadataUpdateUser.display_name}
+              value={metadataUpdateUser.ok.display_name}
             />
-            <AccountSettingsInputField
+            <InputFieldComponent
               name="email"
               icon={faEnvelope}
               type="email"
               placeholder="Email"
-              className=""
-              value={metadataUpdateUser.email}
+              value={metadataUpdateUser.ok.email}
               onChange={handleInputChange}
             />
-            <AccountSettingsInputField
+            <InputFieldComponent
               name="birth_date"
               icon={faSeedling}
               type="date"
               placeholder="Birth Date"
-              className=""
-              value={metadataUpdateUser.user_demographics.birth_date.toString()}
+              value={metadataUpdateUser.ok.user_demographics.birth_date.toString()}
               onChange={handleInputChange}
             />
-            <AccountSettingsDropdownField
+            <DropDownComponent
               name="gender"
               icon={faVenusMars}
               placeholder="Gender"
               className=""
-              value={metadataUpdateUser.user_demographics.gender}
+              value={metadataUpdateUser.ok.user_demographics.gender}
               options={genderOptions}
               onChange={handleInputChange}
             />
-            <AccountSettingsDropdownField
+            <DropDownComponent
               name="country"
               icon={faEarthAsia}
               placeholder="Country"
               className=""
-              value={metadataUpdateUser.user_demographics.country}
+              value={metadataUpdateUser.ok.user_demographics.country}
               options={countryOptions}
               onChange={handleInputChange}
             />

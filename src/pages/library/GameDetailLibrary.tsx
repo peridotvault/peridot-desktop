@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   faClock,
   faCode,
@@ -54,6 +54,7 @@ export default function GameDetailLibrary() {
       ],
     },
   ]);
+
   const AnnouncementContainer = ({
     img_url,
     type,

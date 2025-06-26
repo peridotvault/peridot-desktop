@@ -1,8 +1,8 @@
 // UserContext.tsx
 import { HttpAgent, Actor } from "@dfinity/agent";
-import { userIdlFactory } from "../hooks/idl_app/user";
+import { userIdlFactory } from "../blockchain/icp/idl/user";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
-import { walletService } from "../utils/WalletService";
+import { walletService } from "../features/wallet/services/WalletService";
 import { EncryptedData } from "@antigane/encryption";
 import { GenderVariant, MetadataUser } from "../interfaces/User";
 
@@ -35,7 +35,7 @@ function dateToNanoSeconds(dateStr: string): bigint {
   return BigInt(date.getTime()) * BigInt(1_000_000);
 }
 
-const appCanister = import.meta.env.VITE_PERIDOT_CANISTER_BACKEND;
+const userCanister = import.meta.env.VITE_PERIDOT_CANISTER_BACKEND;
 
 async function createAccount(metadata: MetadataCreateUser, wallet: any) {
   const privateKey = await walletService.decryptWalletData(
@@ -50,7 +50,7 @@ async function createAccount(metadata: MetadataCreateUser, wallet: any) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     const result = await actor.createUser(
@@ -82,22 +82,22 @@ async function updateUser(metadata: MetadataUser, wallet: any) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     const updatePayload: UpdateUserPayload = {
-      username: metadata.username,
-      display_name: metadata.display_name,
-      email: metadata.email,
-      image_url: metadata.image_url ? [metadata.image_url] : [],
-      background_image_url: metadata.background_image_url
-        ? [metadata.background_image_url]
+      username: metadata.ok.username,
+      display_name: metadata.ok.display_name,
+      email: metadata.ok.email,
+      image_url: metadata.ok.image_url ? [metadata.ok.image_url] : [],
+      background_image_url: metadata.ok.background_image_url
+        ? [metadata.ok.background_image_url]
         : [],
       user_demographics: {
         // Convert the date string to nanoseconds timestamp
-        birth_date: dateToNanoSeconds(metadata.user_demographics.birth_date),
-        gender: metadata.user_demographics.gender,
-        country: metadata.user_demographics.country,
+        birth_date: dateToNanoSeconds(metadata.ok.user_demographics.birth_date),
+        gender: metadata.ok.user_demographics.gender,
+        country: metadata.ok.user_demographics.country,
       },
     };
 
@@ -119,7 +119,7 @@ async function isUsernameValid(username: string) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method
@@ -144,7 +144,7 @@ async function getUserByPrincipalId(encryptedPrivateKey: EncryptedData) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method
@@ -175,7 +175,7 @@ async function searchUsersByPrefixWithLimit(
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method
@@ -203,7 +203,7 @@ async function getFriendRequestList(wallet: any) {
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method
@@ -215,7 +215,9 @@ async function getFriendRequestList(wallet: any) {
   }
 }
 
-// Developer
+//  ===============================================================
+//  Developer Account Management & Follow =========================
+//  ===============================================================
 async function createDeveloperProfile(
   wallet: any,
   websiteUrl: string,
@@ -236,7 +238,7 @@ async function createDeveloperProfile(
 
     const actor = Actor.createActor(userIdlFactory, {
       agent,
-      canisterId: appCanister,
+      canisterId: userCanister,
     });
 
     // Call balance method

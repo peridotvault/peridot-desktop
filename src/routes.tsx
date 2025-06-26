@@ -18,6 +18,9 @@ import { UpdateProfile } from "./pages/profile/UpdateProfile";
 import { ProfileUser } from "./pages/profile/ProfileUser";
 import { ProfileDeveloper } from "./pages/profile/ProfileDeveloper";
 import { CreateDeveloper } from "./pages/developer/CreateDeveloper";
+import { CreateApp } from "./pages/developer/CreateApp";
+import { StudioMainLayout } from "./components/layout/studio/StudioMainLayout";
+import { NotFound } from "./pages/NotFound";
 
 // import React, { lazy, Suspense } from "react";
 // const Login = lazy(() => import("./pages/signin/Login"));
@@ -57,7 +60,7 @@ const router = createHashRouter([
         element: <Market />,
       },
       {
-        path: ":game",
+        path: ":app_name/:app_id",
         element: <GameDetail />,
       },
       // profile
@@ -78,6 +81,20 @@ const router = createHashRouter([
         path: "create_developer",
         element: <CreateDeveloper />,
       },
+      {
+        path: "studio",
+        element: <StudioMainLayout />,
+        children: [
+          {
+            index: true,
+            element: <CreateApp />,
+          },
+          {
+            path: "create",
+            element: <CreateApp />,
+          },
+        ],
+      },
     ],
   },
 
@@ -97,6 +114,10 @@ const router = createHashRouter([
   {
     path: "/create_profile",
     element: <CreateProfile />,
+  },
+  {
+    path: "/*",
+    element: <NotFound />,
   },
 ]);
 
