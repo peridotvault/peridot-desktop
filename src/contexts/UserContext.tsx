@@ -215,7 +215,9 @@ async function getFriendRequestList(wallet: any) {
   }
 }
 
-// Developer
+//  ===============================================================
+//  Developer Account Management & Follow =========================
+//  ===============================================================
 async function createDeveloperProfile(
   wallet: any,
   websiteUrl: string,
