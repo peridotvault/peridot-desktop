@@ -32,6 +32,7 @@ export const AppPayment: React.FC<Props> = ({ onClose, price, app_id }) => {
   });
   const updateTokenBalance = useCallback(
     (canisterId: string, balanceUsd: number, balanceToken: number) => {
+      console.log(balanceUsd);
       setTokenBalances((prev) => {
         const newBalances = { ...prev, [canisterId]: balanceToken };
         const total = Object.values(newBalances).reduce(

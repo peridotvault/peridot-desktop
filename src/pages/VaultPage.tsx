@@ -12,6 +12,77 @@ export default function VaultPage() {
   const [isHoverComponent, setIsHoverComponent] = useState(false);
   const [allGames, setAllGames] = useState<AppInterface[] | null>();
 
+  const dummyGameList = [
+    {
+      id: 1,
+      cover_image: "https://storage.googleapis.com/pod_public/750/216712.jpg",
+      title: "Elden Ring",
+      price: 59.99,
+    },
+    {
+      id: 2,
+      cover_image:
+        "https://upload.wikimedia.org/wikipedia/id/e/ee/God_of_War_Ragnar%C3%B6k_cover.jpg",
+      title: "God of War Ragnarok",
+      price: 69.99,
+    },
+    {
+      id: 3,
+      cover_image:
+        "https://m.media-amazon.com/images/M/MV5BZWYyNDRkNzAtOTI0Ny00NDQwLWE5M2YtMWFiZDdmMDc4MmQ0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+      title: "Cyberpunk 2077",
+      price: 49.99,
+    },
+    {
+      id: 4,
+      cover_image: "https://m.media-amazon.com/images/I/61Nm7jqUUSL.jpg",
+      title: "Hogwarts Legacy",
+      price: 59.99,
+    },
+    {
+      id: 5,
+      cover_image:
+        "https://smartcdkeys.com/image/cache/catalog/image/cache/data/products/resident-evil-4-remake/cover/resident-evil-4-remake-smartcdkeys-cheap-cd-key-cover-390x580.webp",
+      title: "Resident Evil 4 Remake",
+      price: 39.99,
+    },
+    {
+      id: 6,
+      cover_image:
+        "https://upload.wikimedia.org/wikipedia/en/0/0c/Witcher_3_cover_art.jpg",
+      title: "The Witcher 3: Wild Hunt",
+      price: 29.99,
+    },
+    {
+      id: 7,
+      cover_image:
+        "https://media.rockstargames.com/rockstargames/img/global/news/upload/actual_1364906194.jpg",
+      title: "Grand Theft Auto V",
+      price: 19.99,
+    },
+    {
+      id: 8,
+      cover_image:
+        "https://cdn1.epicgames.com/400347196e674de89c23cc2a7f2121db/offer/AC%20KINGDOM%20PREORDER_STANDARD%20EDITION_EPIC_Key_Art_Portrait_640x854-640x854-288120c5573756cb988b6c1968cebd86.png",
+      title: "Assassin's Creed Valhalla",
+      price: 39.99,
+    },
+    {
+      id: 9,
+      cover_image:
+        "https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg",
+      title: "Red Dead Redemption 2",
+      price: 49.99,
+    },
+    {
+      id: 10,
+      cover_image:
+        "https://image.api.playstation.com/vulcan/ap/rnd/202009/3021/BtsjAgHT9pqHRXtN9FCk7xc8.png",
+      title: "Spider-Man Remastered",
+      price: 59.99,
+    },
+  ];
+
   const images: string[] = [
     "./assets/vault/Content1.png",
     "./assets/vault/Content2.png",
@@ -102,7 +173,7 @@ export default function VaultPage() {
 
           {/* contents  */}
           <div className="flex gap-6">
-            {allGames?.slice(0, 5).map((item) => (
+            {dummyGameList?.slice(0, 5).map((item) => (
               <VerticalCard
                 key={item.id}
                 id={item.id}
@@ -128,7 +199,7 @@ export default function VaultPage() {
 
           {/* contents  */}
           <div className="flex gap-6">
-            {allGames?.slice(0, 5).map((item) => (
+            {dummyGameList?.slice(5, 10).map((item) => (
               <VerticalCard
                 key={item.id}
                 id={item.id}

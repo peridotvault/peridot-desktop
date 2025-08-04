@@ -10,7 +10,6 @@ import { Principal } from "@dfinity/principal";
 import localforage from "localforage";
 import { ICRC1Coin } from "../components/ICRC1Coin";
 import { useWallet } from "../../../contexts/WalletContext";
-import { TransactionSuccess } from "../components/TransactionSuccess";
 import { SaveContact } from "../components/SaveContact";
 import theCoin from "../../../assets/json/coins.json";
 import { Coin } from "../interfaces/Coin";

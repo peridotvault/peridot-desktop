@@ -15,6 +15,49 @@ export const Sidebar = () => {
   const { wallet } = useWallet();
   const [allGames, setAllGames] = useState<AppInterface[] | null>();
 
+  const dummyGameList = [
+    {
+      id: 1,
+      cover_image: "https://storage.googleapis.com/pod_public/750/216712.jpg",
+      title: "Elden Ring",
+      price: 59.99,
+    },
+    {
+      id: 3,
+      cover_image:
+        "https://m.media-amazon.com/images/M/MV5BZWYyNDRkNzAtOTI0Ny00NDQwLWE5M2YtMWFiZDdmMDc4MmQ0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+      title: "Cyberpunk 2077",
+      price: 49.99,
+    },
+    {
+      id: 4,
+      cover_image: "https://m.media-amazon.com/images/I/61Nm7jqUUSL.jpg",
+      title: "Hogwarts Legacy",
+      price: 59.99,
+    },
+    {
+      id: 6,
+      cover_image:
+        "https://upload.wikimedia.org/wikipedia/en/0/0c/Witcher_3_cover_art.jpg",
+      title: "The Witcher 3: Wild Hunt",
+      price: 29.99,
+    },
+    {
+      id: 7,
+      cover_image:
+        "https://media.rockstargames.com/rockstargames/img/global/news/upload/actual_1364906194.jpg",
+      title: "Grand Theft Auto V",
+      price: 19.99,
+    },
+    {
+      id: 10,
+      cover_image:
+        "https://image.api.playstation.com/vulcan/ap/rnd/202009/3021/BtsjAgHT9pqHRXtN9FCk7xc8.png",
+      title: "Spider-Man Remastered",
+      price: 59.99,
+    },
+  ];
+
   useEffect(() => {
     async function fetchData() {
       const resAllGames = await getMyPurchasedApps(wallet);
@@ -24,7 +67,7 @@ export const Sidebar = () => {
     fetchData();
   }, []);
   // Filtered games based on searchQuery
-  const filteredGames = allGames?.filter((game) =>
+  const filteredGames = dummyGameList?.filter((game) =>
     game.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
