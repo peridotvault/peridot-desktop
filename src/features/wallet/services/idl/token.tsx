@@ -1,4 +1,58 @@
-export const icrc1IdlFactory = ({ IDL }: { IDL: any }) => {
+export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
+  const BlockValue = IDL.Rec();
+  BlockValue.fill(
+    IDL.Variant({
+      Int: IDL.Int,
+      Nat: IDL.Nat,
+      Text: IDL.Text,
+      Blob: IDL.Vec(IDL.Nat8),
+      Array: IDL.Vec(BlockValue),
+      Map: IDL.Vec(
+        IDL.Record({
+          _0_: IDL.Text,
+          _1_: BlockValue,
+        })
+      ),
+    })
+  );
+
+  // Block record: { id: nat; block: variant }
+  const BlockRecord = IDL.Record({
+    id: IDL.Nat,
+    block: BlockValue,
+  });
+
+  // Archived block callback arg/return shape
+  const GetBlocksArg = IDL.Record({
+    start: IDL.Nat,
+    length: IDL.Nat,
+  });
+
+  const ArchivedBlock = IDL.Rec();
+  ArchivedBlock.fill(
+    IDL.Record({
+      args: IDL.Vec(GetBlocksArg),
+      callback: IDL.Func(
+        [IDL.Vec(GetBlocksArg)],
+        [
+          IDL.Record({
+            log_length: IDL.Nat,
+            blocks: IDL.Vec(BlockRecord),
+            archived_blocks: IDL.Vec(ArchivedBlock),
+          }),
+        ],
+        ["query"]
+      ),
+    })
+  );
+
+  // Final return type
+  const GetBlocksResponse = IDL.Record({
+    log_length: IDL.Nat,
+    blocks: IDL.Vec(BlockRecord),
+    archived_blocks: IDL.Vec(ArchivedBlock),
+  });
+
   return IDL.Service({
     icrc1_name: IDL.Func([], [IDL.Text], ["query"]),
     icrc1_symbol: IDL.Func([], [IDL.Text], ["query"]),
@@ -77,6 +131,11 @@ export const icrc1IdlFactory = ({ IDL }: { IDL: any }) => {
           })
         ),
       ],
+      ["query"]
+    ),
+    icrc3_get_blocks: IDL.Func(
+      [IDL.Vec(GetBlocksArg)],
+      [GetBlocksResponse],
       ["query"]
     ),
   });

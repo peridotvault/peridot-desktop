@@ -2,9 +2,13 @@ import { Actor, HttpAgent } from "@dfinity/agent";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import { Principal } from "@dfinity/principal";
 import { walletService } from "../services/WalletService";
-import { icrc1IdlFactory } from "../services/idl/icrc1";
+import { tokenIdlFactory } from "../services/idl/token";
 import { ArchiveInfo, ICRC1Metadata } from "../interfaces/Coin";
 import { hexToArrayBuffer } from "../../../utils/crypto";
+import {
+  Block,
+  ICRC3BlockResponse,
+} from "../../../local_db/wallet/models/Block";
 
 async function transferTokenICRC1(
   to: Principal,
@@ -26,7 +30,7 @@ async function transferTokenICRC1(
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(icrc1IdlFactory, {
+    const actor = Actor.createActor(tokenIdlFactory, {
       agent,
       canisterId: icrc1Address,
     });
@@ -62,7 +66,7 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
       host: import.meta.env.VITE_HOST,
     });
 
-    const actor = Actor.createActor(icrc1IdlFactory, {
+    const actor = Actor.createActor(tokenIdlFactory, {
       agent,
       canisterId: icrc1CanisterId,
     });
@@ -130,5 +134,83 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
   }
 }
 
+async function getTokenBlocks(
+  coinArchiveAddress: Principal,
+  start: number,
+  length: number,
+  wallet: any
+): Promise<Block[]> {
+  if (!wallet.principalId) {
+    throw new Error("Not Logged in");
+  }
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+    });
+
+    const actor = Actor.createActor(tokenIdlFactory, {
+      agent,
+      canisterId: coinArchiveAddress,
+    });
+
+    const result = (await actor.icrc3_get_blocks([
+      { start: start, length: length },
+    ])) as ICRC3BlockResponse;
+
+    const parsed = result.blocks
+      .map((b: any) => parseBlock(b, coinArchiveAddress.toText()))
+      .filter((b: Block | null) => b !== null) as Block[];
+
+    return parsed;
+  } catch (error) {
+    throw new Error("Can't get Token's block");
+  }
+}
+
+function parseBlock(raw: any, coinAddress: string): Block | null {
+  if (!("Map" in raw.block)) return null;
+
+  const map = raw.block.Map;
+  let ts = 0n;
+  let amt = 0;
+  let op = "";
+  let from = "";
+  let to = "";
+  let memo = "";
+
+  for (const entry of map) {
+    const key = entry._0_;
+    const val = entry._1_;
+
+    if (key === "ts" && "Nat" in val) ts = val.Nat;
+    if (key === "op" && "Text" in val) op = val.Text;
+    if (key === "amt" && "Nat" in val) amt = Number(val.Nat);
+    if (key === "memo" && "Blob" in val)
+      memo = Buffer.from(val.Blob).toString("hex");
+    if (key === "from" && "Array" in val) {
+      from = val.Array.map((v: any) =>
+        "Blob" in v ? Buffer.from(v.Blob).toString("hex") : ""
+      ).join(",");
+    }
+    if (key === "to" && "Array" in val) {
+      to = val.Array.map((v: any) =>
+        "Blob" in v ? Buffer.from(v.Blob).toString("hex") : ""
+      ).join(",");
+    }
+  }
+
+  return {
+    coinAddress,
+    blockId: raw.id,
+    timestamp: ts,
+    amt,
+    op,
+    from,
+    to,
+    memo,
+  };
+}
+
 // Export function
-export { transferTokenICRC1, checkBalance };
+export { transferTokenICRC1, checkBalance, getTokenBlocks };

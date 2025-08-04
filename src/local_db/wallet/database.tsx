@@ -1,12 +1,14 @@
 import Dexie, { Table } from "dexie";
-import { Block } from "./models/Block";
-
-import { Coin } from "./models/Coin";
 import { schema } from "./schema";
+
+import { Block } from "./models/Block";
+import { Coin } from "./models/Coin";
+import { UserProgress } from "./models/UserProgress";
 
 class WalletDatabase extends Dexie {
   coins!: Table<Coin, string>;
-  icrc3_blocks!: Table<Block, number>;
+  blocks!: Table<Block, number>;
+  user_progress!: Table<UserProgress, number>;
 
   constructor() {
     super("WalletDatabase");
