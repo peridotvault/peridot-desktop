@@ -1,4 +1,4 @@
 export const schema = {
-  coins: "coinAddress",
+  coins: "coinAddress,isChecked",
   blocks: "++id, coinAddress, blockId, timestamp,op, from, to",
 };

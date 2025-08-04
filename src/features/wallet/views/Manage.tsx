@@ -8,8 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { InputField } from "../../../components/atoms/InputField";
 import { AddCoin } from "../components/AddCoin";
 import theCoin from "../../../assets/json/coins.json";
-import { Coin } from "../interfaces/Coin";
-import { deleteCoin, getCoin, saveCoin } from "../../../utils/IndexedDb";
+import { Coin } from "../../../local_db/wallet/models/Coin";
+import { CoinService } from "../../../local_db/wallet/services/coinService";
 
 interface Props {
   onClose: () => void;
@@ -20,19 +20,20 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
   const [listCoins, setListCoins] = useState<Coin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddCoin, setIsAddCoin] = useState(false);
-  const defaultCoins: Coin[] = theCoin;
+  const defaultCoins: Coin[] = theCoin as Coin[];
 
   async function loadCoins() {
     try {
-      const savedCoins = await getCoin();
+      const savedCoins = await CoinService.getAll();
+      setListCoins(savedCoins);
 
-      if (savedCoins && savedCoins.length > 0) {
-        // Create a merged list with both saved and default coins
-        const mergedCoins = mergeCoins(defaultCoins, savedCoins);
-        setListCoins(mergedCoins);
-      } else {
-        setListCoins(defaultCoins);
-      }
+      // if (savedCoins && savedCoins.length > 0) {
+      //   // Create a merged list with both saved and default coins
+      //   const mergedCoins = mergeCoins(defaultCoins, savedCoins);
+      //   setListCoins(mergedCoins);
+      // } else {
+      //   setListCoins(defaultCoins);
+      // }
     } catch (error) {
       console.error("Error loading coins:", error);
       setListCoins(defaultCoins);
@@ -47,15 +48,17 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
 
   const mergeCoins = (defaults: Coin[], saved: Coin[]): Coin[] => {
     // Create a map for quick lookup of saved coins
-    const savedCoinsMap = new Map(saved.map((coin) => [coin.address, coin]));
+    const savedCoinsMap = new Map(
+      saved.map((coin) => [coin.coinAddress, coin])
+    );
 
     // Start with processed defaults that preserve user preferences
     const result: Coin[] = defaults.map((defaultCoin) => {
-      const savedCoin = savedCoinsMap.get(defaultCoin.address);
+      const savedCoin = savedCoinsMap.get(defaultCoin.coinAddress);
 
       // If user has this coin saved, use their preference for isChecked
       if (savedCoin) {
-        savedCoinsMap.delete(defaultCoin.address); // Remove from map to track processed coins
+        savedCoinsMap.delete(defaultCoin.coinAddress); // Remove from map to track processed coins
         return {
           ...defaultCoin,
           isChecked: savedCoin.isChecked,
@@ -79,22 +82,10 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
     token.name.toLowerCase().includes(searchToken.toLowerCase())
   );
 
-  const handleToggle = async (index: number) => {
+  const handleToggle = async (coinAddress: string) => {
     try {
-      // Get the current coins list
-      const updatedList = [...listCoins];
-
-      // Toggle only the isChecked field for the specific coin
-      updatedList[index] = {
-        ...updatedList[index],
-        isChecked: !updatedList[index].isChecked,
-      };
-
-      // Update UI
-      setListCoins(updatedList);
-
-      // Save to localforage
-      await saveCoin(updatedList);
+      await CoinService.updateIsChecked(coinAddress);
+      loadCoins();
     } catch (error) {
       console.error("Error toggling coin:", error);
     }
@@ -161,7 +152,7 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
                     src={item?.logo != null ? item?.logo : "null"}
                     alt=""
                     className={`w-full ${
-                      item?.address == "ryjl3-tyaaa-aaaaa-aaaba-cai"
+                      item?.coinAddress == "ryjl3-tyaaa-aaaaa-aaaba-cai"
                         ? "p-3"
                         : ""
                     }`}
@@ -194,8 +185,8 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
                 <input
                   type="checkbox"
                   className="opacity-0 w-0 h-0"
-                  checked={item.isChecked}
-                  onChange={() => handleToggle(index)}
+                  checked={item.isChecked === 1}
+                  onChange={() => handleToggle(item.coinAddress)}
                 />
                 <span
                   className={`absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-background_primary shadow-arise-sm transition-all duration-500 rounded-lg ${
@@ -214,8 +205,8 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
               <button
                 className="text-danger hover:scale-110 duration-300 h-full aspect-square pl-2"
                 onClick={async () => {
-                  const newCoinList = await deleteCoin(item.address);
-                  setListCoins(newCoinList);
+                  await CoinService.delete(item.coinAddress);
+                  loadCoins();
                 }}
               >
                 <FontAwesomeIcon icon={faTrash} />

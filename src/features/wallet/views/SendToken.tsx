@@ -12,10 +12,10 @@ import { ICRC1Coin } from "../components/ICRC1Coin";
 import { useWallet } from "../../../contexts/WalletContext";
 import { SaveContact } from "../components/SaveContact";
 import theCoin from "../../../assets/json/coins.json";
-import { Coin } from "../interfaces/Coin";
-import { getCoin, getCoinByAddress } from "../../../utils/IndexedDb";
 import { transferTokenICRC1 } from "../hooks/CoinContext";
 import { AlertMessage } from "../components/AlertMessage";
+import { Coin } from "../../../local_db/wallet/models/Coin";
+import { CoinService } from "../../../local_db/wallet/services/coinService";
 
 interface Props {
   onClose: () => void;
@@ -63,7 +63,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
 
   async function loadCoins() {
     try {
-      const savedCoins = await getCoin();
+      const savedCoins = await CoinService.getAll();
 
       if (savedCoins && savedCoins.length > 0) {
         // Create a merged list with both saved and default coins
@@ -84,15 +84,17 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
 
   const mergeCoins = (defaults: Coin[], saved: Coin[]): Coin[] => {
     // Create a map for quick lookup of saved coins
-    const savedCoinsMap = new Map(saved.map((coin) => [coin.address, coin]));
+    const savedCoinsMap = new Map(
+      saved.map((coin) => [coin.coinAddress, coin])
+    );
 
     // Start with processed defaults that preserve user preferences
     const result: Coin[] = defaults.map((defaultCoin) => {
-      const savedCoin = savedCoinsMap.get(defaultCoin.address);
+      const savedCoin = savedCoinsMap.get(defaultCoin.coinAddress);
 
       // If user has this coin saved, use their preference for isChecked
       if (savedCoin) {
-        savedCoinsMap.delete(defaultCoin.address); // Remove from map to track processed coins
+        savedCoinsMap.delete(defaultCoin.coinAddress); // Remove from map to track processed coins
         return {
           ...defaultCoin,
           isChecked: savedCoin.isChecked,
@@ -282,9 +284,11 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                     className="hover:scale-105 duration-300 px-2"
                     onClick={async () => {
                       try {
-                        const coinAddress = Principal.fromText(item.address);
-                        const theCoinMetadata = await getCoinByAddress(
-                          item.address
+                        const coinAddress = Principal.fromText(
+                          item.coinAddress
+                        );
+                        const theCoinMetadata = await CoinService.getByAddress(
+                          item.coinAddress
                         );
 
                         setFinalCoinAddress(coinAddress);
@@ -296,7 +300,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                     }}
                   >
                     <ICRC1Coin
-                      canisterId={item.address}
+                      canisterId={item.coinAddress}
                       onBalanceUpdate={updateTokenBalance}
                     />
                   </button>

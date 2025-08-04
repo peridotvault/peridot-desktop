@@ -66,5 +66,18 @@ export const icrc1IdlFactory = ({ IDL }: { IDL: any }) => {
       ],
       []
     ),
+    icrc3_get_archives: IDL.Func(
+      [IDL.Record({ from: IDL.Opt(IDL.Principal) })],
+      [
+        IDL.Vec(
+          IDL.Record({
+            start: IDL.Nat,
+            end: IDL.Nat,
+            canister_id: IDL.Principal,
+          })
+        ),
+      ],
+      ["query"]
+    ),
   });
 };

@@ -3,7 +3,7 @@ import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import { Principal } from "@dfinity/principal";
 import { walletService } from "../services/WalletService";
 import { icrc1IdlFactory } from "../services/idl/icrc1";
-import { ICRC1Metadata } from "../interfaces/Coin";
+import { ArchiveInfo, ICRC1Metadata } from "../interfaces/Coin";
 import { hexToArrayBuffer } from "../../../utils/crypto";
 
 async function transferTokenICRC1(
@@ -68,6 +68,14 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
     });
 
     // Call balance method
+    let coinArchiveAddress = "";
+    const archives = (await actor.icrc3_get_archives({
+      from: [],
+    })) as ArchiveInfo[];
+    for (const archive of archives) {
+      coinArchiveAddress = archive.canister_id.toString();
+    }
+
     const name = (await actor.icrc1_name()) as string;
     const symbol = (await actor.icrc1_symbol()) as string;
     const decimals = (await actor.icrc1_decimals()) as number;
@@ -82,6 +90,7 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
     const standardBalance = Number(balanceResult) / 100000000;
     const result: ICRC1Metadata = {
       balance: standardBalance,
+      coinArchiveAddress: coinArchiveAddress,
       logo:
         icrc1CanisterId == Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai")
           ? "./assets/logo-icp.svg"
@@ -110,6 +119,7 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
   } catch (error) {
     const result: ICRC1Metadata = {
       decimals: null,
+      coinArchiveAddress: null,
       balance: null,
       name: null,
       symbol: null,

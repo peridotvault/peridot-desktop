@@ -20,7 +20,6 @@ import { walletService } from "../../../features/wallet/services/WalletService";
 import { Manage } from "../../../features/wallet/views/Manage";
 import { Receive } from "../../../features/wallet/views/Receive";
 import { SendToken } from "../../../features/wallet/views/SendToken";
-import localforage from "localforage";
 import theCoin from "./../../../assets/json/coins.json";
 import {
   getCurrencyByCode,
@@ -31,16 +30,8 @@ import {
 import { Currency } from "../../../features/wallet/interfaces/Currency";
 import { WalletInfo } from "../../../features/wallet/interfaces/Wallet";
 import { InputField } from "../../../components/atoms/InputField";
-
-interface Coin {
-  network: string;
-  address: string;
-  balance: number;
-  name: string;
-  symbol: string;
-  logo: string;
-  isChecked: boolean;
-}
+import { CoinService } from "../../../local_db/wallet/services/coinService";
+import { Coin } from "../../../local_db/wallet/models/Coin";
 
 interface HomeProps {
   onLockChanged: () => void;
@@ -78,17 +69,17 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
         fetchAPICurrency(
           myCurrency == null ? "USD" : myCurrency.currency.currency
         );
-        const savedCoins = await localforage.getItem<Coin[]>("coins");
+        setActiveCoins(await CoinService.getCoinActive());
 
-        if (savedCoins && savedCoins.length > 0) {
-          const activeSavedCoins = savedCoins.filter((coin) => coin.isChecked);
-          setActiveCoins(activeSavedCoins);
-        } else {
-          const activeDefaultCoins = defaultCoins.filter(
-            (coin) => coin.isChecked
-          );
-          setActiveCoins(activeDefaultCoins);
-        }
+        // if (savedCoins && savedCoins.length > 0) {
+        //   const activeSavedCoins = savedCoins.filter((coin) => coin.isChecked);
+        //   setActiveCoins(activeSavedCoins);
+        // } else {
+        //   const activeDefaultCoins = defaultCoins.filter(
+        //     (coin) => coin.isChecked
+        //   );
+        //   setActiveCoins(activeDefaultCoins);
+        // }
       } catch (error) {
         console.error("Error loading coins:", error);
         setActiveCoins(defaultCoins);
@@ -382,7 +373,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
         {activeCoins.map((item, index) => (
           <ICRC1Coin
             key={index}
-            canisterId={item.address}
+            canisterId={item.coinAddress}
             onBalanceUpdate={updateTokenBalance}
           />
         ))}

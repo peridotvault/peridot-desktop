@@ -4,6 +4,18 @@ export interface Coin {
   name: string;
   symbol: string;
   logo: string;
-  fee: bigint;
-  isChecked: boolean;
+  balance: number;
+  fee: number;
+  isChecked: number; //(0 and 1)
 }
+
+// export interface Coin {
+//   network: string;
+//   address: string;
+//   balance: number;
+//   name: string;
+//   fee: number;
+//   symbol: string;
+//   logo: string;
+//   isChecked: boolean;
+// }

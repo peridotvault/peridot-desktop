@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { InputField } from "../../../components/atoms/InputField";
 import { Principal } from "@dfinity/principal";
 import { useWallet } from "../../../contexts/WalletContext";
-import localforage from "localforage";
-import { Coin } from "../interfaces/Coin";
 import { checkBalance } from "../hooks/CoinContext";
+import { Coin } from "../../../local_db/wallet/models/Coin";
+import { CoinService } from "../../../local_db/wallet/services/coinService";
 
 interface NavbarProps {
   onClose: () => void;
@@ -15,8 +15,8 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
   const [coinAddress, setCoinAddress] = useState("");
   const [isCoinAvailable, setIsCoinAvailable] = useState(false);
   const [metadata, setMetadata] = useState<Coin>({
-    network: "icp",
-    address: "",
+    coinAddress: "",
+    coinArchiveAddress: "",
     balance: 0,
     name: "",
     symbol: "",
@@ -31,8 +31,8 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
       const address = Principal.fromText(text);
       const result = await checkBalance(address, wallet);
       setMetadata({
-        network: "icp",
-        address: text,
+        coinAddress: text,
+        coinArchiveAddress: result.coinArchiveAddress!,
         balance: result.balance!,
         name: result.name!,
         symbol: result.symbol!,
@@ -50,12 +50,7 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
   const handleSubmit = async () => {
     const newCoin: Coin = metadata;
     try {
-      const currentCoins = await localforage.getItem<Coin[]>("coins");
-      const updatedCoins = currentCoins
-        ? [...currentCoins, newCoin]
-        : [newCoin];
-
-      await localforage.setItem("coins", updatedCoins);
+      await CoinService.add(newCoin);
       onClose();
     } catch (error) {
       console.log(error);
