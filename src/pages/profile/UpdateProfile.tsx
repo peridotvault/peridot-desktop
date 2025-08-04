@@ -17,7 +17,7 @@ import {
 import countriesData from "../../assets/json/countries.json";
 import { LoadingScreen } from "../../components/organisms/LoadingScreen";
 import { getCoverImage, getProfileImage } from "../../utils/Additional";
-import { TransactionSuccess } from "../../features/wallet/components/TransactionSuccess";
+// import { TransactionSuccess } from "../../features/wallet/components/TransactionSuccess";
 import { GenderVariant, MetadataUser } from "../../interfaces/User";
 import { saveUserInfo } from "../../utils/IndexedDb";
 import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";

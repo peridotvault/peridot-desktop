@@ -5,6 +5,7 @@ import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import { walletService } from "../features/wallet/services/WalletService";
 import { EncryptedData } from "@antigane/encryption";
 import { GenderVariant, MetadataUser } from "../interfaces/User";
+import { hexToArrayBuffer } from "../utils/crypto";
 
 export interface MetadataCreateUser {
   username: string;
@@ -35,13 +36,13 @@ function dateToNanoSeconds(dateStr: string): bigint {
   return BigInt(date.getTime()) * BigInt(1_000_000);
 }
 
-const userCanister = import.meta.env.VITE_PERIDOT_CANISTER_BACKEND;
+const userCanister = import.meta.env.VITE_PERIDOT_CANISTER_USER_BACKEND;
 
 async function createAccount(metadata: MetadataCreateUser, wallet: any) {
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
-  const secretKey = Buffer.from(privateKey, "hex");
+  const secretKey = hexToArrayBuffer(privateKey);
   try {
     const agent = new HttpAgent({
       host: import.meta.env.VITE_HOST,
@@ -72,7 +73,7 @@ async function updateUser(metadata: MetadataUser, wallet: any) {
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
-  const secretKey = Buffer.from(privateKey, "hex");
+  const secretKey = hexToArrayBuffer(privateKey);
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
@@ -133,7 +134,7 @@ async function isUsernameValid(username: string) {
 
 async function getUserByPrincipalId(encryptedPrivateKey: EncryptedData) {
   const privateKey = await walletService.decryptWalletData(encryptedPrivateKey);
-  const secretKey = Buffer.from(privateKey, "hex");
+  const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     // Initialize agent with identity
@@ -164,7 +165,7 @@ async function searchUsersByPrefixWithLimit(
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
-  const secretKey = Buffer.from(privateKey, "hex");
+  const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     // Initialize agent with identity
@@ -192,7 +193,7 @@ async function getFriendRequestList(wallet: any) {
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
-  const secretKey = Buffer.from(privateKey, "hex");
+  const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     // Initialize agent with identity
@@ -227,7 +228,7 @@ async function createDeveloperProfile(
     wallet.encryptedPrivateKey
   );
 
-  const secretKey = Buffer.from(privateKey, "hex");
+  const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     // Initialize agent with identity

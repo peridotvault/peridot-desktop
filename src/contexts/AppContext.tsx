@@ -3,6 +3,7 @@ import { walletService } from "../features/wallet/services/WalletService";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import { appIdlFactory } from "../blockchain/icp/idl/app";
 import { AppInterface } from "../interfaces/App";
+import { hexToArrayBuffer } from "../utils/crypto";
 
 const appCanister = import.meta.env.VITE_PERIDOT_CANISTER_APP_BACKEND;
 type ApiError =
@@ -36,7 +37,7 @@ export async function getMyPurchasedApps(
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
-  const secretKey = Buffer.from(privateKey, "hex");
+  const secretKey = hexToArrayBuffer(privateKey);
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
@@ -77,7 +78,7 @@ export async function buyApp(id: number, wallet: any): Promise<string> {
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
-  const secretKey = Buffer.from(privateKey, "hex");
+  const secretKey = hexToArrayBuffer(privateKey);
 
   const agent = new HttpAgent({
     host: import.meta.env.VITE_HOST,

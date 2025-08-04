@@ -8,6 +8,7 @@ import { Buffer } from "buffer";
 import * as ecc from "tiny-secp256k1";
 import localforage from "localforage";
 import { createEncryptionService, EncryptedData } from "@antigane/encryption";
+import { forceToArrayBuffer } from "../../../utils/crypto";
 
 const bip32 = BIP32Factory(ecc);
 
@@ -165,7 +166,8 @@ class WalletService {
         throw new Error("Private key is undefined");
       }
 
-      const identity = Secp256k1KeyIdentity.fromSecretKey(child.privateKey);
+      const privateKeyBuffer = forceToArrayBuffer(child.privateKey!);
+      const identity = Secp256k1KeyIdentity.fromSecretKey(privateKeyBuffer);
       const principalId = identity.getPrincipal().toString();
       const accountId = this.generateAccountId(principalId);
       const privateKey = Buffer.from(identity.getKeyPair().secretKey).toString(

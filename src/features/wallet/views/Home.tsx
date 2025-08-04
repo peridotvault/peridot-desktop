@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import {
   faArrowRightFromBracket,
   faBitcoinSign,
-  faGear,
   faKey,
   faLock,
   faMoneyBillTransfer,

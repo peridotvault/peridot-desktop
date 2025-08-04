@@ -4,6 +4,7 @@ import { Principal } from "@dfinity/principal";
 import { walletService } from "../services/WalletService";
 import { icrc1IdlFactory } from "../services/idl/icrc1";
 import { ICRC1Metadata } from "../interfaces/Coin";
+import { hexToArrayBuffer } from "../../../utils/crypto";
 
 async function transferTokenICRC1(
   to: Principal,
@@ -16,7 +17,9 @@ async function transferTokenICRC1(
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
-  const secretKey = Buffer.from(privateKey, "hex");
+
+  const secretKey = hexToArrayBuffer(privateKey);
+
   try {
     const agent = new HttpAgent({
       host: import.meta.env.VITE_HOST,

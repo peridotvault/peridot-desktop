@@ -14,7 +14,8 @@ export const VerticalCard = ({
   title: string;
   price: number;
 }) => {
-  const convertedPrice = Number(price) / 1e8;
+  // const convertedPrice = Number(price) / 1e8;
+  const convertedPrice = Number(price);
   const formatTitle = (title: string): string => {
     return title.toLowerCase().replace(/\s+/g, "_");
   };
