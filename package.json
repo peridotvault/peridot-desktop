@@ -90,6 +90,9 @@
           ]
         }
       ],
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
       "icon": "public/assets/coin-peridot.png",
       "category": "public.app-category.game"
     },
