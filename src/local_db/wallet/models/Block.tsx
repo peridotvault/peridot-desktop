@@ -1,13 +1,13 @@
 export interface Block {
   id?: number; // auto-increment
-  coinAddress: string;
-  blockId: bigint;
+  coinArchiveAddress: string;
+  blockId: number;
   timestamp: bigint;
   amt: number;
   op: string;
   from: string;
   to: string;
-  memo: string;
+  memo?: string;
 }
 export interface ICRC3BlockResponse {
   log_length: number;

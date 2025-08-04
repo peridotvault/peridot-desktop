@@ -134,12 +134,42 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
   }
 }
 
-async function getTokenBlocks(
-  coinArchiveAddress: Principal,
-  start: number,
-  length: number,
-  wallet: any
-): Promise<Block[]> {
+async function getBlockLength(coinAddress: Principal): Promise<number> {
+  try {
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+    });
+
+    const actor = Actor.createActor(tokenIdlFactory, {
+      agent,
+      canisterId: coinAddress,
+    });
+
+    // Call balance method
+    let totalBlock: number = 0;
+    const archives = (await actor.icrc3_get_archives({
+      from: [],
+    })) as ArchiveInfo[];
+    for (const archive of archives) {
+      totalBlock = Number(archive.end);
+    }
+    return totalBlock;
+  } catch (error) {
+    throw new Error("Can't get block length");
+  }
+}
+
+async function getTokenBlocks({
+  coinArchiveAddress,
+  start,
+  length,
+  wallet,
+}: {
+  coinArchiveAddress: Principal;
+  start: number;
+  length: number;
+  wallet: any;
+}): Promise<Block[]> {
   if (!wallet.principalId) {
     throw new Error("Not Logged in");
   }
@@ -168,7 +198,7 @@ async function getTokenBlocks(
   }
 }
 
-function parseBlock(raw: any, coinAddress: string): Block | null {
+function parseBlock(raw: any, coinArchiveAddress: string): Block | null {
   if (!("Map" in raw.block)) return null;
 
   const map = raw.block.Map;
@@ -179,30 +209,38 @@ function parseBlock(raw: any, coinAddress: string): Block | null {
   let to = "";
   let memo = "";
 
+  let txMap: any[] = [];
+
   for (const entry of map) {
     const key = entry._0_;
     const val = entry._1_;
 
     if (key === "ts" && "Nat" in val) ts = val.Nat;
-    if (key === "op" && "Text" in val) op = val.Text;
+    if (key === "tx" && "Map" in val) txMap = val.Map;
+  }
+
+  for (const entry of txMap) {
+    const key = entry._0_;
+    const val = entry._1_;
+
     if (key === "amt" && "Nat" in val) amt = Number(val.Nat);
-    if (key === "memo" && "Blob" in val)
+    if (key === "op" && "Text" in val) op = val.Text;
+    if (key === "memo" && "Blob" in val) {
       memo = Buffer.from(val.Blob).toString("hex");
+    }
     if (key === "from" && "Array" in val) {
-      from = val.Array.map((v: any) =>
-        "Blob" in v ? Buffer.from(v.Blob).toString("hex") : ""
-      ).join(",");
+      const blob = val.Array.find((v: any) => "Blob" in v)?.Blob;
+      if (blob) from = Principal.fromUint8Array(Uint8Array.from(blob)).toText();
     }
     if (key === "to" && "Array" in val) {
-      to = val.Array.map((v: any) =>
-        "Blob" in v ? Buffer.from(v.Blob).toString("hex") : ""
-      ).join(",");
+      const blob = val.Array.find((v: any) => "Blob" in v)?.Blob;
+      if (blob) to = Principal.fromUint8Array(Uint8Array.from(blob)).toText();
     }
   }
 
   return {
-    coinAddress,
-    blockId: raw.id,
+    coinArchiveAddress,
+    blockId: Number(raw.id),
     timestamp: ts,
     amt,
     op,
@@ -213,4 +251,4 @@ function parseBlock(raw: any, coinAddress: string): Block | null {
 }
 
 // Export function
-export { transferTokenICRC1, checkBalance, getTokenBlocks };
+export { transferTokenICRC1, checkBalance, getBlockLength, getTokenBlocks };

@@ -13,10 +13,10 @@ export const UserProgressService = {
 
   async saveOrUpdate(
     principalId: string,
-    coinAddress: string,
+    coinArchiveAddress: string,
     lastSavedBlock: number
   ) {
-    const existing = await this.get(principalId, coinAddress);
+    const existing = await this.get(principalId, coinArchiveAddress);
     if (existing) {
       return await dbWallet.user_progress.update(existing.id!, {
         lastSavedBlock,
@@ -24,7 +24,7 @@ export const UserProgressService = {
     } else {
       return await dbWallet.user_progress.add({
         principalId,
-        coinAddress,
+        coinArchiveAddress,
         lastSavedBlock,
       });
     }

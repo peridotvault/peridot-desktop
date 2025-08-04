@@ -1,10 +1,5 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
-import {
-  classifiedByDay,
-  classifiedByReceived,
-  fetchDataRosetta,
-} from "../hooks/FetchDataRosetta";
 import { useWallet } from "../../../contexts/WalletContext";
 import {
   GroupByDayInterface,
@@ -15,6 +10,13 @@ import { TransactionProof } from "./TransactionProof";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { FilterHistory } from "../components/FilterHistory";
+import { BlockService } from "../../../local_db/wallet/services/blockService";
+import { filterByType, groupByDay } from "../../../utils/classifier";
+import { transformBlockToTrained } from "../../../utils/transformBlockToTrainedData";
+import { CoinService } from "../../../local_db/wallet/services/coinService";
+import { getBlockLength, getTokenBlocks } from "../hooks/CoinContext";
+import { UserProgressService } from "../../../local_db/wallet/services/userProgressService";
+import { Principal } from "@dfinity/principal";
 
 export const History = () => {
   const { wallet } = useWallet();
@@ -26,37 +28,92 @@ export const History = () => {
     useState<TrainedDataInterface | null>(null);
   const [filter, setFilter] = useState("daily");
 
-  useEffect(() => {
-    async function fetchingData() {
-      if (wallet?.accountId) {
-        const data = await fetchDataRosetta(wallet.accountId);
-        setRelevantOperations(await classifiedByDay(data));
-      }
-    }
-    fetchingData();
-  }, [wallet]);
+  async function fetchingAllTokenBlocks() {
+    if (!wallet?.principalId) return;
 
-  useEffect(() => {
-    handleChangeFilter();
-  }, [filter]);
+    const listToken = await CoinService.getAll();
 
-  async function handleChangeFilter() {
-    if (wallet?.accountId) {
-      const data = await fetchDataRosetta(wallet.accountId);
-      if (filter == "daily") {
-        setRelevantOperations(await classifiedByDay(data));
-      } else if (filter == "received") {
-        setRelevantOperations(await classifiedByReceived(data, "Received"));
-      } else if (filter == "sent") {
-        setRelevantOperations(await classifiedByReceived(data, "Sent"));
+    for (const coin of listToken) {
+      const tokenLength = await getBlockLength(
+        Principal.fromText(coin.coinAddress)
+      );
+      console.log("Token Length", tokenLength);
+
+      const progressFetch = await UserProgressService.get(
+        wallet.principalId,
+        coin.coinArchiveAddress
+      );
+      const startBlock = progressFetch?.lastSavedBlock ?? 0;
+
+      const result = await getTokenBlocks({
+        coinArchiveAddress: Principal.fromText(coin.coinArchiveAddress),
+        length: tokenLength,
+        start: startBlock,
+        wallet: wallet,
+      });
+
+      for (const block of result) {
+        if (
+          block.from === wallet.principalId ||
+          block.to === wallet.principalId
+        ) {
+          await BlockService.add(block);
+        } else {
+          console.log(`⏩ Skipped non-user block ${block.blockId}`);
+        }
       }
+
+      await UserProgressService.saveOrUpdate(
+        wallet.principalId,
+        coin.coinArchiveAddress,
+        tokenLength
+      );
     }
   }
 
-  function handleClick(op: TrainedDataInterface) {
+  async function loadTransactions() {
+    if (!wallet?.principalId) return;
+
+    const blocks = await BlockService.getByPrincipal(wallet.principalId);
+    console.log("Fetched blocks:", blocks);
+
+    // 🔁 Konversi dari Block[] ke TrainedDataInterface[]
+    const trainedBlocks: TrainedDataInterface[] = blocks.map((block) =>
+      transformBlockToTrained(block, wallet.principalId!)
+    );
+
+    let filteredBlocks: TrainedDataInterface[] = [];
+
+    if (filter === "daily") {
+      setRelevantOperations(groupByDay(trainedBlocks));
+    } else if (filter === "received") {
+      filteredBlocks = filterByType(
+        trainedBlocks,
+        wallet.principalId,
+        "Received"
+      );
+      setRelevantOperations(groupByDay(filteredBlocks));
+    } else if (filter === "sent") {
+      filteredBlocks = filterByType(trainedBlocks, wallet.principalId, "Sent");
+      setRelevantOperations(groupByDay(filteredBlocks));
+    }
+  }
+
+  useEffect(() => {
+    async function syncAndLoad() {
+      await fetchingAllTokenBlocks(); // 🔁 Fetch & Save ke local DB
+      await loadTransactions(); // 📄 Tampilkan dari local DB
+    }
+
+    if (wallet?.principalId) {
+      syncAndLoad();
+    }
+  }, [wallet, filter]);
+
+  const handleClick = (op: TrainedDataInterface) => {
     setIsDetailTransactionOpen(true);
     setMetadataModal(op);
-  }
+  };
 
   function handleCloseModal() {
     setIsDetailTransactionOpen(false);

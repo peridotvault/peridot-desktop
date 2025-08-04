@@ -3,35 +3,54 @@ import { Block } from "../models/Block";
 
 export const BlockService = {
   async add(block: Block) {
-    return await dbWallet.icrc3_blocks.put(block);
+    const existing = await dbWallet.blocks
+      .where({
+        coinArchiveAddress: block.coinArchiveAddress,
+        blockId: block.blockId,
+      })
+      .first();
+
+    if (existing) {
+      console.log(`⏩ Skipped duplicate block ${block.blockId}`);
+      return;
+    }
+
+    return await dbWallet.blocks.put(block);
   },
 
   async getAll(): Promise<Block[]> {
-    return await dbWallet.icrc3_blocks.toArray();
+    return await dbWallet.blocks.toArray();
   },
 
-  async getByCoin(coinAddress: string): Promise<Block[]> {
-    return await dbWallet.icrc3_blocks
-      .where("coinAddress")
-      .equals(coinAddress)
+  async getByCoin(coinArchiveAddress: string): Promise<Block[]> {
+    return await dbWallet.blocks
+      .where("coinArchiveAddress")
+      .equals(coinArchiveAddress)
       .toArray();
   },
 
-  async getByBlockId(coinAddress: string, blockId: bigint) {
-    return await dbWallet.icrc3_blocks
-      .where("[coinAddress+blockId]")
-      .equals([coinAddress + blockId])
+  async getByBlockId(coinArchiveAddress: string, blockId: bigint) {
+    return await dbWallet.blocks
+      .where("[coinArchiveAddress+blockId]")
+      .equals([coinArchiveAddress + blockId])
       .first();
   },
 
   async deleteById(id: number) {
-    return await dbWallet.icrc3_blocks.delete(id);
+    return await dbWallet.blocks.delete(id);
   },
 
-  async getLatestBlockId(coinAddress: string): Promise<bigint | null> {
-    const last = await dbWallet.icrc3_blocks
-      .where("coinAddress")
-      .equals(coinAddress)
+  async getByPrincipal(principalId: string) {
+    const allBlocks = await dbWallet.blocks.toArray();
+    return allBlocks.filter(
+      (block) => block.to === principalId || block.from === principalId
+    );
+  },
+
+  async getLatestBlockId(coinArchiveAddress: string): Promise<number | null> {
+    const last = await dbWallet.blocks
+      .where("coinArchiveAddress")
+      .equals(coinArchiveAddress)
       .reverse()
       .sortBy("blockId");
     return last.length > 0 ? last[0].blockId : null;
