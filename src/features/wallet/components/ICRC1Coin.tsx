@@ -139,7 +139,7 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
           <p>
             {formatCurrency(
               (parseFloat(rates) * icrc1.balance).toLocaleString(),
-              5
+              2
             )}
           </p>
           <p className="text-xs text-text_disabled">{formatCurrency(rates)}</p>

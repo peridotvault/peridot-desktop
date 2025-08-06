@@ -11,7 +11,7 @@ export const BlockService = {
       .first();
 
     if (existing) {
-      console.log(`⏩ Skipped duplicate block ${block.blockId}`);
+      // console.log(`⏩ Skipped duplicate block ${block.blockId}`);
       return;
     }
 

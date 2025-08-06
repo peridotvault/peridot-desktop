@@ -3,5 +3,5 @@ export const schema = {
   blocks:
     "++id, coinArchiveAddress, blockId, timestamp, op, from, to, [coinArchiveAddress+blockId]",
   user_progress:
-    "++id, principalId, coinArchiveAddress, [principalId+coinArchiveAddress]",
+    "++id, principalId, coinAddress, lastSavedBlock, [principalId+coinAddress]",
 };

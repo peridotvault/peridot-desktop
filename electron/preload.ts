@@ -29,4 +29,8 @@ window.electronAPI = {
   clearWallet: (): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('clear-wallet'),
 
+
+  openWebGame: (url: string): void => {
+    ipcRenderer.send('open-web-game', url);
+  },
 }

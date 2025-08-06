@@ -18,18 +18,11 @@ export default function GameDetailLibrary() {
       announcements: [
         {
           img_url:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuELWiuZ7LLpj9Kr3sQ-8Shvsk0UrqmGhiGg&s",
+            "https://img.gamepix.com/games/cubetopia-parkour/cover/cubetopia-parkour.png?w=400&ar=16:10",
           type: "In-Game Event",
-          title: "World Tour | ISEUL-T Cup | Strike A Pose!",
+          title: "Parkour Update",
           description:
             "As ISEUL-T’s generous sponsorship comes to an end they want to see your flashiest moves! This week, your team will be rewarded with some extra cash for showing off by emoting near a cashout that your team starts, steals, or completes! A dance floor appears whenever a player opens a vault, starts a cashout, steals a cashout or completes a cashout. When the dance floor appears you have 5 seconds to strike a pose, and hold that pose for at least 2 seconds - doing so awards your team with $1000. Everyone in your team can do it - so make sure to coordinate your best moves and maximize that cash!",
-        },
-        {
-          img_url: "https://pbs.twimg.com/media/GYZxIMcaMAMIzvR.jpg:large",
-          type: "Regular Update",
-          title: "Update 5.6.0",
-          description:
-            "The power levels are at an all-time high in The Arena this week as DISSUN unveils its newest advertisement in preparation for its takeover of the World Tour starting tomorrow. The fuel company has a lot in store for you, so get ready to celebrate Lunar New Year in a powerful way, as a brand-new throwable takes center stage in the festively decorated Arena!",
         },
       ],
     },
@@ -37,23 +30,21 @@ export default function GameDetailLibrary() {
       date: "Dec 23, 2024",
       announcements: [
         {
-          img_url:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuELWiuZ7LLpj9Kr3sQ-8Shvsk0UrqmGhiGg&s",
-          type: "In-Game Event",
-          title: "World Tour | ISEUL-T Cup | Strike A Pose!",
-          description:
-            "As ISEUL-T’s generous sponsorship comes to an end they want to see your flashiest moves! This week, your team will be rewarded with some extra cash for showing off by emoting near a cashout that your team starts, steals, or completes! A dance floor appears whenever a player opens a vault, starts a cashout, steals a cashout or completes a cashout. When the dance floor appears you have 5 seconds to strike a pose, and hold that pose for at least 2 seconds - doing so awards your team with $1000. Everyone in your team can do it - so make sure to coordinate your best moves and maximize that cash!",
-        },
-        {
-          img_url: "https://pbs.twimg.com/media/GYZxIMcaMAMIzvR.jpg:large",
+          img_url: "https://i.ytimg.com/vi/3TYtDN9612M/sddefault.jpg",
           type: "Regular Update",
-          title: "Update 5.6.0",
+          title: "Update 0.5",
           description:
             "The power levels are at an all-time high in The Arena this week as DISSUN unveils its newest advertisement in preparation for its takeover of the World Tour starting tomorrow. The fuel company has a lot in store for you, so get ready to celebrate Lunar New Year in a powerful way, as a brand-new throwable takes center stage in the festively decorated Arena!",
         },
       ],
     },
   ]);
+  const gameDetail = {
+    headerImage:
+      "https://img.itch.zone/aW1nLzIxNDYxMzI3LmpwZWc=/original/2JnL%2BH.jpeg",
+    title: "Cubetopia",
+    currentPrice: 0,
+  };
 
   const AnnouncementContainer = ({
     img_url,
@@ -82,11 +73,15 @@ export default function GameDetailLibrary() {
     );
   };
 
+  const openWebApp = () => {
+    window.electronAPI.openWebGame("https://thecubetopia.com");
+  };
+
   return (
     <main className="flex flex-col items-center gap-5 mb-32">
       <div className="bg-white w-full h-96 relative">
         <img
-          src="https://cdn2.steamgriddb.com/hero/0a30a29822b9ea4efaa92d60a93c78cb.jpg"
+          src={gameDetail.headerImage}
           className="object-cover w-full h-[30rem]"
           alt=""
         />
@@ -99,7 +94,7 @@ export default function GameDetailLibrary() {
         <div className="flex flex-col gap-8 w-2/3">
           {/* Header  */}
           <section className="flex flex-col gap-4">
-            <p className="text-3xl font-medium">Call of Duty : Black Ops 6</p>
+            <p className="text-3xl font-medium">{gameDetail.title}</p>
             <div className="flex gap-4">
               <p className="flex gap-2 items-center">
                 <FontAwesomeIcon
@@ -146,17 +141,24 @@ export default function GameDetailLibrary() {
           <section className="bg-background_primary shadow-flat-sm w-full p-6 rounded-2xl flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <p>current price</p>
-              <p className="text-3xl font-bold">$271,15</p>
+              <p className="text-3xl font-bold">
+                {gameDetail.currentPrice > 0
+                  ? "$" + gameDetail.currentPrice
+                  : "FREE"}
+              </p>
             </div>
             {/* button  */}
             <div className="flex flex-col gap-4">
-              <button className="bg-success px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
+              <button
+                onClick={openWebApp}
+                className="bg-accent_secondary px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
+              >
                 <FontAwesomeIcon icon={faPlay} />
                 Launch
               </button>
               <button className="border border-white/20 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
                 <FontAwesomeIcon icon={faStore} />
-                Items
+                Item Market
               </button>
             </div>
             {/* Details  */}
@@ -193,7 +195,7 @@ export default function GameDetailLibrary() {
 
           {/* friend list  */}
           <section className="flex flex-col gap-4">
-            <p className="text-xl font-medium">Friends who use</p>
+            <p className="text-xl font-medium">Friends who play</p>
             <div className="flex flex-wrap gap-4">
               <img
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"

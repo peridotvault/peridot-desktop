@@ -14,7 +14,11 @@ import { BlockService } from "../../../local_db/wallet/services/blockService";
 import { filterByType, groupByDay } from "../../../utils/classifier";
 import { transformBlockToTrained } from "../../../utils/transformBlockToTrainedData";
 import { CoinService } from "../../../local_db/wallet/services/coinService";
-import { getBlockLength, getTokenBlocks } from "../hooks/CoinContext";
+import {
+  getArchiveBlockLength,
+  getLedgerBlockLength,
+  getTokenBlocks,
+} from "../hooks/CoinContext";
 import { UserProgressService } from "../../../local_db/wallet/services/userProgressService";
 import { Principal } from "@dfinity/principal";
 
@@ -28,48 +32,48 @@ export const History = () => {
     useState<TrainedDataInterface | null>(null);
   const [filter, setFilter] = useState("daily");
 
-  async function fetchingAllTokenBlocks() {
-    if (!wallet?.principalId) return;
+  // async function fetchingAllTokenBlocks() {
+  //   if (!wallet?.principalId) return;
 
-    const listToken = await CoinService.getAll();
+  //   const listToken = await CoinService.getAll();
 
-    for (const coin of listToken) {
-      const tokenLength = await getBlockLength(
-        Principal.fromText(coin.coinAddress)
-      );
-      console.log("Token Length", tokenLength);
+  //   for (const coin of listToken) {
+  //     const tokenLength = await getBlockLength(
+  //       Principal.fromText(coin.coinAddress)
+  //     );
+  //     console.log("Token Length", tokenLength);
 
-      const progressFetch = await UserProgressService.get(
-        wallet.principalId,
-        coin.coinArchiveAddress
-      );
-      const startBlock = progressFetch?.lastSavedBlock ?? 0;
+  //     const progressFetch = await UserProgressService.get(
+  //       wallet.principalId,
+  //       coin.coinArchiveAddress
+  //     );
+  //     const startBlock = progressFetch?.lastSavedBlock ?? 0;
 
-      const result = await getTokenBlocks({
-        coinArchiveAddress: Principal.fromText(coin.coinArchiveAddress),
-        length: tokenLength,
-        start: startBlock,
-        wallet: wallet,
-      });
+  //     const result = await getTokenBlocks({
+  //       coinArchiveAddress: Principal.fromText(coin.coinArchiveAddress),
+  //       length: tokenLength,
+  //       start: startBlock,
+  //       wallet: wallet,
+  //     });
 
-      for (const block of result) {
-        if (
-          block.from === wallet.principalId ||
-          block.to === wallet.principalId
-        ) {
-          await BlockService.add(block);
-        } else {
-          console.log(`⏩ Skipped non-user block ${block.blockId}`);
-        }
-      }
+  //     for (const block of result) {
+  //       if (
+  //         block.from === wallet.principalId ||
+  //         block.to === wallet.principalId
+  //       ) {
+  //         await BlockService.add(block);
+  //       } else {
+  //         console.log(`⏩ Skipped non-user block ${block.blockId}`);
+  //       }
+  //     }
 
-      await UserProgressService.saveOrUpdate(
-        wallet.principalId,
-        coin.coinArchiveAddress,
-        tokenLength
-      );
-    }
-  }
+  //     await UserProgressService.saveOrUpdate(
+  //       wallet.principalId,
+  //       coin.coinAddress,
+  //       tokenLength
+  //     );
+  //   }
+  // }
 
   async function loadTransactions() {
     if (!wallet?.principalId) return;
@@ -99,16 +103,84 @@ export const History = () => {
     }
   }
 
+  // useEffect(() => {
+  //   async function syncAndLoad() {
+  //     await fetchingAllTokenBlocks(); // 🔁 Fetch & Save ke local DB
+  //     await loadTransactions(); // 📄 Tampilkan dari local DB
+  //   }
+
+  //   if (wallet?.principalId) {
+  //     syncAndLoad();
+  //   }
+  // }, [wallet, filter]);
+
   useEffect(() => {
-    async function syncAndLoad() {
-      await fetchingAllTokenBlocks(); // 🔁 Fetch & Save ke local DB
-      await loadTransactions(); // 📄 Tampilkan dari local DB
+    async function initHistory() {
+      // 1️⃣ Tampilkan data dari local DB terlebih dahulu
+      await loadTransactions();
+
+      // 2️⃣ Lanjutkan proses sinkronisasi di background
+      await syncFromChain();
     }
 
     if (wallet?.principalId) {
-      syncAndLoad();
+      initHistory();
     }
   }, [wallet, filter]);
+
+  async function syncFromChain() {
+    const listToken = await CoinService.getAll();
+
+    let updated = false;
+
+    for (const coin of listToken) {
+      const ledgerBlockLength = await getLedgerBlockLength(
+        Principal.fromText(coin.coinAddress)
+      );
+      const archiveBlockLength = await getArchiveBlockLength(
+        Principal.fromText(coin.coinArchiveAddress)
+      );
+      console.log("Length Token ", coin.coinAddress, ": ", ledgerBlockLength);
+
+      const progressFetch = await UserProgressService.get(
+        wallet!.principalId!,
+        coin.coinAddress
+      );
+      const startBlock = progressFetch?.lastSavedBlock ?? 0;
+      console.log("Saved Block ", coin.coinAddress, ": ", startBlock);
+
+      // ⏩ Skip kalau tidak ada perubahan dari chain
+      if (ledgerBlockLength === startBlock) {
+        console.log(`🟢 No new block for ${coin.coinAddress}`);
+        continue;
+      }
+
+      const result = await getTokenBlocks({
+        coinArchiveAddress: Principal.fromText(coin.coinArchiveAddress),
+        length: ledgerBlockLength,
+        start: startBlock,
+        wallet: wallet!,
+      });
+
+      for (const block of result) {
+        if (
+          block.from === wallet!.principalId ||
+          block.to === wallet!.principalId
+        ) {
+          await BlockService.add(block);
+          updated = true;
+        }
+        await UserProgressService.saveOrUpdate({
+          principalId: wallet!.principalId!,
+          coinAddress: coin.coinAddress,
+          lastSavedBlock: block.blockId,
+        });
+      }
+    }
+    if (updated) {
+      await loadTransactions();
+    }
+  }
 
   const handleClick = (op: TrainedDataInterface) => {
     setIsDetailTransactionOpen(true);

@@ -70,16 +70,6 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
           myCurrency == null ? "USD" : myCurrency.currency.currency
         );
         setActiveCoins(await CoinService.getCoinActive());
-
-        // if (savedCoins && savedCoins.length > 0) {
-        //   const activeSavedCoins = savedCoins.filter((coin) => coin.isChecked);
-        //   setActiveCoins(activeSavedCoins);
-        // } else {
-        //   const activeDefaultCoins = defaultCoins.filter(
-        //     (coin) => coin.isChecked
-        //   );
-        //   setActiveCoins(activeDefaultCoins);
-        // }
       } catch (error) {
         console.error("Error loading coins:", error);
         setActiveCoins(defaultCoins);

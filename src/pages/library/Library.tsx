@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useWallet } from "../../contexts/WalletContext";
 import { AppInterface } from "../../interfaces/App";
 import { getMyPurchasedApps } from "../../contexts/AppContext";
+import { Link } from "react-router-dom";
 
 export const Library = () => {
   const { wallet } = useWallet();
@@ -58,7 +59,18 @@ export const Library = () => {
       title: "Spider-Man Remastered",
       price: 59.99,
     },
+    {
+      id: 11,
+      cover_image:
+        "https://img.gamepix.com/games/cubetopia-parkour/icon/cubetopia-parkour.png?w=400",
+      title: "Cubetopia",
+      price: 0,
+    },
   ];
+
+  const formatTitle = (title: string): string => {
+    return title.toLowerCase().replace(/\s+/g, "_");
+  };
 
   return (
     <div className="flex justify-center">
@@ -78,16 +90,17 @@ export const Library = () => {
           </p>
           <div className="flex flex-wrap gap-8">
             {dummyGameList?.map((item) => (
-              <button
+              <Link
+                to={`/library/${formatTitle(item.title)}`}
                 key={item.id}
-                className="w-[170px] bg-background_secondary rounded-xl overflow-hidden"
+                className="w-[170px] aspect-[3/4] bg-background_secondary rounded-xl overflow-hidden"
               >
                 <img
                   src={item.cover_image}
                   alt=""
-                  className="aspect-[3/4] object-cover hover:scale-110 duration-300"
+                  className="w-full h-full object-cover hover:scale-110 duration-300"
                 />
-              </button>
+              </Link>
             ))}
           </div>
         </section>

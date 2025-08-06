@@ -134,7 +134,7 @@ async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
   }
 }
 
-async function getBlockLength(coinAddress: Principal): Promise<number> {
+async function getLedgerBlockLength(coinAddress: Principal): Promise<number> {
   try {
     const agent = new HttpAgent({
       host: import.meta.env.VITE_HOST,
@@ -145,26 +145,47 @@ async function getBlockLength(coinAddress: Principal): Promise<number> {
       canisterId: coinAddress,
     });
 
-    // Call balance method
-    let totalBlock: number = 0;
-    const archives = (await actor.icrc3_get_archives({
-      from: [],
-    })) as ArchiveInfo[];
-    for (const archive of archives) {
-      totalBlock = Number(archive.end);
-    }
-    return totalBlock;
+    const result = (await actor.icrc3_get_blocks([
+      { start: 0, length: 1 },
+    ])) as ICRC3BlockResponse;
+
+    return Number(result.log_length);
+  } catch (error) {
+    throw new Error("Can't get block length");
+  }
+}
+
+async function getArchiveBlockLength(
+  coinArchiveAddress: Principal
+): Promise<number> {
+  try {
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+    });
+
+    const actor = Actor.createActor(tokenIdlFactory, {
+      agent,
+      canisterId: coinArchiveAddress,
+    });
+
+    const result = (await actor.icrc3_get_blocks([
+      { start: 0, length: 1 },
+    ])) as ICRC3BlockResponse;
+
+    return Number(result.log_length);
   } catch (error) {
     throw new Error("Can't get block length");
   }
 }
 
 async function getTokenBlocks({
+  // coinAddress,
   coinArchiveAddress,
   start,
   length,
   wallet,
 }: {
+  // coinAddress: Principal;
   coinArchiveAddress: Principal;
   start: number;
   length: number;
@@ -251,4 +272,10 @@ function parseBlock(raw: any, coinArchiveAddress: string): Block | null {
 }
 
 // Export function
-export { transferTokenICRC1, checkBalance, getBlockLength, getTokenBlocks };
+export {
+  transferTokenICRC1,
+  checkBalance,
+  getArchiveBlockLength,
+  getLedgerBlockLength,
+  getTokenBlocks,
+};

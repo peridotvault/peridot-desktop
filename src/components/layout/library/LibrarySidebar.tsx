@@ -56,6 +56,13 @@ export const Sidebar = () => {
       title: "Spider-Man Remastered",
       price: 59.99,
     },
+    {
+      id: 11,
+      cover_image:
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9IFYjzdymoYh2aMmhPz91Ly_jSdEM7ZUVMQ&s",
+      title: "Cubetopia",
+      price: 0,
+    },
   ];
 
   useEffect(() => {
