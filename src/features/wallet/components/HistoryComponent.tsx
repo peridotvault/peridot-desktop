@@ -9,14 +9,16 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 export const HistoryComponent = ({
+  user_address,
   transaction_data,
   onClick,
 }: {
+  user_address: string;
   transaction_data: TrainedDataInterface;
   onClick: () => void;
 }) => {
   const E8S_PER_TOKEN = 100000000;
-  const isReceived = transaction_data.value > 0 ? true : false;
+  const isUserSender = transaction_data.sender === user_address ? true : false;
   return (
     <button
       className="flex flex-col gap-4 items-center hover:scale-105 duration-300 group"
@@ -50,9 +52,9 @@ export const HistoryComponent = ({
               </span>
             </div>
             <span className="text-sm text-text_disabled">
-              {isReceived
-                ? "From : " + shortenAddress(transaction_data.sender, 10, 5)
-                : "To : " + shortenAddress(transaction_data.receiver, 10, 5)}
+              {isUserSender
+                ? "To : " + shortenAddress(transaction_data.receiver, 10, 5)
+                : "From : " + shortenAddress(transaction_data.sender, 10, 5)}
             </span>
           </div>
         </div>
@@ -61,10 +63,11 @@ export const HistoryComponent = ({
         <div className="flex ">
           <p
             className={`${
-              transaction_data.value > 0 ? "text-success" : "text-danger"
+              isUserSender ? "text-danger" : "text-success"
             }  text-lg`}
           >
-            {((isReceived ? 1 : -1) * transaction_data.value) / E8S_PER_TOKEN +
+            {((isUserSender ? -1 : 1) * transaction_data.value) /
+              E8S_PER_TOKEN +
               " " +
               transaction_data.currency}
           </p>

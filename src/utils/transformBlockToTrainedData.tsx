@@ -12,6 +12,7 @@ export function transformBlockToTrained(
     date: new Date(Number(block.timestamp) / 1_000_000).toLocaleDateString(),
     label: block.op,
     transaction_identifier: `${block.blockId}`,
+    canisterId: block.coinArchiveAddress,
     value: block.amt,
     timestamp: String(block.timestamp),
     currency: "", // kamu bisa ambil dari coin.symbol jika mau

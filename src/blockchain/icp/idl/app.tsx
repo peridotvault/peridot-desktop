@@ -3,8 +3,8 @@ export const appIdlFactory = ({ IDL }: { IDL: any }) => {
     id: IDL.Nat,
     title: IDL.Text,
     owner: IDL.Principal,
-    cover_image: IDL.Text,
-    background_image: IDL.Text,
+    coverImage: IDL.Text,
+    backgroundImage: IDL.Text,
     price: IDL.Nat64,
   });
 

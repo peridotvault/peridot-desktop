@@ -1,10 +1,10 @@
 import { BrowserWindow } from 'electron';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
+// import { fileURLToPath } from 'node:url';
+// import path from 'node:path';
 import { getMainWindow } from './_mainWindow';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
 let webGameWindow: BrowserWindow | null = null;
 

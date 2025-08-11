@@ -1,102 +1,116 @@
 export const userIdlFactory = ({ IDL }: { IDL: any }) => {
+  const Country = IDL.Text;
+
   const DeveloperFollower = IDL.Record({
-    created_at: IDL.Int,
-    user_principal_id: IDL.Principal,
+    createdAt: IDL.Int,
+    userId: IDL.Principal,
   });
 
   const AnnouncementInteraction = IDL.Record({
-    user_principal_id: IDL.Principal,
+    userId: IDL.Principal,
   });
 
   const AnnouncementComment = IDL.Record({
-    created_at: IDL.Int,
-    user_principal_id: IDL.Principal,
+    createdAt: IDL.Int,
+    userId: IDL.Principal,
     comment: IDL.Text,
   });
 
   const DeveloperAnnouncement = IDL.Record({
-    announcement_dislikes: IDL.Opt(IDL.Vec(AnnouncementInteraction)),
+    announcementDislikes: IDL.Opt(IDL.Vec(AnnouncementInteraction)),
     content: IDL.Text,
-    cover_image: IDL.Text,
+    coverImage: IDL.Text,
     headline: IDL.Text,
-    total_dislike: IDL.Int,
-    created_at: IDL.Int,
-    total_like: IDL.Int,
-    announcement_likes: IDL.Opt(IDL.Vec(AnnouncementInteraction)),
-    announcement_comments: IDL.Opt(IDL.Vec(AnnouncementComment)),
+    totalDislike: IDL.Int,
+    createdAt: IDL.Int,
+    totalLike: IDL.Int,
+    announcementLikes: IDL.Opt(IDL.Vec(AnnouncementInteraction)),
+    announcementComments: IDL.Opt(IDL.Vec(AnnouncementComment)),
   });
 
   const Developer = IDL.Record({
-    joined_date: IDL.Int,
-    developer_followers: IDL.Opt(IDL.Vec(DeveloperFollower)),
-    developer_bio: IDL.Text,
-    developer_announcement: IDL.Opt(IDL.Vec(DeveloperAnnouncement)),
-    total_follower: IDL.Nat,
-    developer_website: IDL.Text,
+    developerWebsite: IDL.Text,
+    developerBio: IDL.Text,
+    totalFollower: IDL.Nat,
+    joinedDate: IDL.Int,
+    announcements: IDL.Opt(IDL.Vec(DeveloperAnnouncement)),
   });
 
   // Users ======================================
   const UserLibrary = IDL.Record({
-    app_id: IDL.Nat,
-    playtime_minute: IDL.Int,
+    appId: IDL.Nat,
+    playtimeMinute: IDL.Nat,
     lastPlayed: IDL.Opt(IDL.Int),
-    current_version: IDL.Text,
-    created_at: IDL.Int,
+    currentVersion: IDL.Text,
+    createdAt: IDL.Int,
+  });
+
+  const Interaction = IDL.Variant({
+    view: IDL.Null,
+    purchase: IDL.Null,
+    play: IDL.Null,
   });
 
   const UserInteraction = IDL.Record({
-    app_id: IDL.Principal,
-    interaction: IDL.Variant({
-      play: IDL.Null,
-      view: IDL.Null,
-      purchase: IDL.Null,
-    }),
-    created_at: IDL.Int,
+    appId: IDL.Nat,
+    interaction: Interaction,
+    createdAt: IDL.Int,
+  });
+
+  const Gender = IDL.Variant({
+    male: IDL.Null,
+    female: IDL.Null,
+    other: IDL.Null,
   });
 
   const UserDemographics = IDL.Record({
-    birth_date: IDL.Int,
-    gender: IDL.Variant({
-      other: IDL.Null,
-      female: IDL.Null,
-      male: IDL.Null,
-    }),
+    birthDate: IDL.Int,
+    gender: Gender,
     country: IDL.Text,
   });
 
   const User = IDL.Record({
     username: IDL.Text,
-    display_name: IDL.Text,
+    displayName: IDL.Text,
     email: IDL.Text,
-    image_url: IDL.Opt(IDL.Text),
-    background_image_url: IDL.Opt(IDL.Text),
-    total_playtime: IDL.Opt(IDL.Int),
-    created_at: IDL.Int,
-    user_demographics: UserDemographics,
-    user_interactions: IDL.Opt(IDL.Vec(UserInteraction)),
-    user_libraries: IDL.Opt(IDL.Vec(UserLibrary)),
+    imageUrl: IDL.Opt(IDL.Text),
+    backgroundImageUrl: IDL.Opt(IDL.Text),
+    totalPlaytime: IDL.Opt(IDL.Int),
+    createdAt: IDL.Int,
+    userDemographics: UserDemographics,
+    userInteractions: IDL.Opt(IDL.Vec(UserInteraction)),
+    userLibraries: IDL.Opt(IDL.Vec(UserLibrary)),
     developer: IDL.Opt(Developer),
   });
 
   // User Friends ======================================
   const UserFriend = IDL.Record({
-    user1_principal_id: IDL.Principal,
-    user2_principal_id: IDL.Principal,
+    user1Id: IDL.Principal,
+    user2Id: IDL.Principal,
     status: IDL.Variant({
       accept: IDL.Null,
       pending: IDL.Null,
       decline: IDL.Null,
     }),
-    created_at: IDL.Int,
+    createdAt: IDL.Int,
   });
 
   const UpdateUser = IDL.Record({
     username: IDL.Text,
-    display_name: IDL.Text,
+    displayName: IDL.Text,
     email: IDL.Text,
-    image_url: IDL.Opt(IDL.Text),
-    background_image_url: IDL.Opt(IDL.Text),
-    user_demographics: UserDemographics,
+    imageUrl: IDL.Opt(IDL.Text),
+    backgroundImageUrl: IDL.Opt(IDL.Text),
+    userDemographics: UserDemographics,
+  });
+
+  const CreateUser = IDL.Record({
+    username: IDL.Text,
+    displayName: IDL.Text,
+    email: IDL.Text,
+    birthDate: IDL.Int,
+    gender: Gender,
+    country: Country,
   });
 
   // Handlers
@@ -116,26 +130,10 @@ export const userIdlFactory = ({ IDL }: { IDL: any }) => {
   });
 
   return IDL.Service({
-    createUser: IDL.Func(
-      [
-        IDL.Text, // username
-        IDL.Text, // display_name
-        IDL.Text, // email
-        IDL.Int, // birth_date
-        IDL.Variant({
-          // gender
-          other: IDL.Null,
-          female: IDL.Null,
-          male: IDL.Null,
-        }),
-        IDL.Text, // country
-      ],
-      [Result],
-      []
-    ),
+    createUser: IDL.Func([CreateUser], [Result], []),
     updateUser: IDL.Func([UpdateUser], [Result], []),
     getUserByPrincipalId: IDL.Func([], [Result], []),
-    searchUsersByPrefixWithLimit: IDL.Func(
+    getUsersByPrefixWithLimit: IDL.Func(
       [IDL.Text, IDL.Nat],
       [
         IDL.Variant({
@@ -145,7 +143,7 @@ export const userIdlFactory = ({ IDL }: { IDL: any }) => {
       ],
       []
     ),
-    isUsernameValid: IDL.Func(
+    getIsUsernameValid: IDL.Func(
       [IDL.Text],
       [
         IDL.Variant({

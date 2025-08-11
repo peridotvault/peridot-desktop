@@ -10,7 +10,7 @@ export default function VaultPage() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [isHoverComponent, setIsHoverComponent] = useState(false);
-  const [allGames, setAllGames] = useState<AppInterface[] | null>();
+  const [_, setAllGames] = useState<AppInterface[] | null>();
 
   const dummyGameList = [
     {

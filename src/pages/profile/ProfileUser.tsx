@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
-import { faGear, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import {
@@ -220,15 +220,6 @@ export const ProfileUser = () => {
                   alt=""
                 />
               </div>
-              {/* Setting  */}
-              <button
-                className="shadow-flat-sm hover:shadow-arise-sm w-12 h-12 rounded-lg"
-                onClick={() => {}}
-              >
-                <div className="w-12 h-12 flex justify-center items-center">
-                  <FontAwesomeIcon icon={faGear} />
-                </div>
-              </button>
             </div>
             {/* bio  */}
             <div className="flex flex-col gap-3 mt-3 px-10">

@@ -179,14 +179,16 @@ async function getArchiveBlockLength(
 }
 
 async function getTokenBlocks({
-  // coinAddress,
+  coinAddress,
   coinArchiveAddress,
+  archiveBlockLength,
   start,
   length,
   wallet,
 }: {
-  // coinAddress: Principal;
+  coinAddress: Principal;
   coinArchiveAddress: Principal;
+  archiveBlockLength: number;
   start: number;
   length: number;
   wallet: any;
@@ -200,14 +202,27 @@ async function getTokenBlocks({
       host: import.meta.env.VITE_HOST,
     });
 
-    const actor = Actor.createActor(tokenIdlFactory, {
-      agent,
-      canisterId: coinArchiveAddress,
-    });
+    let result: ICRC3BlockResponse;
 
-    const result = (await actor.icrc3_get_blocks([
-      { start: start, length: length },
-    ])) as ICRC3BlockResponse;
+    if (start >= archiveBlockLength) {
+      const actor = Actor.createActor(tokenIdlFactory, {
+        agent,
+        canisterId: coinAddress,
+      });
+
+      result = (await actor.icrc3_get_blocks([
+        { start: start, length: length },
+      ])) as ICRC3BlockResponse;
+    } else {
+      const actor = Actor.createActor(tokenIdlFactory, {
+        agent,
+        canisterId: coinArchiveAddress,
+      });
+
+      result = (await actor.icrc3_get_blocks([
+        { start: start, length: length },
+      ])) as ICRC3BlockResponse;
+    }
 
     const parsed = result.blocks
       .map((b: any) => parseBlock(b, coinArchiveAddress.toText()))

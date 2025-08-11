@@ -35,6 +35,7 @@ export interface RawTransactionsResponse {
 export interface RelevantOperation {
   index: number;
   transaction_identifier: string;
+  canisterId: string;
   value: number;
   timestamp: string;
   currency: string;
@@ -46,6 +47,7 @@ export interface TrainedDataInterface {
   index: number;
   date: string;
   label: string;
+  canisterId: string;
   transaction_identifier: string;
   value: number;
   timestamp: string;

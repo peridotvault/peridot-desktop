@@ -13,7 +13,7 @@ export const Sidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { wallet } = useWallet();
-  const [allGames, setAllGames] = useState<AppInterface[] | null>();
+  const [_, setAllGames] = useState<AppInterface[] | null>();
 
   const dummyGameList = [
     {

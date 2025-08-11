@@ -32,49 +32,6 @@ export const History = () => {
     useState<TrainedDataInterface | null>(null);
   const [filter, setFilter] = useState("daily");
 
-  // async function fetchingAllTokenBlocks() {
-  //   if (!wallet?.principalId) return;
-
-  //   const listToken = await CoinService.getAll();
-
-  //   for (const coin of listToken) {
-  //     const tokenLength = await getBlockLength(
-  //       Principal.fromText(coin.coinAddress)
-  //     );
-  //     console.log("Token Length", tokenLength);
-
-  //     const progressFetch = await UserProgressService.get(
-  //       wallet.principalId,
-  //       coin.coinArchiveAddress
-  //     );
-  //     const startBlock = progressFetch?.lastSavedBlock ?? 0;
-
-  //     const result = await getTokenBlocks({
-  //       coinArchiveAddress: Principal.fromText(coin.coinArchiveAddress),
-  //       length: tokenLength,
-  //       start: startBlock,
-  //       wallet: wallet,
-  //     });
-
-  //     for (const block of result) {
-  //       if (
-  //         block.from === wallet.principalId ||
-  //         block.to === wallet.principalId
-  //       ) {
-  //         await BlockService.add(block);
-  //       } else {
-  //         console.log(`⏩ Skipped non-user block ${block.blockId}`);
-  //       }
-  //     }
-
-  //     await UserProgressService.saveOrUpdate(
-  //       wallet.principalId,
-  //       coin.coinAddress,
-  //       tokenLength
-  //     );
-  //   }
-  // }
-
   async function loadTransactions() {
     if (!wallet?.principalId) return;
 
@@ -102,17 +59,6 @@ export const History = () => {
       setRelevantOperations(groupByDay(filteredBlocks));
     }
   }
-
-  // useEffect(() => {
-  //   async function syncAndLoad() {
-  //     await fetchingAllTokenBlocks(); // 🔁 Fetch & Save ke local DB
-  //     await loadTransactions(); // 📄 Tampilkan dari local DB
-  //   }
-
-  //   if (wallet?.principalId) {
-  //     syncAndLoad();
-  //   }
-  // }, [wallet, filter]);
 
   useEffect(() => {
     async function initHistory() {
@@ -155,27 +101,33 @@ export const History = () => {
         continue;
       }
 
-      const result = await getTokenBlocks({
-        coinArchiveAddress: Principal.fromText(coin.coinArchiveAddress),
-        length: ledgerBlockLength,
-        start: startBlock,
-        wallet: wallet!,
-      });
-
-      for (const block of result) {
-        if (
-          block.from === wallet!.principalId ||
-          block.to === wallet!.principalId
-        ) {
-          await BlockService.add(block);
-          updated = true;
-        }
-        await UserProgressService.saveOrUpdate({
-          principalId: wallet!.principalId!,
-          coinAddress: coin.coinAddress,
-          lastSavedBlock: block.blockId,
+      const batchSize = 100;
+      for (let i = startBlock; i < ledgerBlockLength; i += batchSize) {
+        const result = await getTokenBlocks({
+          coinAddress: Principal.fromText(coin.coinAddress),
+          coinArchiveAddress: Principal.fromText(coin.coinArchiveAddress),
+          archiveBlockLength: archiveBlockLength,
+          length: batchSize,
+          start: i,
+          wallet: wallet!,
         });
+
+        for (const block of result) {
+          if (
+            block.from === wallet!.principalId ||
+            block.to === wallet!.principalId
+          ) {
+            await BlockService.add(block);
+            updated = true;
+          }
+          await UserProgressService.saveOrUpdate({
+            principalId: wallet!.principalId!,
+            coinAddress: coin.coinAddress,
+            lastSavedBlock: block.blockId,
+          });
+        }
       }
+      await loadTransactions();
     }
     if (updated) {
       await loadTransactions();
@@ -222,6 +174,7 @@ export const History = () => {
             {transactions.map((tx, idx) => (
               <HistoryComponent
                 key={idx}
+                user_address={wallet.principalId!.toString()}
                 transaction_data={tx}
                 onClick={() => handleClick(tx)}
               />
@@ -245,6 +198,7 @@ export const History = () => {
       {/* Detail Transaction */}
       {isDetailTransactionOpen ? (
         <TransactionProof
+          user_address={wallet.principalId!.toString()}
           parseMetadata={metadataModal!}
           onCloseModal={handleCloseModal}
         />

@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 
 export const Library = () => {
   const { wallet } = useWallet();
-  const [allGames, setAllGames] = useState<AppInterface[] | null>();
+  const [_, setAllGames] = useState<AppInterface[] | null>();
 
   useEffect(() => {
     async function fetchData() {

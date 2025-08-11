@@ -46,37 +46,37 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
     loadCoins();
   }, []);
 
-  const mergeCoins = (defaults: Coin[], saved: Coin[]): Coin[] => {
-    // Create a map for quick lookup of saved coins
-    const savedCoinsMap = new Map(
-      saved.map((coin) => [coin.coinAddress, coin])
-    );
+  // const mergeCoins = (defaults: Coin[], saved: Coin[]): Coin[] => {
+  //   // Create a map for quick lookup of saved coins
+  //   const savedCoinsMap = new Map(
+  //     saved.map((coin) => [coin.coinAddress, coin])
+  //   );
 
-    // Start with processed defaults that preserve user preferences
-    const result: Coin[] = defaults.map((defaultCoin) => {
-      const savedCoin = savedCoinsMap.get(defaultCoin.coinAddress);
+  //   // Start with processed defaults that preserve user preferences
+  //   const result: Coin[] = defaults.map((defaultCoin) => {
+  //     const savedCoin = savedCoinsMap.get(defaultCoin.coinAddress);
 
-      // If user has this coin saved, use their preference for isChecked
-      if (savedCoin) {
-        savedCoinsMap.delete(defaultCoin.coinAddress); // Remove from map to track processed coins
-        return {
-          ...defaultCoin,
-          isChecked: savedCoin.isChecked,
-        };
-      }
+  //     // If user has this coin saved, use their preference for isChecked
+  //     if (savedCoin) {
+  //       savedCoinsMap.delete(defaultCoin.coinAddress); // Remove from map to track processed coins
+  //       return {
+  //         ...defaultCoin,
+  //         isChecked: savedCoin.isChecked,
+  //       };
+  //     }
 
-      // This is a new coin the user hasn't seen before
-      return defaultCoin;
-    });
+  //     // This is a new coin the user hasn't seen before
+  //     return defaultCoin;
+  //   });
 
-    // Add any remaining saved coins that aren't in defaults
-    // (This would be rare but ensures we don't lose user data)
-    savedCoinsMap.forEach((coin) => {
-      result.push(coin);
-    });
+  //   // Add any remaining saved coins that aren't in defaults
+  //   // (This would be rare but ensures we don't lose user data)
+  //   savedCoinsMap.forEach((coin) => {
+  //     result.push(coin);
+  //   });
 
-    return result;
-  };
+  //   return result;
+  // };
 
   const filteredCoins = listCoins.filter((token) =>
     token.name.toLowerCase().includes(searchToken.toLowerCase())

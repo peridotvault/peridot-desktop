@@ -9,9 +9,9 @@ import { hexToArrayBuffer } from "../utils/crypto";
 
 export interface MetadataCreateUser {
   username: string;
-  display_name: string;
+  displayName: string;
   email: string;
-  birth_date: string;
+  birthDate: string;
   gender: GenderVariant;
   country: string;
 }
@@ -19,12 +19,12 @@ export interface MetadataCreateUser {
 // Define the UpdateUser interface to match the IDL
 interface UpdateUserPayload {
   username: string;
-  display_name: string;
+  displayName: string;
   email: string;
-  image_url: [] | [string];
-  background_image_url: [] | [string];
-  user_demographics: {
-    birth_date: bigint;
+  imageUrl: [] | [string];
+  backgroundImageUrl: [] | [string];
+  userDemographics: {
+    birthDate: bigint;
     gender: GenderVariant;
     country: string;
   };
@@ -54,14 +54,14 @@ async function createAccount(metadata: MetadataCreateUser, wallet: any) {
       canisterId: userCanister,
     });
 
-    const result = await actor.createUser(
-      metadata.username,
-      metadata.display_name,
-      metadata.email,
-      dateToNanoSeconds(metadata.birth_date),
-      metadata.gender,
-      metadata.country
-    );
+    const result = await actor.createUser({
+      username: metadata.username,
+      displayName: metadata.displayName,
+      email: metadata.email,
+      birthDate: dateToNanoSeconds(metadata.birthDate),
+      gender: metadata.gender,
+      country: metadata.country,
+    });
 
     return result;
   } catch (error) {
@@ -88,17 +88,17 @@ async function updateUser(metadata: MetadataUser, wallet: any) {
 
     const updatePayload: UpdateUserPayload = {
       username: metadata.ok.username,
-      display_name: metadata.ok.display_name,
+      displayName: metadata.ok.displayName,
       email: metadata.ok.email,
-      image_url: metadata.ok.image_url ? [metadata.ok.image_url] : [],
-      background_image_url: metadata.ok.background_image_url
-        ? [metadata.ok.background_image_url]
+      imageUrl: metadata.ok.imageUrl ? [metadata.ok.imageUrl] : [],
+      backgroundImageUrl: metadata.ok.backgroundImageUrl
+        ? [metadata.ok.backgroundImageUrl]
         : [],
-      user_demographics: {
+      userDemographics: {
         // Convert the date string to nanoseconds timestamp
-        birth_date: dateToNanoSeconds(metadata.ok.user_demographics.birth_date),
-        gender: metadata.ok.user_demographics.gender,
-        country: metadata.ok.user_demographics.country,
+        birthDate: dateToNanoSeconds(metadata.ok.userDemographics.birthDate),
+        gender: metadata.ok.userDemographics.gender,
+        country: metadata.ok.userDemographics.country,
       },
     };
 
@@ -124,7 +124,7 @@ async function isUsernameValid(username: string) {
     });
 
     // Call balance method
-    const result = await actor.isUsernameValid(username);
+    const result = await actor.getIsUsernameValid(username);
 
     return result;
   } catch (error) {
@@ -180,7 +180,7 @@ async function searchUsersByPrefixWithLimit(
     });
 
     // Call balance method
-    const result = await actor.searchUsersByPrefixWithLimit(prefix, limit);
+    const result = await actor.getUsersByPrefixWithLimit(prefix, limit);
 
     return result;
   } catch (error) {

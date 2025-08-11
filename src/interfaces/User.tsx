@@ -11,12 +11,12 @@ export type GenderVariant =
 
 export interface MetadataUpdateUser {
   username: string;
-  display_name: string;
+  displayName: string;
   email: string;
-  image_url: string | null;
-  background_image_url: string | null;
-  user_demographics: {
-    birth_date: string;
+  imageUrl: string | null;
+  backgroundImageUrl: string | null;
+  userDemographics: {
+    birthDate: string;
     gender: GenderVariant;
     country: string;
   };
@@ -25,55 +25,65 @@ export interface MetadataUpdateUser {
 export interface MetadataUser {
   ok: {
     username: string;
-    display_name: string;
+    displayName: string;
     description: string;
     link: string;
     email: string;
-    image_url: string | null;
-    background_image_url: string | null;
-    total_playtime: number;
-    created_at: string;
-    user_demographics: {
-      birth_date: string;
+    imageUrl: string | null;
+    backgroundImageUrl: string | null;
+    totalPlaytime: number;
+    createdAt: string;
+    userDemographics: {
+      birthDate: string;
       gender: GenderVariant;
       country: string;
     };
-    user_interactions: [
-      {
-        app_id: string;
-        interaction: string;
-        created_at: string;
-      }
-    ];
-    user_libraries: string;
+    userInteractions:
+      | [
+          {
+            appId: string;
+            interaction: string;
+            createdAt: string;
+          }
+        ]
+      | null;
+    userLibraries: [UserLibrary] | null;
     developer: [];
   };
+}
+
+interface UserLibrary {
+  appId: number;
+  playtimeMinute: number;
+  lastPlayed: string | null;
+  currentVersion: string;
+  createdAt: string;
 }
 
 // interface UserDataInterface {
 //   ok: {
 //     username: string;
-//     display_name: string;
+//     displayName: string;
 //     description: string;
 //     link: string;
 //     email: string;
-//     image_url: string;
-//     background_image_url: string;
-//     total_playtime: number;
-//     created_at: string;
-//     user_demographics: {
-//       birth_date: string;
+//     imageUrl: string;
+//     backgroundImageUrl: string;
+//     totalPlaytime: number;
+//     createdAt: string;
+//     userDemographics: {
+//       birthDate: string;
 //       gender: string;
 //       country: string;
 //     };
-//     user_interactions: [
+//     userInteractions: [
 //       {
-//         app_id: string;
+//         appId: string;
 //         interaction: string;
-//         created_at: string;
+//         createdAt: string;
 //       }
 //     ];
-//     user_libraries: string;
+//     userLibraries: string;
 //     developer: [];
 //   };
 // }

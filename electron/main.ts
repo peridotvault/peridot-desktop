@@ -3,23 +3,23 @@ import { createMainWindow } from './windows/_mainWindow';
 import { setupStoreHandlers } from './store';
 import { setupIpcHandlers } from './ipcHandlers';
 
-let win: BrowserWindow | null;
+// let win: BrowserWindow | null;
 
 app.whenReady().then(() => {
   setupStoreHandlers();
-  win = createMainWindow();
+  createMainWindow();
   setupIpcHandlers();
 });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
-    win = null;
+    // win = null;
   }
 });
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    win = createMainWindow();
+    createMainWindow();
   }
 });

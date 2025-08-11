@@ -6,41 +6,45 @@ import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { shortenAddress } from "../../../utils/Additional";
 import { ButtonTransaction } from "../../../components/atoms/ButtonTransaction";
 import { ipcRenderer } from "electron";
-import { millisecondsToTimestamp } from "../hooks/FetchDataRosetta";
+import { DateTime } from "luxon";
+
+export function millisecondsToTimestamp(milliseconds: number): string {
+  return DateTime.fromMillis(milliseconds / 1_000_000)
+    .toUTC()
+    .toFormat("yyyy-MM-dd, h:mm:ss a 'UTC'");
+}
 
 export const TransactionProof = ({
+  user_address,
   parseMetadata,
   onCloseModal,
 }: {
+  user_address: string;
   parseMetadata: TrainedDataInterface;
   onCloseModal: () => void;
 }) => {
   const E8S_PER_TOKEN = 100000000;
-  const isReceived = parseMetadata.value > 0 ? true : false;
+  const isUserSender = parseMetadata.sender === user_address ? true : false;
   const metadata = [
     {
-      title: "Hash",
-      content: shortenAddress(parseMetadata.transaction_identifier, 10, 10),
+      title: "Block Id",
+      content: parseMetadata.index,
     },
     {
       title: "Type",
-      content: receivedComponent(isReceived),
-    },
-    {
-      title: "Index",
-      content: parseMetadata.index,
+      content: receivedComponent(isUserSender),
     },
     {
       title: "Amount",
       content:
-        ((isReceived ? 1 : -1) * parseMetadata.value) / E8S_PER_TOKEN +
+        ((isUserSender ? -1 : 1) * parseMetadata.value) / E8S_PER_TOKEN +
         " " +
         parseMetadata.currency,
     },
     {
-      title: isReceived ? "From" : "To",
+      title: isUserSender ? "To" : "From",
       content: shortenAddress(
-        isReceived ? parseMetadata.sender : parseMetadata.receiver,
+        isUserSender ? parseMetadata.receiver : parseMetadata.sender,
         10,
         10
       ),
@@ -51,11 +55,11 @@ export const TransactionProof = ({
     },
   ];
 
-  function receivedComponent(isReceived: boolean) {
+  function receivedComponent(isUserSender: boolean) {
     return (
       <div className="flex">
         <p className="bg-accent_primary px-3 text-sm rounded-full text-black">
-          {isReceived ? "Received" : "Sent"}
+          {isUserSender ? "Sent" : "Received"}
         </p>
       </div>
     );
@@ -96,7 +100,7 @@ export const TransactionProof = ({
         onClick={() => {
           ipcRenderer.send(
             "open-external-link",
-            `https://www.icpexplorer.org/#/tx/${parseMetadata.transaction_identifier}`
+            `https://peridot-explorer.vercel.app/${parseMetadata.canisterId}/transaction/${parseMetadata.transaction_identifier}`
           );
         }}
       />

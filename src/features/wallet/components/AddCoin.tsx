@@ -22,7 +22,7 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
     symbol: "",
     fee: 0,
     logo: "",
-    isChecked: false,
+    isChecked: 0,
   });
 
   async function handleOnChange(text: string) {
@@ -38,7 +38,7 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
         symbol: result.symbol!,
         fee: result.fee!,
         logo: result.logo!,
-        isChecked: false,
+        isChecked: 0,
       });
       setIsCoinAvailable(true);
     } catch (error) {

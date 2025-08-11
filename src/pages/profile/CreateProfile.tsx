@@ -118,9 +118,9 @@ export const CreateProfile = () => {
     msg: "",
   });
   const [username, setUsername] = useState("");
-  const [display_name, setDisplayName] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
-  const [birth_date, setBirthDate] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("");
   const [country, setCountry] = useState("");
   const { wallet } = useWallet();
@@ -135,9 +135,9 @@ export const CreateProfile = () => {
 
   const handleSubmit = async (
     username: string,
-    display_name: string,
+    displayName: string,
     email: string,
-    birth_date: string,
+    birthDate: string,
     gender: string,
     country: string
   ) => {
@@ -147,9 +147,9 @@ export const CreateProfile = () => {
     // Validation before submission
     const metadataCreateUser = {
       username: username,
-      display_name: display_name,
+      displayName: displayName,
       email: email,
-      birth_date: birth_date,
+      birthDate: birthDate,
       gender: genderVariant,
       country: country,
     };
@@ -250,12 +250,12 @@ export const CreateProfile = () => {
             </p>
           </div>
           <AccountSettingsInputField
-            name="display_name"
+            name="displayName"
             icon={faTv}
             type="text"
             placeholder="Display Name"
             className=""
-            value={display_name}
+            value={displayName}
             onChange={(e) => handleInputChange(e, setDisplayName)}
           />
           <AccountSettingsInputField
@@ -268,12 +268,12 @@ export const CreateProfile = () => {
             onChange={(e) => handleInputChange(e, setEmail)}
           />
           <AccountSettingsInputField
-            name="birth_date"
+            name="birthDate"
             icon={faSeedling}
             type="date"
             placeholder="Birth Date"
             className=""
-            value={birth_date}
+            value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
           />
           <AccountSettingsDropdownField
@@ -299,9 +299,9 @@ export const CreateProfile = () => {
           onClick={() =>
             handleSubmit(
               username,
-              display_name,
+              displayName,
               email,
-              birth_date,
+              birthDate,
               gender,
               country
             )
