@@ -1,9 +1,9 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import { AppInterface } from "../../interfaces/App";
-import { getMyPurchasedApps } from "../../contexts/AppContext";
+import { AppInterface } from "../../interfaces/app/AppInterface";
 import { Link } from "react-router-dom";
+import { getMyApps } from "../../blockchain/icp/app/services/ICPAppService";
 
 export const Library = () => {
   const { wallet } = useWallet();
@@ -11,7 +11,7 @@ export const Library = () => {
 
   useEffect(() => {
     async function fetchData() {
-      const resAllGames = await getMyPurchasedApps(wallet);
+      const resAllGames = await getMyApps({ wallet: wallet });
       setAllGames(resAllGames);
     }
 

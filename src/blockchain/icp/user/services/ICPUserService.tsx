@@ -1,44 +1,31 @@
 // UserContext.tsx
 import { HttpAgent, Actor } from "@dfinity/agent";
-import { userIdlFactory } from "../blockchain/icp/idl/user";
+
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
-import { walletService } from "../features/wallet/services/WalletService";
-import { EncryptedData } from "@antigane/encryption";
-import { GenderVariant, MetadataUser } from "../interfaces/User";
-import { hexToArrayBuffer } from "../utils/crypto";
-
-export interface MetadataCreateUser {
-  username: string;
-  displayName: string;
-  email: string;
-  birthDate: string;
-  gender: GenderVariant;
-  country: string;
-}
-
-// Define the UpdateUser interface to match the IDL
-interface UpdateUserPayload {
-  username: string;
-  displayName: string;
-  email: string;
-  imageUrl: [] | [string];
-  backgroundImageUrl: [] | [string];
-  userDemographics: {
-    birthDate: bigint;
-    gender: GenderVariant;
-    country: string;
-  };
-}
-
-function dateToNanoSeconds(dateStr: string): bigint {
-  const date = new Date(dateStr);
-  // Convert to nanoseconds (multiply by 1,000,000 to convert milliseconds to nanoseconds)
-  return BigInt(date.getTime()) * BigInt(1_000_000);
-}
+import {
+  CreateUserInterface,
+  UpdateUserInterface,
+  UserInterface,
+} from "../../../../interfaces/user/UserInterface";
+import { walletService } from "../../../../features/wallet/services/WalletService";
+import { hexToArrayBuffer } from "../../../../utils/crypto";
+import { ICPUserFactory } from "../ICPUserFactory";
+import { ApiResponse } from "../../../../interfaces/CoreInterface";
 
 const userCanister = import.meta.env.VITE_PERIDOT_CANISTER_USER_BACKEND;
 
-async function createAccount(metadata: MetadataCreateUser, wallet: any) {
+function dateToNanoSeconds(dateStr: bigint): bigint {
+  const date = new Date(Number(dateStr));
+  return BigInt(date.getTime()) * BigInt(1_000_000);
+}
+
+async function createAccount({
+  metadata,
+  wallet,
+}: {
+  metadata: CreateUserInterface;
+  wallet: any;
+}) {
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
@@ -49,7 +36,7 @@ async function createAccount(metadata: MetadataCreateUser, wallet: any) {
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(userIdlFactory, {
+    const actor = Actor.createActor(ICPUserFactory, {
       agent,
       canisterId: userCanister,
     });
@@ -58,7 +45,7 @@ async function createAccount(metadata: MetadataCreateUser, wallet: any) {
       username: metadata.username,
       displayName: metadata.displayName,
       email: metadata.email,
-      birthDate: dateToNanoSeconds(metadata.birthDate),
+      birthDate: metadata.birthDate,
       gender: metadata.gender,
       country: metadata.country,
     });
@@ -69,7 +56,13 @@ async function createAccount(metadata: MetadataCreateUser, wallet: any) {
   }
 }
 
-async function updateUser(metadata: MetadataUser, wallet: any) {
+async function updateUser({
+  metadataUpdate,
+  wallet,
+}: {
+  metadataUpdate: UpdateUserInterface;
+  wallet: any;
+}): Promise<UpdateUserInterface> {
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
@@ -81,61 +74,58 @@ async function updateUser(metadata: MetadataUser, wallet: any) {
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(userIdlFactory, {
+    const actor = Actor.createActor(ICPUserFactory, {
       agent,
       canisterId: userCanister,
     });
 
-    const updatePayload: UpdateUserPayload = {
-      username: metadata.ok.username,
-      displayName: metadata.ok.displayName,
-      email: metadata.ok.email,
-      imageUrl: metadata.ok.imageUrl ? [metadata.ok.imageUrl] : [],
-      backgroundImageUrl: metadata.ok.backgroundImageUrl
-        ? [metadata.ok.backgroundImageUrl]
-        : [],
-      userDemographics: {
-        // Convert the date string to nanoseconds timestamp
-        birthDate: dateToNanoSeconds(metadata.ok.userDemographics.birthDate),
-        gender: metadata.ok.userDemographics.gender,
-        country: metadata.ok.userDemographics.country,
-      },
-    };
-
-    // Call balance method
-    const result = await actor.updateUser(updatePayload);
-
-    return result;
+    const result = (await actor.updateUser(
+      metadataUpdate
+    )) as ApiResponse<UpdateUserInterface>;
+    if ("err" in result) {
+      const [k, v] = Object.entries(result.err)[0] as [string, string];
+      throw new Error(`updateUser failed: ${k} - ${v}`);
+    }
+    return result.ok;
   } catch (error) {
-    throw new Error("Error Context : " + error);
+    throw new Error("Error Service Update User : " + error);
   }
 }
 
-async function isUsernameValid(username: string) {
+async function getIsUsernameValid(
+  username: string
+): Promise<ApiResponse<Boolean>> {
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
       host: import.meta.env.VITE_HOST,
     });
 
-    const actor = Actor.createActor(userIdlFactory, {
+    const actor = Actor.createActor(ICPUserFactory, {
       agent,
       canisterId: userCanister,
     });
 
     // Call balance method
-    const result = await actor.getIsUsernameValid(username);
+    const result = (await actor.getIsUsernameValid(
+      username
+    )) as ApiResponse<Boolean>;
 
     return result;
   } catch (error) {
-    throw new Error("Error Context : " + error);
+    throw new Error("Error getIsUsernameValid : " + error);
   }
 }
 
-async function getUserByPrincipalId(encryptedPrivateKey: EncryptedData) {
-  const privateKey = await walletService.decryptWalletData(encryptedPrivateKey);
+async function getUserByPrincipalId({
+  wallet,
+}: {
+  wallet: any;
+}): Promise<UserInterface> {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
   const secretKey = hexToArrayBuffer(privateKey);
-
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
@@ -143,17 +133,20 @@ async function getUserByPrincipalId(encryptedPrivateKey: EncryptedData) {
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(userIdlFactory, {
+    const actor = Actor.createActor(ICPUserFactory, {
       agent,
       canisterId: userCanister,
     });
 
-    // Call balance method
-    const result = await actor.getUserByPrincipalId();
-
-    return result;
+    const result =
+      (await actor.getUserByPrincipalId()) as ApiResponse<UserInterface>;
+    if ("err" in result) {
+      const [k, _] = Object.entries(result.err)[0] as [string, string];
+      throw new Error(` ${k}`);
+    }
+    return result.ok;
   } catch (error) {
-    throw new Error("Error Context : " + error);
+    throw new Error("Error Service Get User By PrincipalId : " + error);
   }
 }
 
@@ -174,7 +167,7 @@ async function searchUsersByPrefixWithLimit(
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(userIdlFactory, {
+    const actor = Actor.createActor(ICPUserFactory, {
       agent,
       canisterId: userCanister,
     });
@@ -202,7 +195,7 @@ async function getFriendRequestList(wallet: any) {
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(userIdlFactory, {
+    const actor = Actor.createActor(ICPUserFactory, {
       agent,
       canisterId: userCanister,
     });
@@ -219,11 +212,15 @@ async function getFriendRequestList(wallet: any) {
 //  ===============================================================
 //  Developer Account Management & Follow =========================
 //  ===============================================================
-async function createDeveloperProfile(
-  wallet: any,
-  websiteUrl: string,
-  bio: string
-) {
+async function createDeveloperProfile({
+  wallet,
+  websiteUrl,
+  bio,
+}: {
+  wallet: any;
+  websiteUrl: string;
+  bio: string;
+}) {
   const privateKey = await walletService.decryptWalletData(
     wallet.encryptedPrivateKey
   );
@@ -237,7 +234,7 @@ async function createDeveloperProfile(
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(userIdlFactory, {
+    const actor = Actor.createActor(ICPUserFactory, {
       agent,
       canisterId: userCanister,
     });
@@ -255,7 +252,7 @@ async function createDeveloperProfile(
 export {
   createAccount,
   updateUser,
-  isUsernameValid,
+  getIsUsernameValid,
   getUserByPrincipalId,
   searchUsersByPrefixWithLimit,
   getFriendRequestList,

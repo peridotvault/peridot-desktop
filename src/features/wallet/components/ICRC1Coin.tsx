@@ -64,12 +64,25 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
   }, [wallet.principalId, canisterId]);
 
   // Calculate and update the USD balance whenever price or balance changes
+  // useEffect(() => {
+  //   if (icrc1?.balance && rates && rates !== "0" && onBalanceUpdate) {
+  //     const balanceUsd = parseFloat(rates) * icrc1.balance;
+  //     onBalanceUpdate(canisterId, balanceUsd, icrc1?.balance);
+  //   } else if (onBalanceUpdate) {
+  //     // Set to 0 if there's no valid balance or price
+  //     onBalanceUpdate(canisterId, 0, 0);
+  //   }
+  // }, [icrc1?.balance, rates, canisterId, onBalanceUpdate]);
+
   useEffect(() => {
-    if (icrc1?.balance && rates && rates !== "0" && onBalanceUpdate) {
-      const balanceUsd = parseFloat(rates) * icrc1.balance;
-      onBalanceUpdate(canisterId, balanceUsd, icrc1?.balance);
-    } else if (onBalanceUpdate) {
-      // Set to 0 if there's no valid balance or price
+    if (!onBalanceUpdate) return;
+
+    if (icrc1?.balance != null) {
+      const balanceUsd =
+        rates && rates !== "0" ? parseFloat(rates) * icrc1.balance : 0;
+      onBalanceUpdate(canisterId, balanceUsd, icrc1.balance);
+    } else {
+      // belum ada balance: tetap kirim 0 agar parent bisa reset
       onBalanceUpdate(canisterId, 0, 0);
     }
   }, [icrc1?.balance, rates, canisterId, onBalanceUpdate]);

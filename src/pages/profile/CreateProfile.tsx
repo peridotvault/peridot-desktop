@@ -11,12 +11,19 @@ import {
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { createAccount, isUsernameValid } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
 import { useNavigate } from "react-router-dom";
 import countriesData from "../../assets/json/countries.json";
 import { clearWalletData } from "../../utils/StoreService";
-import { GenderVariant } from "../../interfaces/User";
+import {
+  CreateUserInterface,
+  Gender,
+} from "../../interfaces/user/UserInterface";
+import {
+  createAccount,
+  getIsUsernameValid,
+} from "../../blockchain/icp/user/services/ICPUserService";
+import { ApiResponse } from "../../interfaces/CoreInterface";
 
 interface CountryOption {
   code: string;
@@ -133,6 +140,15 @@ export const CreateProfile = () => {
     setter(e.target.value);
   };
 
+  function dateToNanoSeconds(dateStr: string): bigint {
+    // Expect "YYYY-MM-DD"
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+    if (!m) throw new Error("Invalid date format, expected YYYY-MM-DD");
+    const [_, y, mo, d] = m;
+    const ms = Date.UTC(Number(y), Number(mo) - 1, Number(d)); // milliseconds UTC
+    return BigInt(ms) * 1_000_000n; // -> nanoseconds
+  }
+
   const handleSubmit = async (
     username: string,
     displayName: string,
@@ -141,15 +157,15 @@ export const CreateProfile = () => {
     gender: string,
     country: string
   ) => {
-    const genderVariant: GenderVariant = {
+    const genderVariant: Gender = {
       [gender]: null,
-    } as GenderVariant;
+    } as Gender;
     // Validation before submission
-    const metadataCreateUser = {
+    const metadataCreateUser: CreateUserInterface = {
       username: username,
       displayName: displayName,
       email: email,
-      birthDate: birthDate,
+      birthDate: dateToNanoSeconds(birthDate),
       gender: genderVariant,
       country: country,
     };
@@ -163,7 +179,10 @@ export const CreateProfile = () => {
     }
 
     try {
-      const result = await createAccount(metadataCreateUser, wallet);
+      const result = await createAccount({
+        metadata: metadataCreateUser,
+        wallet: wallet,
+      });
       if (result) {
         // Handle successful creation
         console.log("Account created successfully");
@@ -225,19 +244,18 @@ export const CreateProfile = () => {
               value={username}
               onChange={async (e) => {
                 handleInputChange(e, setUsername);
-                const result = await isUsernameValid(e.target.value);
-                if (result && typeof result === "object" && "ok" in result) {
-                  setIsValidUsername({ valid: true, msg: "username valid" });
-                } else if (
-                  result &&
-                  typeof result === "object" &&
-                  "err" in result
-                ) {
+                const result: ApiResponse<Boolean> = await getIsUsernameValid(
+                  e.target.value
+                );
+
+                if ("err" in result) {
                   const error = result as { err: { InvalidInput: string } };
                   setIsValidUsername({
                     valid: false,
                     msg: error.err.InvalidInput ?? "Invalid username",
                   });
+                } else {
+                  setIsValidUsername({ valid: true, msg: "username valid" });
                 }
               }}
             />

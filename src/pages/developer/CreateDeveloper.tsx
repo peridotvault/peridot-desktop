@@ -2,16 +2,22 @@
 import React, { useState } from "react";
 import { InputField } from "../../components/atoms/InputField";
 import { ButtonTransaction } from "../../components/atoms/ButtonTransaction";
-import { createDeveloperProfile } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
+import { createDeveloperProfile } from "../../blockchain/icp/user/services/ICPUserService";
+import { AppPayment } from "../../features/wallet/views/Payment";
 
 export const CreateDeveloper = () => {
   const { wallet } = useWallet();
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [bio, setBio] = useState("");
+  const [isOnPayment, setIsOnPayment] = useState(false);
 
   async function handlePayment() {
-    const result = await createDeveloperProfile(wallet, websiteUrl, bio);
+    const result = await createDeveloperProfile({
+      wallet: wallet,
+      websiteUrl: websiteUrl,
+      bio: bio,
+    });
     console.log(result);
   }
   return (
@@ -46,7 +52,14 @@ export const CreateDeveloper = () => {
         <p className="text-text_disabled">
           *Alert! you can not REFUND but You still can change this details later
         </p>
-        <ButtonTransaction onClick={handlePayment} text="Pay" />
+        <ButtonTransaction onClick={() => setIsOnPayment(true)} text="Pay" />
+        {isOnPayment && (
+          <AppPayment
+            price={Number(10)}
+            onClose={() => setIsOnPayment(false)}
+            onExecute={handlePayment}
+          />
+        )}
       </div>
       {/* background  */}
       <div className="bg-radial absolute top-0 left-0 w-full h-full -z-10 opacity-30"></div>

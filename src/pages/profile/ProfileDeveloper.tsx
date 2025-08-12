@@ -12,56 +12,26 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { Slide } from "../Slide";
-import { getUserByPrincipalId } from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
 import { LoadingScreen } from "../../components/organisms/LoadingScreen";
-
-interface UserDataInterface {
-  ok: {
-    username: string;
-    display_name: string;
-    description: string;
-    link: string;
-    email: string;
-    image_url: string;
-    background_image_url: string;
-    total_playtime: number;
-    created_at: string;
-    user_demographics: {
-      birth_date: string;
-      gender: string;
-      country: string;
-    };
-    user_interactions: [
-      {
-        app_id: string;
-        interaction: string;
-        created_at: string;
-      }
-    ];
-    user_libraries: string;
-    developer: string;
-  };
-}
+import { getUserByPrincipalId } from "../../blockchain/icp/user/services/ICPUserService";
+import { UserInterface } from "../../interfaces/user/UserInterface";
+import { GetOpt } from "../../interfaces/CoreInterface";
 
 export const ProfileDeveloper = () => {
   const { wallet } = useWallet();
-  const [userData, setUserData] = useState<UserDataInterface | null>(null);
+  const [userData, setUserData] = useState<UserInterface | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpenWallet, setIOpenWallet] = useState(false);
 
   useEffect(() => {
     async function checkUser() {
       if (wallet.encryptedPrivateKey) {
-        const isUserExist = await getUserByPrincipalId(
-          wallet.encryptedPrivateKey
-        );
-        if (
-          isUserExist &&
-          typeof isUserExist === "object" &&
-          "ok" in isUserExist
-        ) {
-          setUserData(isUserExist as UserDataInterface);
+        const isUserExist = await getUserByPrincipalId({
+          wallet: wallet,
+        });
+        if (isUserExist) {
+          setUserData(isUserExist as UserInterface);
           setIsLoading(false);
         }
       }
@@ -83,7 +53,7 @@ export const ProfileDeveloper = () => {
             {/* cover  */}
             <div className="w-full h-[11rem]">
               <img
-                src={userData?.ok.background_image_url}
+                src={GetOpt(userData?.backgroundImageUrl!)}
                 className="w-full h-[15rem] object-cover rounded-2xl "
                 alt=""
               />
@@ -92,7 +62,7 @@ export const ProfileDeveloper = () => {
             <div className="px-10 relative flex items-end gap-6">
               <div className="w-36 h-36 bg-background_primary shadow-2xl rounded-full z-10 overflow-hidden p-2">
                 <img
-                  src={userData?.ok.image_url}
+                  src={GetOpt(userData?.imageUrl!)}
                   className="w-full h-full object-cover rounded-full"
                   alt=""
                 />
@@ -115,11 +85,9 @@ export const ProfileDeveloper = () => {
             {/* bio  */}
             <div className="flex flex-col gap-3 mt-3 px-10">
               <div className="flex flex-col gap-1">
-                <p className="font-medium text-2xl">
-                  {userData?.ok.display_name}
-                </p>
+                <p className="font-medium text-2xl">{userData?.displayName}</p>
                 <p className="text-text_disabled text-lg">
-                  @{userData?.ok.username}
+                  @{userData?.username}
                 </p>
               </div>
               <p>
@@ -173,7 +141,7 @@ export const ProfileDeveloper = () => {
               {/* profile image  */}
               <div className="w-1/12">
                 <img
-                  src={userData?.ok.image_url}
+                  src={GetOpt(userData?.imageUrl!)}
                   className="w-full aspect-square object-cover rounded-full shadow-flat-sm"
                   alt=""
                 />
@@ -191,7 +159,7 @@ export const ProfileDeveloper = () => {
                 {/* image content */}
                 <div className="mt-3">
                   <img
-                    src={userData?.ok.image_url}
+                    src={GetOpt(userData?.imageUrl!)}
                     className="w-full h-full rounded-xl"
                     alt=""
                   />
@@ -227,7 +195,7 @@ export const ProfileDeveloper = () => {
               {/* profile image  */}
               <div className="w-1/12">
                 <img
-                  src={userData?.ok.image_url}
+                  src={GetOpt(userData?.imageUrl!)}
                   className="w-full aspect-square object-cover rounded-full shadow-flat-sm"
                   alt=""
                 />
@@ -245,7 +213,7 @@ export const ProfileDeveloper = () => {
                 {/* image content */}
                 <div className="mt-3">
                   <img
-                    src={userData?.ok.background_image_url}
+                    src={GetOpt(userData?.backgroundImageUrl!)}
                     className="w-full h-full rounded-xl"
                     alt=""
                   />
@@ -293,7 +261,7 @@ export const ProfileDeveloper = () => {
             {/* lists friend  */}
             <div className="flex gap-3 items-center">
               <img
-                src={userData?.ok.image_url}
+                src={GetOpt(userData?.imageUrl!)}
                 className="w-1/6 aspect-square object-cover rounded-lg shadow-arise-sm"
                 alt=""
               />

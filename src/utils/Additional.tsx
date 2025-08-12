@@ -29,7 +29,7 @@ export const copyToClipboard = (data: EncryptedData | string | null) => {
   });
 };
 
-export const formatPriceICP = (price: number | undefined) => {
+export const formatPeridotTokenPrice = (price: bigint | undefined) => {
   const convertedPrice = Number(price) / 1e8;
   return convertedPrice;
 };

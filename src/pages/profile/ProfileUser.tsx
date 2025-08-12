@@ -2,22 +2,22 @@
 import React, { useEffect, useState } from "react";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-import {
-  getFriendRequestList,
-  getUserByPrincipalId,
-  searchUsersByPrefixWithLimit,
-} from "../../contexts/UserContext";
 import { useWallet } from "../../contexts/WalletContext";
 import { LoadingScreen } from "../../components/organisms/LoadingScreen";
 import { InputField } from "../../components/atoms/InputField";
 import { LoadingLogo } from "../../components/organisms/LoadingLogo";
 import { getCoverImage, getProfileImage } from "../../utils/Additional";
-import { MetadataUser } from "../../interfaces/User";
+import { UserInterface } from "../../interfaces/user/UserInterface";
+import {
+  getFriendRequestList,
+  getUserByPrincipalId,
+  searchUsersByPrefixWithLimit,
+} from "../../blockchain/icp/user/services/ICPUserService";
+import { GetOpt } from "../../interfaces/CoreInterface";
 
 export const ProfileUser = () => {
   const { wallet } = useWallet();
-  const [userData, setUserData] = useState<MetadataUser | null>(null);
+  const [userData, setUserData] = useState<UserInterface | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isOpenAddFriend, setIsOpenAddFriend] = useState(false);
   const [list_announcement] = useState([
@@ -41,15 +41,11 @@ export const ProfileUser = () => {
   useEffect(() => {
     async function checkUser() {
       if (wallet.encryptedPrivateKey) {
-        const isUserExist = await getUserByPrincipalId(
-          wallet.encryptedPrivateKey
-        );
-        if (
-          isUserExist &&
-          typeof isUserExist === "object" &&
-          "ok" in isUserExist
-        ) {
-          setUserData(isUserExist as MetadataUser);
+        const isUserExist = await getUserByPrincipalId({
+          wallet: wallet,
+        });
+        if (isUserExist) {
+          setUserData(isUserExist);
           setIsLoading(false);
         } else {
           setIsLoading(false);
@@ -205,7 +201,7 @@ export const ProfileUser = () => {
             {/* cover  */}
             <div className="w-full h-[11rem]">
               <img
-                src={getCoverImage(userData?.ok.background_image_url)}
+                src={getCoverImage(GetOpt(userData?.backgroundImageUrl!))}
                 className="w-full h-[15rem] object-cover rounded-2xl "
                 alt=""
               />
@@ -215,7 +211,7 @@ export const ProfileUser = () => {
               {/* Img  */}
               <div className="w-36 h-36 bg-background_primary shadow-2xl rounded-full z-10 overflow-hidden p-2">
                 <img
-                  src={getProfileImage(userData?.ok.image_url)}
+                  src={getProfileImage(GetOpt(userData?.imageUrl!))}
                   className="w-full h-full object-cover rounded-full"
                   alt=""
                 />
@@ -226,21 +222,19 @@ export const ProfileUser = () => {
               <div className="flex flex-col gap-1">
                 <div className="flex gap-2">
                   <p className="font-medium text-2xl">
-                    {userData?.ok.display_name}
+                    {userData?.displayName}
                   </p>
-                  {userData?.ok.developer.length != 0 ? (
+                  {GetOpt(userData?.developer!) && (
                     <div className="">
                       <span className="px-2 py-1 rounded-full border-accent_primary/50 border text-xs text-accent_primary">
                         dev
                       </span>
                     </div>
-                  ) : (
-                    ""
                   )}
                 </div>
 
                 <p className="text-text_disabled text-lg">
-                  @{userData?.ok.username}
+                  @{userData?.username}
                 </p>
               </div>
             </div>
@@ -289,7 +283,7 @@ export const ProfileUser = () => {
             {/* lists friend  */}
             <div className="flex gap-3 items-center">
               <img
-                src={getProfileImage(userData?.ok.image_url)}
+                src={getProfileImage(GetOpt(userData?.imageUrl!))}
                 className="w-1/6 aspect-square object-cover rounded-lg shadow-arise-sm"
                 alt=""
               />

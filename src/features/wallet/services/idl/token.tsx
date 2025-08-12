@@ -1,4 +1,69 @@
 export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
+  const Subaccount = IDL.Opt(IDL.Vec(IDL.Nat8));
+  const Account = IDL.Record({
+    owner: IDL.Principal,
+    subaccount: Subaccount,
+  });
+
+  // ---- ICRC-2 ----
+  // allowance
+  const AllowanceArgs = IDL.Record({ account: Account, spender: Account });
+  const Allowance = IDL.Record({
+    allowance: IDL.Nat,
+    expires_at: IDL.Opt(IDL.Nat64),
+  });
+
+  // approve
+  const ApproveArgs = IDL.Record({
+    from_subaccount: Subaccount,
+    spender: Account,
+    amount: IDL.Nat,
+    expected_allowance: IDL.Opt(IDL.Nat),
+    expires_at: IDL.Opt(IDL.Nat64),
+    fee: IDL.Opt(IDL.Nat),
+    memo: IDL.Opt(IDL.Vec(IDL.Nat8)),
+    created_at_time: IDL.Opt(IDL.Nat64),
+  });
+
+  const TxIndex = IDL.Nat;
+
+  const ApproveErr = IDL.Variant({
+    GenericError: IDL.Record({ message: IDL.Text, error_code: IDL.Nat }),
+    TemporarilyUnavailable: IDL.Null,
+    Duplicate: IDL.Record({ duplicate_of: TxIndex }),
+    BadFee: IDL.Record({ expected_fee: IDL.Nat }),
+    AllowanceChanged: IDL.Record({ current_allowance: IDL.Nat }),
+    CreatedInFuture: IDL.Record({ ledger_time: IDL.Nat64 }),
+    TooOld: IDL.Null,
+    InsufficientFunds: IDL.Record({ balance: IDL.Nat }),
+  });
+
+  const ApproveResult = IDL.Variant({ Ok: TxIndex, Err: ApproveErr });
+
+  const TransferFromArgs = IDL.Record({
+    from: Account,
+    to: Account,
+    amount: IDL.Nat,
+    fee: IDL.Opt(IDL.Nat),
+    memo: IDL.Opt(IDL.Vec(IDL.Nat8)),
+    created_at_time: IDL.Opt(IDL.Nat64),
+    spender_subaccount: Subaccount,
+  });
+
+  const TransferFromErr = IDL.Variant({
+    GenericError: IDL.Record({ message: IDL.Text, error_code: IDL.Nat }),
+    TemporarilyUnavailable: IDL.Null,
+    BadBurn: IDL.Record({ min_burn_amount: IDL.Nat }),
+    Duplicate: IDL.Record({ duplicate_of: TxIndex }),
+    BadFee: IDL.Record({ expected_fee: IDL.Nat }),
+    CreatedInFuture: IDL.Record({ ledger_time: IDL.Nat64 }),
+    TooOld: IDL.Null,
+    InsufficientFunds: IDL.Record({ balance: IDL.Nat }),
+  });
+
+  const TransferFromResult = IDL.Variant({ Ok: TxIndex, Err: TransferFromErr });
+
+  // ---- ICRC-3 ----
   const BlockValue = IDL.Rec();
   BlockValue.fill(
     IDL.Variant({
@@ -120,6 +185,12 @@ export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
       ],
       []
     ),
+    // ICRC-2
+    icrc2_allowance: IDL.Func([AllowanceArgs], [Allowance], ["query"]),
+    icrc2_approve: IDL.Func([ApproveArgs], [ApproveResult], []),
+    icrc2_transfer_from: IDL.Func([TransferFromArgs], [TransferFromResult], []),
+
+    // ICRC-3
     icrc3_get_archives: IDL.Func(
       [IDL.Record({ from: IDL.Opt(IDL.Principal) })],
       [

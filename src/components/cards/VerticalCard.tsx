@@ -4,15 +4,15 @@ import { PriceCoin } from "./PriceCoin";
 import { Link } from "react-router-dom";
 
 export const VerticalCard = ({
-  id,
+  appId,
   imgUrl,
   title,
   price,
 }: {
-  id: number;
+  appId: bigint;
   imgUrl: string;
   title: string;
-  price: number;
+  price: bigint;
 }) => {
   // const convertedPrice = Number(price) / 1e8;
   const convertedPrice = Number(price);
@@ -21,7 +21,7 @@ export const VerticalCard = ({
   };
   return (
     <Link
-      to={`/${formatTitle(title)}/${id}`}
+      to={`/${formatTitle(title)}/${Number(appId)}`}
       className="w-full flex flex-col gap-3 group"
     >
       <div className="w-full aspect-[3/4] overflow-hidden bg-white rounded-xl duration-300">

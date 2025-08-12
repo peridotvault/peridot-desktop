@@ -1,12 +1,12 @@
 import localforage from "localforage";
-import { MetadataUser } from "../interfaces/User";
 
 import { Currency } from "../features/wallet/interfaces/Currency";
 import theCurrencies from "./../assets/json/currencies.json";
 import { WalletInfo } from "../features/wallet/interfaces/Wallet";
+import { UserInterface } from "../interfaces/user/UserInterface";
 
 // ✅ User
-export async function saveUserInfo(user: MetadataUser) {
+export async function saveUserInfo(user: UserInterface) {
   try {
     await localforage.setItem("user-info", user);
     console.log("Successfully");
@@ -15,8 +15,8 @@ export async function saveUserInfo(user: MetadataUser) {
   }
 }
 
-export async function getUserInfo(): Promise<MetadataUser | null> {
-  const user = await localforage.getItem<MetadataUser>("user-info");
+export async function getUserInfo(): Promise<UserInterface | null> {
+  const user = await localforage.getItem<UserInterface>("user-info");
   return user;
 }
 

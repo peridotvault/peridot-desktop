@@ -1,11 +1,6 @@
-// @ts-ignore
+// UpdateProfile.tsx
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useWallet } from "../../contexts/WalletContext";
-import {
-  updateUser,
-  getUserByPrincipalId,
-  isUsernameValid,
-} from "../../contexts/UserContext";
 import {
   faEarthAsia,
   faEnvelope,
@@ -17,296 +12,260 @@ import {
 import countriesData from "../../assets/json/countries.json";
 import { LoadingScreen } from "../../components/organisms/LoadingScreen";
 import { getCoverImage, getProfileImage } from "../../utils/Additional";
-// import { TransactionSuccess } from "../../features/wallet/components/TransactionSuccess";
-import { GenderVariant, MetadataUser } from "../../interfaces/User";
 import { saveUserInfo } from "../../utils/IndexedDb";
 import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";
 import { DropDownComponent } from "../../components/atoms/DropDownComponent";
 import { AlertMessage } from "../../features/wallet/components/AlertMessage";
 
-interface CountryOption {
+import {
+  Gender,
+  UserInterface,
+  UpdateUserInterface,
+} from "../../interfaces/user/UserInterface";
+import {
+  getIsUsernameValid,
+  getUserByPrincipalId,
+  updateUser,
+} from "../../blockchain/icp/user/services/ICPUserService";
+
+/** Utils — konversi tanggal */
+function unixNsToDateStr(ns: bigint): string {
+  if (!ns || ns === 0n) return "";
+  const ms = Number(ns / 1_000_000n);
+  const d = new Date(ms);
+  const iso = new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+  )
+    .toISOString()
+    .slice(0, 10); // YYYY-MM-DD
+  return iso;
+}
+function dateStrToUnixNs(dateStr: string): bigint {
+  // "YYYY-MM-DD" -> ns (UTC midnight)
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (!m) throw new Error("Invalid date format (YYYY-MM-DD)");
+  const y = Number(m[1]),
+    mo = Number(m[2]) - 1,
+    d = Number(m[3]);
+  const ms = Date.UTC(y, mo, d, 0, 0, 0, 0);
+  return BigInt(ms) * 1_000_000n;
+}
+function genderVariantToCode(
+  g: Gender | null | undefined
+): "male" | "female" | "other" {
+  if (!g) return "other";
+  if ("male" in g) return "male";
+  if ("female" in g) return "female";
+  return "other";
+}
+function genderCodeToVariant(code: string): Gender {
+  if (code === "male") return { male: null };
+  if (code === "female") return { female: null };
+  return { other: null };
+}
+
+/** UI dropdown options */
+interface Option {
   code: string;
   name: string;
 }
+const genderOptions: Option[] = [
+  { code: "male", name: "Male" },
+  { code: "female", name: "Female" },
+  { code: "other", name: "Other" },
+];
+const countryOptions: Option[] = countriesData;
 
-interface UserDataInterface {
-  ok: {
-    username: string;
-    display_name: string;
-    email: string;
-    image_url: string;
-    background_image_url: string;
-    total_playtime: number;
-    created_at: string;
-    user_demographics: {
-      birth_date: number;
-      gender: {
-        male: null | undefined;
-        female: null | undefined;
-        other: null | undefined;
-      };
-      country: string;
-    };
-    user_interactions: [
-      {
-        app_id: string;
-        interaction: string;
-        created_at: string;
-      }
-    ];
-    user_libraries: string;
-    developer: string;
-  };
-}
+/** State untuk FORM (string-friendly) */
+type UpdateForm = {
+  username: string;
+  displayName: string;
+  email: string;
+  birthDateStr: string; // "YYYY-MM-DD"
+  genderCode: "male" | "female" | "other";
+  country: string;
+  imageUrl: string | null;
+  backgroundImageUrl: string | null;
+};
 
 export const UpdateProfile = () => {
   const { wallet } = useWallet();
-  const [userData, setUserData] = useState<UserDataInterface | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showFailed, setShowFailed] = useState(false);
-  const [metadataUpdateUser, setMetadataUpdateUser] = useState<MetadataUser>({
-    // username: "",
-    // display_name: "",
-    // email: "",
-    // image_url: "",
-    // background_image_url: "",
-    // user_demographics: {
-    //   birth_date: "",
-    //   gender: { other: null },
-    //   country: "",
-    // },
-    ok: {
-      username: "",
-      display_name: "",
-      description: "",
-      link: "",
-      email: "",
-      image_url: "",
-      background_image_url: "",
-      total_playtime: 0,
-      created_at: "",
-      user_demographics: {
-        birth_date: "",
-        gender: { other: null },
-        country: "",
-      },
-      user_interactions: [
-        {
-          app_id: "",
-          interaction: "",
-          created_at: "",
-        },
-      ],
-      user_libraries: "",
-      developer: [],
-    },
+
+  const [form, setForm] = useState<UpdateForm>({
+    username: "",
+    displayName: "",
+    email: "",
+    birthDateStr: "",
+    genderCode: "other",
+    country: "",
+    imageUrl: null,
+    backgroundImageUrl: null,
   });
+
   const [isValidUsername, setIsValidUsername] = useState({
     valid: true,
     msg: "",
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showFailed, setShowFailed] = useState(false);
 
-  function timestampToDateString(timestamp: number): string {
-    const date = new Date(Number(timestamp) / 1_000_000); // Convert nanoseconds to milliseconds
-    return date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-  }
-
+  // Load user → map ke form
   useEffect(() => {
-    async function checkUser() {
-      if (wallet.encryptedPrivateKey) {
-        const isUserExist = await getUserByPrincipalId(
-          wallet.encryptedPrivateKey
-        );
-        if (
-          isUserExist &&
-          typeof isUserExist === "object" &&
-          "ok" in isUserExist
-        ) {
-          const theUserData = isUserExist as UserDataInterface;
-          const genderVariant =
-            theUserData.ok.user_demographics.gender.male === null
-              ? { male: null }
-              : theUserData.ok.user_demographics.gender.female === null
-              ? { female: null }
-              : { other: null };
-          setUserData(userData);
-          setMetadataUpdateUser((prev) => {
-            const result = {
-              ok: {
-                ...prev?.ok,
-                username: theUserData.ok.username,
-                display_name: theUserData.ok.display_name,
-                email: theUserData.ok.email,
-                image_url: theUserData.ok.image_url || "",
-                background_image_url: theUserData.ok.background_image_url || "",
-                user_demographics: {
-                  birth_date: timestampToDateString(
-                    theUserData.ok.user_demographics.birth_date
-                  ),
-                  gender: genderVariant,
-                  country: theUserData.ok.user_demographics.country,
-                },
-              },
-            };
-            return result;
-          });
-          setIsLoading(false);
-        }
+    (async () => {
+      try {
+        if (wallet) return;
+        const user: UserInterface = await getUserByPrincipalId({
+          wallet: wallet,
+        });
+        setForm({
+          username: user.username,
+          displayName: user.displayName,
+          email: user.email,
+          birthDateStr: unixNsToDateStr(user.userDemographics.birthDate),
+          genderCode: genderVariantToCode(user.userDemographics.gender),
+          country: user.userDemographics.country,
+          imageUrl: user.imageUrl ?? null,
+          backgroundImageUrl: user.backgroundImageUrl ?? null,
+        });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
       }
-    }
-    checkUser();
+    })();
   }, [wallet]);
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  // Handlers
+  const onChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]:
+        name === "birthDateStr"
+          ? value
+          : type === "number"
+          ? value === ""
+            ? ""
+            : value
+          : value,
+    }));
+  };
 
-    if (name === "gender") {
-      // Special handling for gender to create the variant structure
-      const genderVariant: GenderVariant = {
-        [value as keyof GenderVariant]: null,
-      } as GenderVariant;
-      setMetadataUpdateUser((prev) => ({
-        ...prev,
-        user_demographics: {
-          ...prev.ok.user_demographics,
-          gender: genderVariant,
-        },
-      }));
-    } else if (name in metadataUpdateUser.ok.user_demographics) {
-      setMetadataUpdateUser((prev) => ({
-        ...prev,
-        user_demographics: {
-          ...prev.ok.user_demographics,
-          [name]:
-            type === "number" ? (value === "" ? "" : Number(value)) : value,
-        },
-      }));
-    } else {
-      setMetadataUpdateUser((prev) => ({
-        ...prev,
-        [name]: type === "number" ? (value === "" ? "" : Number(value)) : value,
-      }));
-    }
+  const onGenderChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const code = e.target.value as UpdateForm["genderCode"];
+    setForm((p) => ({ ...p, genderCode: code }));
   };
 
   const handleImageUpload = async (
     e: ChangeEvent<HTMLInputElement>,
-    imageType: "image_url" | "background_image_url"
+    field: "imageUrl" | "backgroundImageUrl"
   ) => {
     try {
       const file = e.target.files?.[0];
       if (!file) return;
-
-      // Check file size
-      const MAX_FILE_SIZE = 1.5 * 1024 * 1024;
-      if (file.size > MAX_FILE_SIZE) {
-        const currentSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const MAX = 1.5 * 1024 * 1024;
+      if (file.size > MAX) {
         alert(
-          `File size exceeds 1.5MB limit. Current size: ${currentSizeMB}MB`
+          `File too large (>1.5MB). Size: ${(file.size / 1024 / 1024).toFixed(
+            2
+          )}MB`
         );
         e.target.value = "";
         return;
       }
-
-      // Convert to base64
-      const base64String = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result === "string") {
-            resolve(reader.result);
-          } else {
-            reject(new Error("Failed to convert image to base64"));
-          }
-        };
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(file);
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () =>
+          typeof r.result === "string"
+            ? resolve(r.result)
+            : reject(new Error("toBase64 failed"));
+        r.onerror = () => reject(r.error);
+        r.readAsDataURL(file);
       });
-
-      setMetadataUpdateUser((prev) => ({
-        ...prev,
-        [imageType]: base64String,
-      }));
-    } catch (error) {
-      console.error("Error handling image upload:", error);
+      setForm((p) => ({ ...p, [field]: base64 }));
+    } catch (err) {
+      console.error(err);
       e.target.value = "";
-      alert("Failed to upload image. Please try again.");
+      alert("Failed to upload image.");
     }
   };
 
   const handleSubmit = async () => {
-    // Validation before submission
-    const { ok } = metadataUpdateUser;
-    const { birth_date, gender, country } = ok.user_demographics;
-
+    // Validasi ringan
     if (
-      !ok.username ||
-      !ok.display_name ||
-      !ok.email ||
-      !birth_date ||
-      !gender ||
-      !country
+      !form.username ||
+      !form.displayName ||
+      !form.email ||
+      !form.birthDateStr ||
+      !form.country
     ) {
       alert("Please fill in all fields");
       return;
     }
-
-    // Additional validation for email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(ok.email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       alert("Please enter a valid email address");
       return;
     }
-
     try {
-      const result = await updateUser(metadataUpdateUser, wallet);
-      if (result) {
-        saveUserInfo(metadataUpdateUser);
-        // Handle successful creation
-        console.log("Account updated successfully");
-        setShowSuccess(true);
-        setTimeout(() => {
-          setShowSuccess(false);
-        }, 2000);
-      }
+      // Build payload sesuai UpdateUserInterface (camelCase)
+      const payload: UpdateUserInterface = {
+        username: form.username,
+        displayName: form.displayName,
+        email: form.email,
+        imageUrl: form.imageUrl ?? null,
+        backgroundImageUrl: form.backgroundImageUrl ?? null,
+        userDemographics: {
+          birthDate: dateStrToUnixNs(form.birthDateStr),
+          gender: genderCodeToVariant(form.genderCode),
+          country: form.country,
+        },
+      };
+
+      const updated = await updateUser({ metadataUpdate: payload, wallet });
+      // Simpan versi ringkas ke IndexedDB (opsional)
+      await saveUserInfo(updated as unknown as UserInterface);
+
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
       console.error("Error updating account:", error);
       setShowFailed(true);
-      setTimeout(() => {
-        setShowFailed(false);
-      }, 2000);
+      setTimeout(() => setShowFailed(false), 2000);
     }
   };
 
-  const genderOptions: CountryOption[] = [
-    { code: "male", name: "Male" },
-    { code: "female", name: "Female" },
-    { code: "other", name: "Other" },
-  ];
-  const countryOptions: CountryOption[] = countriesData;
+  // Username validation while typing
+  const onUsernameChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    onChange(e);
+    try {
+      const res = await getIsUsernameValid(e.target.value);
+      if ("ok" in res)
+        setIsValidUsername({ valid: true, msg: "username valid" });
+      else if ("err" in res) {
+        const err = res.err as { InvalidInput?: string };
+        setIsValidUsername({
+          valid: false,
+          msg: err.InvalidInput ?? "Invalid username",
+        });
+      }
+    } catch {
+      setIsValidUsername({ valid: false, msg: "Validation failed" });
+    }
+  };
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+  if (isLoading) return <LoadingScreen />;
 
   return (
-    <main className="pt-20  w-full flex flex-col">
+    <main className="pt-20 w-full flex flex-col">
       <div className="flex flex-col items-center">
-        {showSuccess ? (
-          <AlertMessage
-            msg="Account Updated Successfully"
-            isSuccess={showSuccess}
-          />
-        ) : (
-          ""
+        {showSuccess && (
+          <AlertMessage msg="Account Updated Successfully" isSuccess />
         )}
-        {showFailed ? (
-          <AlertMessage msg="Account Updated Failed" isSuccess={showFailed} />
-        ) : (
-          ""
+        {showFailed && (
+          <AlertMessage msg="Account Update Failed" isSuccess={false} />
         )}
+
         <div className="mb-3 py-6 px-10 border-b border-background_disabled flex justify-between items-center w-full">
           <p className="text-2xl font-semibold">Account Settings</p>
           <button
@@ -316,16 +275,17 @@ export const UpdateProfile = () => {
             Submit
           </button>
         </div>
+
         <div className="container flex gap-10 px-10 pt-3 pb-10">
           <div className="w-1/2 flex flex-col gap-10">
-            {/* Profile Photo  */}
+            {/* Profile Photo */}
             <div className="flex flex-col gap-3">
-              <p className="capitalize font-semibold">Profile photo</p>
+              <p className="capitalize font-semibold">Profile Photo</p>
               <div className="flex justify-center">
                 <div className="shadow-arise-sm w-[230px] aspect-square rounded-full overflow-hidden">
-                  {metadataUpdateUser.ok.image_url && (
+                  {form.imageUrl && (
                     <img
-                      src={getProfileImage(metadataUpdateUser.ok.image_url)}
+                      src={getProfileImage(form.imageUrl)}
                       className="w-full h-full object-cover"
                     />
                   )}
@@ -334,20 +294,18 @@ export const UpdateProfile = () => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleImageUpload(e, "image_url")}
+                onChange={(e) => handleImageUpload(e, "imageUrl")}
                 className="w-full bg-transparent shadow-sunken-sm px-5 mt-3 py-3 rounded-lg"
               />
             </div>
-            {/* bg img  */}
+            {/* Background Image */}
             <div className="flex flex-col gap-3">
               <p className="capitalize font-semibold">Background Image</p>
               <div className="flex justify-center">
                 <div className="shadow-arise-sm w-full h-[15rem] rounded-xl overflow-hidden">
-                  {metadataUpdateUser.ok.background_image_url && (
+                  {form.backgroundImageUrl && (
                     <img
-                      src={getCoverImage(
-                        metadataUpdateUser.ok.background_image_url
-                      )}
+                      src={getCoverImage(form.backgroundImageUrl)}
                       className="w-full h-full object-cover"
                     />
                   )}
@@ -356,94 +314,84 @@ export const UpdateProfile = () => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleImageUpload(e, "background_image_url")}
+                onChange={(e) => handleImageUpload(e, "backgroundImageUrl")}
                 className="w-full bg-transparent shadow-sunken-sm px-5 mt-3 py-3 rounded-lg"
-                required
               />
             </div>
           </div>
+
           <div className="flex flex-col gap-6 w-1/2">
             <div className="flex flex-col gap-2">
               <p className="text-xl font-semibold">User Information</p>
               <p className="text-text_disabled">
-                Here you can edit public information about yourself The changes
-                will be displayed for other users.
+                Here you can edit public information about yourself. The changes
+                will be visible to other users.
               </p>
             </div>
-            <div className="">
+
+            <div>
               <InputFieldComponent
                 name="username"
                 icon={faUser}
                 type="text"
                 placeholder="username"
-                value={metadataUpdateUser.ok.username}
-                onChange={async (e) => {
-                  handleInputChange(e);
-                  const result = await isUsernameValid(e.target.value);
-                  if (result && typeof result === "object" && "ok" in result) {
-                    setIsValidUsername({ valid: true, msg: "username valid" });
-                  } else if (
-                    result &&
-                    typeof result === "object" &&
-                    "err" in result
-                  ) {
-                    const error = result as { err: { InvalidInput: string } };
-                    setIsValidUsername({
-                      valid: false,
-                      msg: error.err.InvalidInput ?? "Invalid username",
-                    });
-                  }
-                }}
+                value={form.username}
+                onChange={onUsernameChange}
               />
               <p
-                className={` ${
+                className={`${
                   isValidUsername.valid ? "text-success" : "text-danger"
                 }`}
               >
                 {isValidUsername.msg}
               </p>
             </div>
+
             <InputFieldComponent
-              name="display_name"
+              name="displayName"
               icon={faTv}
               type="text"
               placeholder="Display Name"
-              onChange={handleInputChange}
-              value={metadataUpdateUser.ok.display_name}
+              value={form.displayName}
+              onChange={onChange}
             />
+
             <InputFieldComponent
               name="email"
               icon={faEnvelope}
               type="email"
               placeholder="Email"
-              value={metadataUpdateUser.ok.email}
-              onChange={handleInputChange}
+              value={form.email}
+              onChange={onChange}
             />
+
             <InputFieldComponent
-              name="birth_date"
+              name="birthDateStr"
               icon={faSeedling}
               type="date"
               placeholder="Birth Date"
-              value={metadataUpdateUser.ok.user_demographics.birth_date.toString()}
-              onChange={handleInputChange}
+              value={form.birthDateStr}
+              onChange={onChange}
             />
+
             <DropDownComponent
               name="gender"
               icon={faVenusMars}
               placeholder="Gender"
               className=""
-              value={metadataUpdateUser.ok.user_demographics.gender}
+              value={form.genderCode}
               options={genderOptions}
-              onChange={handleInputChange}
+              onChange={onGenderChange}
             />
+
             <DropDownComponent
               name="country"
               icon={faEarthAsia}
               placeholder="Country"
               className=""
-              value={metadataUpdateUser.ok.user_demographics.country}
+              value={form.country}
               options={countryOptions}
-              onChange={handleInputChange}
+              onChange={onChange}
             />
           </div>
         </div>

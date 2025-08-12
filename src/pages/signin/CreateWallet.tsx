@@ -7,9 +7,8 @@ import { PasswordPage } from "./PasswordPage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faDice } from "@fortawesome/free-solid-svg-icons";
 import { clearWalletData } from "../../utils/StoreService";
-import { getUserByPrincipalId } from "../../contexts/UserContext";
 import { SeedPhraseInput } from "../../features/wallet/components/SeedPhraseInput";
-// import { getUserByPrincipalId } from "../../contexts/UserContext";
+import { getUserByPrincipalId } from "../../blockchain/icp/user/services/ICPUserService";
 
 export default function CreateWallet() {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } =
@@ -20,21 +19,22 @@ export default function CreateWallet() {
 
   useEffect(() => {
     async function userHandle() {
-      if (wallet.encryptedPrivateKey) {
-        const isUserExist = await getUserByPrincipalId(
-          wallet.encryptedPrivateKey
-        );
-        if (
-          isUserExist &&
-          typeof isUserExist === "object" &&
-          "ok" in isUserExist
-        ) {
-          navigate("/");
-        } else {
-          navigate("/create_profile");
+      try {
+        if (wallet.encryptedPrivateKey) {
+          const isUserExist = await getUserByPrincipalId({
+            wallet: wallet,
+          });
+          if (isUserExist) {
+            navigate("/");
+          }
         }
+      } catch (error) {
+        const msg = String((error as Error)?.message ?? error);
+        if (msg.includes("NotFound")) navigate("/create_profile");
+        else console.error(error);
       }
     }
+
     generateSeedPhrase();
     userHandle();
   }, [wallet.encryptedPrivateKey, navigate]);

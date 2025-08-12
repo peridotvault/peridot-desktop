@@ -1,9 +1,9 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { walletService } from "../features/wallet/services/WalletService";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
-import { appIdlFactory } from "../blockchain/icp/idl/app";
-import { AppInterface } from "../interfaces/App";
+import { AppInterface } from "../interfaces/app/AppInterface";
 import { hexToArrayBuffer } from "../utils/crypto";
+import { ICPAppFactory } from "../blockchain/icp/app/ICPAppFactory";
 
 const appCanister = import.meta.env.VITE_PERIDOT_CANISTER_APP_BACKEND;
 type ApiError =
@@ -20,7 +20,7 @@ export async function getAllApps(): Promise<AppInterface[] | null> {
       host: import.meta.env.VITE_HOST,
     });
 
-    const actor = Actor.createActor(appIdlFactory, {
+    const actor = Actor.createActor(ICPAppFactory, {
       agent,
       canisterId: appCanister,
     });
@@ -45,7 +45,7 @@ export async function getMyPurchasedApps(
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(appIdlFactory, {
+    const actor = Actor.createActor(ICPAppFactory, {
       agent,
       canisterId: appCanister,
     });
@@ -63,7 +63,7 @@ export async function getApp(id: number): Promise<AppInterface | null> {
       host: import.meta.env.VITE_HOST,
     });
 
-    const actor = Actor.createActor(appIdlFactory, {
+    const actor = Actor.createActor(ICPAppFactory, {
       agent,
       canisterId: appCanister,
     });
@@ -85,7 +85,7 @@ export async function buyApp(id: number, wallet: any): Promise<string> {
     identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
   });
 
-  const actor = Actor.createActor(appIdlFactory, {
+  const actor = Actor.createActor(ICPAppFactory, {
     agent,
     canisterId: appCanister,
   });

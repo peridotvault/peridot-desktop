@@ -5,13 +5,13 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Wallet } from "../../features/wallet/views/Wallet";
 import { AnimatePresence } from "framer-motion";
 import { useWallet } from "../../contexts/WalletContext";
-import { getUserByPrincipalId } from "../../contexts/UserContext";
 import { InputField } from "../atoms/InputField";
 import { walletService } from "../../features/wallet/services/WalletService";
 import { getUserInfo } from "../../utils/IndexedDb";
-import { MetadataUser } from "../../interfaces/User";
 import { saveUserInfo } from "../../utils/IndexedDb";
 import _ from "lodash";
+import { UserInterface } from "../../interfaces/user/UserInterface";
+import { getUserByPrincipalId } from "../../blockchain/icp/user/services/ICPUserService";
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
@@ -20,11 +20,11 @@ export default function MainLayout() {
   const [isRequiredPassword, setIsRequiredPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<MetadataUser | null>(null);
+  const [userData, setUserData] = useState<UserInterface | null>(null);
 
   const saveMetadata = async (
-    oldUserMetadata: MetadataUser | null,
-    newMetadata: MetadataUser
+    oldUserMetadata: UserInterface | null,
+    newMetadata: UserInterface
   ): Promise<void> => {
     try {
       if (!_.isEqual(oldUserMetadata, newMetadata)) {
@@ -34,10 +34,6 @@ export default function MainLayout() {
     } catch (error) {
       console.error;
     }
-  };
-
-  const isValidUser = (u: unknown): u is MetadataUser => {
-    return typeof u === "object" && u !== null && "ok" in u;
   };
 
   // Check wallet and session status
@@ -65,10 +61,10 @@ export default function MainLayout() {
           const isValidSession = lock ? Date.now() <= lock.expiresAt : false;
           setIsCheckingWallet(false);
           if (isValidSession) {
-            const isUserExist = (await getUserByPrincipalId(
-              wallet.encryptedPrivateKey
-            )) as MetadataUser;
-            if (isValidUser(isUserExist)) {
+            const isUserExist = (await getUserByPrincipalId({
+              wallet: wallet,
+            })) as UserInterface;
+            if (isUserExist) {
               saveMetadata(userInfo, isUserExist);
 
               setIsRequiredPassword(false);
@@ -142,7 +138,7 @@ export default function MainLayout() {
     <main className="min-h-screen flex flex-col">
       <Navbar
         onOpenWallet={() => setIOpenWallet(true)}
-        profileImage={userData?.ok.image_url}
+        profileImage={userData?.imageUrl}
       />
       <div
         className={`flex-1  ${

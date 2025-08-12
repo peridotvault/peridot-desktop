@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getMyPurchasedApps } from "../../../contexts/AppContext";
-import { AppInterface } from "../../../interfaces/App";
+import { AppInterface } from "../../../interfaces/app/AppInterface";
 import { useWallet } from "../../../contexts/WalletContext";
+import { getMyApps } from "../../../blockchain/icp/app/services/ICPAppService";
 
 export const Sidebar = () => {
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ export const Sidebar = () => {
 
   useEffect(() => {
     async function fetchData() {
-      const resAllGames = await getMyPurchasedApps(wallet);
+      const resAllGames = await getMyApps({ wallet: wallet });
       setAllGames(resAllGames);
     }
 

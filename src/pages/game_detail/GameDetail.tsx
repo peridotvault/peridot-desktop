@@ -5,20 +5,27 @@ import { VerticalCard } from "../../components/cards/VerticalCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { AppPayment } from "../../features/wallet/views/Payment";
-import { AppInterface } from "../../interfaces/App";
-import { getAllApps, getApp } from "../../contexts/AppContext";
+import { AppInterface } from "../../interfaces/app/AppInterface";
 import { useParams } from "react-router-dom";
-import { formatPriceICP } from "../../utils/Additional";
+import { formatPeridotTokenPrice } from "../../utils/Additional";
+import {
+  getAllApps,
+  getAppById,
+} from "../../blockchain/icp/app/services/ICPAppService";
+import { useWallet } from "../../contexts/WalletContext";
+import { buyApp } from "../../blockchain/icp/app/services/ICPPurchaseService";
+import { PurchaseInterface } from "../../interfaces/app/PurchaseInterface";
 
 export default function GameDetail() {
   const { app_id } = useParams();
+  const { wallet } = useWallet();
   const [isOnPayment, setIsOnPayment] = useState(false);
   const [detailGame, setDetailGame] = useState<AppInterface | null>();
   const [allGames, setAllGames] = useState<AppInterface[] | null>();
 
   useEffect(() => {
     async function fetchData() {
-      const resDetailGame = await getApp(Number(app_id));
+      const resDetailGame = await getAppById({ appId: Number(app_id) });
       setDetailGame(resDetailGame);
       const resAllGames = await getAllApps();
       setAllGames(resAllGames);
@@ -43,8 +50,8 @@ export default function GameDetail() {
             {/* overview */}
             <img
               src={
-                detailGame?.background_image
-                  ? detailGame.background_image
+                detailGame?.coverImage
+                  ? detailGame.coverImage
                   : "/assets/cover1.png"
               }
               alt=""
@@ -90,8 +97,8 @@ export default function GameDetail() {
               <div className="w-full aspect-video relative overflow-hidden shadow-arise-sm rounded-xl">
                 <img
                   src={
-                    detailGame?.background_image
-                      ? detailGame.background_image
+                    detailGame?.coverImage
+                      ? detailGame.coverImage
                       : "/assets/cover1.png"
                   }
                   className="w-full h-full object-cover"
@@ -136,7 +143,7 @@ export default function GameDetail() {
                     className="h-6 aspect-square object-contain"
                   />
                   <p className="text-lg">
-                    {formatPriceICP(detailGame?.price)} ICP
+                    {formatPeridotTokenPrice(detailGame?.price)} ICP
                   </p>
                   {/* <p className="opacity-80">
                     / IDR {(1045800).toLocaleString()}
@@ -177,9 +184,9 @@ export default function GameDetail() {
             <div className="flex gap-6">
               {allGames?.slice(0, 5).map((item) => (
                 <VerticalCard
-                  key={item.id}
-                  id={item.id}
-                  imgUrl={item.cover_image}
+                  key={item.appId}
+                  appId={item.appId}
+                  imgUrl={item.coverImage}
                   title={item.title}
                   price={item.price}
                 />
@@ -189,9 +196,16 @@ export default function GameDetail() {
         </section>
         {isOnPayment && (
           <AppPayment
+            price={Number(formatPeridotTokenPrice(detailGame?.price))} // 10 ICP (human)
             onClose={() => setIsOnPayment(false)}
-            price={Number(formatPriceICP(detailGame?.price))}
-            app_id={Number(app_id)}
+            onExecute={async () => {
+              const res: PurchaseInterface = await buyApp({
+                appId: Number(app_id),
+                wallet: wallet,
+              });
+
+              console.log(res);
+            }}
           />
         )}
         <div className="mb-20"></div>
