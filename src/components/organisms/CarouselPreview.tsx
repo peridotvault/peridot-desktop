@@ -133,7 +133,7 @@ export default function CarouselPreview({
       -index * 100
     }% + ${pct}%))`;
   };
-  const onPointerUp = (e: React.PointerEvent) => {
+  const onPointerUp = (_: React.PointerEvent) => {
     if (!wrap.current || !track.current) return;
     const dx = dragDX.current;
     dragStart.current = null;

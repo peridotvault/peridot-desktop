@@ -2,13 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useWallet } from "../../contexts/WalletContext";
 import { AppInterface } from "../../interfaces/app/AppInterface";
 import { getMyApps } from "../../blockchain/icp/app/services/ICPAppService";
 
 export const Sidebar = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
 

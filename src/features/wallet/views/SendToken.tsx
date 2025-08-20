@@ -116,7 +116,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
   };
 
   const updateTokenBalance = useCallback(
-    (canisterId: string, balanceUsd: number, balanceToken: number) => {
+    (_canisterId: string, _balanceUsd: number, balanceToken: number) => {
       setTokenBalances(balanceToken);
     },
     []

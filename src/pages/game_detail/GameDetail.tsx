@@ -17,6 +17,7 @@ import { PurchaseInterface } from "../../interfaces/app/PurchaseInterface";
 import CarouselPreview, {
   MediaItem,
 } from "../../components/organisms/CarouselPreview";
+import { VerticalCard } from "../../components/cards/VerticalCard";
 
 export default function GameDetail() {
   const { appId } = useParams();
@@ -92,15 +93,6 @@ export default function GameDetail() {
           {/* Left side ======================== */}
           <div className="w-3/4 flex flex-col gap-12 text-lg">
             {/* overview */}
-            {/* <img
-              src={
-                detailGame?.coverImage
-                  ? detailGame.coverImage
-                  : "/assets/cover1.png"
-              }
-              alt=""
-              className="aspect-video rounded-xl object-cover shadow-arise-sm "
-            /> */}
             <CarouselPreview
               items={previewsToMediaItems(detailGame?.previews)}
               initialIndex={0}
@@ -111,7 +103,7 @@ export default function GameDetail() {
             <p>{detailGame?.description}</p>
           </div>
           {/* right side ======================== */}
-          <div className="w-1/4 min-w-[300px] h-52 flex flex-col gap-6">
+          <div className="w-1/4 min-w-[300px]  flex flex-col gap-6">
             {/* age regulation  */}
             <div className="flex items-center justify-center ">
               <div className="w-full aspect-[3/4] relative overflow-hidden shadow-arise-sm rounded-xl">
@@ -196,7 +188,7 @@ export default function GameDetail() {
 
             {/* contents  */}
             <div className="flex gap-6">
-              {/* {allGames?.slice(0, 5).map((item) => (
+              {allGames?.slice(0, 5).map((item) => (
                 <VerticalCard
                   key={item.appId}
                   appId={item.appId}
@@ -204,7 +196,7 @@ export default function GameDetail() {
                   title={item.title}
                   price={item.price}
                 />
-              ))} */}
+              ))}
             </div>
           </div>
         </section>

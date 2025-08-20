@@ -38,11 +38,11 @@ export const AppPayment: React.FC<Props> = ({
     {}
   );
   const [myBalance, setMyBalance] = useState(0);
-  const [fee, setFee] = useState<bigint>(0n);
+  // const [fee, setFee] = useState<bigint>(0n);
 
   // info ledger
   const [decimals, setDecimals] = useState<number>(8);
-  const [allowance, setAllowance] = useState<bigint>(0n);
+  // const [allowance, setAllowance] = useState<bigint>(0n);
 
   // ui
   const [busy, setBusy] = useState(false);
@@ -106,19 +106,19 @@ export const AppPayment: React.FC<Props> = ({
   useEffect(() => {
     (async () => {
       try {
-        const { actor, agent } = await makeLedgerActor();
+        const { actor } = await makeLedgerActor();
         const dec = Number(await actor.icrc1_decimals());
         setDecimals(dec);
 
-        const feeOnChain = await actor.icrc1_fee();
-        setFee(BigInt(feeOnChain));
+        // const feeOnChain = await actor.icrc1_fee();
+        // setFee(BigInt(feeOnChain));
 
-        const owner = await agent.getPrincipal(); // ✅
-        const account = { owner, subaccount: [] as [] };
-        const spender = { owner: spenderPrincipal, subaccount: [] as [] };
+        // const owner = await agent.getPrincipal(); // ✅
+        // const account = { owner, subaccount: [] as [] };
+        // const spender = { owner: spenderPrincipal, subaccount: [] as [] };
 
-        const alw = await actor.icrc2_allowance({ account, spender });
-        setAllowance(alw.allowance);
+        // const alw = await actor.icrc2_allowance({ account, spender });
+        // setAllowance(alw.allowance);
       } catch (e: any) {
         setAlertData({ isSuccess: false, msg: e?.message ?? String(e) });
       }

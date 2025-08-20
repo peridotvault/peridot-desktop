@@ -14,11 +14,6 @@ import { ApiResponse } from "../../../../interfaces/CoreInterface";
 
 const userCanister = import.meta.env.VITE_PERIDOT_CANISTER_USER_BACKEND;
 
-function dateToNanoSeconds(dateStr: bigint): bigint {
-  const date = new Date(Number(dateStr));
-  return BigInt(date.getTime()) * BigInt(1_000_000);
-}
-
 async function createAccount({
   metadata,
   wallet,

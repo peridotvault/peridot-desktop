@@ -1,12 +1,6 @@
 // UpdateApp.tsx (replaces your old CreateApp.tsx for edit flow)
 // @ts-ignore
-import React, {
-  ChangeEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";
 import {
   faBrain,
@@ -456,20 +450,11 @@ export default function UpdateApp() {
         throw new Error("Isi field Version dulu sebelum upload build.");
 
       const filename = safeFileName(file.name);
-      const contentType = file.type || "application/octet-stream";
 
       type BuildPrefixKey = "builds/windows" | "builds/macos" | "builds/linux";
       const baseBuildPrefix =
         storage.prefixes[`builds/${osKey}` as BuildPrefixKey];
       const versionPrefix = `${baseBuildPrefix}${version}/`;
-
-      const publicUrl = await uploadToPrefix({
-        file,
-        prefix: versionPrefix,
-        fileName: filename,
-        contentType,
-        public: true,
-      });
 
       const checksum = await sha256Hex(file);
       const sizeMB = +(file.size / (1024 * 1024)).toFixed(3);
