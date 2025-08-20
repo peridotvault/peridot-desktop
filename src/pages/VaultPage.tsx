@@ -3,85 +3,14 @@ import React, { useEffect, useState } from "react";
 import { VerticalCard } from "../components/cards/VerticalCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import { getAllApps } from "../contexts/AppContext";
 import { AppInterface } from "../interfaces/app/AppInterface";
+import { getAllApps } from "../blockchain/icp/app/services/ICPAppService";
 
 export default function VaultPage() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [isHoverComponent, setIsHoverComponent] = useState(false);
-  const [_, setAllGames] = useState<AppInterface[] | null>();
-
-  const dummyGameList = [
-    {
-      id: 1,
-      cover_image: "https://storage.googleapis.com/pod_public/750/216712.jpg",
-      title: "Elden Ring",
-      price: 59,
-    },
-    {
-      id: 2,
-      cover_image:
-        "https://upload.wikimedia.org/wikipedia/id/e/ee/God_of_War_Ragnar%C3%B6k_cover.jpg",
-      title: "God of War Ragnarok",
-      price: 69,
-    },
-    {
-      id: 3,
-      cover_image:
-        "https://m.media-amazon.com/images/M/MV5BZWYyNDRkNzAtOTI0Ny00NDQwLWE5M2YtMWFiZDdmMDc4MmQ0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-      title: "Cyberpunk 2077",
-      price: 49,
-    },
-    {
-      id: 4,
-      cover_image: "https://m.media-amazon.com/images/I/61Nm7jqUUSL.jpg",
-      title: "Hogwarts Legacy",
-      price: 59,
-    },
-    {
-      id: 5,
-      cover_image:
-        "https://smartcdkeys.com/image/cache/catalog/image/cache/data/products/resident-evil-4-remake/cover/resident-evil-4-remake-smartcdkeys-cheap-cd-key-cover-390x580.webp",
-      title: "Resident Evil 4 Remake",
-      price: 39,
-    },
-    {
-      id: 6,
-      cover_image:
-        "https://upload.wikimedia.org/wikipedia/en/0/0c/Witcher_3_cover_art.jpg",
-      title: "The Witcher 3: Wild Hunt",
-      price: 29,
-    },
-    {
-      id: 7,
-      cover_image:
-        "https://media.rockstargames.com/rockstargames/img/global/news/upload/actual_1364906194.jpg",
-      title: "Grand Theft Auto V",
-      price: 19,
-    },
-    {
-      id: 8,
-      cover_image:
-        "https://cdn1.epicgames.com/400347196e674de89c23cc2a7f2121db/offer/AC%20KINGDOM%20PREORDER_STANDARD%20EDITION_EPIC_Key_Art_Portrait_640x854-640x854-288120c5573756cb988b6c1968cebd86.png",
-      title: "Assassin's Creed Valhalla",
-      price: 39,
-    },
-    {
-      id: 9,
-      cover_image:
-        "https://upload.wikimedia.org/wikipedia/en/4/44/Red_Dead_Redemption_II.jpg",
-      title: "Red Dead Redemption 2",
-      price: 49,
-    },
-    {
-      id: 10,
-      cover_image:
-        "https://image.api.playstation.com/vulcan/ap/rnd/202009/3021/BtsjAgHT9pqHRXtN9FCk7xc8.png",
-      title: "Spider-Man Remastered",
-      price: 59,
-    },
-  ];
+  const [allApps, setAllApps] = useState<AppInterface[] | null>();
 
   const images: string[] = [
     "./assets/vault/Content1.png",
@@ -92,7 +21,8 @@ export default function VaultPage() {
   useEffect(() => {
     async function fetchData() {
       const resAllGames = await getAllApps();
-      setAllGames(resAllGames);
+      console.log(resAllGames);
+      setAllApps(resAllGames);
     }
 
     fetchData();
@@ -173,11 +103,11 @@ export default function VaultPage() {
 
           {/* contents  */}
           <div className="flex gap-6">
-            {dummyGameList?.slice(0, 5).map((item) => (
+            {allApps?.slice(0, 5).map((item) => (
               <VerticalCard
-                key={item.id}
-                appId={BigInt(item.id)}
-                imgUrl={item.cover_image}
+                key={item.appId}
+                appId={BigInt(item.appId)}
+                imgUrl={item.coverImage}
                 title={item.title}
                 price={BigInt(item.price)}
               />
@@ -199,11 +129,11 @@ export default function VaultPage() {
 
           {/* contents  */}
           <div className="flex gap-6">
-            {dummyGameList?.slice(5, 10).map((item) => (
+            {allApps?.slice(0, 5).map((item) => (
               <VerticalCard
-                key={item.id}
-                appId={BigInt(item.id)}
-                imgUrl={item.cover_image}
+                key={item.appId}
+                appId={BigInt(item.appId)}
+                imgUrl={item.coverImage}
                 title={item.title}
                 price={BigInt(item.price)}
               />

@@ -1,24 +1,18 @@
-import { AppId, Timestamp, UserId } from "../CoreInterface";
+import { AppId, Opt, Timestamp, UserId } from "../CoreInterface";
 
 /** Jika kamu punya enum/variant final, impor dari file lain */
-export type AppStatus =
-  | { draft: null }
-  | { published: null }
-  | { archived: null }
-  | { hidden: null }; // <-- EDIT sesuai Core.AppStatus milikmu
+export type AppStatus = { publish: null } | { notPublish: null };
 
-export type Category =
-  | { game: null }
-  | { tool: null }
-  | { demo: null }
-  | { other: null }; // <-- EDIT sesuai Core.Category milikmu
+export type Media = { image: null } | { video: null };
 
-export type Tag = string; // <-- EDIT jika Tag kamu adalah variant, bukan string
+export type Tag = string;
+export type Category = string;
 
 /** =========================
  *  Preview
  *  ========================= */
 export interface Preview {
+  kind: Media;
   url: string;
 }
 
@@ -30,7 +24,7 @@ export type OS = { windows: null } | { macos: null } | { linux: null };
 /** =========================
  *  Manifest
  *  ========================= */
-export interface Manifest {
+export interface ManifestInterface {
   version: string; // ex: "1.0.3"
   size: number; // Motoko Float -> JS number (Float64)
   bucket: string; // storage bucket
@@ -49,7 +43,7 @@ export interface WebBuild {
 
 export interface NativeBuild {
   os: OS; // #windows | #macos | #linux
-  manifests: Manifest[];
+  manifests: ManifestInterface[];
   processor: string;
   memory: bigint; // in MB/GB (Nat)
   storage: bigint; // in MB/GB (Nat)
@@ -75,19 +69,24 @@ export interface AppRating {
 /** =========================
  *  Create DTO
  *  ========================= */
-export interface CreateApp {
+export interface UpdateAppInterface {
   title: string;
   description: string;
-  coverImage: string;
-  previews: Preview[];
-  price: bigint; // Nat
-  requiredAge: bigint; // Nat
-  releaseDate: Timestamp;
+  bannerImage: Opt<string>;
+  coverImage: Opt<string>;
+  previews: Opt<Preview[]>;
+  price: Opt<bigint>;
+  requiredAge: Opt<bigint>;
+  releaseDate: Opt<Timestamp>;
   status: AppStatus;
-  createdAt: Timestamp;
-  category: Category;
-  appTags: Tag[];
-  distributions: Distribution[];
+  category: Opt<Category[]>;
+  appTags: Opt<Tag[]>;
+  distributions: Opt<Distribution[]>;
+}
+
+export interface CreateAppInterface {
+  title: string;
+  description: string;
 }
 
 /** =========================
@@ -98,6 +97,7 @@ export interface AppInterface {
   developerId: UserId;
   title: string;
   description: string;
+  bannerImage: string;
   coverImage: string;
   previews: Preview[];
   price: bigint; // Nat
@@ -105,7 +105,7 @@ export interface AppInterface {
   releaseDate: Timestamp;
   status: AppStatus;
   createdAt: Timestamp;
-  category: Category;
+  category: Category[];
   appTags: Tag[];
   distributions: Distribution[];
   appRatings?: AppRating[] | null;

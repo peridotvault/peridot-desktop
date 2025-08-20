@@ -42,11 +42,6 @@ export const Slide: React.FC<SlideProps> = ({ onClose }) => {
           icon: faUserGear,
         },
         {
-          label: "Developer Studio",
-          url: "/studio",
-          icon: faDesktop,
-        },
-        {
           label: "Downloads",
           url: "/downloads",
           icon: faDownload,
@@ -54,12 +49,17 @@ export const Slide: React.FC<SlideProps> = ({ onClose }) => {
       ],
     },
     {
-      title: "Services",
+      title: "Developer",
       children: [
         {
           label: "Update to Developer Account",
           url: "/create_developer",
           icon: faUpLong,
+        },
+        {
+          label: "Developer Studio",
+          url: "/studio",
+          icon: faDesktop,
         },
       ],
     },

@@ -31,7 +31,7 @@ export async function buyApp({
     });
 
     const result = (await actor.buyApp(
-      appId
+      BigInt(appId)
     )) as ApiResponse<PurchaseInterface>;
     if ("err" in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];

@@ -13,7 +13,7 @@ interface ICRC1CoinProps {
     canisterId: string,
     balanceUsd: number,
     balanceToken: number
-  ) => void;
+  ) => void | number;
 }
 
 export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {

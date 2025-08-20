@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
 import {
   faArrowLeft,
   faArrowRight,
@@ -7,9 +6,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-import { getProfileImage } from "../../utils/Additional";
 import { AnimatePresence } from "framer-motion";
-import { Slide } from "../../pages/Slide";
+import { getProfileImage } from "../utils/Additional";
+import { useWallet } from "../contexts/WalletContext";
+import { Slide } from "../pages/Slide";
 
 interface NavbarProps {
   onOpenWallet: () => void;

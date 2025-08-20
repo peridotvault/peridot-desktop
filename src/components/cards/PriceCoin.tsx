@@ -12,16 +12,11 @@ export const PriceCoin = ({ price }: { price: number }) => {
 
   return (
     <div className="flex gap-2 items-center text-start">
-      {/* <img
+      <img
         src="./assets/coin-peridot.png"
         className="h-5 aspect-square object-contain"
-      /> */}
-      {/* <p>{price.toLocaleString()} PER</p> */}
-      <img
-        src="./assets/logo-icp.svg"
-        className="h-5 aspect-square object-contain"
       />
-      <p>{price} ICP</p>
+      <p>{price} PER</p>
     </div>
   );
 };

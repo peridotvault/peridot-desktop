@@ -1,6 +1,6 @@
 import React, { ChangeEvent } from "react";
 
-export const PhotoFieldComponent = ({
+export const BannerFieldComponent = ({
   title,
   imageUrl,
   onChange,
@@ -12,9 +12,8 @@ export const PhotoFieldComponent = ({
   return (
     <div className="flex flex-col gap-3">
       <p className="capitalize font-semibold">{title}</p>
-
       <div className="flex justify-center">
-        <div className="shadow-arise-sm w-[230px] aspect-[3/4] rounded-xl overflow-hidden grid place-items-center bg-background_secondary">
+        <div className="shadow-arise-sm w-full flex justify-center items-center h-[25rem] rounded-xl overflow-hidden bg-background_secondary">
           {imageUrl ? (
             <img
               src={imageUrl} // sekarang langsung pakai URL publik
@@ -26,7 +25,6 @@ export const PhotoFieldComponent = ({
           )}
         </div>
       </div>
-
       <div className="flex items-center gap-3">
         <input
           type="file"
@@ -36,6 +34,14 @@ export const PhotoFieldComponent = ({
           className="w-full bg-transparent shadow-sunken-sm px-5 mt-3 py-3 rounded-lg"
         />
       </div>
+
+      {/* <input
+        type="file"
+        accept="image/*"
+        required
+        onChange={(e) => handleImageUpload(e)}
+        className="w-full bg-transparent shadow-sunken-sm px-5 mt-3 py-3 rounded-lg"
+      /> */}
     </div>
   );
 };

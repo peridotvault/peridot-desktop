@@ -53,7 +53,13 @@ export const ICPAppTypes = (IDL: CandidIDL) => {
     native: NativeBuild,
   });
 
+  const Media = IDL.Variant({
+    image: IDL.Null,
+    video: IDL.Null,
+  });
+
   const Preview = IDL.Record({
+    kind: Media,
     url: IDL.Text,
   });
 
@@ -65,16 +71,17 @@ export const ICPAppTypes = (IDL: CandidIDL) => {
     developerId: ICPDeveloperId,
     title: IDL.Text,
     description: IDL.Text,
-    coverImage: IDL.Text,
-    previews: IDL.Vec(Preview),
-    price: IDL.Nat,
-    requiredAge: IDL.Nat,
-    releaseDate: ICPTimestamp,
+    coverImage: IDL.Opt(IDL.Text),
+    bannerImage: IDL.Opt(IDL.Text),
+    previews: IDL.Opt(IDL.Vec(Preview)),
+    price: IDL.Opt(IDL.Nat),
+    requiredAge: IDL.Opt(IDL.Nat),
+    releaseDate: IDL.Opt(ICPTimestamp),
     status: ICPAppStatus,
     createdAt: ICPTimestamp,
-    category: ICPCategory,
-    appTags: IDL.Vec(ICPAppTags),
-    distributions: IDL.Vec(Distribution),
+    category: IDL.Opt(IDL.Vec(ICPCategory)),
+    appTags: IDL.Opt(IDL.Vec(ICPAppTags)),
+    distributions: IDL.Opt(IDL.Vec(Distribution)),
     appRatings: IDL.Opt(IDL.Vec(AppRating)),
   });
 
@@ -84,20 +91,26 @@ export const ICPAppTypes = (IDL: CandidIDL) => {
   const CreateApp = IDL.Record({
     title: IDL.Text,
     description: IDL.Text,
-    coverImage: IDL.Text,
-    previews: IDL.Vec(Preview),
-    price: IDL.Nat,
-    requiredAge: IDL.Nat,
-    releaseDate: ICPTimestamp,
+  });
+
+  const UpdateApp = IDL.Record({
+    title: IDL.Text,
+    description: IDL.Text,
+    bannerImage: IDL.Opt(IDL.Text),
+    coverImage: IDL.Opt(IDL.Text),
+    previews: IDL.Opt(IDL.Vec(Preview)),
+    price: IDL.Opt(IDL.Nat),
+    requiredAge: IDL.Opt(IDL.Nat),
+    releaseDate: IDL.Opt(ICPTimestamp),
     status: ICPAppStatus,
-    createdAt: ICPTimestamp,
-    category: ICPCategory,
-    appTags: IDL.Vec(ICPAppTags),
-    distributions: IDL.Vec(Distribution),
+    category: IDL.Opt(IDL.Vec(ICPCategory)),
+    appTags: IDL.Opt(IDL.Vec(ICPAppTags)),
+    distributions: IDL.Opt(IDL.Vec(Distribution)),
   });
 
   return {
     App,
     CreateApp,
+    UpdateApp,
   };
 };

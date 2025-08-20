@@ -1,13 +1,12 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
 import { StarComponent } from "../../components/atoms/StarComponent";
-import { VerticalCard } from "../../components/cards/VerticalCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { AppPayment } from "../../features/wallet/views/Payment";
-import { AppInterface } from "../../interfaces/app/AppInterface";
+import { AppInterface, Preview } from "../../interfaces/app/AppInterface";
 import { useParams } from "react-router-dom";
-import { formatPeridotTokenPrice } from "../../utils/Additional";
+import { nsToDateStr } from "../../utils/Additional";
 import {
   getAllApps,
   getAppById,
@@ -15,18 +14,24 @@ import {
 import { useWallet } from "../../contexts/WalletContext";
 import { buyApp } from "../../blockchain/icp/app/services/ICPPurchaseService";
 import { PurchaseInterface } from "../../interfaces/app/PurchaseInterface";
+import CarouselPreview, {
+  MediaItem,
+} from "../../components/organisms/CarouselPreview";
 
 export default function GameDetail() {
-  const { app_id } = useParams();
+  const { appId } = useParams();
   const { wallet } = useWallet();
   const [isOnPayment, setIsOnPayment] = useState(false);
   const [detailGame, setDetailGame] = useState<AppInterface | null>();
   const [allGames, setAllGames] = useState<AppInterface[] | null>();
+  const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
 
   useEffect(() => {
     async function fetchData() {
-      const resDetailGame = await getAppById({ appId: Number(app_id) });
+      const resDetailGame = await getAppById({ appId: Number(appId) });
+      console.log(resDetailGame);
       setDetailGame(resDetailGame);
+      setHumanPriceStr(Number(resDetailGame?.price) / 1e8);
       const resAllGames = await getAllApps();
       setAllGames(resAllGames);
     }
@@ -34,13 +39,50 @@ export default function GameDetail() {
     fetchData();
   }, []);
 
+  function isOptVecShape(v: any): v is [any[]] {
+    return Array.isArray(v) && v.length === 1 && Array.isArray(v[0]);
+  }
+
+  function extLooksVideo(url = ""): boolean {
+    return /\.(mp4|webm|mov|m4v)$/i.test(url);
+  }
+
+  function previewsToMediaItems(
+    previewsAny?: Preview[] | [Preview[]] | null
+  ): MediaItem[] {
+    // 1) unwrap opt vec: [] => [], [ [..] ] => [..]
+    const arr: any[] = !previewsAny
+      ? []
+      : isOptVecShape(previewsAny)
+      ? previewsAny[0]
+      : (previewsAny as any[]);
+
+    // 2) map aman + fallback deteksi video dari ekstensi
+    return arr
+      .filter((p) => p && typeof p === "object")
+      .map((p) => {
+        const url = p.url ?? p.src ?? "";
+        const kindObj = p.kind ?? {};
+        const isVideo =
+          (typeof kindObj === "object" && "video" in kindObj) ||
+          extLooksVideo(url);
+        return {
+          kind: isVideo ? "video" : "image",
+          src: url,
+          alt: p.alt ?? "preview",
+        } as MediaItem;
+      });
+  }
+
   return (
     <main className="flex justify-center duration-300">
       <div className="max-w-[1400px] w-full flex flex-col gap-6 duration-300">
         <div className="mb-20"></div>
         {/* title */}
-        <div className="px-12 py-6 flex flex-col gap-3">
-          <p className="text-3xl font-bold">{detailGame?.title}</p>
+        <div className="px-12 pt-6 flex flex-col gap-3">
+          <p className="text-3xl font-bold">
+            {detailGame?.title ? detailGame?.title : "PeridotVault Game"}
+          </p>
           <StarComponent rate={4} />
         </div>
         {/* First Section */}
@@ -48,7 +90,7 @@ export default function GameDetail() {
           {/* Left side ======================== */}
           <div className="w-3/4 flex flex-col gap-12 text-lg">
             {/* overview */}
-            <img
+            {/* <img
               src={
                 detailGame?.coverImage
                   ? detailGame.coverImage
@@ -56,39 +98,15 @@ export default function GameDetail() {
               }
               alt=""
               className="aspect-video rounded-xl object-cover shadow-arise-sm "
+            /> */}
+            <CarouselPreview
+              items={previewsToMediaItems(detailGame?.previews)}
+              initialIndex={0}
+              autoPlay
+              showThumbnails
             />
             {/* section 1 */}
-            <p>
-              Get ready for the apocalypse! Shatterline is an intense FPS with
-              roguelike co-op PVE and PVP modes. Pick a unique operator,
-              customize your look and weapons, and combat the alien plague!
-            </p>
-            <section className="flex flex-col gap-6 ">
-              <p className="text-xl font-bold">Get ready for the apocalypse!</p>
-              <p>
-                Welcome to Shatterline - ground zero for the apocalypse. Are you
-                ready?
-              </p>
-              <p>
-                Shatterline is a fierce, intense multiplayer FPS, offering
-                roguelike co-op PVE modes as well as competitive PvP modes.
-                Immerse yourself in a world of explosive action; smooth,
-                satisfying gunplay; wild customizations; and a striking
-                landscape full of secrets, rewards, and deadly opponents.
-              </p>
-              <p>
-                A mysterious interstellar object has exploded near Earth,
-                sending massive, jagged shards smashing into our planet’s
-                surface - turning thriving cities into toxic craters and leaving
-                millions dead.
-              </p>
-              <p>
-                From this destruction, a new horror has risen: an alien
-                contaminant called “Crystalline” that tears apart geomagnetic
-                fields and transforms living flesh to razor-edged silica. And
-                it’s spreading.
-              </p>
-            </section>
+            <p>{detailGame?.description}</p>
           </div>
           {/* right side ======================== */}
           <div className="w-1/4 min-w-[300px] h-52 flex flex-col gap-6">
@@ -124,30 +142,24 @@ export default function GameDetail() {
             </div>
             {/* details game  */}
             <div className="flex flex-col">
-              <GameTypes title="Developer" content="Antigane Studio" />
+              <GameTypes title="Developer" content="Antigane Inc." />
               <GameTypes title="Publisher" content="Antigane Inc." />
-              <GameTypes title="Release Date" content="12/05/24" />
+              <GameTypes
+                title="Release Date"
+                content={nsToDateStr(detailGame?.releaseDate.toString()) || ""}
+              />
               <GameTypes title="Requirement" content="RAM 16GB / 256GB" />
               <GameTypes title="Platform" content="Windows" />
             </div>
             {/* Buy Game  */}
             <div className="flex flex-col gap-4 py-3">
-              {detailGame?.price && detailGame.price >= 0 ? (
+              {Number(humanPriceStr!) > 0 ? (
                 <div className="flex gap-2 items-center text-start">
-                  {/* <img
+                  <img
                     src="/assets/coin-peridot.png"
                     className="h-6 aspect-square object-contain"
-                    /> */}
-                  <img
-                    src="/assets/logo-icp.svg"
-                    className="h-6 aspect-square object-contain"
                   />
-                  <p className="text-lg">
-                    {formatPeridotTokenPrice(detailGame?.price)} ICP
-                  </p>
-                  {/* <p className="opacity-80">
-                    / IDR {(1045800).toLocaleString()}
-                    </p> */}
+                  <p className="text-lg">{humanPriceStr.toString()} PER</p>
                 </div>
               ) : (
                 <div className="flex gap-2 items-center text-start text-lg font-bold">
@@ -182,7 +194,7 @@ export default function GameDetail() {
 
             {/* contents  */}
             <div className="flex gap-6">
-              {allGames?.slice(0, 5).map((item) => (
+              {/* {allGames?.slice(0, 5).map((item) => (
                 <VerticalCard
                   key={item.appId}
                   appId={item.appId}
@@ -190,17 +202,18 @@ export default function GameDetail() {
                   title={item.title}
                   price={item.price}
                 />
-              ))}
+              ))} */}
             </div>
           </div>
         </section>
         {isOnPayment && (
           <AppPayment
-            price={Number(formatPeridotTokenPrice(detailGame?.price))} // 10 ICP (human)
+            price={Number(humanPriceStr)}
             onClose={() => setIsOnPayment(false)}
+            SPENDER={import.meta.env.VITE_PERIDOT_CANISTER_APP_BACKEND}
             onExecute={async () => {
               const res: PurchaseInterface = await buyApp({
-                appId: Number(app_id),
+                appId: Number(appId),
                 wallet: wallet,
               });
 

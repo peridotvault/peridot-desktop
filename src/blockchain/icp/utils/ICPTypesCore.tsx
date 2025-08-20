@@ -16,7 +16,7 @@ export const ICPCoreError = IDL.Variant({
   InvalidInput: IDL.Text,
   NotFound: IDL.Text,
   ValidationError: IDL.Text,
-  Unauthorized: IDL.Text,
+  NotAuthorized: IDL.Text,
   AlreadyExists: IDL.Text,
   StorageError: IDL.Text,
   InternalError: IDL.Text,

@@ -1,7 +1,8 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
 import {
   AppInterface,
-  CreateApp,
+  CreateAppInterface,
+  UpdateAppInterface,
 } from "../../../../interfaces/app/AppInterface";
 import { ICPAppFactory } from "../ICPAppFactory";
 import { walletService } from "../../../../features/wallet/services/WalletService";
@@ -15,7 +16,7 @@ export async function createApp({
   createAppTypes,
   wallet,
 }: {
-  createAppTypes: CreateApp;
+  createAppTypes: CreateAppInterface;
   wallet: any;
 }): Promise<AppInterface> {
   const privateKey = await walletService.decryptWalletData(
@@ -33,7 +34,7 @@ export async function createApp({
       agent,
       canisterId: appCanister,
     });
-
+    console.log("trying");
     const result = (await actor.createApp(
       createAppTypes
     )) as ApiResponse<AppInterface>;
@@ -41,9 +42,87 @@ export async function createApp({
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`createApp failed: ${k} - ${v}`);
     }
+    console.log("done");
+
     return result.ok;
   } catch (error) {
     throw new Error("Error Service Create App : " + error);
+  }
+}
+
+export async function updateApp({
+  updateAppTypes,
+  appId,
+  wallet,
+}: {
+  updateAppTypes: UpdateAppInterface;
+  appId: number;
+  wallet: any;
+}): Promise<AppInterface> {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
+  const secretKey = hexToArrayBuffer(privateKey);
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+    });
+
+    const actor = Actor.createActor(ICPAppFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+    console.log("trying");
+    const result = (await actor.updateApp(
+      updateAppTypes,
+      BigInt(appId)
+    )) as ApiResponse<AppInterface>;
+    if ("err" in result) {
+      const [k, v] = Object.entries(result.err)[0] as [string, string];
+      throw new Error(`updateApp failed: ${k} - ${v}`);
+    }
+    console.log("done");
+
+    return result.ok;
+  } catch (error) {
+    throw new Error("Error Service Update App : " + error);
+  }
+}
+
+export async function getAppByDeveloperId({
+  wallet,
+}: {
+  wallet: any;
+}): Promise<AppInterface[] | null> {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
+  const secretKey = hexToArrayBuffer(privateKey);
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+    });
+
+    const actor = Actor.createActor(ICPAppFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+
+    const result = (await actor.getAppByDeveloperId()) as ApiResponse<
+      AppInterface[]
+    >;
+    console.log(result);
+    if ("err" in result) {
+      const [k, v] = Object.entries(result.err)[0] as [string, string];
+      throw new Error(`getAllApps failed: ${k} - ${v}`);
+    }
+    return result.ok;
+  } catch (error) {
+    throw new Error("Error Service Get All Apps by Developer Id : " + error);
   }
 }
 
@@ -86,7 +165,9 @@ export async function getAppById({
       canisterId: appCanister,
     });
 
-    const result = (await actor.getAppById(appId)) as ApiResponse<AppInterface>;
+    const result = (await actor.getAppById(
+      BigInt(appId)
+    )) as ApiResponse<AppInterface>;
     if ("err" in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`getAppById failed: ${k} - ${v}`);

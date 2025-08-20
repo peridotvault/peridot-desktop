@@ -21,6 +21,7 @@ import {
 } from "../hooks/CoinContext";
 import { UserProgressService } from "../../../local_db/wallet/services/userProgressService";
 import { Principal } from "@dfinity/principal";
+import { formatShortEn } from "../../../utils/Additional";
 
 export const History = () => {
   const { wallet } = useWallet();
@@ -170,7 +171,7 @@ export const History = () => {
       <section className="flex flex-col gap-8">
         {Object.entries(relevantOperations).map(([date, transactions]) => (
           <div key={date} className="flex flex-col gap-6">
-            <h2>{date}</h2>
+            <h2>{formatShortEn(date)}</h2>
             {transactions.map((tx, idx) => (
               <HistoryComponent
                 key={idx}

@@ -13,13 +13,11 @@ import { Principal } from "@dfinity/principal";
 import { ICRCLedgerActor } from "../blockchain/icp/ICRCLedgerFactory";
 
 const PERIDOT_TOKEN_CANISTER = import.meta.env.VITE_PERIDOT_TOKEN_CANISTER;
-const SPENDER = Principal.fromText(
-  import.meta.env.VITE_PERIDOT_CANISTER_USER_BACKEND
-);
 
 interface Props {
   onClose: () => void;
   price: number | string;
+  SPENDER: string;
   onExecute: () => Promise<void>;
 }
 
@@ -28,9 +26,14 @@ interface AlertInterface {
   msg: string;
 }
 
-export const AppPayment: React.FC<Props> = ({ onClose, price, onExecute }) => {
+export const AppPayment: React.FC<Props> = ({
+  onClose,
+  price,
+  onExecute,
+  SPENDER,
+}) => {
   const { wallet } = useWallet();
-
+  const spenderPrincipal = Principal.fromText(SPENDER);
   const [_tokenBalances, setTokenBalances] = useState<{ [id: string]: number }>(
     {}
   );
@@ -112,7 +115,7 @@ export const AppPayment: React.FC<Props> = ({ onClose, price, onExecute }) => {
 
         const owner = await agent.getPrincipal(); // ✅
         const account = { owner, subaccount: [] as [] };
-        const spender = { owner: SPENDER, subaccount: [] as [] };
+        const spender = { owner: spenderPrincipal, subaccount: [] as [] };
 
         const alw = await actor.icrc2_allowance({ account, spender });
         setAllowance(alw.allowance);
@@ -123,73 +126,126 @@ export const AppPayment: React.FC<Props> = ({ onClose, price, onExecute }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  let _nonce = 0;
+  const uniqueCreatedAtNs = (): bigint => {
+    const base = BigInt(Date.now()) * 1_000_000n; // ms -> ns
+    _nonce = (_nonce + 1) & 0xffff; // 0..65535
+    return base + BigInt(_nonce);
+  };
+
+  // biar ringkas
+  type Opt<T> = [] | [T];
+  const ToOpt = <T,>(v: T | null | undefined): Opt<T> => (v == null ? [] : [v]);
+
+  async function safeApprove(params: {
+    actor: ICRCLedgerActor;
+    account: { owner: Principal; subaccount: [] };
+    spender: { owner: Principal; subaccount: [] };
+    targetAllowance: bigint;
+  }) {
+    const { actor, account, spender, targetAllowance } = params;
+
+    // 1) allowance sekarang
+    const { allowance: cur } = await actor.icrc2_allowance({
+      account,
+      spender,
+    });
+
+    // 2) kalau belum perlu berubah, skip
+    if (cur === targetAllowance) return;
+
+    // 3) kalau non-zero, clear dulu → 0
+    if (cur !== 0n) {
+      const clearRes = await actor.icrc2_approve({
+        from_subaccount: [],
+        spender,
+        amount: 0n,
+        expected_allowance: [cur], // proteksi balapan
+        expires_at: [],
+        fee: [],
+        memo: [],
+        created_at_time: ToOpt(uniqueCreatedAtNs()),
+      });
+      if ("Err" in clearRes) {
+        // Duplicate di step ini boleh dianggap ok (idempotent)
+        if (!("Duplicate" in clearRes.Err)) {
+          const k = Object.keys(clearRes.Err)[0];
+          throw new Error(`Approve(clear->0) failed: ${k}`);
+        }
+      }
+    }
+
+    // 4) set ke target
+    const setRes = await actor.icrc2_approve({
+      from_subaccount: [],
+      spender,
+      amount: targetAllowance,
+      expected_allowance: [0n],
+      expires_at: [],
+      fee: [],
+      memo: [],
+      created_at_time: ToOpt(uniqueCreatedAtNs()), // ← HARUS beda
+    });
+
+    if ("Err" in setRes) {
+      // Jika Duplicate, verifikasi hasil akhirnya
+      if ("Duplicate" in setRes.Err) {
+        const { allowance: after } = await actor.icrc2_allowance({
+          account,
+          spender,
+        });
+        if (after >= targetAllowance) return; // treat as success
+      }
+      const k = Object.keys(setRes.Err)[0];
+      throw new Error(`Approve(set target) failed: ${k}`);
+    }
+  }
+
   async function handlePayment() {
     try {
       setBusy(true);
       setAlertData({ isSuccess: null, msg: "" });
 
-      const { actor, agent } = await makeLedgerActor();
+      if (Number(price) <= 0) {
+      } else {
+        const { actor, agent } = await makeLedgerActor();
 
-      // 1) Convert price to subunits correctly
-      const need = toSubunits(humanPriceStr, decimals);
+        // 1) konversi harga ke subunit
+        const need = toSubunits(humanPriceStr, decimals);
 
-      // 2) Get current allowance to check actual state
-      const owner = await agent.getPrincipal();
-      const account = { owner, subaccount: [] as [] };
-      const spender = { owner: SPENDER, subaccount: [] as [] };
+        // 2) ambil owner & akun spender
+        const owner = await agent.getPrincipal();
+        const account = { owner, subaccount: [] as [] };
+        const spender = { owner: spenderPrincipal, subaccount: [] as [] };
 
-      const currentAllowance = await actor.icrc2_allowance({
-        account,
-        spender,
-      });
+        // 3) ambil fee transfer (kalau fungsi fee tidak ada, anggap 0)
+        let txFee = 0n;
+        try {
+          const f = await actor.icrc1_fee();
+          txFee = BigInt(f);
+        } catch {
+          txFee = 0n;
+        }
 
-      console.log("Need:", need.toString());
-      console.log("Current allowance:", currentAllowance.allowance.toString());
-      console.log("Fee:", fee.toString());
+        // 4) target allowance = amount + fee (banyak ledger meminta ini)
+        const targetAllowance = need + txFee;
 
-      // 3) Always approve the full amount needed (including fee)
-      // Don't rely on existing allowance state, refresh it
-      const totalNeeded = need + fee; // Remove the arbitrary buffer
+        // 5) SAFE APPROVE (clear -> set)
+        await safeApprove({ actor, account, spender, targetAllowance });
 
-      const approveRes = await actor.icrc2_approve({
-        from_subaccount: [],
-        spender,
-        amount: totalNeeded,
-        expected_allowance: [], // Let ledger handle existing allowance
-        expires_at: [],
-        fee: [], // Let ledger use default fee for approve
-        memo: [],
-        created_at_time: [],
-      });
-
-      if ("Err" in approveRes) {
-        const errorKey = Object.keys(approveRes.Err)[0];
-        const errorDetail =
-          approveRes.Err[errorKey as keyof typeof approveRes.Err];
-        throw new Error(
-          `Approve failed: ${errorKey} - ${JSON.stringify(errorDetail)}`
-        );
+        // 6) verifikasi allowance (opsional, tapi bagus)
+        const { allowance: newAlw } = await actor.icrc2_allowance({
+          account,
+          spender,
+        });
+        if (newAlw < need) {
+          throw new Error(
+            `Allowance insufficient after approve: ${newAlw} < ${need}`
+          );
+        }
       }
 
-      console.log("Approve successful, block index:", approveRes.Ok);
-
-      // 4) Verify the new allowance
-      const newAllowanceCheck = await actor.icrc2_allowance({
-        account,
-        spender,
-      });
-      console.log(
-        "New allowance after approve:",
-        newAllowanceCheck.allowance.toString()
-      );
-
-      if (newAllowanceCheck.allowance < need) {
-        throw new Error(
-          `Allowance still insufficient: ${newAllowanceCheck.allowance} < ${need}`
-        );
-      }
-
-      // 5) Now execute the backend payment
+      // 7) jalankan pembayaran di backend (akan panggil transfer_from)
       await onExecute();
 
       setAlertData({ isSuccess: true, msg: "Payment succeeded 🎉" });

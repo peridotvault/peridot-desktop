@@ -2,16 +2,16 @@
 import React, { useEffect, useState } from "react";
 import { Navbar } from "./Navbar";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Wallet } from "../../features/wallet/views/Wallet";
 import { AnimatePresence } from "framer-motion";
-import { useWallet } from "../../contexts/WalletContext";
-import { InputField } from "../atoms/InputField";
-import { walletService } from "../../features/wallet/services/WalletService";
-import { getUserInfo } from "../../utils/IndexedDb";
-import { saveUserInfo } from "../../utils/IndexedDb";
 import _ from "lodash";
-import { UserInterface } from "../../interfaces/user/UserInterface";
-import { getUserByPrincipalId } from "../../blockchain/icp/user/services/ICPUserService";
+import { useWallet } from "../contexts/WalletContext";
+import { UserInterface } from "../interfaces/user/UserInterface";
+import { getUserInfo, saveUserInfo } from "../utils/IndexedDb";
+import { walletService } from "../features/wallet/services/WalletService";
+import { getUserByPrincipalId } from "../blockchain/icp/user/services/ICPUserService";
+import { Wallet } from "../features/wallet/views/Wallet";
+import { InputField } from "../components/atoms/InputField";
+import { GetOpt } from "../interfaces/CoreInterface";
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
@@ -138,7 +138,7 @@ export default function MainLayout() {
     <main className="min-h-screen flex flex-col">
       <Navbar
         onOpenWallet={() => setIOpenWallet(true)}
-        profileImage={userData?.imageUrl}
+        profileImage={GetOpt(userData?.imageUrl)}
       />
       <div
         className={`flex-1  ${

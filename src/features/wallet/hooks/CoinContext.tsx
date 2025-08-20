@@ -178,6 +178,45 @@ async function getArchiveBlockLength(
   }
 }
 
+function keyOf(entry: any): string {
+  if (Array.isArray(entry)) return entry[0];
+  return entry?._0_;
+}
+function valOf(entry: any): any {
+  if (Array.isArray(entry)) return entry[1];
+  return entry?._1_;
+}
+function findInMap(map: any[] | undefined, key: string): any | undefined {
+  if (!Array.isArray(map)) return undefined;
+  const e = map.find((ent) => keyOf(ent) === key);
+  return e ? valOf(e) : undefined;
+}
+function asNat(v: any): bigint | undefined {
+  if (!v || typeof v !== "object") return undefined;
+  if ("Nat" in v) return v.Nat as bigint;
+  if ("Int" in v) return BigInt(v.Int as bigint);
+  if ("Text" in v && /^\d+$/.test(v.Text)) return BigInt(v.Text);
+  return undefined;
+}
+function asText(v: any): string | undefined {
+  if (!v || typeof v !== "object") return undefined;
+  if ("Text" in v) return v.Text as string;
+  return undefined;
+}
+function decodePrincipalFromArrayField(arr?: any[]): string {
+  if (!Array.isArray(arr)) return "";
+  const blob = arr.find((x) => x && typeof x === "object" && "Blob" in x)?.Blob;
+  if (!blob) return "";
+  try {
+    return Principal.fromUint8Array(Uint8Array.from(blob)).toText();
+  } catch {
+    return new TextDecoder().decode(blob);
+  }
+}
+function toHex(u8: Uint8Array): string {
+  return [...u8].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 async function getTokenBlocks({
   coinAddress,
   coinArchiveAddress,
@@ -235,55 +274,46 @@ async function getTokenBlocks({
 }
 
 function parseBlock(raw: any, coinArchiveAddress: string): Block | null {
-  if (!("Map" in raw.block)) return null;
+  // Pastikan bentuknya map candid: { block: { Map: [...] }, id: Nat }
+  if (!raw?.block || !("Map" in raw.block)) return null;
 
-  const map = raw.block.Map;
-  let ts = 0n;
-  let amt = 0;
-  let op = "";
-  let from = "";
-  let to = "";
-  let memo = "";
+  const map: any[] = raw.block.Map;
 
-  let txMap: any[] = [];
+  // --- TX map (kalau ada)
+  const txMap = findInMap(map, "tx")?.Map as any[] | undefined;
 
-  for (const entry of map) {
-    const key = entry._0_;
-    const val = entry._1_;
+  // --- Timestamp (prioritas: block.ts → tx.ts → tx.created_at_time → block.created_at_time)
+  const tsTop =
+    asNat(findInMap(map, "ts")) ?? asNat(findInMap(map, "timestamp"));
+  const tsTx = asNat(findInMap(txMap, "ts"));
+  const tsCreated =
+    asNat(findInMap(txMap, "created_at_time")) ??
+    asNat(findInMap(map, "created_at_time"));
+  const ts = tsTop ?? tsTx ?? tsCreated ?? 0n;
 
-    if (key === "ts" && "Nat" in val) ts = val.Nat;
-    if (key === "tx" && "Map" in val) txMap = val.Map;
-  }
+  // --- Fields lain dari tx
+  const amtNat = asNat(findInMap(txMap, "amt")) ?? 0n;
+  const opText = asText(findInMap(txMap, "op")) ?? "";
+  const memoBlob = findInMap(txMap, "memo")?.Blob as Uint8Array | undefined;
+  const fromArr = findInMap(txMap, "from")?.Array as any[] | undefined;
+  const toArr = findInMap(txMap, "to")?.Array as any[] | undefined;
 
-  for (const entry of txMap) {
-    const key = entry._0_;
-    const val = entry._1_;
+  const from = decodePrincipalFromArrayField(fromArr);
+  const to = decodePrincipalFromArrayField(toArr);
+  const memo = memoBlob ? toHex(Uint8Array.from(memoBlob)) : "";
 
-    if (key === "amt" && "Nat" in val) amt = Number(val.Nat);
-    if (key === "op" && "Text" in val) op = val.Text;
-    if (key === "memo" && "Blob" in val) {
-      memo = Buffer.from(val.Blob).toString("hex");
-    }
-    if (key === "from" && "Array" in val) {
-      const blob = val.Array.find((v: any) => "Blob" in v)?.Blob;
-      if (blob) from = Principal.fromUint8Array(Uint8Array.from(blob)).toText();
-    }
-    if (key === "to" && "Array" in val) {
-      const blob = val.Array.find((v: any) => "Blob" in v)?.Blob;
-      if (blob) to = Principal.fromUint8Array(Uint8Array.from(blob)).toText();
-    }
-  }
-
+  // NOTE: simpan amount sebagai bigint kalau bisa, lalu format saat render
   return {
+    id: Number(raw.id ?? raw.blockId ?? 0),
+    blockId: Number(raw.id ?? raw.blockId ?? 0),
     coinArchiveAddress,
-    blockId: Number(raw.id),
-    timestamp: ts,
-    amt,
-    op,
+    timestamp: ts, // ← sudah tidak 0n kalau ada salah satu jalur
+    op: opText,
+    amt: Number(amtNat), // atau simpan amt: amtNat (bigint) kalau tipe Block mendukung
     from,
     to,
     memo,
-  };
+  } as Block;
 }
 
 // Export function

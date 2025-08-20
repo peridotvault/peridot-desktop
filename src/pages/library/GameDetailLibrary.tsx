@@ -10,8 +10,17 @@ import {
   faStore,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  AppInterface,
+  Distribution,
+  isWeb,
+} from "../../interfaces/app/AppInterface";
+import { getAppById } from "../../blockchain/icp/app/services/ICPAppService";
+import { useParams } from "react-router-dom";
 
 export default function GameDetailLibrary() {
+  const { appId } = useParams();
+
   const [list_announcement] = useState([
     {
       date: "Dec 24, 2024",
@@ -39,12 +48,17 @@ export default function GameDetailLibrary() {
       ],
     },
   ]);
-  const gameDetail = {
-    headerImage:
-      "https://img.itch.zone/aW1nLzIxNDYxMzI3LmpwZWc=/original/2JnL%2BH.jpeg",
-    title: "Cubetopia",
-    currentPrice: 0,
-  };
+
+  const [theApp, setTheApp] = useState<AppInterface | null>();
+
+  useEffect(() => {
+    async function fetchData() {
+      const resAllApps = await getAppById({ appId: Number(appId) });
+      setTheApp(resAllApps);
+    }
+
+    fetchData();
+  }, []);
 
   const AnnouncementContainer = ({
     img_url,
@@ -73,15 +87,40 @@ export default function GameDetailLibrary() {
     );
   };
 
-  const openWebApp = () => {
-    window.electronAPI.openWebGame("https://thecubetopia.com");
-  };
+  function unwrapOptVec<T>(v: T[] | [T[]] | null | undefined): T[] {
+    if (!v) return [];
+    return Array.isArray(v) && v.length === 1 && Array.isArray(v[0])
+      ? v[0]
+      : (v as T[]);
+  }
 
+  // Ambil url web pertama dari distributions
+  function getWebUrlFromApp(app?: AppInterface | null): string | null {
+    if (!app) return null;
+    const dists = unwrapOptVec<Distribution>(app.distributions as any);
+    const web = dists.find(isWeb) as { web: { url: string } } | undefined;
+    return web?.web?.url ?? null;
+  }
+
+  const openWebApp = () => {
+    const url = getWebUrlFromApp(theApp);
+    if (!url) {
+      alert("Web build URL tidak tersedia untuk app ini.");
+      return;
+    }
+    // Jika jalan di Electron + preload expose electronAPI
+    if ((window as any).electronAPI?.openWebGame) {
+      (window as any).electronAPI.openWebGame(url);
+    } else {
+      // fallback browser biasa
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
   return (
     <main className="flex flex-col items-center gap-5 mb-32">
       <div className="bg-white w-full h-96 relative">
         <img
-          src={gameDetail.headerImage}
+          src={theApp?.bannerImage}
           className="object-cover w-full h-[30rem]"
           alt=""
         />
@@ -94,7 +133,7 @@ export default function GameDetailLibrary() {
         <div className="flex flex-col gap-8 w-2/3">
           {/* Header  */}
           <section className="flex flex-col gap-4">
-            <p className="text-3xl font-medium">{gameDetail.title}</p>
+            <p className="text-3xl font-medium">{theApp?.title}</p>
             <div className="flex gap-4">
               <p className="flex gap-2 items-center">
                 <FontAwesomeIcon
@@ -142,9 +181,7 @@ export default function GameDetailLibrary() {
             <div className="flex flex-col gap-2">
               <p>current price</p>
               <p className="text-3xl font-bold">
-                {gameDetail.currentPrice > 0
-                  ? "$" + gameDetail.currentPrice
-                  : "FREE"}
+                {Number(theApp?.price) > 0 ? "$" + theApp?.price : "FREE"}
               </p>
             </div>
             {/* button  */}

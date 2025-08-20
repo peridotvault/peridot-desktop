@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate, useLocation } from "react-router-dom";
-import { AppInterface } from "../../../interfaces/app/AppInterface";
-import { useWallet } from "../../../contexts/WalletContext";
-import { getMyApps } from "../../../blockchain/icp/app/services/ICPAppService";
+import { useWallet } from "../../contexts/WalletContext";
+import { AppInterface } from "../../interfaces/app/AppInterface";
+import { getMyApps } from "../../blockchain/icp/app/services/ICPAppService";
 
 export const Sidebar = () => {
   const navigate = useNavigate();
@@ -13,68 +13,19 @@ export const Sidebar = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { wallet } = useWallet();
-  const [_, setAllGames] = useState<AppInterface[] | null>();
-
-  const dummyGameList = [
-    {
-      id: 1,
-      cover_image: "https://storage.googleapis.com/pod_public/750/216712.jpg",
-      title: "Elden Ring",
-      price: 59.99,
-    },
-    {
-      id: 3,
-      cover_image:
-        "https://m.media-amazon.com/images/M/MV5BZWYyNDRkNzAtOTI0Ny00NDQwLWE5M2YtMWFiZDdmMDc4MmQ0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-      title: "Cyberpunk 2077",
-      price: 49.99,
-    },
-    {
-      id: 4,
-      cover_image: "https://m.media-amazon.com/images/I/61Nm7jqUUSL.jpg",
-      title: "Hogwarts Legacy",
-      price: 59.99,
-    },
-    {
-      id: 6,
-      cover_image:
-        "https://upload.wikimedia.org/wikipedia/en/0/0c/Witcher_3_cover_art.jpg",
-      title: "The Witcher 3: Wild Hunt",
-      price: 29.99,
-    },
-    {
-      id: 7,
-      cover_image:
-        "https://media.rockstargames.com/rockstargames/img/global/news/upload/actual_1364906194.jpg",
-      title: "Grand Theft Auto V",
-      price: 19.99,
-    },
-    {
-      id: 10,
-      cover_image:
-        "https://image.api.playstation.com/vulcan/ap/rnd/202009/3021/BtsjAgHT9pqHRXtN9FCk7xc8.png",
-      title: "Spider-Man Remastered",
-      price: 59.99,
-    },
-    {
-      id: 11,
-      cover_image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9IFYjzdymoYh2aMmhPz91Ly_jSdEM7ZUVMQ&s",
-      title: "Cubetopia",
-      price: 0,
-    },
-  ];
+  const [myApps, setMyApps] = useState<AppInterface[] | null>();
 
   useEffect(() => {
     async function fetchData() {
-      const resAllGames = await getMyApps({ wallet: wallet });
-      setAllGames(resAllGames);
+      const resAllApps = await getMyApps({ wallet: wallet });
+      setMyApps(resAllApps);
     }
 
     fetchData();
   }, []);
+
   // Filtered games based on searchQuery
-  const filteredGames = dummyGameList?.filter((game) =>
+  const filteredGames = myApps?.filter((game) =>
     game.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -110,12 +61,13 @@ export const Sidebar = () => {
       {/* List Games  */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="flex flex-col gap-1">
-          {filteredGames?.map((item, i) => {
+          {filteredGames?.map((item) => {
             const isActive =
-              location.pathname === `/library/${formatTitle(item.title)}`;
+              location.pathname ===
+              `/library/${formatTitle(item.title)}/${item.appId}`;
             return (
               <button
-                key={i}
+                key={item.appId}
                 onClick={() => handleGameClick(formatTitle(item.title))}
                 className={`flex gap-3 px-7 py-2 items-center  duration-100
               ${
@@ -123,7 +75,7 @@ export const Sidebar = () => {
               }`}
               >
                 <img
-                  src={item.cover_image}
+                  src={item.coverImage}
                   className="w-6 h-6 object-cover rounded-md"
                   alt=""
                 />

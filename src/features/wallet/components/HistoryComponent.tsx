@@ -19,6 +19,14 @@ export const HistoryComponent = ({
 }) => {
   const E8S_PER_TOKEN = 100000000;
   const isUserSender = transaction_data.sender === user_address ? true : false;
+  const label =
+    transaction_data.label == "approve"
+      ? "Approve"
+      : isUserSender
+      ? "Transfer"
+      : "Receive";
+
+  if (label == "Approve") return;
   return (
     <button
       className="flex flex-col gap-4 items-center hover:scale-105 duration-300 group"
@@ -34,7 +42,7 @@ export const HistoryComponent = ({
           {/* Info  */}
           <div className="flex flex-col items-start justify-center">
             <div className="flex items-center gap-2">
-              <label className="">{transaction_data.label}</label>
+              <label className="">{label}</label>
               <span
                 className={`text-end w-full text-xs max-w-0 overflow-hidden group-hover:max-w-20 duration-500 ${
                   transaction_data.is_suspicious

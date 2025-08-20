@@ -3,6 +3,7 @@
 import { TrainedDataInterface } from "../features/wallet/interfaces/History";
 
 export function groupByDay(data: TrainedDataInterface[]) {
+  // 1) Grouping seperti biasa
   const grouped: Record<string, TrainedDataInterface[]> = {};
   data.forEach((item) => {
     const date = new Date(
@@ -11,7 +12,14 @@ export function groupByDay(data: TrainedDataInterface[]) {
     if (!grouped[date]) grouped[date] = [];
     grouped[date].push(item);
   });
-  return grouped;
+
+  // 2) Convert ke array, urutkan dari terbaru
+  const sortedEntries = Object.entries(grouped).sort(
+    ([dateA], [dateB]) => new Date(dateB).getTime() - new Date(dateA).getTime()
+  );
+
+  // 3) Balikin dalam bentuk array atau object tergantung kebutuhan
+  return Object.fromEntries(sortedEntries);
 }
 
 export function filterByType(

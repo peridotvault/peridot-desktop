@@ -1,5 +1,5 @@
 {
-  "name": "peridot",
+  "name": "peridotvault-desktop",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -38,6 +38,7 @@
     "localforage": "^1.10.0",
     "lodash": "^4.17.21",
     "luxon": "^3.6.1",
+    "motion": "^12.23.12",
     "multer": "^2.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -48,6 +49,7 @@
     "vite-plugin-wasm": "^3.3.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.3",
     "@types/lodash": "^4.17.16",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
@@ -69,7 +71,7 @@
   },
   "main": "dist-electron/main.js",
   "build": {
-    "appId": "com.example.peridot",
+    "appId": "com.example.peridotvault",
     "productName": "Peridot",
     "files": [
       "dist/**/*",

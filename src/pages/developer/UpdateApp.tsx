@@ -1,4 +1,4 @@
-// CreateApp.tsx
+// UpdateApp.tsx (replaces your old CreateApp.tsx for edit flow)
 // @ts-ignore
 import React, {
   ChangeEvent,
@@ -33,12 +33,16 @@ import {
   Distribution,
   OS,
   UpdateAppInterface,
+  AppInterface,
 } from "../../interfaces/app/AppInterface";
-import allCategories from "./../../assets/json/app/categories.json";
+import allCategories from "../../assets/json/app/categories.json";
 import { useWallet } from "../../contexts/WalletContext";
-import { createApp } from "../../blockchain/icp/app/services/ICPAppService";
+import {
+  getAppByDeveloperId,
+  updateApp, // <<< make sure this exists in ICPAppService
+} from "../../blockchain/icp/app/services/ICPAppService";
 import { BannerFieldComponent } from "../../components/atoms/BannerFieldComponent";
-import { OSKey } from "../../interfaces/CoreInterface";
+import { Opt, OSKey, ToOpt } from "../../interfaces/CoreInterface";
 import {
   dateStrToNs,
   hasDist,
@@ -51,33 +55,59 @@ import { sha256Hex } from "../../utils/file";
 import {
   initAppStorage,
   InitResp,
-  presignRead,
   safeFileName,
   uploadToPrefix,
 } from "../../api/wasabiClient";
+import { useParams } from "react-router-dom";
 
-export default function CreateApp() {
+export default function UpdateApp() {
   const { wallet } = useWallet();
 
   /** ======================
    *  Storage App ID (folder)
    *  ====================== */
-  // IDEAL: pakai appId sebenarnya; jika belum ada → gunakan draft id
-  const [appId] = useState(() => crypto.randomUUID()); // atau id draft kamu sendiri
-  const [appStorageId] = useState(() => `draft-${crypto.randomUUID()}`);
+  const { appId } = useParams();
   const [storage, setStorage] = useState<InitResp | null>(null);
+  const [apps, setApps] = useState<AppInterface[] | null>(null);
+  const [loadedApp, setLoadedApp] = useState<AppInterface | null>(null);
 
-  // Init struktur di Wasabi sekali (cover/, previews/, builds/..., metadata/)
+  // fetch all dev apps (so we can hydrate by appId)
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        if (!wallet) return;
+        const listApp = await getAppByDeveloperId({ wallet });
+        if (isMounted) setApps(listApp);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [wallet]);
+
+  // find current app by appId once apps are loaded
+  useEffect(() => {
+    if (!apps || !appId) return;
+    const found = apps.find((a) => String(a.appId) === String(appId));
+    if (found) setLoadedApp(found);
+  }, [apps, appId]);
+
+  // Init Wasabi folder structure (cover/, previews/, builds/..., metadata/)
   useEffect(() => {
     (async () => {
       try {
-        const s = await initAppStorage(appStorageId);
+        if (!wallet || !appId) return;
+        const s = await initAppStorage(appId!);
         setStorage(s);
       } catch (e) {
         console.error("initAppStorage failed:", e);
       }
     })();
-  }, [appStorageId]);
+  }, [appId, wallet]);
+
   // ===== General form =====
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -100,15 +130,25 @@ export default function CreateApp() {
 
   // Previews (URL public Wasabi)
   const [previewItems, setPreviewItems] = useState<MediaItem[]>([]);
-  const previewsToPayload: Preview[] = useMemo(
-    () =>
-      previewItems.map((it) => ({
-        kind: it.kind === "video" ? { video: null } : { image: null },
-        // simpan key stabil; fallback ke src kalau memang public
-        url: it.storageKey ?? it.src,
-      })),
-    [previewItems]
-  );
+  const previewsToPayload: Preview[] = useMemo(() => {
+    return previewItems
+      .map((it) => {
+        const url =
+          (it as any).storageKey ??
+          (it as any).src ??
+          (it as any).url ?? // kalau ada
+          "";
+        if (typeof url !== "string" || url.trim() === "") return null; // ⬅️ filter
+        return {
+          kind:
+            it.kind === "video"
+              ? ({ video: null } as const)
+              : ({ image: null } as const),
+          url,
+        };
+      })
+      .filter(Boolean) as Preview[];
+  }, [previewItems]);
 
   // Distribusi/OS
   const [selectedDistribution, setSelectedDistribution] = useState<Option[]>(
@@ -119,10 +159,10 @@ export default function CreateApp() {
   const blankManifest = (): ManifestInterface => ({
     version: "",
     size: 0,
-    bucket: "", // diisi otomatis saat upload build
-    basePath: "", // diisi otomatis saat upload build
+    bucket: "",
+    basePath: "",
     checksum: "",
-    content: "", // nama file
+    content: "",
     createdAt: 0n,
   });
   const [manifestsByOS, setManifestsByOS] = useState<
@@ -139,7 +179,7 @@ export default function CreateApp() {
   const [storageStr, setStorageStr] = useState(""); // bigint
   const [graphics, setGraphics] = useState("");
   const [notes, setNotes] = useState("");
-  const categoryOptions = allCategories.categories.map((tag) => ({
+  const categoryOptions = allCategories.categories.map((tag: any) => ({
     value: tag.id,
     label: tag.name,
   }));
@@ -150,7 +190,7 @@ export default function CreateApp() {
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ ok?: string; err?: string }>({});
 
-  // sinkronisasi OS manifests
+  // sync manifests grid when distribution changes
   useEffect(() => {
     const chosenOS = new Set(
       selectedDistribution
@@ -170,9 +210,140 @@ export default function CreateApp() {
   }, [selectedDistribution]);
 
   /** ======================
-   *  UPLOAD HELPERS
+   *  HYDRATE FROM EXISTING APP
    *  ====================== */
+  function osKeyFromOS(os: OS): OSKey {
+    if ((os as any).windows !== undefined) return "windows";
+    if ((os as any).macos !== undefined) return "macos";
+    return "linux";
+  }
 
+  function extLooksVideo(u: string) {
+    return /(\.mp4|\.webm|\.mov|video\=)/i.test(u);
+  }
+
+  function unwrapOpt<T>(o: any): T | undefined {
+    // Candid Option ↔︎ [] | [T]
+    return Array.isArray(o) ? (o.length ? o[0] : undefined) : o;
+  }
+
+  function hydrateFromApp(a: AppInterface) {
+    // --- unwrapping semua Option dari canister
+    const banner = unwrapOpt<string>((a as any).bannerImage);
+    const cover = unwrapOpt<string>((a as any).coverImage);
+    const prevs = unwrapOpt<Preview[]>((a as any).previews) ?? [];
+    const cats = unwrapOpt<string[]>((a as any).category) ?? [];
+    const tags = unwrapOpt<string[]>((a as any).appTags) ?? [];
+    const dists = unwrapOpt<Distribution[]>((a as any).distributions) ?? [];
+    const relNs = unwrapOpt<bigint>((a as any).releaseDate);
+
+    // --- general
+    setTitle(a.title ?? "");
+    setDescription(a.description ?? "");
+    setCoverImage(cover ?? "");
+    setBannerImage(banner ?? "");
+
+    setPriceStr(
+      a.price ? String((Number(a.price) / 1e8) as unknown as bigint) : ""
+    );
+    setRequiredAgeStr(
+      a.requiredAge ? String(a.requiredAge as unknown as bigint) : ""
+    );
+    setReleaseDateStr(relNs ? nsToDateStr(relNs as any) : "");
+
+    // status
+    const st = (a.status || {}) as any;
+    setStatusCode(st.publish !== undefined ? "publish" : "notPublish");
+
+    // categories -> cocokkan ke options by label
+    const selected = categoryOptions.filter((o) => cats.includes(o.label));
+    setSelectedCategories(selected);
+
+    setAppTags([...tags]);
+
+    // previews -> MediaItem[] (skip yang tidak punya url)
+    const pitems: MediaItem[] = prevs
+      .map((p) => {
+        const url = (p as any)?.url;
+        if (!url) return null;
+        return {
+          kind:
+            p.kind && (p.kind as any).video !== undefined
+              ? "video"
+              : extLooksVideo(url)
+              ? "video"
+              : "image",
+          src: url,
+          alt: "preview",
+        } as MediaItem;
+      })
+      .filter(Boolean) as MediaItem[];
+    setPreviewItems(pitems);
+
+    // distributions -> selected + manifests + HW
+    const opts: Option[] = [];
+    const nextManifests: Record<OSKey, ManifestInterface[]> = {
+      windows: [],
+      macos: [],
+      linux: [],
+    };
+
+    let _web = "";
+    let hw = {
+      processor: "",
+      memory: "0",
+      storage: "0",
+      graphics: "",
+      notes: "",
+    };
+
+    dists.forEach((d) => {
+      if ((d as any).web) {
+        opts.push({ value: "web", label: "Web" });
+        _web = (d as any).web.url || "";
+        return;
+      }
+      if ((d as any).native) {
+        const n = (d as any).native;
+        const osKey = osKeyFromOS(n.os);
+        if (!opts.find((o) => o.value === osKey)) {
+          opts.push({
+            value: osKey,
+            label:
+              osKey === "macos"
+                ? "MacOS"
+                : osKey.charAt(0).toUpperCase() + osKey.slice(1),
+          });
+        }
+        nextManifests[osKey] = (n.manifests || []) as ManifestInterface[];
+        hw.processor = n.processor || hw.processor;
+        hw.memory = String(n.memory ?? hw.memory);
+        hw.storage = String(n.storage ?? hw.storage);
+        hw.graphics = n.graphics || hw.graphics;
+        hw.notes = n.additionalNotes || hw.notes;
+      }
+    });
+
+    setSelectedDistribution(opts);
+    setManifestsByOS(nextManifests);
+    setWebUrl(_web);
+
+    setProcessor(hw.processor);
+    setMemoryStr(hw.memory || "");
+    setStorageStr(hw.storage || "");
+    setGraphics(hw.graphics);
+    setNotes(hw.notes);
+  }
+
+  // run hydrate whenever loadedApp changes
+  useEffect(() => {
+    if (loadedApp) hydrateFromApp(loadedApp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadedApp]);
+
+  /** ======================
+   *  UPLOAD HELPERS (Wasabi)
+   *  ====================== */
   async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !storage) return;
@@ -183,9 +354,7 @@ export default function CreateApp() {
         fileName: safeFileName(file.name),
         contentType: file.type,
       });
-      // const { url: signed } = await presignRead(key);
       const apiUrl = `${import.meta.env.VITE_API_BASE}/files/${key}`;
-      console.log(apiUrl);
       setCoverImage(apiUrl);
     } catch (err) {
       console.error("upload cover failed:", err);
@@ -205,13 +374,46 @@ export default function CreateApp() {
         contentType: file.type,
       });
       const apiUrl = `${import.meta.env.VITE_API_BASE}/files/${key}`;
-      console.log(apiUrl);
       setBannerImage(apiUrl);
     } catch (err) {
       console.error("upload banner failed:", err);
     } finally {
       e.target.value = "";
     }
+  }
+
+  const toOptVec = <T,>(arr?: T[] | null): Opt<T[]> =>
+    arr && arr.length ? [arr] : [];
+
+  function toWireFromUI(ui: {
+    title: string;
+    description: string;
+    bannerImage?: string;
+    coverImage?: string;
+    previews?: Preview[];
+    price?: bigint;
+    requiredAge?: bigint;
+    releaseDate?: bigint; // Timestamp (ns)
+    status: AppStatus;
+    createdAt?: bigint; // Timestamp (ns), opsional sesuai Motoko
+    category?: string[];
+    appTags?: string[];
+    distributions?: Distribution[];
+  }): UpdateAppInterface {
+    return {
+      title: ui.title,
+      description: ui.description,
+      status: ui.status,
+      bannerImage: ToOpt(ui.bannerImage),
+      coverImage: ToOpt(ui.coverImage),
+      price: ui.price !== undefined ? ToOpt(ui.price) : [],
+      requiredAge: ui.requiredAge !== undefined ? ToOpt(ui.requiredAge) : [],
+      releaseDate: ui.releaseDate !== undefined ? ToOpt(ui.releaseDate) : [],
+      previews: toOptVec(ui.previews),
+      category: toOptVec(ui.category),
+      appTags: toOptVec(ui.appTags),
+      distributions: toOptVec(ui.distributions),
+    };
   }
 
   // Previews: langsung dari <input type="file">
@@ -222,15 +424,12 @@ export default function CreateApp() {
     try {
       const { key } = await uploadToPrefix({
         file,
-        prefix: storage.prefixes.previews, // "icp/apps/<appId>/previews/"
+        prefix: storage.prefixes.previews,
         fileName: safeFileName(file.name),
         contentType: file.type || "application/octet-stream",
-        // public: false  // default private; akses via /api/files/*
       });
 
-      // URL bersih lewat API kamu (streaming, bukan redirect)
       const apiUrl = `${import.meta.env.VITE_API_BASE}/files/${key}`;
-
       const kind: MediaItem["kind"] = file.type.startsWith("video/")
         ? "video"
         : "image";
@@ -259,14 +458,11 @@ export default function CreateApp() {
       const filename = safeFileName(file.name);
       const contentType = file.type || "application/octet-stream";
 
-      // prefix folder versi untuk OS tsb, mis:
-      // icp/apps/<appId>/builds/windows/<version>/
       type BuildPrefixKey = "builds/windows" | "builds/macos" | "builds/linux";
       const baseBuildPrefix =
         storage.prefixes[`builds/${osKey}` as BuildPrefixKey];
       const versionPrefix = `${baseBuildPrefix}${version}/`;
 
-      // upload (presign + PUT) via helper
       const publicUrl = await uploadToPrefix({
         file,
         prefix: versionPrefix,
@@ -275,7 +471,6 @@ export default function CreateApp() {
         public: true,
       });
 
-      // metadata untuk manifest
       const checksum = await sha256Hex(file);
       const sizeMB = +(file.size / (1024 * 1024)).toFixed(3);
 
@@ -285,11 +480,11 @@ export default function CreateApp() {
           i === idx
             ? {
                 ...mm,
-                bucket: storage.bucket, // ← JANGAN hardcode
-                basePath: versionPrefix, // ← pakai prefix sebenarnya
+                bucket: storage.bucket,
+                basePath: versionPrefix,
                 size: sizeMB,
                 checksum,
-                content: filename, // nama file yang di-upload
+                content: filename,
                 createdAt: nowNs(),
               }
             : mm
@@ -310,17 +505,17 @@ export default function CreateApp() {
     const list: Distribution[] = [];
 
     if (hasDist(selectedDistribution, "web")) {
-      list.push({ web: { url: webUrl } });
+      list.push({ web: { url: webUrl } } as any);
     }
 
     (["windows", "macos", "linux"] as OSKey[]).forEach((osk) => {
       if (!hasDist(selectedDistribution, osk)) return;
       const osVariant: OS =
         osk === "windows"
-          ? { windows: null }
+          ? ({ windows: null } as any)
           : osk === "macos"
-          ? { macos: null }
-          : { linux: null };
+          ? ({ macos: null } as any)
+          : ({ linux: null } as any);
       list.push({
         native: {
           os: osVariant,
@@ -331,14 +526,13 @@ export default function CreateApp() {
           graphics,
           additionalNotes: notes ? notes : null,
         },
-      });
+      } as any);
     });
 
     return list;
   }
 
   function mapStatusToBackend(code: string): AppStatus {
-    // back-end kamu pakai { publish | notPublish }, jadi map dari UI
     if (code === "publish") return { publish: null } as unknown as AppStatus;
     return { notPublish: null } as unknown as AppStatus;
   }
@@ -358,25 +552,31 @@ export default function CreateApp() {
       if (previewItems.length === 0)
         throw new Error("Please upload at least one preview.");
 
-      const payload: UpdateAppInterface = {
+      const payload = {
         title,
-        bannerImage: bannerImage,
         description,
-        coverImage, // URL publik Wasabi
-        previews: previewsToPayload,
-        price: BigInt(priceStr || "0"),
-        requiredAge: BigInt(requiredAgeStr || "0"),
-        releaseDate: dateStrToNs(releaseDateStr),
+        bannerImage, // (string | undefined)
+        coverImage,
+        previews: previewsToPayload.length ? previewsToPayload : undefined,
+        price: priceStr ? BigInt(priceStr) : undefined,
+        requiredAge: requiredAgeStr ? BigInt(requiredAgeStr) : undefined,
+        releaseDate: releaseDateStr ? dateStrToNs(releaseDateStr) : undefined,
         status: mapStatusToBackend(statusCode),
-        createdAt: nowNs(),
-        category: categoriesText, // sekarang array of string
-        appTags,
-        distributions: distributionsToPayload(),
-      };
+        category: categoriesText.length ? categoriesText : undefined,
+        appTags: appTags.length ? appTags : undefined,
+        distributions: (() => {
+          const d = distributionsToPayload();
+          return d.length ? d : undefined;
+        })(),
+      } as any;
 
-      await createApp({ createAppTypes: payload, wallet });
+      if (!wallet || !appId)
+        throw new Error("Wallet atau AppId tidak tersedia.");
 
-      setToast({ ok: "App created successfully 🎉" });
+      const wire = toWireFromUI(payload);
+      await updateApp({ updateAppTypes: wire, appId: Number(appId), wallet });
+
+      setToast({ ok: "App updated successfully 🎉" });
     } catch (err: any) {
       console.error(err);
       setToast({ err: err?.message ?? String(err) });
@@ -398,7 +598,7 @@ export default function CreateApp() {
   return (
     <div className="w-full flex justify-center px-8 pt-8 pb-32">
       <form onSubmit={onSubmit} className="container flex flex-col gap-8">
-        <h1 className="text-3xl pb-4">Create a new App</h1>
+        <h1 className="text-3xl pb-4">Update App</h1>
 
         {toast.ok && (
           <div className="rounded-lg border border-success text-success px-4 py-2">
@@ -542,7 +742,7 @@ export default function CreateApp() {
           {/* Banner & Cover: setImageUrl DI-INTERCEPT untuk upload */}
           <BannerFieldComponent
             title="Banner Image"
-            image_url={bannerImage}
+            imageUrl={bannerImage}
             onChange={handleBannerChange}
           />
 
@@ -565,7 +765,7 @@ export default function CreateApp() {
             <div className="w-1/3">
               <PhotoFieldComponent
                 title="Cover Image"
-                image_url={coverImage}
+                imageUrl={coverImage}
                 onChange={handleCoverChange}
               />
             </div>
@@ -722,7 +922,7 @@ export default function CreateApp() {
               busy ? "opacity-60 cursor-not-allowed" : ""
             }`}
           >
-            {busy ? "Creating..." : "Create App"}
+            {busy ? "Updating..." : "Update App"}
           </button>
         </div>
       </form>

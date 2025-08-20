@@ -16,6 +16,7 @@ import { saveUserInfo } from "../../utils/IndexedDb";
 import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";
 import { DropDownComponent } from "../../components/atoms/DropDownComponent";
 import { AlertMessage } from "../../features/wallet/components/AlertMessage";
+import { GetOpt, ToOpt } from "../../interfaces/CoreInterface";
 
 import {
   Gender,
@@ -28,20 +29,20 @@ import {
   updateUser,
 } from "../../blockchain/icp/user/services/ICPUserService";
 
-/** Utils — konversi tanggal */
+/** Utils — konversi tanggal (ns <-> YYYY-MM-DD UTC) */
 function unixNsToDateStr(ns: bigint): string {
   if (!ns || ns === 0n) return "";
   const ms = Number(ns / 1_000_000n);
   const d = new Date(ms);
+  // normalisasi ke midnight UTC supaya cocok <input type="date">
   const iso = new Date(
     Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
   )
     .toISOString()
-    .slice(0, 10); // YYYY-MM-DD
+    .slice(0, 10);
   return iso;
 }
 function dateStrToUnixNs(dateStr: string): bigint {
-  // "YYYY-MM-DD" -> ns (UTC midnight)
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
   if (!m) throw new Error("Invalid date format (YYYY-MM-DD)");
   const y = Number(m[1]),
@@ -74,22 +75,23 @@ const genderOptions: Option[] = [
   { code: "female", name: "Female" },
   { code: "other", name: "Other" },
 ];
-const countryOptions: Option[] = countriesData;
+const countryOptions: Option[] = countriesData as Option[];
 
-/** State untuk FORM (string-friendly) */
+/** ===== State form khusus UI (string-friendly) ===== */
 type UpdateForm = {
   username: string;
   displayName: string;
   email: string;
-  birthDateStr: string; // "YYYY-MM-DD"
+  birthDateStr: string; // YYYY-MM-DD
   genderCode: "male" | "female" | "other";
   country: string;
-  imageUrl: string | null;
-  backgroundImageUrl: string | null;
+  imageUrl: string | null; // base64/url untuk preview
+  backgroundImageUrl: string | null; // base64/url untuk preview
 };
 
 export const UpdateProfile = () => {
   const { wallet } = useWallet();
+  const [updating, setUpdating] = useState(false);
 
   const [form, setForm] = useState<UpdateForm>({
     username: "",
@@ -110,14 +112,12 @@ export const UpdateProfile = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
 
-  // Load user → map ke form
+  // Load user → map ke form UI
   useEffect(() => {
     (async () => {
       try {
-        if (wallet) return;
-        const user: UserInterface = await getUserByPrincipalId({
-          wallet: wallet,
-        });
+        if (!wallet?.encryptedPrivateKey) return; // ← perbaikan (jangan return saat wallet ada)
+        const user: UserInterface = await getUserByPrincipalId({ wallet });
         setForm({
           username: user.username,
           displayName: user.displayName,
@@ -125,8 +125,8 @@ export const UpdateProfile = () => {
           birthDateStr: unixNsToDateStr(user.userDemographics.birthDate),
           genderCode: genderVariantToCode(user.userDemographics.gender),
           country: user.userDemographics.country,
-          imageUrl: user.imageUrl ?? null,
-          backgroundImageUrl: user.backgroundImageUrl ?? null,
+          imageUrl: GetOpt(user.imageUrl) ?? null,
+          backgroundImageUrl: GetOpt(user.backgroundImageUrl) ?? null,
         });
       } catch (e) {
         console.error(e);
@@ -134,24 +134,13 @@ export const UpdateProfile = () => {
         setIsLoading(false);
       }
     })();
-  }, [wallet]);
+  }, [wallet?.encryptedPrivateKey]);
 
   // Handlers
   const onChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]:
-        name === "birthDateStr"
-          ? value
-          : type === "number"
-          ? value === ""
-            ? ""
-            : value
-          : value,
-    }));
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
-
   const onGenderChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const code = e.target.value as UpdateForm["genderCode"];
     setForm((p) => ({ ...p, genderCode: code }));
@@ -207,14 +196,15 @@ export const UpdateProfile = () => {
       alert("Please enter a valid email address");
       return;
     }
+
     try {
-      // Build payload sesuai UpdateUserInterface (camelCase)
+      setUpdating(true);
       const payload: UpdateUserInterface = {
         username: form.username,
         displayName: form.displayName,
         email: form.email,
-        imageUrl: form.imageUrl ?? null,
-        backgroundImageUrl: form.backgroundImageUrl ?? null,
+        imageUrl: ToOpt(form.imageUrl ?? undefined),
+        backgroundImageUrl: ToOpt(form.backgroundImageUrl ?? undefined),
         userDemographics: {
           birthDate: dateStrToUnixNs(form.birthDateStr),
           gender: genderCodeToVariant(form.genderCode),
@@ -223,15 +213,17 @@ export const UpdateProfile = () => {
       };
 
       const updated = await updateUser({ metadataUpdate: payload, wallet });
-      // Simpan versi ringkas ke IndexedDB (opsional)
       await saveUserInfo(updated as unknown as UserInterface);
-
       setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 2000);
     } catch (error) {
       console.error("Error updating account:", error);
       setShowFailed(true);
       setTimeout(() => setShowFailed(false), 2000);
+      setShowFailed(true);
+      setTimeout(() => setShowFailed(false), 2000);
+    } finally {
+      setUpdating(false); // ⬅️ selesai loading
+      setTimeout(() => setShowSuccess(false), 2000);
     }
   };
 
@@ -240,9 +232,9 @@ export const UpdateProfile = () => {
     onChange(e);
     try {
       const res = await getIsUsernameValid(e.target.value);
-      if ("ok" in res)
+      if ("ok" in res) {
         setIsValidUsername({ valid: true, msg: "username valid" });
-      else if ("err" in res) {
+      } else if ("err" in res) {
         const err = res.err as { InvalidInput?: string };
         setIsValidUsername({
           valid: false,
@@ -272,11 +264,20 @@ export const UpdateProfile = () => {
             onClick={handleSubmit}
             className="w-52 p-3 rounded-xl hover:shadow-arise-sm shadow-flat-sm duration-300 hover:text-white text-text_disabled"
           >
-            Submit
+            Update
           </button>
         </div>
 
         <div className="container flex gap-10 px-10 pt-3 pb-10">
+          {updating && (
+            <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center">
+              <div className="bg-background_primary px-6 py-4 rounded-xl shadow-arise-sm flex items-center gap-3">
+                <span className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <span>Updating profile…</span>
+              </div>
+            </div>
+          )}
+
           <div className="w-1/2 flex flex-col gap-10">
             {/* Profile Photo */}
             <div className="flex flex-col gap-3">
@@ -298,6 +299,7 @@ export const UpdateProfile = () => {
                 className="w-full bg-transparent shadow-sunken-sm px-5 mt-3 py-3 rounded-lg"
               />
             </div>
+
             {/* Background Image */}
             <div className="flex flex-col gap-3">
               <p className="capitalize font-semibold">Background Image</p>

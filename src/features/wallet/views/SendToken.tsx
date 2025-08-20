@@ -55,9 +55,10 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
 
   // Coins
   // const [isLoading, setIsLoading] = useState(true);
-  const [_tokenBalances, setTokenBalances] = useState<{
-    [canisterId: string]: number;
-  }>({});
+  // const [tokenBalances, setTokenBalances] = useState<{
+  // [canisterId: string]: number;
+  // }>({});
+  const [tokenBalances, setTokenBalances] = useState<number>(0);
   const defaultCoins: Coin[] = theCoin;
   const [listCoins, setListCoins] = useState<Coin[]>([]);
 
@@ -115,11 +116,8 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
   };
 
   const updateTokenBalance = useCallback(
-    (canisterId: string, balanceUsd: number) => {
-      setTokenBalances((prev) => {
-        const newBalances = { ...prev, [canisterId]: balanceUsd };
-        return newBalances;
-      });
+    (canisterId: string, balanceUsd: number, balanceToken: number) => {
+      setTokenBalances(balanceToken);
     },
     []
   );
@@ -134,7 +132,10 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
 
+  const canSend = Boolean(Number(amountCoin) < tokenBalances);
+
   async function handleSend() {
+    if (!canSend) return;
     try {
       const result = await transferTokenICRC1(
         finalAddress!,
@@ -319,34 +320,42 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                 </div>
 
                 {/* Amount  */}
-                <div className="flex items-center gap-2">
-                  <InputField
-                    onChange={(e) => {
-                      e = e.replace(/,/g, ".");
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <InputField
+                      onChange={(e) => {
+                        e = e.replace(/,/g, ".");
 
-                      if (e === "" || e === "0") {
-                        setAmountCoin(e);
-                        return;
-                      }
+                        if (e === "" || e === "0") {
+                          setAmountCoin(e);
+                          return;
+                        }
 
-                      if (/^0+[1-9][0-9]*$/.test(e)) {
-                        e = e.replace(/^0+/, "");
-                      }
+                        if (/^0+[1-9][0-9]*$/.test(e)) {
+                          e = e.replace(/^0+/, "");
+                        }
 
-                      if (/^(0|([1-9][0-9]*))([.,][0-9]*)?$/.test(e)) {
-                        setAmountCoin(e);
-                      }
-                    }}
-                    placeholder="Amount"
-                    type="text"
-                    value={amountCoin ? amountCoin : ""}
-                  />
-                  <div className="flex gap-8 items-center">
-                    <p className="text-lg">{coinMetadata?.symbol}</p>
-                    {/* <button className="text-sm shadow-arise-sm hover:shadow-flat-sm py-2 px-4 rounded-full">
+                        if (/^(0|([1-9][0-9]*))([.,][0-9]*)?$/.test(e)) {
+                          setAmountCoin(e);
+                        }
+                      }}
+                      placeholder="Amount"
+                      type="text"
+                      value={amountCoin ? amountCoin : ""}
+                    />
+                    <div className="flex gap-8 items-center">
+                      <p className="text-lg">{coinMetadata?.symbol}</p>
+                      {/* <button className="text-sm shadow-arise-sm hover:shadow-flat-sm py-2 px-4 rounded-full">
                       max
-                    </button> */}
+                      </button> */}
+                    </div>
                   </div>
+                  {!canSend && (
+                    <p className="text-sm text-red-400">
+                      Amount exceeds balance ({tokenBalances}{" "}
+                      {coinMetadata?.symbol})
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -358,7 +367,10 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                 </div> */}
                 <button
                   onClick={handleSend}
-                  className="w-full text-lg rounded-lg font bg-gradient-to-tr from-accent_primary to-accent_secondary p-2 hover:scale-105 duration-300"
+                  disabled={!canSend}
+                  className={`w-full text-lg rounded-lg font bg-gradient-to-tr from-accent_primary to-accent_secondary p-2  duration-300 ${
+                    canSend ? "hover:scale-105" : "opacity-50"
+                  } `}
                 >
                   Send
                 </button>

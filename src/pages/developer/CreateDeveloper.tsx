@@ -11,6 +11,7 @@ export const CreateDeveloper = () => {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [bio, setBio] = useState("");
   const [isOnPayment, setIsOnPayment] = useState(false);
+  const priceUpgradeToDeveloperAccount = 10;
 
   async function handlePayment() {
     const result = await createDeveloperProfile({
@@ -29,7 +30,9 @@ export const CreateDeveloper = () => {
       >
         <div className="bg-background_secondary aspect-video rounded-xl flex flex-col justify-center items-center">
           <p className="text-text_disabled">one-time payment for</p>
-          <p className="text-5xl font-bold">10 USD</p>
+          <p className="text-5xl font-bold">
+            {priceUpgradeToDeveloperAccount} PER
+          </p>
         </div>
         {/* title  */}
         <h1 className="text-xl capitalize">Every Developer need Identity</h1>
@@ -55,7 +58,8 @@ export const CreateDeveloper = () => {
         <ButtonTransaction onClick={() => setIsOnPayment(true)} text="Pay" />
         {isOnPayment && (
           <AppPayment
-            price={Number(10)}
+            price={Number(priceUpgradeToDeveloperAccount)}
+            SPENDER={import.meta.env.VITE_PERIDOT_CANISTER_USER_BACKEND}
             onClose={() => setIsOnPayment(false)}
             onExecute={handlePayment}
           />

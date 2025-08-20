@@ -1,6 +1,6 @@
 import { ICPAppTypes } from "./types/ICPAppTypes";
 import { ICPPurchaseTypes } from "./types/ICPPurchaseTypes";
-import { ICPCoreResult } from "../utils/ICPTypesCore";
+import { ICPAppId, ICPCoreResult } from "../utils/ICPTypesCore";
 
 export const ICPAppFactory = ({ IDL }: { IDL: any }) => {
   const AppTypes = ICPAppTypes(IDL);
@@ -12,13 +12,19 @@ export const ICPAppFactory = ({ IDL }: { IDL: any }) => {
       [ICPCoreResult(AppTypes.App)],
       []
     ),
-    getAllApps: IDL.Func([], [ICPCoreResult(IDL.Vec(AppTypes.App))], ["query"]),
-    getAppById: IDL.Func(
-      [IDL.Nat],
-      [ICPCoreResult(IDL.Vec(AppTypes.App))],
-      ["query"]
+    updateApp: IDL.Func(
+      [AppTypes.UpdateApp, ICPAppId],
+      [ICPCoreResult(AppTypes.App)],
+      []
     ),
+    getAllApps: IDL.Func([], [ICPCoreResult(IDL.Vec(AppTypes.App))], ["query"]),
+    getAppByDeveloperId: IDL.Func(
+      [],
+      [ICPCoreResult(IDL.Vec(AppTypes.App))],
+      []
+    ),
+    getAppById: IDL.Func([ICPAppId], [ICPCoreResult(AppTypes.App)], ["query"]),
     getMyApps: IDL.Func([], [ICPCoreResult(IDL.Vec(AppTypes.App))], []),
-    buyApp: IDL.Func([IDL.Nat], [ICPCoreResult(PurchaseTypes.Purchase)], []),
+    buyApp: IDL.Func([ICPAppId], [ICPCoreResult(PurchaseTypes.Purchase)], []),
   });
 };

@@ -2,7 +2,8 @@
 import React, { ChangeEventHandler } from "react";
 import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { GenderVariant } from "../../interfaces/User";
+import { Gender } from "../../interfaces/user/UserInterface";
+import { Distribution } from "../../interfaces/app/AppInterface";
 
 export const DropDownComponent = ({
   name,
@@ -17,7 +18,7 @@ export const DropDownComponent = ({
   icon: IconDefinition;
   placeholder: string;
   className: string;
-  value: string | GenderVariant;
+  value: string | Gender | Distribution;
   options: { code: string; name: string }[];
   onChange: ChangeEventHandler<HTMLSelectElement>;
 }) => {

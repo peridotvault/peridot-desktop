@@ -4,6 +4,7 @@ import { InputField } from "../../../components/atoms/InputField";
 import { copyToClipboard } from "../../../utils/Additional";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClone } from "@fortawesome/free-solid-svg-icons";
+import { validateMnemonic, wordlists } from "bip39";
 
 interface SeedPhraseInputProps {
   onContinue: (seedPhrase: string) => void;
@@ -14,6 +15,7 @@ export const SeedPhraseInput = ({
   onContinue,
   seedPhrase,
 }: SeedPhraseInputProps) => {
+  const EN = wordlists.english;
   const [words, setWords] = useState(Array(12).fill(""));
   const [errors] = useState(Array(12).fill(false));
 
@@ -77,7 +79,16 @@ export const SeedPhraseInput = ({
   };
 
   const isValid = () => {
-    return words.every((word) => word.trim() !== "");
+    // harus 12 kata & semuanya terisi
+    if (words.length !== 12) return false;
+    const cleaned = words.map((w) => w.trim().toLowerCase());
+    if (!cleaned.every((w) => w.length > 0)) return false;
+
+    // pastikan semua kata ada di wordlist BIP39 English
+    if (!cleaned.every((w) => EN.includes(w))) return false;
+
+    // cek checksum mnemonic
+    return validateMnemonic(cleaned.join(" "), EN);
   };
 
   const handleSubmit = (e: any) => {

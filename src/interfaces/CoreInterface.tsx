@@ -35,3 +35,6 @@ export function GetOpt<T>(o: Opt<T> | undefined | null): T | undefined {
 export function ToOpt<T>(v: T | null | undefined): Opt<T> {
   return v == null ? [] : [v];
 }
+
+export type DistKey = "web" | "windows" | "macos" | "linux";
+export type OSKey = Extract<DistKey, "windows" | "macos" | "linux">;
