@@ -28,6 +28,8 @@ export default function GameDetail() {
 
   useEffect(() => {
     async function fetchData() {
+      window.scrollTo(0, 0);
+
       const resDetailGame = await getAppById({ appId: Number(appId) });
       console.log(resDetailGame);
       setDetailGame(resDetailGame);
@@ -112,7 +114,7 @@ export default function GameDetail() {
           <div className="w-1/4 min-w-[300px] h-52 flex flex-col gap-6">
             {/* age regulation  */}
             <div className="flex items-center justify-center ">
-              <div className="w-full aspect-video relative overflow-hidden shadow-arise-sm rounded-xl">
+              <div className="w-full aspect-[3/4] relative overflow-hidden shadow-arise-sm rounded-xl">
                 <img
                   src={
                     detailGame?.coverImage

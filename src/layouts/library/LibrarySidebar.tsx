@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useWallet } from "../../contexts/WalletContext";
 import { AppInterface } from "../../interfaces/app/AppInterface";
 import { getMyApps } from "../../blockchain/icp/app/services/ICPAppService";
@@ -28,10 +28,6 @@ export const Sidebar = () => {
   const filteredGames = myApps?.filter((game) =>
     game.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const handleGameClick = (path: string) => {
-    navigate(path);
-  };
 
   const formatTitle = (title: string): string => {
     return title.toLowerCase().replace(/\s+/g, "_");
@@ -66,9 +62,9 @@ export const Sidebar = () => {
               location.pathname ===
               `/library/${formatTitle(item.title)}/${item.appId}`;
             return (
-              <button
+              <Link
                 key={item.appId}
-                onClick={() => handleGameClick(formatTitle(item.title))}
+                to={`/library/${formatTitle(item.title)}/${item.appId}`}
                 className={`flex gap-3 px-7 py-2 items-center  duration-100
               ${
                 isActive ? "shadow-flat-sm scale-110" : "hover:shadow-arise-sm "
@@ -80,7 +76,7 @@ export const Sidebar = () => {
                   alt=""
                 />
                 <p className="truncate text-sm">{item.title}</p>
-              </button>
+              </Link>
             );
           })}
         </div>

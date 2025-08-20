@@ -20,6 +20,8 @@ export default function VaultPage() {
 
   useEffect(() => {
     async function fetchData() {
+      window.scrollTo(0, 0);
+
       const resAllGames = await getAllApps();
       console.log(resAllGames);
       setAllApps(resAllGames);

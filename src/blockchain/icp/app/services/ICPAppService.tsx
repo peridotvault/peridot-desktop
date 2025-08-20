@@ -209,3 +209,37 @@ export async function getMyApps({
     throw new Error("Error Service Get My Apps : " + error);
   }
 }
+
+export async function deleteApp({
+  wallet,
+  appId,
+}: {
+  wallet: any;
+  appId: number;
+}): Promise<Text> {
+  const privateKey = await walletService.decryptWalletData(
+    wallet.encryptedPrivateKey
+  );
+  const secretKey = hexToArrayBuffer(privateKey);
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+    });
+
+    const actor = Actor.createActor(ICPAppFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+
+    const result = (await actor.deleteApp(appId)) as ApiResponse<Text>;
+    if ("err" in result) {
+      const [k, v] = Object.entries(result.err)[0] as [string, string];
+      throw new Error(`deleteApp failed: ${k} - ${v}`);
+    }
+    return result.ok;
+  } catch (error) {
+    throw new Error("Error Service Delete App : " + error);
+  }
+}

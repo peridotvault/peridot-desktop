@@ -52,13 +52,33 @@ export default function GameDetailLibrary() {
   const [theApp, setTheApp] = useState<AppInterface | null>();
 
   useEffect(() => {
+    // scroll ke atas tiap ganti game (opsional)
+    window.scrollTo(0, 0);
+
+    // validasi appId
+    const idNum = Number(appId);
+    if (!appId || Number.isNaN(idNum)) {
+      setTheApp(null);
+      return;
+    }
+
+    let cancelled = false;
     async function fetchData() {
-      const resAllApps = await getAppById({ appId: Number(appId) });
-      setTheApp(resAllApps);
+      try {
+        setTheApp(null); // reset agar tidak menampilkan data lama
+        const res = await getAppById({ appId: idNum });
+        if (!cancelled) setTheApp(res);
+      } catch (e) {
+        if (!cancelled) setTheApp(null);
+        // optionally: tampilkan notifikasi error
+      }
     }
 
     fetchData();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [appId]);
 
   const AnnouncementContainer = ({
     img_url,

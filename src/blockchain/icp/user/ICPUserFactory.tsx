@@ -7,6 +7,7 @@ export const ICPUserFactory = ({ IDL }: { IDL: any }) => {
   const FriendTypes = ICPFriendTypes(IDL);
 
   return IDL.Service({
+    // USER
     createUser: IDL.Func(
       [UserTypes.CreateUser],
       [ICPCoreResult(UserTypes.User)],
@@ -25,7 +26,7 @@ export const ICPUserFactory = ({ IDL }: { IDL: any }) => {
     ),
     getIsUsernameValid: IDL.Func([IDL.Text], [ICPCoreResult(IDL.Bool)], []),
 
-    // user friend
+    // FRIEND
     getFriendRequestList: IDL.Func(
       [],
       [ICPCoreResult(FriendTypes.UserFriend)],
@@ -33,11 +34,12 @@ export const ICPUserFactory = ({ IDL }: { IDL: any }) => {
     ),
     getFriendList: IDL.Func([], [ICPCoreResult(FriendTypes.UserFriend)], []),
 
-    // Developer
+    // DEVELOPER
     createDeveloperProfile: IDL.Func(
       [IDL.Text, IDL.Text],
       [ICPCoreResult(UserTypes.User)],
       []
     ),
+    getAmIDeveloper: IDL.Func([], [IDL.Bool], []),
   });
 };
