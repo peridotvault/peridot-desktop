@@ -9,6 +9,7 @@ export interface InitResp {
     cover: string; // "icp/apps/<appId>/cover/"
     previews: string; // "icp/apps/<appId>/previews/"
     metadata: string; // "icp/apps/<appId>/metadata/"
+    announcements: string; // "icp/apps/<appId>/announcements/"
     "builds/web": string; // "icp/apps/<appId>/builds/web/"
     "builds/windows": string;
     "builds/macos": string;

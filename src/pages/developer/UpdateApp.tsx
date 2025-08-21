@@ -102,6 +102,17 @@ export default function UpdateApp() {
     })();
   }, [appId, wallet]);
 
+  // ===== Announcements =====
+  const [headline, setHeadline] = useState("");
+  const [content, setContent] = useState("");
+  const [announcementCoverImage, setAnnouncementCoverImage] = useState<string>("");
+  const [announcementStatus, setAnnouncementStatus] = useState("");
+  const announcementStatusOptions = [
+    {code: "draft", name: "Draft"},
+    {code: "published", name: "Published"},
+    {code: "archived", name: "Archived"},
+  ]
+
   // ===== General form =====
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -357,6 +368,31 @@ export default function UpdateApp() {
     }
   }
 
+  async function handleAnnouncementCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !storage) return;
+    console.log(file);
+    console.log(storage.prefixes);
+    console.log(safeFileName(file.name));
+    console.log(file.type);
+
+    try {
+      const {key} = await uploadToPrefix({
+        file,
+        prefix: storage.prefixes.announcements,
+        fileName: safeFileName(file.name),
+        contentType: file.type
+      })
+
+      const apiUrl = `${import.meta.env.VITE_API_BASE}/files/${key}`;
+      setAnnouncementCoverImage(apiUrl);
+    } catch(err) {
+      console.error("Upload announcement cover failed:", err)
+    } finally {
+      e.target.value = "";
+    }
+  }
+
   async function handleBannerChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !storage) return;
@@ -581,7 +617,61 @@ export default function UpdateApp() {
   const removeTag = (t: string) => setAppTags((p) => p.filter((x) => x !== t));
 
   return (
-    <div className="w-full flex justify-center px-8 pt-8 pb-32">
+    <div className="w-full flex flex-col justify-center px-8 pt-8 pb-32">
+      <form action="" className="container flex flex-col gap-8">
+        <h1 className="text-3xl pb-4">Announcements</h1>
+
+        <InputFieldComponent
+          name="Headline"
+          icon={faHeading}
+          type="text"
+          placeholder="Headline"
+          value={headline}
+          onChange={() => null}
+        />
+        <InputFieldComponent
+          name="Content"
+          icon={faMessage}
+          type="text"
+          placeholder="Content"
+          value={content}
+          onChange={() => null}
+        />
+        <PhotoFieldComponent
+          title="Cover Image"
+          imageUrl={announcementCoverImage}
+          onChange={handleAnnouncementCoverChange}
+        />
+        <DropDownComponent
+          name="status"
+          icon={faCheck}
+          placeholder="Status"
+          className=""
+          value={announcementStatus}
+          options={announcementStatusOptions.map((s) => ({
+            code: s.code,
+            name: s.name,
+          }))}
+          onChange={(e) =>
+            setAnnouncementStatus(
+              (e.target as HTMLSelectElement).value as keyof AppStatus
+            )
+          }
+        />
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={busy}
+            className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
+              busy ? "opacity-60 cursor-not-allowed" : ""
+            }`}
+          >
+            {busy ? "Creating..." : "Create Announcement"}
+          </button>
+        </div>
+      </form>
+
       <form onSubmit={onSubmit} className="container flex flex-col gap-8">
         <h1 className="text-3xl pb-4">Update App</h1>
 
