@@ -26,7 +26,7 @@ export function createMainWindow(): BrowserWindow {
         },
     });
 
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 
     mainWindow.webContents.on('did-finish-load', () => {
         mainWindow?.webContents.send('main-process-message', new Date().toLocaleString());

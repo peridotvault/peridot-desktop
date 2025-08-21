@@ -344,7 +344,7 @@ export default function UpdateApp() {
     try {
       const { key } = await uploadToPrefix({
         file,
-        prefix: storage.prefixes.cover,
+        prefix: storage.prefixes.assets,
         fileName: safeFileName(file.name),
         contentType: file.type,
       });
@@ -363,7 +363,7 @@ export default function UpdateApp() {
     try {
       const { key } = await uploadToPrefix({
         file,
-        prefix: storage.prefixes.cover,
+        prefix: storage.prefixes.assets,
         fileName: safeFileName(file.name),
         contentType: file.type,
       });
