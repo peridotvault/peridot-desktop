@@ -53,8 +53,8 @@ import {
   uploadToPrefix,
 } from "../../api/wasabiClient";
 import { useParams } from "react-router-dom";
-import { AnnouncementStatus, CreateAnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
-import { createAnnouncement } from "../../blockchain/icp/app/services/ICPAnnouncementService";
+import { AnnouncementInterface, AnnouncementStatus, CreateAnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
+import { createAnnouncement, getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -97,6 +97,7 @@ export default function UpdateApp() {
   const { appId } = useParams();
   const [storage, setStorage] = useState<InitResp | null>(null);
   const [apps, setApps] = useState<AppInterface[] | null>(null);
+  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
   const [loadedApp, setLoadedApp] = useState<AppInterface | null>(null);
 
   // fetch all dev apps (so we can hydrate by appId)
@@ -135,6 +136,24 @@ export default function UpdateApp() {
       }
     })();
   }, [appId, wallet]);
+
+  // Get all announcements by app id
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        if (!wallet) return;
+        const listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet });
+        if (isMounted) setAnnouncements(listAnnouncement);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    }
+  }, [appId, wallet])
 
   // ===== Announcements =====
   const [headline, setHeadline] = useState("");
@@ -702,7 +721,42 @@ export default function UpdateApp() {
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0}>
-          <h1 className="text-3xl pb-4">Announcements</h1>
+          <div>
+            <h1 className="text-3xl pb-4">Announcements</h1>
+            <div className="flex flex-col gap-6">
+            {announcements?.map((item, index) => (
+                <div key={index} className="bg-gray-600 p-6 flex justify-between">
+                  <div>
+                    <div className="flex content-center mb-8">
+                        <p className="text-xl capitalize mr-4">
+                          {item.status && typeof item.status === 'object'
+                            ? Object.keys(item.status)[0]
+                            : ''}
+                        </p>
+                        <p>
+                          {item.createdAt
+                            ? new Date(Number(item.createdAt) / 1_000_000).toLocaleDateString()
+                            : ""}
+                        </p>
+                    </div>
+                    <div className="mb-4">
+                      <p className="text-3xl font-bold">{item.headline}</p>
+                    </div>
+                    <div>
+                      <p className="text-lg">{item.content}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <img
+                      src={item.coverImage}
+                      className="w-64 h-72 object-cover"
+                      alt="preview"
+                    />
+                  </div>
+                </div>
+            ))}
+            </div>
+          </div>
           {/* <form onSubmit={onAnnouncementSubmit} className="container flex flex-col gap-8">
             <h1 className="text-3xl pb-4">Announcements</h1>
 

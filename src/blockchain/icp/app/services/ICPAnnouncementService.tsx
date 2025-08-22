@@ -52,7 +52,7 @@ export async function getAllAnnouncementsByAppId({
     wallet
 }: {
     appId: any;
-    wallet: any
+    wallet: any;
 }): Promise<AnnouncementInterface[] | null> {
     const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
     const secretKey = hexToArrayBuffer(privateKey);
@@ -68,7 +68,9 @@ export async function getAllAnnouncementsByAppId({
             canisterId: appCanister
         })
 
-        const result = (await actor.getAllAnnouncementsByAppId()) as ApiResponse<AnnouncementInterface[]>;
+        const result = (await actor.getAllAnnouncementsByAppId(
+            appId
+        )) as ApiResponse<AnnouncementInterface[]>;
         console.log("Announcements: " + result);
         if ("err" in result) {
             const [k, v] = Object.entries(result.err)[0] as [string, string];

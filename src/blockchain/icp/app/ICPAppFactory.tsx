@@ -49,7 +49,7 @@ export const ICPAnnouncementFactory = ({ IDL }: { IDL: any }) => {
     ),
     // GET
     getAllAnnouncementsByAppId: IDL.Func(
-      [],
+      [ICPAppId],
       [ICPCoreResult(IDL.Vec(AnnouncementTypes.AppAnnouncement))],
       []
     )
