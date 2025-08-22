@@ -56,6 +56,38 @@ import { useParams } from "react-router-dom";
 import { AnnouncementStatus, CreateAnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
 import { createAnnouncement } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
+
 export default function UpdateApp() {
   const { wallet } = useWallet();
 
@@ -654,402 +686,419 @@ export default function UpdateApp() {
   };
   const removeTag = (t: string) => setAppTags((p) => p.filter((x) => x !== t));
 
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
   return (
     <div className="w-full flex flex-col justify-center px-8 pt-8 pb-32">
-      <form onSubmit={onAnnouncementSubmit} className="container flex flex-col gap-8">
-        <h1 className="text-3xl pb-4">Announcements</h1>
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+            <Tab label="Announcements" {...a11yProps(0)} />
+            <Tab label="Settings" {...a11yProps(1)} />
+          </Tabs>
+        </Box>
+        <CustomTabPanel value={value} index={0}>
+          <form onSubmit={onAnnouncementSubmit} className="container flex flex-col gap-8">
+            <h1 className="text-3xl pb-4">Announcements</h1>
 
-        <InputFieldComponent
-          name="Headline"
-          icon={faHeading}
-          type="text"
-          placeholder="Headline"
-          value={headline}
-          onChange={(e) => setHeadline((e.target as HTMLInputElement).value)}
-        />
-        <InputFieldComponent
-          name="Content"
-          icon={faMessage}
-          type="text"
-          placeholder="Content"
-          value={content}
-          onChange={(e) => setContent((e.target as HTMLInputElement).value)}
-        />
-        <PhotoFieldComponent
-          title="Cover Image"
-          imageUrl={announcementCoverImage}
-          onChange={handleAnnouncementCoverChange}
-        />
-        <DropDownComponent
-          name="status"
-          icon={faCheck}
-          placeholder="Status"
-          className=""
-          value={announcementStatus}
-          options={announcementStatusOptions.map((s) => ({
-            code: s.code,
-            name: s.name,
-          }))}
-          onChange={(e) =>
-            setAnnouncementStatus(
-              (e.target as HTMLSelectElement).value as keyof AppStatus
-            )
-          }
-        />
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="pin-announcement"
-            checked={isAnnouncementPinned}
-            onChange={(e) => setIsAnnouncementPinned(e.target.checked)}
-          />
-          <label htmlFor="pin-announcement" className="cursor-pointer select-none">
-            Pin Announcement
-          </label>
-        </div>
-
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={busy}
-            className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
-              busy ? "opacity-60 cursor-not-allowed" : ""
-            }`}
-          >
-            {busy ? "Creating..." : "Create Announcement"}
-          </button>
-        </div>
-      </form>
-
-      <form onSubmit={onSubmit} className="container flex flex-col gap-8">
-        <h1 className="text-3xl pb-4">Update App</h1>
-
-        {toast.ok && (
-          <div className="rounded-lg border border-success text-success px-4 py-2">
-            {toast.ok}
-          </div>
-        )}
-        {toast.err && (
-          <div className="rounded-lg border border-danger text-danger px-4 py-2">
-            {toast.err}
-          </div>
-        )}
-
-        <div className="flex gap-12">
-          {/* left */}
-          <div className="flex flex-col gap-8 w-2/3">
-            <section className="flex flex-col gap-4">
-              <h2 className="text-2xl font-semibold pb-2">General</h2>
-
-              <InputFieldComponent
-                name="title"
-                icon={faHeading}
-                type="text"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
+            <InputFieldComponent
+              name="Headline"
+              icon={faHeading}
+              type="text"
+              placeholder="Headline"
+              value={headline}
+              onChange={(e) => setHeadline((e.target as HTMLInputElement).value)}
+            />
+            <InputFieldComponent
+              name="Content"
+              icon={faMessage}
+              type="text"
+              placeholder="Content"
+              value={content}
+              onChange={(e) => setContent((e.target as HTMLInputElement).value)}
+            />
+            <PhotoFieldComponent
+              title="Cover Image"
+              imageUrl={announcementCoverImage}
+              onChange={handleAnnouncementCoverChange}
+            />
+            <DropDownComponent
+              name="status"
+              icon={faCheck}
+              placeholder="Status"
+              className=""
+              value={announcementStatus}
+              options={announcementStatusOptions.map((s) => ({
+                code: s.code,
+                name: s.name,
+              }))}
+              onChange={(e) =>
+                setAnnouncementStatus(
+                  (e.target as HTMLSelectElement).value as keyof AppStatus
+                )
+              }
+            />
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="pin-announcement"
+                checked={isAnnouncementPinned}
+                onChange={(e) => setIsAnnouncementPinned(e.target.checked)}
               />
-              <InputFieldComponent
-                name="description"
-                icon={faMessage}
-                type="text"
-                placeholder="Description"
-                value={description}
-                onChange={(e) =>
-                  setDescription((e.target as HTMLInputElement).value)
-                }
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <InputFieldComponent
-                  name="price"
-                  icon={faMoneyBill1Wave}
-                  type="number"
-                  placeholder="Price (Nat)"
-                  value={priceStr}
-                  onChange={(e) =>
-                    setPriceStr((e.target as HTMLInputElement).value)
-                  }
-                />
-                <InputFieldComponent
-                  name="requiredAge"
-                  icon={faPersonCane}
-                  type="number"
-                  placeholder="Required Age (Nat)"
-                  value={requiredAgeStr}
-                  onChange={(e) =>
-                    setRequiredAgeStr((e.target as HTMLInputElement).value)
-                  }
-                />
+              <label htmlFor="pin-announcement" className="cursor-pointer select-none">
+                Pin Announcement
+              </label>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={busy}
+                className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
+                  busy ? "opacity-60 cursor-not-allowed" : ""
+                }`}
+              >
+                {busy ? "Creating..." : "Create Announcement"}
+              </button>
+            </div>
+          </form>
+        </CustomTabPanel>
+        <CustomTabPanel value={value} index={1}>
+          <form onSubmit={onSubmit} className="container flex flex-col gap-8">
+            <h1 className="text-3xl pb-4">Update App</h1>
+
+            {toast.ok && (
+              <div className="rounded-lg border border-success text-success px-4 py-2">
+                {toast.ok}
               </div>
-
-              <InputFieldComponent
-                name="releaseDate"
-                icon={faCalendarDays}
-                type="date"
-                placeholder="Release Date"
-                value={releaseDateStr}
-                onChange={(e) =>
-                  setReleaseDateStr((e.target as HTMLInputElement).value)
-                }
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <DropDownComponent
-                  name="status"
-                  icon={faCheck}
-                  placeholder="Status"
-                  className=""
-                  value={statusCode}
-                  options={statusOptions.map((s) => ({
-                    code: s.code,
-                    name: s.name,
-                  }))}
-                  onChange={(e) =>
-                    setStatusCode(
-                      (e.target as HTMLSelectElement).value as keyof AppStatus
-                    )
-                  }
-                />
-                <MultiSelectComponent
-                  maxValue={3}
-                  placeholder="Category"
-                  selected={selectedCategories}
-                  options={categoryOptions}
-                  onChange={setSelectedCategories}
-                />
+            )}
+            {toast.err && (
+              <div className="rounded-lg border border-danger text-danger px-4 py-2">
+                {toast.err}
               </div>
+            )}
 
-              {/* Tags */}
-              <div className="flex items-center gap-3">
-                <input
-                  className="shadow-sunken-sm rounded-lg px-3 py-2 bg-transparent w-64"
-                  placeholder="Add tag and press +"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="px-3 py-2 rounded-md shadow-flat-sm hover:shadow-arise-sm"
-                  onClick={addTag}
-                >
-                  +
-                </button>
-              </div>
-              {appTags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {appTags.map((t) => (
-                    <span
-                      key={t}
-                      className="px-2 py-1 rounded-full border text-xs"
-                    >
-                      {t}{" "}
-                      <button
-                        type="button"
-                        className="ml-1 text-danger"
-                        onClick={() => removeTag(t)}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              )}
-            </section>
-          </div>
-        </div>
+            <div className="flex gap-12">
+              {/* left */}
+              <div className="flex flex-col gap-8 w-2/3">
+                <section className="flex flex-col gap-4">
+                  <h2 className="text-2xl font-semibold pb-2">General</h2>
 
-        {/* Designs */}
-        <section className="flex flex-col gap-8">
-          <hr className="border-t border-background_disabled" />
-          <h2 className="text-2xl font-semibold pb-2">Designs</h2>
-
-          {/* Banner & Cover: setImageUrl DI-INTERCEPT untuk upload */}
-          <BannerFieldComponent
-            title="Banner Image"
-            imageUrl={bannerImage}
-            onChange={handleBannerChange}
-          />
-
-          <div className="w-full flex gap-4 justify-evenly">
-            <div className="w-1/2">
-              <CarouselPreview
-                items={previewItems}
-                initialIndex={0}
-                showThumbnails
-                htmlElement={
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    onChange={handlePreviewUpload}
-                    className="h-20 aspect-video bg-transparent shadow-sunken-sm rounded-lg"
+                  <InputFieldComponent
+                    name="title"
+                    icon={faHeading}
+                    type="text"
+                    placeholder="Title"
+                    value={title}
+                    onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
                   />
-                }
-              />
+                  <InputFieldComponent
+                    name="description"
+                    icon={faMessage}
+                    type="text"
+                    placeholder="Description"
+                    value={description}
+                    onChange={(e) =>
+                      setDescription((e.target as HTMLInputElement).value)
+                    }
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <InputFieldComponent
+                      name="price"
+                      icon={faMoneyBill1Wave}
+                      type="number"
+                      placeholder="Price (Nat)"
+                      value={priceStr}
+                      onChange={(e) =>
+                        setPriceStr((e.target as HTMLInputElement).value)
+                      }
+                    />
+                    <InputFieldComponent
+                      name="requiredAge"
+                      icon={faPersonCane}
+                      type="number"
+                      placeholder="Required Age (Nat)"
+                      value={requiredAgeStr}
+                      onChange={(e) =>
+                        setRequiredAgeStr((e.target as HTMLInputElement).value)
+                      }
+                    />
+                  </div>
+
+                  <InputFieldComponent
+                    name="releaseDate"
+                    icon={faCalendarDays}
+                    type="date"
+                    placeholder="Release Date"
+                    value={releaseDateStr}
+                    onChange={(e) =>
+                      setReleaseDateStr((e.target as HTMLInputElement).value)
+                    }
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <DropDownComponent
+                      name="status"
+                      icon={faCheck}
+                      placeholder="Status"
+                      className=""
+                      value={statusCode}
+                      options={statusOptions.map((s) => ({
+                        code: s.code,
+                        name: s.name,
+                      }))}
+                      onChange={(e) =>
+                        setStatusCode(
+                          (e.target as HTMLSelectElement).value as keyof AppStatus
+                        )
+                      }
+                    />
+                    <MultiSelectComponent
+                      maxValue={3}
+                      placeholder="Category"
+                      selected={selectedCategories}
+                      options={categoryOptions}
+                      onChange={setSelectedCategories}
+                    />
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      className="shadow-sunken-sm rounded-lg px-3 py-2 bg-transparent w-64"
+                      placeholder="Add tag and press +"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="px-3 py-2 rounded-md shadow-flat-sm hover:shadow-arise-sm"
+                      onClick={addTag}
+                    >
+                      +
+                    </button>
+                  </div>
+                  {appTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {appTags.map((t) => (
+                        <span
+                          key={t}
+                          className="px-2 py-1 rounded-full border text-xs"
+                        >
+                          {t}{" "}
+                          <button
+                            type="button"
+                            className="ml-1 text-danger"
+                            onClick={() => removeTag(t)}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              </div>
             </div>
-            <div className="w-1/3">
-              <PhotoFieldComponent
-                title="Cover Image"
-                imageUrl={coverImage}
-                onChange={handleCoverChange}
-              />
-            </div>
-          </div>
-        </section>
 
-        {/* Distributions */}
-        <section className="flex flex-col gap-4">
-          <hr className="border-t border-background_disabled" />
-          <h2 className="text-2xl font-semibold pb-2">Distributions</h2>
-          <MultiSelectComponent
-            maxValue={4}
-            placeholder="Select your Distribution"
-            selected={selectedDistribution}
-            options={[
-              { value: "web", label: "Web" },
-              { value: "windows", label: "Windows" },
-              { value: "macos", label: "MacOS" },
-              { value: "linux", label: "Linux" },
-            ]}
-            onChange={setSelectedDistribution}
-          />
-        </section>
-
-        {/* Web build */}
-        {hasDist(selectedDistribution, "web") && (
-          <section className="flex flex-col gap-4">
-            <hr className="border-t border-background_disabled" />
-            <h2 className="text-2xl font-semibold pb-2">Web Build</h2>
-            <InputFieldComponent
-              name="webUrl"
-              icon={faGlobe}
-              type="text"
-              placeholder="https://your-app.example/play"
-              value={webUrl}
-              onChange={(e) => setWebUrl((e.target as HTMLInputElement).value)}
-            />
-          </section>
-        )}
-
-        {/* Native per-OS */}
-        {(["windows", "macos", "linux"] as OSKey[]).map((osKey) =>
-          hasDist(selectedDistribution, osKey) ? (
-            <section key={osKey} className="flex flex-col gap-4">
+            {/* Designs */}
+            <section className="flex flex-col gap-8">
               <hr className="border-t border-background_disabled" />
-              <h2 className="text-2xl font-semibold pb-2 capitalize">
-                {osKey} Manifests
-              </h2>
+              <h2 className="text-2xl font-semibold pb-2">Designs</h2>
 
-              <ManifestList
-                osKey={osKey}
-                items={manifestsByOS[osKey]}
-                onAdd={() =>
-                  setManifestsByOS((prev) => ({
-                    ...prev,
-                    [osKey]: [...prev[osKey], blankManifest()],
-                  }))
-                }
-                onRemove={(idx) =>
-                  setManifestsByOS((prev) => ({
-                    ...prev,
-                    [osKey]: prev[osKey].filter((_, i) => i !== idx),
-                  }))
-                }
-                onChange={(idx, field, value) =>
-                  setManifestsByOS((prev) => ({
-                    ...prev,
-                    [osKey]: prev[osKey].map((m, i) =>
-                      i === idx
-                        ? {
-                            ...m,
-                            [field]:
-                              field === "size"
-                                ? Number(value || "0")
-                                : (value as any),
-                          }
-                        : m
-                    ),
-                  }))
-                }
-                onUploadFile={(idx, file) =>
-                  uploadBuildForManifest(osKey, idx, file)
-                }
+              {/* Banner & Cover: setImageUrl DI-INTERCEPT untuk upload */}
+              <BannerFieldComponent
+                title="Banner Image"
+                imageUrl={bannerImage}
+                onChange={handleBannerChange}
+              />
+
+              <div className="w-full flex gap-4 justify-evenly">
+                <div className="w-1/2">
+                  <CarouselPreview
+                    items={previewItems}
+                    initialIndex={0}
+                    showThumbnails
+                    htmlElement={
+                      <input
+                        type="file"
+                        accept="image/*,video/*"
+                        onChange={handlePreviewUpload}
+                        className="h-20 aspect-video bg-transparent shadow-sunken-sm rounded-lg"
+                      />
+                    }
+                  />
+                </div>
+                <div className="w-1/3">
+                  <PhotoFieldComponent
+                    title="Cover Image"
+                    imageUrl={coverImage}
+                    onChange={handleCoverChange}
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* Distributions */}
+            <section className="flex flex-col gap-4">
+              <hr className="border-t border-background_disabled" />
+              <h2 className="text-2xl font-semibold pb-2">Distributions</h2>
+              <MultiSelectComponent
+                maxValue={4}
+                placeholder="Select your Distribution"
+                selected={selectedDistribution}
+                options={[
+                  { value: "web", label: "Web" },
+                  { value: "windows", label: "Windows" },
+                  { value: "macos", label: "MacOS" },
+                  { value: "linux", label: "Linux" },
+                ]}
+                onChange={setSelectedDistribution}
               />
             </section>
-          ) : null
-        )}
 
-        {/* Native shared hardware */}
-        {(hasDist(selectedDistribution, "windows") ||
-          hasDist(selectedDistribution, "macos") ||
-          hasDist(selectedDistribution, "linux")) && (
-          <section className="flex flex-col gap-4">
-            <h3 className="text-xl font-semibold pt-2">Native Hardware</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <InputFieldComponent
-                name="processor"
-                icon={faBrain}
-                type="text"
-                placeholder="Processor"
-                value={processor}
-                onChange={(e) =>
-                  setProcessor((e.target as HTMLInputElement).value)
-                }
-              />
-              <InputFieldComponent
-                name="memory"
-                icon={faBrain}
-                type="number"
-                placeholder="Memory (Nat)"
-                value={memoryStr}
-                onChange={(e) =>
-                  setMemoryStr((e.target as HTMLInputElement).value)
-                }
-              />
-              <InputFieldComponent
-                name="storage"
-                icon={faBrain}
-                type="number"
-                placeholder="Storage (Nat)"
-                value={storageStr}
-                onChange={(e) =>
-                  setStorageStr((e.target as HTMLInputElement).value)
-                }
-              />
-              <InputFieldComponent
-                name="graphics"
-                icon={faBrain}
-                type="text"
-                placeholder="Graphics"
-                value={graphics}
-                onChange={(e) =>
-                  setGraphics((e.target as HTMLInputElement).value)
-                }
-              />
+            {/* Web build */}
+            {hasDist(selectedDistribution, "web") && (
+              <section className="flex flex-col gap-4">
+                <hr className="border-t border-background_disabled" />
+                <h2 className="text-2xl font-semibold pb-2">Web Build</h2>
+                <InputFieldComponent
+                  name="webUrl"
+                  icon={faGlobe}
+                  type="text"
+                  placeholder="https://your-app.example/play"
+                  value={webUrl}
+                  onChange={(e) => setWebUrl((e.target as HTMLInputElement).value)}
+                />
+              </section>
+            )}
+
+            {/* Native per-OS */}
+            {(["windows", "macos", "linux"] as OSKey[]).map((osKey) =>
+              hasDist(selectedDistribution, osKey) ? (
+                <section key={osKey} className="flex flex-col gap-4">
+                  <hr className="border-t border-background_disabled" />
+                  <h2 className="text-2xl font-semibold pb-2 capitalize">
+                    {osKey} Manifests
+                  </h2>
+
+                  <ManifestList
+                    osKey={osKey}
+                    items={manifestsByOS[osKey]}
+                    onAdd={() =>
+                      setManifestsByOS((prev) => ({
+                        ...prev,
+                        [osKey]: [...prev[osKey], blankManifest()],
+                      }))
+                    }
+                    onRemove={(idx) =>
+                      setManifestsByOS((prev) => ({
+                        ...prev,
+                        [osKey]: prev[osKey].filter((_, i) => i !== idx),
+                      }))
+                    }
+                    onChange={(idx, field, value) =>
+                      setManifestsByOS((prev) => ({
+                        ...prev,
+                        [osKey]: prev[osKey].map((m, i) =>
+                          i === idx
+                            ? {
+                                ...m,
+                                [field]:
+                                  field === "size"
+                                    ? Number(value || "0")
+                                    : (value as any),
+                              }
+                            : m
+                        ),
+                      }))
+                    }
+                    onUploadFile={(idx, file) =>
+                      uploadBuildForManifest(osKey, idx, file)
+                    }
+                  />
+                </section>
+              ) : null
+            )}
+
+            {/* Native shared hardware */}
+            {(hasDist(selectedDistribution, "windows") ||
+              hasDist(selectedDistribution, "macos") ||
+              hasDist(selectedDistribution, "linux")) && (
+              <section className="flex flex-col gap-4">
+                <h3 className="text-xl font-semibold pt-2">Native Hardware</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <InputFieldComponent
+                    name="processor"
+                    icon={faBrain}
+                    type="text"
+                    placeholder="Processor"
+                    value={processor}
+                    onChange={(e) =>
+                      setProcessor((e.target as HTMLInputElement).value)
+                    }
+                  />
+                  <InputFieldComponent
+                    name="memory"
+                    icon={faBrain}
+                    type="number"
+                    placeholder="Memory (Nat)"
+                    value={memoryStr}
+                    onChange={(e) =>
+                      setMemoryStr((e.target as HTMLInputElement).value)
+                    }
+                  />
+                  <InputFieldComponent
+                    name="storage"
+                    icon={faBrain}
+                    type="number"
+                    placeholder="Storage (Nat)"
+                    value={storageStr}
+                    onChange={(e) =>
+                      setStorageStr((e.target as HTMLInputElement).value)
+                    }
+                  />
+                  <InputFieldComponent
+                    name="graphics"
+                    icon={faBrain}
+                    type="text"
+                    placeholder="Graphics"
+                    value={graphics}
+                    onChange={(e) =>
+                      setGraphics((e.target as HTMLInputElement).value)
+                    }
+                  />
+                </div>
+                <InputFieldComponent
+                  name="notes"
+                  icon={faBrain}
+                  type="text"
+                  placeholder="Additional Notes"
+                  value={notes}
+                  onChange={(e) => setNotes((e.target as HTMLInputElement).value)}
+                />
+              </section>
+            )}
+
+            {/* Submit */}
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={busy}
+                className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
+                  busy ? "opacity-60 cursor-not-allowed" : ""
+                }`}
+              >
+                {busy ? "Updating..." : "Update App"}
+              </button>
             </div>
-            <InputFieldComponent
-              name="notes"
-              icon={faBrain}
-              type="text"
-              placeholder="Additional Notes"
-              value={notes}
-              onChange={(e) => setNotes((e.target as HTMLInputElement).value)}
-            />
-          </section>
-        )}
-
-        {/* Submit */}
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={busy}
-            className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
-              busy ? "opacity-60 cursor-not-allowed" : ""
-            }`}
-          >
-            {busy ? "Updating..." : "Update App"}
-          </button>
-        </div>
-      </form>
+          </form>
+        </CustomTabPanel>
+      </Box>
     </div>
   );
 }
