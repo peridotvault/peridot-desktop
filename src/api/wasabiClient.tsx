@@ -6,7 +6,8 @@ export interface InitResp {
   region: string;
   base: string; // ex: "icp/apps/<appId>/"
   prefixes: {
-    cover: string; // "icp/apps/<appId>/cover/"
+    assets: string; // "icp/apps/<appId>/assets/"
+    announcements: string; // "icp/apps/<appId>/announcements/"
     previews: string; // "icp/apps/<appId>/previews/"
     metadata: string; // "icp/apps/<appId>/metadata/"
     announcements: string; // "icp/apps/<appId>/announcements/"
