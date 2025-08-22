@@ -53,6 +53,8 @@ import {
   uploadToPrefix,
 } from "../../api/wasabiClient";
 import { useParams } from "react-router-dom";
+import { AnnouncementStatus, CreateAnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
+import { createAnnouncement } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 
 export default function UpdateApp() {
   const { wallet } = useWallet();
@@ -555,6 +557,12 @@ export default function UpdateApp() {
     return { notPublish: null } as unknown as AppStatus;
   }
 
+  function mapAnnouncementStatusToBackend(code: string): AnnouncementStatus {
+    if (code === "draft") return {draft: null} as unknown as AnnouncementStatus;
+    if (code === "published") return {published: null} as unknown as AnnouncementStatus;
+    return {archived: null} as unknown as AnnouncementStatus;
+  }
+
   // ====== submit ======
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -610,22 +618,25 @@ export default function UpdateApp() {
       setBusy(true);
       setToast({});
 
-  //     const [headline, setHeadline] = useState("");
-  // const [content, setContent] = useState("");
-  // const [announcementCoverImage, setAnnouncementCoverImage] = useState<string>("");
-  // const [announcementStatus, setAnnouncementStatus] = useState("");
-  // const announcementStatusOptions = [
       if (!announcementCoverImage) throw new Error("Announcement cover image is required.");
 
-      const payload ={
-        headline,
-        content,
+      const createData: CreateAnnouncementInterface = {
+        appId: BigInt(appId!),
+        developerId: wallet,
+        headline: headline,
+        content: content, 
         coverImage: announcementCoverImage,
-        status: announcementStatus,
-        pinned: isAnnouncementPinned
-      } as any
+        pinned: isAnnouncementPinned,
+        status: mapAnnouncementStatusToBackend(announcementStatus),
+        createdAt: nowNs(),
+      }
 
+      const announcementCreated = await createAnnouncement({
+        createAnnouncementTypes: createData,
+        wallet
+      })
       
+      setToast({ok: "Announcement created successfully 🎉"})
     } catch (err: any) {
       console.error(err)
       setToast({ err: err?.message ?? String(err) });
