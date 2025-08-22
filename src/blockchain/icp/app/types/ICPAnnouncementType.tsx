@@ -4,6 +4,17 @@ import { ICPAnnouncementStatus, ICPAppId, ICPDeveloperId, ICPTimestamp } from ".
 type CandidIDL = typeof IDLNS;
 
 export const ICPAnnouncementTypes = (IDL: CandidIDL) => {
+    const CreateAnnouncement = IDL.Record({
+        appId: ICPAppId,
+        developerId: ICPDeveloperId,
+        coverImage: IDL.Text,
+        headline: IDL.Text,
+        content: IDL.Text,
+        pinned: IDL.Bool,
+        status: ICPAnnouncementStatus,
+        createdAt: ICPTimestamp
+    })
+
     const Announcement = IDL.Record({
         appId: ICPAppId,
         developerId: ICPDeveloperId,
@@ -17,5 +28,5 @@ export const ICPAnnouncementTypes = (IDL: CandidIDL) => {
         publishAt: IDL.Opt(ICPTimestamp)
     })
 
-    return {Announcement}
+    return {CreateAnnouncement, Announcement}
 }
