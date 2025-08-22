@@ -46,3 +46,37 @@ export async function createAnnouncement({
         throw new Error("Error Service Create Announcement:" + error);
     }
 }
+
+export async function getAllAnnouncementsByAppId({
+    appId,
+    wallet
+}: {
+    appId: any;
+    wallet: any
+}): Promise<AnnouncementInterface[] | null> {
+    const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
+    const secretKey = hexToArrayBuffer(privateKey);
+
+    try {
+        const agent = new HttpAgent({
+            host: import.meta.env.VITE_HOST,
+            identity: Secp256k1KeyIdentity.fromSecretKey(secretKey)
+        })
+
+        const actor = Actor.createActor(ICPAnnouncementFactory, {
+            agent,
+            canisterId: appCanister
+        })
+
+        const result = (await actor.getAllAnnouncementsByAppId()) as ApiResponse<AnnouncementInterface[]>;
+        console.log("Announcements: " + result);
+        if ("err" in result) {
+            const [k, v] = Object.entries(result.err)[0] as [string, string];
+            throw new Error(`getAllApps failed: ${k} - ${v}`);
+        }
+
+        return result.ok;
+    } catch (error) {
+        throw new Error("Error Service Get All Announcements by App Id: " + error)
+    }
+}
