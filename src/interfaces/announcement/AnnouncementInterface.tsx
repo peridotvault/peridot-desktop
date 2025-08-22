@@ -1,6 +1,6 @@
 export type AnnouncementStatus = {draft: null} | {published: null} | {archived: null}
 
-export interface CreateAnnouncementInterface {
+export interface AnnouncementInterface {
     headline: string;
     content: string;
     coverImage: string;

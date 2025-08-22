@@ -11,6 +11,12 @@ export const ICPAppStatus = IDL.Variant({
   notPublish: IDL.Null,
 });
 
+export const ICPAnnouncementStatus = IDL.Variant({
+  draft: IDL.Null,
+  published: IDL.Null,
+  archived: IDL.Null
+})
+
 // Handlers
 export const ICPCoreError = IDL.Variant({
   InvalidInput: IDL.Text,
