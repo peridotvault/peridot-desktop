@@ -1,0 +1,35 @@
+import { IDL as IDLNS } from "@dfinity/candid";
+import {
+  ICPAnnouncementId,
+  ICPAnnouncementStatus,
+  ICPAppId,
+  ICPDeveloperId,
+  ICPTimestamp,
+} from "../../utils/ICPTypesCore";
+
+type CandidIDL = typeof IDLNS;
+
+export const ICPAnnouncementTypes = (IDL: CandidIDL) => {
+  const DTOAppAnnouncement = IDL.Record({
+    coverImage: IDL.Text,
+    headline: IDL.Text,
+    content: IDL.Text,
+    pinned: IDL.Bool,
+    status: ICPAnnouncementStatus,
+  });
+
+  const AppAnnouncement = IDL.Record({
+    announcementId: ICPAnnouncementId,
+    appId: ICPAppId,
+    developerId: ICPDeveloperId,
+    coverImage: IDL.Text,
+    headline: IDL.Text,
+    content: IDL.Text,
+    pinned: IDL.Bool,
+    status: ICPAnnouncementStatus,
+    createdAt: ICPTimestamp,
+    updatedAt: IDL.Opt(ICPTimestamp),
+  });
+
+  return { DTOAppAnnouncement, AppAnnouncement };
+};

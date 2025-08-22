@@ -1,6 +1,7 @@
 import { IDL } from "@dfinity/candid";
 
 export const ICPAppId = IDL.Nat;
+export const ICPAnnouncementId = IDL.Nat;
 export const ICPUserId = IDL.Principal;
 export const ICPDeveloperId = IDL.Principal;
 export const ICPTimestamp = IDL.Int;
@@ -9,6 +10,12 @@ export const ICPAppTags = IDL.Text;
 export const ICPAppStatus = IDL.Variant({
   publish: IDL.Null,
   notPublish: IDL.Null,
+});
+
+export const ICPAnnouncementStatus = IDL.Variant({
+  draft: IDL.Null,
+  published: IDL.Null,
+  archived: IDL.Null,
 });
 
 // Handlers

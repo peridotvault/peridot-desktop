@@ -53,6 +53,8 @@ import {
   uploadToPrefix,
 } from "../../api/wasabiClient";
 import { useParams } from "react-router-dom";
+import { AnnouncementStatus, CreateAnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
+import { createAnnouncement } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 
 export default function UpdateApp() {
   const { wallet } = useWallet();
@@ -101,6 +103,18 @@ export default function UpdateApp() {
       }
     })();
   }, [appId, wallet]);
+
+  // ===== Announcements =====
+  const [headline, setHeadline] = useState("");
+  const [content, setContent] = useState("");
+  const [announcementCoverImage, setAnnouncementCoverImage] = useState<string>("");
+  const [announcementStatus, setAnnouncementStatus] = useState("");
+  const [isAnnouncementPinned, setIsAnnouncementPinned] = useState(false);
+  const announcementStatusOptions = [
+    {code: "draft", name: "Draft"},
+    {code: "published", name: "Published"},
+    {code: "archived", name: "Archived"},
+  ]
 
   // ===== General form =====
   const [title, setTitle] = useState("");
@@ -357,6 +371,27 @@ export default function UpdateApp() {
     }
   }
 
+  async function handleAnnouncementCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !storage) return;
+
+    try {
+      const {key} = await uploadToPrefix({
+        file,
+        prefix: storage.prefixes.announcements,
+        fileName: safeFileName(file.name),
+        contentType: file.type
+      })
+
+      const apiUrl = `${import.meta.env.VITE_API_BASE}/files/${key}`;
+      setAnnouncementCoverImage(apiUrl);
+    } catch(err) {
+      console.error("Upload announcement cover failed:", err)
+    } finally {
+      e.target.value = "";
+    }
+  }
+
   async function handleBannerChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !storage) return;
@@ -522,6 +557,12 @@ export default function UpdateApp() {
     return { notPublish: null } as unknown as AppStatus;
   }
 
+  function mapAnnouncementStatusToBackend(code: string): AnnouncementStatus {
+    if (code === "draft") return {draft: null} as unknown as AnnouncementStatus;
+    if (code === "published") return {published: null} as unknown as AnnouncementStatus;
+    return {archived: null} as unknown as AnnouncementStatus;
+  }
+
   // ====== submit ======
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -570,6 +611,39 @@ export default function UpdateApp() {
     }
   }
 
+  // ===== submit announcement =====
+  async function onAnnouncementSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    try {
+      setBusy(true);
+      setToast({});
+
+      if (!announcementCoverImage) throw new Error("Announcement cover image is required.");
+
+      const createData: CreateAnnouncementInterface = {
+        headline: headline,
+        content: content, 
+        coverImage: announcementCoverImage,
+        pinned: isAnnouncementPinned,
+        status: mapAnnouncementStatusToBackend(announcementStatus)
+      }
+
+
+      const announcementCreated = await createAnnouncement({
+        createAnnouncementTypes: createData,
+        wallet: wallet,
+        appId: BigInt(Number(appId))
+      })
+      
+      setToast({ok: "Announcement created successfully 🎉"})
+    } catch (err: any) {
+      console.error(err)
+      setToast({ err: err?.message ?? String(err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   // tag add/remove
   const addTag = () => {
     const t = tagInput.trim();
@@ -581,7 +655,72 @@ export default function UpdateApp() {
   const removeTag = (t: string) => setAppTags((p) => p.filter((x) => x !== t));
 
   return (
-    <div className="w-full flex justify-center px-8 pt-8 pb-32">
+    <div className="w-full flex flex-col justify-center px-8 pt-8 pb-32">
+      <form onSubmit={onAnnouncementSubmit} className="container flex flex-col gap-8">
+        <h1 className="text-3xl pb-4">Announcements</h1>
+
+        <InputFieldComponent
+          name="Headline"
+          icon={faHeading}
+          type="text"
+          placeholder="Headline"
+          value={headline}
+          onChange={(e) => setHeadline((e.target as HTMLInputElement).value)}
+        />
+        <InputFieldComponent
+          name="Content"
+          icon={faMessage}
+          type="text"
+          placeholder="Content"
+          value={content}
+          onChange={(e) => setContent((e.target as HTMLInputElement).value)}
+        />
+        <PhotoFieldComponent
+          title="Cover Image"
+          imageUrl={announcementCoverImage}
+          onChange={handleAnnouncementCoverChange}
+        />
+        <DropDownComponent
+          name="status"
+          icon={faCheck}
+          placeholder="Status"
+          className=""
+          value={announcementStatus}
+          options={announcementStatusOptions.map((s) => ({
+            code: s.code,
+            name: s.name,
+          }))}
+          onChange={(e) =>
+            setAnnouncementStatus(
+              (e.target as HTMLSelectElement).value as keyof AppStatus
+            )
+          }
+        />
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="pin-announcement"
+            checked={isAnnouncementPinned}
+            onChange={(e) => setIsAnnouncementPinned(e.target.checked)}
+          />
+          <label htmlFor="pin-announcement" className="cursor-pointer select-none">
+            Pin Announcement
+          </label>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={busy}
+            className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
+              busy ? "opacity-60 cursor-not-allowed" : ""
+            }`}
+          >
+            {busy ? "Creating..." : "Create Announcement"}
+          </button>
+        </div>
+      </form>
+
       <form onSubmit={onSubmit} className="container flex flex-col gap-8">
         <h1 className="text-3xl pb-4">Update App</h1>
 
