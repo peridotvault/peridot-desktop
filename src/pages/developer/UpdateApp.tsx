@@ -107,6 +107,7 @@ export default function UpdateApp() {
   const [content, setContent] = useState("");
   const [announcementCoverImage, setAnnouncementCoverImage] = useState<string>("");
   const [announcementStatus, setAnnouncementStatus] = useState("");
+  const [isAnnouncementPinned, setIsAnnouncementPinned] = useState(false);
   const announcementStatusOptions = [
     {code: "draft", name: "Draft"},
     {code: "published", name: "Published"},
@@ -371,10 +372,6 @@ export default function UpdateApp() {
   async function handleAnnouncementCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !storage) return;
-    console.log(file);
-    console.log(storage.prefixes);
-    console.log(safeFileName(file.name));
-    console.log(file.type);
 
     try {
       const {key} = await uploadToPrefix({
@@ -606,6 +603,37 @@ export default function UpdateApp() {
     }
   }
 
+  // ===== submit announcement =====
+  async function onAnnouncementSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    try {
+      setBusy(true);
+      setToast({});
+
+  //     const [headline, setHeadline] = useState("");
+  // const [content, setContent] = useState("");
+  // const [announcementCoverImage, setAnnouncementCoverImage] = useState<string>("");
+  // const [announcementStatus, setAnnouncementStatus] = useState("");
+  // const announcementStatusOptions = [
+      if (!announcementCoverImage) throw new Error("Announcement cover image is required.");
+
+      const payload ={
+        headline,
+        content,
+        coverImage: announcementCoverImage,
+        status: announcementStatus,
+        pinned: isAnnouncementPinned
+      } as any
+
+      
+    } catch (err: any) {
+      console.error(err)
+      setToast({ err: err?.message ?? String(err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   // tag add/remove
   const addTag = () => {
     const t = tagInput.trim();
@@ -618,7 +646,7 @@ export default function UpdateApp() {
 
   return (
     <div className="w-full flex flex-col justify-center px-8 pt-8 pb-32">
-      <form action="" className="container flex flex-col gap-8">
+      <form onSubmit={onAnnouncementSubmit} className="container flex flex-col gap-8">
         <h1 className="text-3xl pb-4">Announcements</h1>
 
         <InputFieldComponent
@@ -627,7 +655,7 @@ export default function UpdateApp() {
           type="text"
           placeholder="Headline"
           value={headline}
-          onChange={() => null}
+          onChange={(e) => setHeadline((e.target as HTMLInputElement).value)}
         />
         <InputFieldComponent
           name="Content"
@@ -635,7 +663,7 @@ export default function UpdateApp() {
           type="text"
           placeholder="Content"
           value={content}
-          onChange={() => null}
+          onChange={(e) => setContent((e.target as HTMLInputElement).value)}
         />
         <PhotoFieldComponent
           title="Cover Image"
@@ -658,6 +686,17 @@ export default function UpdateApp() {
             )
           }
         />
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="pin-announcement"
+            checked={isAnnouncementPinned}
+            onChange={(e) => setIsAnnouncementPinned(e.target.checked)}
+          />
+          <label htmlFor="pin-announcement" className="cursor-pointer select-none">
+            Pin Announcement
+          </label>
+        </div>
 
         <div className="flex justify-end">
           <button
