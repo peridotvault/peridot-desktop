@@ -58,7 +58,7 @@ export const DeveloperStudio = () => {
           key={index}
           to={"/studio/update/" + item.appId.toString()}
         >
-          <div className="flex  gap-6 items-start">
+          <div className="flex gap-6 items-start">
             <div className="w-12 aspect-[3/4]">
               <img
                 src={item.coverImage}

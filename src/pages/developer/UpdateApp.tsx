@@ -702,7 +702,8 @@ export default function UpdateApp() {
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0}>
-          <form onSubmit={onAnnouncementSubmit} className="container flex flex-col gap-8">
+          <h1 className="text-3xl pb-4">Announcements</h1>
+          {/* <form onSubmit={onAnnouncementSubmit} className="container flex flex-col gap-8">
             <h1 className="text-3xl pb-4">Announcements</h1>
 
             <InputFieldComponent
@@ -765,7 +766,7 @@ export default function UpdateApp() {
                 {busy ? "Creating..." : "Create Announcement"}
               </button>
             </div>
-          </form>
+          </form> */}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
           <form onSubmit={onSubmit} className="container flex flex-col gap-8">
