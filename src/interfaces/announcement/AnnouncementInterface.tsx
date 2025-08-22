@@ -1,10 +1,9 @@
-import { Timestamp, Opt, AppId, UserId } from "../CoreInterface";
+import { Timestamp, Opt, AppId } from "../CoreInterface";
 
 export type AnnouncementStatus = {draft: null} | {published: null} | {archived: null}
 
 export interface CreateAnnouncementInterface {
     appId: AppId;
-    developerId: UserId;
     headline: string;
     content: string;
     coverImage: string;

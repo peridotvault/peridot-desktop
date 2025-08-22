@@ -622,7 +622,6 @@ export default function UpdateApp() {
 
       const createData: CreateAnnouncementInterface = {
         appId: BigInt(appId!),
-        developerId: wallet,
         headline: headline,
         content: content, 
         coverImage: announcementCoverImage,
