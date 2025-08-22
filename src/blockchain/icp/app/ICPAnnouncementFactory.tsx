@@ -1,15 +1,15 @@
-import { ICPCoreResult } from "../utils/ICPTypesCore";
-import { ICPAnnouncementTypes } from "./types/ICPAnnouncementType"
+import { ICPAppId, ICPCoreResult } from "../utils/ICPTypesCore";
+import { ICPAnnouncementTypes } from "./types/ICPAnnouncementType";
 
-export const ICPAnnouncementFactory = ({IDL}: {IDL: any}) => {
-    const AnnouncementTypes = ICPAnnouncementTypes(IDL);
+export const ICPAnnouncementFactory = ({ IDL }: { IDL: any }) => {
+  const AnnouncementTypes = ICPAnnouncementTypes(IDL);
 
-    return IDL.Service({
-        // CREATE
-        createAnnouncement: IDL.Func(
-            [AnnouncementTypes.CreateAnnouncement],
-            [ICPCoreResult(AnnouncementTypes.Announcement)],
-            []
-        )
-    })
-}
+  return IDL.Service({
+    // CREATE
+    createAnnouncement: IDL.Func(
+      [ICPAppId, AnnouncementTypes.DTOAppAnnouncement],
+      [ICPCoreResult(AnnouncementTypes.AppAnnouncement)],
+      []
+    ),
+  });
+};
