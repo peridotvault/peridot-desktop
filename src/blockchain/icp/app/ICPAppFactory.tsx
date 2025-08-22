@@ -1,6 +1,7 @@
 import { ICPAppTypes } from "./types/ICPAppTypes";
 import { ICPPurchaseTypes } from "./types/ICPPurchaseTypes";
 import { ICPAppId, ICPCoreResult } from "../utils/ICPTypesCore";
+import { ICPAnnouncementTypes } from "./types/ICPAnnouncementType";
 
 export const ICPAppFactory = ({ IDL }: { IDL: any }) => {
   const AppTypes = ICPAppTypes(IDL);
@@ -33,5 +34,18 @@ export const ICPAppFactory = ({ IDL }: { IDL: any }) => {
 
     // DELETE
     deleteApp: IDL.Func([ICPAppId], [ICPCoreResult(IDL.Text)], []),
+  });
+};
+
+export const ICPAnnouncementFactory = ({ IDL }: { IDL: any }) => {
+  const AnnouncementTypes = ICPAnnouncementTypes(IDL);
+
+  return IDL.Service({
+    // CREATE
+    createAnnouncement: IDL.Func(
+      [ICPAppId, AnnouncementTypes.DTOAppAnnouncement],
+      [ICPCoreResult(AnnouncementTypes.AppAnnouncement)],
+      []
+    ),
   });
 };

@@ -3,17 +3,19 @@ import { AnnouncementInterface, CreateAnnouncementInterface } from "../../../../
 import { walletService } from "../../../../features/wallet/services/WalletService";
 import { hexToArrayBuffer } from "../../../../utils/crypto";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
-import { ICPAnnouncementFactory } from "../ICPAnnouncementFactory";
+import { ICPAnnouncementFactory } from "../ICPAppFactory";
 import { ApiResponse } from "../../../../interfaces/CoreInterface";
 
 const appCanister = import.meta.env.VITE_PERIDOT_CANISTER_APP_BACKEND;
 
 export async function createAnnouncement({
     createAnnouncementTypes,
-    wallet
+    wallet,
+    appId
 }: {
     createAnnouncementTypes: CreateAnnouncementInterface;
     wallet: any;
+    appId: any
 }): Promise<AnnouncementInterface> {
     const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
     const secretKey = hexToArrayBuffer(privateKey);
@@ -30,6 +32,7 @@ export async function createAnnouncement({
         })
 
         const result = (await actor.createAnnouncement(
+            appId,
             createAnnouncementTypes
         )) as ApiResponse<AnnouncementInterface>;
 

@@ -621,18 +621,18 @@ export default function UpdateApp() {
       if (!announcementCoverImage) throw new Error("Announcement cover image is required.");
 
       const createData: CreateAnnouncementInterface = {
-        appId: BigInt(appId!),
         headline: headline,
         content: content, 
         coverImage: announcementCoverImage,
         pinned: isAnnouncementPinned,
-        status: mapAnnouncementStatusToBackend(announcementStatus),
-        createdAt: nowNs(),
+        status: mapAnnouncementStatusToBackend(announcementStatus)
       }
+
 
       const announcementCreated = await createAnnouncement({
         createAnnouncementTypes: createData,
-        wallet
+        wallet: wallet,
+        appId: BigInt(Number(appId))
       })
       
       setToast({ok: "Announcement created successfully 🎉"})
