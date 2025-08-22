@@ -1,4 +1,14 @@
+import { Timestamp, Opt } from "../CoreInterface";
+
 export type AnnouncementStatus = {draft: null} | {published: null} | {archived: null}
+
+export interface CreateAnnouncementInterface {
+    headline: string;
+    content: string;
+    coverImage: string;
+    status: AnnouncementStatus;
+    pinned: boolean;
+}
 
 export interface AnnouncementInterface {
     headline: string;
@@ -6,4 +16,7 @@ export interface AnnouncementInterface {
     coverImage: string;
     status: AnnouncementStatus;
     pinned: boolean;
+    createdAt: Timestamp;
+    updatedAt: Opt<Timestamp>;
+    publishAt: Opt<Timestamp>;
 }
