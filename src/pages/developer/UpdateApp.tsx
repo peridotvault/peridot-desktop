@@ -663,6 +663,7 @@ export default function UpdateApp() {
   }
 
   // ===== submit announcement =====
+  const [isCreateAnnouncementFormDisplayed, setIsCreateAnnouncementFormDisplayed] = useState(false);
   async function onAnnouncementSubmit(e: React.FormEvent) {
     e.preventDefault()
     try {
@@ -679,13 +680,24 @@ export default function UpdateApp() {
         status: mapAnnouncementStatusToBackend(announcementStatus)
       }
 
-
       const announcementCreated = await createAnnouncement({
         createAnnouncementTypes: createData,
         wallet: wallet,
         appId: BigInt(Number(appId))
       })
       
+      // Refresh announcements list without reloading the page
+      if (wallet && appId) {
+        const listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet });
+        setAnnouncements(listAnnouncement);
+      }
+
+      setIsCreateAnnouncementFormDisplayed(false);
+      setHeadline("");
+      setContent("");
+      setAnnouncementCoverImage("");
+      setIsAnnouncementPinned(false);
+      setAnnouncementStatus("");
       setToast({ok: "Announcement created successfully 🎉"})
     } catch (err: any) {
       console.error(err)
@@ -723,6 +735,91 @@ export default function UpdateApp() {
         <CustomTabPanel value={value} index={0}>
           <div>
             <h1 className="text-3xl pb-4">Announcements</h1>
+            {toast.ok && (
+              <div className="rounded-lg border border-success text-success px-4 py-2">
+                {toast.ok}
+              </div>
+            )}
+            {toast.err && (
+              <div className="rounded-lg border border-danger text-danger px-4 py-2">
+                {toast.err}
+              </div>
+            )}
+            <div className="flex justify-start">
+              <button
+                type="button"
+                disabled={busy}
+                className={isCreateAnnouncementFormDisplayed ? "shadow-flat-sm my-6 px-6 py-3 rounded-md bg-red-500/20" : "shadow-flat-sm my-6 px-6 py-3 rounded-md bg-green-500/20"}
+                onClick={() => setIsCreateAnnouncementFormDisplayed(!isCreateAnnouncementFormDisplayed)}
+              >
+                {isCreateAnnouncementFormDisplayed ? "Cancel": "Create New Announcement"}
+                
+              </button>
+            </div>
+            <form onSubmit={onAnnouncementSubmit} className={isCreateAnnouncementFormDisplayed ? "container flex flex-col gap-8" : "hidden"}>
+              <h1 className="text-3xl pb-4">Announcements</h1>
+
+              <InputFieldComponent
+                name="Headline"
+                icon={faHeading}
+                type="text"
+                placeholder="Headline"
+                value={headline}
+                onChange={(e) => setHeadline((e.target as HTMLInputElement).value)}
+              />
+              <InputFieldComponent
+                name="Content"
+                icon={faMessage}
+                type="text"
+                placeholder="Content"
+                value={content}
+                onChange={(e) => setContent((e.target as HTMLInputElement).value)}
+              />
+              <PhotoFieldComponent
+                title="Cover Image"
+                imageUrl={announcementCoverImage}
+                onChange={handleAnnouncementCoverChange}
+              />
+              <DropDownComponent
+                name="status"
+                icon={faCheck}
+                placeholder="Status"
+                className=""
+                value={announcementStatus}
+                options={announcementStatusOptions.map((s) => ({
+                  code: s.code,
+                  name: s.name,
+                }))}
+                onChange={(e) =>
+                  setAnnouncementStatus(
+                    (e.target as HTMLSelectElement).value as keyof AppStatus
+                  )
+                }
+              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="pin-announcement"
+                  checked={isAnnouncementPinned}
+                  onChange={(e) => setIsAnnouncementPinned(e.target.checked)}
+                />
+                <label htmlFor="pin-announcement" className="cursor-pointer select-none">
+                  Pin Announcement
+                </label>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
+                    busy ? "opacity-60 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {busy ? "Creating..." : "Create Announcement"}
+                </button>
+              </div>
+            </form>
             <div className="flex flex-col gap-6">
             {announcements?.map((item, index) => (
                 <div key={index} className="bg-gray-600 p-6 flex justify-between">
@@ -757,70 +854,6 @@ export default function UpdateApp() {
             ))}
             </div>
           </div>
-          {/* <form onSubmit={onAnnouncementSubmit} className="container flex flex-col gap-8">
-            <h1 className="text-3xl pb-4">Announcements</h1>
-
-            <InputFieldComponent
-              name="Headline"
-              icon={faHeading}
-              type="text"
-              placeholder="Headline"
-              value={headline}
-              onChange={(e) => setHeadline((e.target as HTMLInputElement).value)}
-            />
-            <InputFieldComponent
-              name="Content"
-              icon={faMessage}
-              type="text"
-              placeholder="Content"
-              value={content}
-              onChange={(e) => setContent((e.target as HTMLInputElement).value)}
-            />
-            <PhotoFieldComponent
-              title="Cover Image"
-              imageUrl={announcementCoverImage}
-              onChange={handleAnnouncementCoverChange}
-            />
-            <DropDownComponent
-              name="status"
-              icon={faCheck}
-              placeholder="Status"
-              className=""
-              value={announcementStatus}
-              options={announcementStatusOptions.map((s) => ({
-                code: s.code,
-                name: s.name,
-              }))}
-              onChange={(e) =>
-                setAnnouncementStatus(
-                  (e.target as HTMLSelectElement).value as keyof AppStatus
-                )
-              }
-            />
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="pin-announcement"
-                checked={isAnnouncementPinned}
-                onChange={(e) => setIsAnnouncementPinned(e.target.checked)}
-              />
-              <label htmlFor="pin-announcement" className="cursor-pointer select-none">
-                Pin Announcement
-              </label>
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={busy}
-                className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
-                  busy ? "opacity-60 cursor-not-allowed" : ""
-                }`}
-              >
-                {busy ? "Creating..." : "Create Announcement"}
-              </button>
-            </div>
-          </form> */}
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
           <form onSubmit={onSubmit} className="container flex flex-col gap-8">
