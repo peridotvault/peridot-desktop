@@ -18,6 +18,8 @@ import CarouselPreview, {
   MediaItem,
 } from "../../components/organisms/CarouselPreview";
 import { VerticalCard } from "../../components/cards/VerticalCard";
+import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
+import { getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 
 export default function GameDetail() {
   const { appId } = useParams();
@@ -26,6 +28,7 @@ export default function GameDetail() {
   const [detailGame, setDetailGame] = useState<AppInterface | null>();
   const [allGames, setAllGames] = useState<AppInterface[] | null>();
   const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
+  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -41,6 +44,24 @@ export default function GameDetail() {
 
     fetchData();
   }, []);
+
+  // Get all announcements by app id
+    useEffect(() => {
+      let isMounted = true;
+      (async () => {
+        try {
+          if (!wallet) return;
+          const listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet });
+          if (isMounted) setAnnouncements(listAnnouncement);
+        } catch (e) {
+          console.error(e);
+        }
+      })();
+  
+      return () => {
+        isMounted = false;
+      }
+    }, [appId, wallet])
 
   function isOptVecShape(v: any): v is [any[]] {
     return Array.isArray(v) && v.length === 1 && Array.isArray(v[0]);
@@ -176,6 +197,44 @@ export default function GameDetail() {
             </div>
           </div>
         </section>
+
+        {/* Announcement */}
+        <div>
+          <h1 className="text-3xl pb-4">Announcements</h1>
+          <div className="flex flex-col gap-6">
+          {announcements?.map((item, index) => (
+              <div key={index} className="bg-gray-600 p-6 flex justify-between">
+                <div>
+                  <div className="flex content-center mb-8">
+                      <p className="text-xl capitalize mr-4">
+                        {item.status && typeof item.status === 'object'
+                          ? Object.keys(item.status)[0]
+                          : ''}
+                      </p>
+                      <p>
+                        {item.createdAt
+                          ? new Date(Number(item.createdAt) / 1_000_000).toLocaleDateString()
+                          : ""}
+                      </p>
+                  </div>
+                  <div className="mb-4">
+                    <p className="text-3xl font-bold">{item.headline}</p>
+                  </div>
+                  <div>
+                    <p className="text-lg">{item.content}</p>
+                  </div>
+                </div>
+                <div>
+                  <img
+                    src={item.coverImage}
+                    className="w-64 h-72 object-cover"
+                    alt="preview"
+                  />
+                </div>
+              </div>
+          ))}
+          </div>
+        </div>
 
         {/* Similar Games  */}
         <section className="flex justify-center px-12 py-6">
