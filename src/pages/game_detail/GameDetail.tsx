@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { StarComponent } from "../../components/atoms/StarComponent";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import { faAngleRight, faThumbTack } from "@fortawesome/free-solid-svg-icons";
 import { AppPayment } from "../../features/wallet/views/Payment";
 import { AppInterface, Preview } from "../../interfaces/app/AppInterface";
 import { useParams } from "react-router-dom";
@@ -51,7 +51,26 @@ export default function GameDetail() {
       (async () => {
         try {
           if (!wallet) return;
-          const listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet });
+          let listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet }) ?? [];
+          // Sort: pinned first, then by createdAt descending
+            // Filter only published announcements
+            listAnnouncement = listAnnouncement.filter(
+            (item) =>
+              item.status &&
+              typeof item.status === "object" &&
+              Object.keys(item.status)[0] === "published"
+            );
+            // Sort: pinned first, then by createdAt descending
+            listAnnouncement = listAnnouncement.sort((a, b) => {
+            // Pinned first
+            if (a.pinned && !b.pinned) return -1;
+            if (!a.pinned && b.pinned) return 1;
+            // Then by createdAt descending
+            const aCreated = a.createdAt ? Number(a.createdAt) : 0;
+            const bCreated = b.createdAt ? Number(b.createdAt) : 0;
+            return bCreated - aCreated;
+          });
+          
           if (isMounted) setAnnouncements(listAnnouncement);
         } catch (e) {
           console.error(e);
@@ -203,19 +222,15 @@ export default function GameDetail() {
           <h1 className="text-3xl pb-4">Announcements</h1>
           <div className="flex flex-col gap-6">
           {announcements?.map((item, index) => (
-              <div key={index} className="bg-gray-600 p-6 flex justify-between">
+              <div key={index} className={item.pinned ? "bg-green-500/20 p-6 flex justify-between" : "bg-gray-600 p-6 flex justify-between"}>
                 <div>
                   <div className="flex content-center mb-8">
-                      <p className="text-xl capitalize mr-4">
-                        {item.status && typeof item.status === 'object'
-                          ? Object.keys(item.status)[0]
-                          : ''}
-                      </p>
-                      <p>
-                        {item.createdAt
-                          ? new Date(Number(item.createdAt) / 1_000_000).toLocaleDateString()
-                          : ""}
-                      </p>
+                    {item.pinned ? <FontAwesomeIcon icon={faThumbTack} className="mr-4" /> : ""}
+                    <p>
+                      {item.createdAt
+                        ? new Date(Number(item.createdAt) / 1_000_000).toLocaleDateString()
+                        : ""}
+                    </p>
                   </div>
                   <div className="mb-4">
                     <p className="text-3xl font-bold">{item.headline}</p>

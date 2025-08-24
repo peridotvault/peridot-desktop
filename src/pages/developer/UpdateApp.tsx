@@ -146,7 +146,17 @@ export default function UpdateApp() {
     (async () => {
       try {
         if (!wallet) return;
-        const listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet });
+        let listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet }) ?? [];
+        // Sort: pinned first, then by createdAt descending
+        listAnnouncement = listAnnouncement.sort((a, b) => {
+          // Pinned first
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          // Then by createdAt descending
+          const aCreated = a.createdAt ? Number(a.createdAt) : 0;
+          const bCreated = b.createdAt ? Number(b.createdAt) : 0;
+          return bCreated - aCreated;
+        });
         if (isMounted) setAnnouncements(listAnnouncement);
       } catch (e) {
         console.error(e);
