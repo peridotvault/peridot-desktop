@@ -1,14 +1,14 @@
 // services/SyncService.ts
 import { Principal } from "@dfinity/principal";
-import {
-  getTokenBlocks,
-  getLedgerBlockLength,
-  getArchiveBlockLength,
-} from "../hooks/CoinContext";
 import { CoinService } from "../../../local_db/wallet/services/coinService";
 import { UserProgressService } from "../../../local_db/wallet/services/userProgressService";
 import { Block } from "../../../local_db/wallet/models/Block";
 import { BlockService } from "../../../local_db/wallet/services/blockService";
+import {
+  getArchiveBlockLength,
+  getLedgerBlockLength,
+  getTokenBlocks,
+} from "../blockchain/icp/services/ICPCoinService";
 
 interface SyncProgress {
   current: number;

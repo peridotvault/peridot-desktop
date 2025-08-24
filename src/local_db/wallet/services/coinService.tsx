@@ -7,6 +7,24 @@ export const CoinService = {
     return await dbWallet.coins.put(coin);
   },
 
+  async addManyIfMissing(coins: Coin[]) {
+    // Insert hanya koin yang belum ada (berdasarkan coinAddress)
+    const existing = await dbWallet.coins.toArray();
+    const existingIds = new Set(existing.map((c) => c.coinAddress));
+    const toInsert = coins.filter((c) => !existingIds.has(c.coinAddress));
+    if (toInsert.length > 0) {
+      await dbWallet.coins.bulkAdd(toInsert);
+    }
+  },
+
+  async seedIfEmpty(defaultCoins: Coin[]) {
+    const count = await dbWallet.coins.count();
+    if (count === 0) {
+      // First run → isi dari JSON
+      await dbWallet.coins.bulkAdd(defaultCoins);
+    }
+  },
+
   // Read
   async getAll(): Promise<Coin[]> {
     return await dbWallet.coins.toArray();

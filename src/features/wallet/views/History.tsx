@@ -14,14 +14,14 @@ import { BlockService } from "../../../local_db/wallet/services/blockService";
 import { filterByType, groupByDay } from "../../../utils/classifier";
 import { transformBlockToTrained } from "../../../utils/transformBlockToTrainedData";
 import { CoinService } from "../../../local_db/wallet/services/coinService";
+import { UserProgressService } from "../../../local_db/wallet/services/userProgressService";
+import { Principal } from "@dfinity/principal";
+import { formatShortEn } from "../../../utils/Additional";
 import {
   getArchiveBlockLength,
   getLedgerBlockLength,
   getTokenBlocks,
-} from "../hooks/CoinContext";
-import { UserProgressService } from "../../../local_db/wallet/services/userProgressService";
-import { Principal } from "@dfinity/principal";
-import { formatShortEn } from "../../../utils/Additional";
+} from "../blockchain/icp/services/ICPCoinService";
 
 export const History = () => {
   const { wallet } = useWallet();

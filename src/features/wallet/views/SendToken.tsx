@@ -12,10 +12,10 @@ import { ICRC1Coin } from "../components/ICRC1Coin";
 import { useWallet } from "../../../contexts/WalletContext";
 import { SaveContact } from "../components/SaveContact";
 import theCoin from "../../../assets/json/coins.json";
-import { transferTokenICRC1 } from "../hooks/CoinContext";
 import { AlertMessage } from "../components/AlertMessage";
 import { Coin } from "../../../local_db/wallet/models/Coin";
 import { CoinService } from "../../../local_db/wallet/services/coinService";
+import { transferTokenICRC1 } from "../blockchain/icp/services/ICPCoinService";
 
 interface Props {
   onClose: () => void;

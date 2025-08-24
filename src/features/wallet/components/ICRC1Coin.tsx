@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { useWallet } from "../../../contexts/WalletContext";
 import { Principal } from "@dfinity/principal";
-import { checkBalance } from "../hooks/CoinContext";
 import { ICRC1Metadata } from "../interfaces/Coin";
 import { WalletInfo } from "../interfaces/Wallet";
 import { getWalletInfo } from "../../../utils/IndexedDb";
+import { checkBalance } from "../blockchain/icp/services/ICPCoinService";
 
 interface ICRC1CoinProps {
   canisterId: string;
@@ -62,17 +62,6 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
 
     return () => clearInterval(interval);
   }, [wallet.principalId, canisterId]);
-
-  // Calculate and update the USD balance whenever price or balance changes
-  // useEffect(() => {
-  //   if (icrc1?.balance && rates && rates !== "0" && onBalanceUpdate) {
-  //     const balanceUsd = parseFloat(rates) * icrc1.balance;
-  //     onBalanceUpdate(canisterId, balanceUsd, icrc1?.balance);
-  //   } else if (onBalanceUpdate) {
-  //     // Set to 0 if there's no valid balance or price
-  //     onBalanceUpdate(canisterId, 0, 0);
-  //   }
-  // }, [icrc1?.balance, rates, canisterId, onBalanceUpdate]);
 
   useEffect(() => {
     if (!onBalanceUpdate) return;
