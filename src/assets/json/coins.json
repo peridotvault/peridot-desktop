@@ -10,13 +10,13 @@
         "isChecked": 1
     },
     {
-        "coinAddress": "4u7dm-7qaaa-aaaam-acvdq-cai",
+        "coinAddress": "a4js4-wiaaa-aaaak-qijqa-cai",
         "coinArchiveAddress": "",
-        "name": "Ifal",
-        "symbol": "FAL",
-        "logo": "",
+        "name": "Peridot",
+        "symbol": "PER",
+        "logo": "https://raw.githubusercontent.com/peridotfoundation/metadata/main/logo.png",
         "balance": 0,
-        "fee": 0,
+        "fee": 500,
         "isChecked": 1
     }
 ]

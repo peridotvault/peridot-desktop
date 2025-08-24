@@ -60,24 +60,31 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
     [canisterId: string]: number;
   }>({});
   const [activeCoins, setActiveCoins] = useState<Coin[]>([]);
-  const defaultCoins: Coin[] = theCoin;
+  const defaultCoins: Coin[] = theCoin as Coin[];
 
   useEffect(() => {
-    async function loadCoins() {
+    async function bootstrap() {
       try {
-        const myCurrency = (await getWalletInfo()) as WalletInfo;
-        fetchAPICurrency(
-          myCurrency == null ? "USD" : myCurrency.currency.currency
-        );
-        setActiveCoins(await CoinService.getCoinActive());
+        // 1) Currency
+        const myWallet = (await getWalletInfo()) as WalletInfo;
+        await fetchAPICurrency(myWallet ? myWallet.currency.currency : "USD");
+
+        // 2) Seed dulu (first run), lalu pastikan coin baru di JSON ikut masuk
+        await CoinService.seedIfEmpty(defaultCoins);
+        await CoinService.addManyIfMissing(defaultCoins);
+
+        // 3) Ambil coin aktif dari DB (bukan dari file JSON)
+        const actives = await CoinService.getCoinActive();
+        setActiveCoins(actives);
       } catch (error) {
-        console.error("Error loading coins:", error);
-        setActiveCoins(defaultCoins);
+        console.error("Error bootstrapping wallet:", error);
+        // fallback visual saja kalau DB error
+        setActiveCoins(defaultCoins.filter((c) => c.isChecked === 1));
       }
     }
 
     if (!openButton.manage) {
-      loadCoins();
+      bootstrap();
     }
   }, [openButton.manage]);
 

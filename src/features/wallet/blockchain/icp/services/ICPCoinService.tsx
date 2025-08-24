@@ -1,16 +1,16 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
-import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import { Principal } from "@dfinity/principal";
-import { walletService } from "../services/WalletService";
-import { tokenIdlFactory } from "../services/idl/token";
-import { ArchiveInfo, ICRC1Metadata } from "../interfaces/Coin";
-import { hexToArrayBuffer } from "../../../utils/crypto";
+import { walletService } from "../../../services/WalletService";
+import { hexToArrayBuffer } from "../../../../../utils/crypto";
+import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
+import { tokenIdlFactory } from "../types/token";
+import { ArchiveInfo, ICRC1Metadata } from "../../../interfaces/Coin";
 import {
   Block,
   ICRC3BlockResponse,
-} from "../../../local_db/wallet/models/Block";
+} from "../../../../../local_db/wallet/models/Block";
 
-async function transferTokenICRC1(
+export async function transferTokenICRC1(
   to: Principal,
   amount: number,
   icrc1Address: Principal,
@@ -56,85 +56,124 @@ async function transferTokenICRC1(
   }
 }
 
-async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
-  if (!wallet.principalId) {
+export async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
+  if (!wallet?.principalId) {
     throw new Error("Not Logged in");
   }
-  try {
-    // Initialize agent with identity
-    const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
-    });
 
-    const actor = Actor.createActor(tokenIdlFactory, {
+  try {
+    // Gunakan host dari env; pastikan kompatibel CORS di browser.
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST || "https://icp-api.io",
+    });
+    // Jika dev lokal (dfx): await agent.fetchRootKey();
+
+    const actor = Actor.createActor(tokenIdlFactory as any, {
       agent,
       canisterId: icrc1CanisterId,
     });
 
-    // Call balance method
+    // -------------------------------
+    // 1) (Opsional) Archives — aman dari error
+    // -------------------------------
     let coinArchiveAddress = "";
-    const archives = (await actor.icrc3_get_archives({
-      from: [],
-    })) as ArchiveInfo[];
-    for (const archive of archives) {
-      coinArchiveAddress = archive.canister_id.toString();
+    try {
+      const archives = (await actor.icrc3_get_archives({
+        from: [],
+      })) as ArchiveInfo[];
+      if (Array.isArray(archives) && archives.length > 0) {
+        coinArchiveAddress =
+          archives[archives.length - 1].canister_id.toString();
+      }
+    } catch {
+      // Ledger ICP (ryjl3-...) memang tidak mengekspor icrc3_get_archives → abaikan
+      coinArchiveAddress = "";
     }
 
+    // -------------------------------
+    // 2) Metadata dasar
+    // -------------------------------
     const name = (await actor.icrc1_name()) as string;
     const symbol = (await actor.icrc1_symbol()) as string;
-    const decimals = (await actor.icrc1_decimals()) as number;
-    const fee = (await actor.icrc1_fee()) as number;
-    const metadataResult = (await actor.icrc1_metadata()) as any[][];
-    const balanceResult = await actor.icrc1_balance_of({
-      owner: Principal.fromText(wallet.principalId),
-      subaccount: [],
-    });
 
-    // Convert balance to number and format
-    const standardBalance = Number(balanceResult) / 100000000;
-    const result: ICRC1Metadata = {
-      balance: standardBalance,
-      coinArchiveAddress: coinArchiveAddress,
-      logo:
-        icrc1CanisterId == Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai")
-          ? "./assets/logo-icp.svg"
-          : null,
-      decimals: 0,
-      name: "",
-      symbol: "",
-      fee: 0,
-    };
-    result.name = name;
-    result.symbol = symbol;
-    result.decimals = decimals;
-    result.fee = fee;
-    for (const metadata of metadataResult) {
-      const key = metadata[0];
-      const value = metadata[1];
-
-      switch (key) {
-        case "icrc1:logo":
-          result.logo = value.Text;
-          break;
-      }
+    // decimals bisa number atau bigint tergantung IDL; pastikan jadi number wajar
+    let decimals = Number(await actor.icrc1_decimals());
+    if (!Number.isFinite(decimals) || decimals < 0 || decimals > 50) {
+      decimals = 8; // fallback aman
     }
+
+    // fee biasanya Nat (bigint). Skala ke unit token.
+    let fee = 0;
+    try {
+      const feeRaw = await actor.icrc1_fee();
+      if (typeof feeRaw === "bigint") {
+        fee = Number(feeRaw) / Math.pow(10, decimals);
+      } else if (typeof feeRaw === "number") {
+        // beberapa IDL custom bisa mengembalikan number
+        fee = feeRaw / Math.pow(10, decimals);
+      }
+    } catch {
+      fee = 0;
+    }
+
+    // -------------------------------
+    // 3) Balance (default subaccount; isi subaccount di sini jika kamu pakai non-default)
+    // -------------------------------
+    const balanceNat: bigint = (await actor.icrc1_balance_of({
+      owner: Principal.fromText(wallet.principalId),
+      subaccount: [], // ganti ke [bytes32] jika pakai subaccount non-default
+    })) as bigint;
+
+    const balance = Number(balanceNat) / Math.pow(10, decimals);
+
+    // -------------------------------
+    // 4) Metadata tambahan (logo)
+    // -------------------------------
+    let logo: string | null =
+      icrc1CanisterId.toText() === "ryjl3-tyaaa-aaaaa-aaaba-cai"
+        ? "./assets/logo-icp.svg"
+        : null;
+
+    try {
+      const metadataResult = (await actor.icrc1_metadata()) as any[][];
+      // Cari entri 'icrc1:logo' → { Text: string }
+      const logoEntry = Array.isArray(metadataResult)
+        ? metadataResult.find(
+            (it) => String(it?.[0]).toLowerCase() === "icrc1:logo"
+          )
+        : undefined;
+      const v = logoEntry?.[1];
+      const maybeText: unknown = v?.Text ?? v?.text ?? v;
+      if (typeof maybeText === "string" && maybeText.trim().length > 0) {
+        logo = maybeText;
+      }
+    } catch {
+      // Abaikan jika metadata tidak tersedia
+    }
+
+    // -------------------------------
+    // 5) Bentuk hasil sesuai tipe lamamu
+    // -------------------------------
+    const result: ICRC1Metadata = {
+      balance, // number
+      coinArchiveAddress, // string ("" kalau tidak ada)
+      logo, // string | null
+      decimals, // number
+      name, // string
+      symbol, // string
+      fee, // number (sudah diskalakan)
+    };
 
     return result;
   } catch (error) {
-    const result: ICRC1Metadata = {
-      decimals: null,
-      coinArchiveAddress: null,
-      balance: null,
-      name: null,
-      symbol: null,
-      logo: null,
-      fee: null,
-    };
-    return result;
+    // Biarkan error "asli" gelembung ke atas -> mudah di-debug
+    throw error;
   }
 }
 
-async function getLedgerBlockLength(coinAddress: Principal): Promise<number> {
+export async function getLedgerBlockLength(
+  coinAddress: Principal
+): Promise<number> {
   try {
     const agent = new HttpAgent({
       host: import.meta.env.VITE_HOST,
@@ -155,7 +194,7 @@ async function getLedgerBlockLength(coinAddress: Principal): Promise<number> {
   }
 }
 
-async function getArchiveBlockLength(
+export async function getArchiveBlockLength(
   coinArchiveAddress: Principal
 ): Promise<number> {
   try {
@@ -217,7 +256,7 @@ function toHex(u8: Uint8Array): string {
   return [...u8].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function getTokenBlocks({
+export async function getTokenBlocks({
   coinAddress,
   coinArchiveAddress,
   archiveBlockLength,
@@ -315,12 +354,3 @@ function parseBlock(raw: any, coinArchiveAddress: string): Block | null {
     memo,
   } as Block;
 }
-
-// Export function
-export {
-  transferTokenICRC1,
-  checkBalance,
-  getArchiveBlockLength,
-  getLedgerBlockLength,
-  getTokenBlocks,
-};

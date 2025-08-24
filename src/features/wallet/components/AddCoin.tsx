@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { InputField } from "../../../components/atoms/InputField";
 import { Principal } from "@dfinity/principal";
 import { useWallet } from "../../../contexts/WalletContext";
-import { checkBalance } from "../hooks/CoinContext";
 import { Coin } from "../../../local_db/wallet/models/Coin";
 import { CoinService } from "../../../local_db/wallet/services/coinService";
+import { checkBalance } from "../blockchain/icp/services/ICPCoinService";
 
 interface NavbarProps {
   onClose: () => void;
