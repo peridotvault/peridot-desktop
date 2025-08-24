@@ -11,6 +11,7 @@ import {
   faMoneyBill1Wave,
   faPersonCane,
   faCalendarDays,
+  faThumbTack
 } from "@fortawesome/free-solid-svg-icons";
 import { PhotoFieldComponent } from "../../components/atoms/PhotoFieldComponent";
 import { DropDownComponent } from "../../components/atoms/DropDownComponent";
@@ -59,6 +60,8 @@ import { createAnnouncement, getAllAnnouncementsByAppId } from "../../blockchain
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -688,7 +691,17 @@ export default function UpdateApp() {
       
       // Refresh announcements list without reloading the page
       if (wallet && appId) {
-        const listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet });
+        let listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet }) ?? [];
+        // Sort: pinned first, then by createdAt descending
+        listAnnouncement = listAnnouncement.sort((a, b) => {
+          // Pinned first
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          // Then by createdAt descending
+          const aCreated = a.createdAt ? Number(a.createdAt) : 0;
+          const bCreated = b.createdAt ? Number(b.createdAt) : 0;
+          return bCreated - aCreated;
+        });
         setAnnouncements(listAnnouncement);
       }
 
@@ -822,19 +835,20 @@ export default function UpdateApp() {
             </form>
             <div className="flex flex-col gap-6">
             {announcements?.map((item, index) => (
-                <div key={index} className="bg-gray-600 p-6 flex justify-between">
+                <div key={index} className={item.pinned ? "bg-green-500/20 p-6 flex justify-between" : "bg-gray-600 p-6 flex justify-between"}>
                   <div>
                     <div className="flex content-center mb-8">
-                        <p className="text-xl capitalize mr-4">
-                          {item.status && typeof item.status === 'object'
-                            ? Object.keys(item.status)[0]
-                            : ''}
-                        </p>
-                        <p>
-                          {item.createdAt
-                            ? new Date(Number(item.createdAt) / 1_000_000).toLocaleDateString()
-                            : ""}
-                        </p>
+                      {item.pinned ? <FontAwesomeIcon icon={faThumbTack} className="mr-4" /> : ""}
+                      <p className="text-xl capitalize mr-4">
+                        {item.status && typeof item.status === 'object'
+                          ? Object.keys(item.status)[0]
+                          : ''}
+                      </p>
+                      <p>
+                        {item.createdAt
+                          ? new Date(Number(item.createdAt) / 1_000_000).toLocaleDateString()
+                          : ""}
+                      </p>
                     </div>
                     <div className="mb-4">
                       <p className="text-3xl font-bold">{item.headline}</p>
