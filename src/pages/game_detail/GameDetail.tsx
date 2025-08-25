@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { StarComponent } from "../../components/atoms/StarComponent";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight, faThumbTack, faThumbsUp, faThumbsDown } from "@fortawesome/free-solid-svg-icons";
+import { faAngleRight, faThumbTack, faThumbsUp, faThumbsDown, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { AppPayment } from "../../features/wallet/views/Payment";
 import { AppInterface, Preview } from "../../interfaces/app/AppInterface";
 import { useParams } from "react-router-dom";
@@ -16,7 +16,6 @@ import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
 import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 import Modal from "@mui/material/Modal";
-import Box from "@mui/material/Box";
 
 export default function GameDetail() {
     const { appId } = useParams();
@@ -133,7 +132,10 @@ export default function GameDetail() {
         <main className="flex justify-center duration-300">
             {/* Announcement modal */}
             <Modal open={isAnnouncementModalShowed} onClose={() => setIsAnnouncementModalShowed(false)} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-500 w-3/4">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-shadow_primary rounded-2xl w-3/4 h-3/4 border-2 border-green-900">
+                    <span className="absolute top-0 right-0 p-6 translate-x-1/2 -translate-y-1/2 bg-green-900 rounded-full cursor-pointer" onClick={() => setIsAnnouncementModalShowed(false)}>
+                        <FontAwesomeIcon icon={faXmark} />
+                    </span>
                     <p>{selectedAnnouncementId}</p>
                 </div>
             </Modal>

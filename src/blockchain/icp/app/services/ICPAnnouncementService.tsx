@@ -64,7 +64,23 @@ export async function getAllAnnouncementsByAppId({ appId, wallet }: { appId: any
     }
 }
 
-export async function likeByAnnouncementId({ announcementId, wallet }: { announcementId: any; wallet: any }) {
+// export async function getAnnouncementByAnnouncementId({ announcementId, wallet }: { announcementId: any; wallet: any }): Promise<AnnouncementInteractionInterface> {
+//     const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
+//     const secretKey = hexToArrayBuffer(privateKey);
+
+//     try {
+//         const agent = new HttpAgent({
+//             host: import.meta.env.VITE_HOST,
+//             identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+//         });
+
+//         // const actor = Actor
+//     } catch (error) {
+//         throw new Error("Error Service Get Announcement by Id: " + error);
+//     }
+// }
+
+export async function likeByAnnouncementId({ announcementId, wallet }: { announcementId: any; wallet: any }): Promise<AnnouncementInteractionInterface[]> {
     const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
     const secretKey = hexToArrayBuffer(privateKey);
 
