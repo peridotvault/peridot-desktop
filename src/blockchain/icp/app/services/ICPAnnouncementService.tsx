@@ -90,3 +90,30 @@ export async function likeByAnnouncementId({ announcementId, wallet }: { announc
         throw new Error("Error Service Like by Announcement ID: " + error);
     }
 }
+
+export async function dislikeByAnnouncementId({ announcementId, wallet }: { announcementId: any; wallet: any }) {
+    const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
+    const secretKey = hexToArrayBuffer(privateKey);
+
+    try {
+        const agent = new HttpAgent({
+            host: import.meta.env.VITE_HOST,
+            identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+        });
+
+        const actor = Actor.createActor(ICPAnnouncementFactory, {
+            agent,
+            canisterId: appCanister,
+        });
+
+        const result = (await actor.dislikeByAnnouncementId(announcementId)) as ApiResponse<AnnouncementInteractionInterface[]>;
+        if ("err" in result) {
+            const [k, v] = Object.entries(result.err)[0] as [string, string];
+            throw new Error(`dislikeByAnnouncementId failed: ${k} - ${v}`);
+        }
+
+        return result.ok;
+    } catch (error) {
+        throw new Error("Error Service Like by Announcement ID: " + error);
+    }
+}

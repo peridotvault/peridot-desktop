@@ -14,7 +14,7 @@ import { PurchaseInterface } from "../../interfaces/app/PurchaseInterface";
 import CarouselPreview, { MediaItem } from "../../components/organisms/CarouselPreview";
 import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
-import { getAllAnnouncementsByAppId, likeByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
+import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 
 export default function GameDetail() {
     const { appId } = useParams();
@@ -100,9 +100,21 @@ export default function GameDetail() {
     }
 
     async function likeByAnnouncementIdHandler(announcementId: any) {
-        console.log(announcementId);
         try {
             const announcementInteraction = await likeByAnnouncementId({
+                announcementId: BigInt(Number(announcementId)),
+                wallet,
+            });
+
+            console.log(announcementInteraction);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function dislikeByAnnouncementIdHandler(announcementId: any) {
+        try {
+            const announcementInteraction = await dislikeByAnnouncementId({
                 announcementId: BigInt(Number(announcementId)),
                 wallet,
             });
@@ -202,7 +214,7 @@ export default function GameDetail() {
                                             <FontAwesomeIcon icon={faThumbsUp} onClick={() => likeByAnnouncementIdHandler(item.announcementId)} className="mr-4" />
                                         </button>
                                         <button>
-                                            <FontAwesomeIcon icon={faThumbsDown} className="mr-4" />
+                                            <FontAwesomeIcon icon={faThumbsDown} onClick={() => dislikeByAnnouncementIdHandler(item.announcementId)} className="mr-4" />
                                         </button>
                                     </div>
                                 </div>
