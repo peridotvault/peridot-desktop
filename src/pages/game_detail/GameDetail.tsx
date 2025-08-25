@@ -15,7 +15,7 @@ import { PurchaseInterface } from "../../interfaces/app/PurchaseInterface";
 import CarouselPreview, { MediaItem } from "../../components/organisms/CarouselPreview";
 import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
-import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
+import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId, getAnnouncementsByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 import Modal from "@mui/material/Modal";
 
 export default function GameDetail() {
@@ -27,8 +27,8 @@ export default function GameDetail() {
     const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
     const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
     const [isAnnouncementModalShowed, setIsAnnouncementModalShowed] = useState(false);
-    const [selectedAnnouncementId, setSelectedAnnouncementId] = useState("");
     const [comment, setComment] = useState("");
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementInterface | null>(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -127,8 +127,30 @@ export default function GameDetail() {
                 announcementId: BigInt(Number(announcementId)),
                 wallet,
             });
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
-            console.log(announcementInteraction);
+    async function fetchAnnouncementByAnnouncementId(announcementId: any) {
+        setSelectedAnnouncement(null);
+        setIsAnnouncementModalShowed(true);
+        try {
+            const announcement = await getAnnouncementsByAnnouncementId({
+                announcementId: BigInt(Number(announcementId)),
+                wallet,
+            });
+
+            setSelectedAnnouncement(announcement);
+            console.log(announcement?.headline);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function onCommentSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        try {
         } catch (err) {
             console.error(err);
         }
@@ -138,32 +160,30 @@ export default function GameDetail() {
         <main className="flex justify-center duration-300">
             {/* Announcement modal */}
             <Modal open={isAnnouncementModalShowed} onClose={() => setIsAnnouncementModalShowed(false)} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-shadow_primary rounded-2xl w-1/2 h-1/2 border-2 border-green-900 p-12">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-shadow_primary rounded-2xl w-3/5 h-3/4 border-2 border-green-900 p-12">
                     <p className="absolute top-0 right-0 pb-4 px-5 translate-x-1/2 -translate-y-1/2 bg-green-900 rounded-full cursor-pointer text-4xl" onClick={() => setIsAnnouncementModalShowed(false)}>
                         x
                     </p>
 
-                    <div className="flex justify-between">
-                        <div>
-                            <div className="mb-16">
-                                <div className="mb-4">
-                                    <p className="text-4xl">Test headline</p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-500">PUBLISHED 25, August 2025</p>
-                                </div>
+                    <div className="mb-12">
+                        <div className="mb-12">
+                            <div className="mb-4">
+                                <p className="text-4xl">{selectedAnnouncement?.headline}</p>
                             </div>
                             <div>
-                                <p>Test content</p>
+                                <p className="text-gray-500">PUBLISHED 25, August 2025</p>
                             </div>
+                        </div>
+                        <div>
+                            <p>{selectedAnnouncement?.content}</p>
                         </div>
                     </div>
                     <div>
-                        <div>
+                        <div className="mb-4">
                             <p className="text-2xl">Comments</p>
                         </div>
                         <div>
-                            <form action="">
+                            <form onSubmit={onCommentSubmit}>
                                 <InputFieldComponent name="Comment" icon={faMessage} type="text" placeholder="Comment" value={comment} onChange={(e) => setComment((e.target as HTMLInputElement).value)} />
                                 <div className="flex justify-end">
                                     <button type="submit" className={`shadow-flat-sm my-6 px-6 py-3 rounded-md`}>
@@ -248,8 +268,7 @@ export default function GameDetail() {
                                 key={index}
                                 className={item.pinned ? "bg-green-500/20 p-6 flex justify-between cursor-pointer" : "bg-gray-600 p-6 flex justify-between cursor-pointer"}
                                 onClick={() => {
-                                    setIsAnnouncementModalShowed(true);
-                                    setSelectedAnnouncementId(String(item.announcementId));
+                                    fetchAnnouncementByAnnouncementId(item.announcementId);
                                 }}
                             >
                                 <div className="flex flex-col justify-between">

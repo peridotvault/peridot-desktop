@@ -31,6 +31,7 @@ export const ICPAnnouncementFactory = ({ IDL }: { IDL: any }) => {
     return IDL.Service({
         // CREATE
         createAnnouncement: IDL.Func([ICPAppId, AnnouncementTypes.DTOAppAnnouncement], [ICPCoreResult(AnnouncementTypes.AppAnnouncement)], []),
+        commentByAnnouncementId: IDL.Func([ICPAnnouncementId, IDL.Text], [ICPCoreResult(AnnouncementTypes.AppAnnouncement)], []),
         // GET
         getAllAnnouncementsByAppId: IDL.Func([ICPAppId], [ICPCoreResult(IDL.Vec(AnnouncementTypes.AppAnnouncement))], []),
         getAnnouncementsByAnnouncementId: IDL.Func([ICPAnnouncementId], [ICPCoreResult(AnnouncementTypes.AppAnnouncement)], []),
