@@ -17,9 +17,17 @@ import {
 } from "../../interfaces/app/AppInterface";
 import { getAppById } from "../../blockchain/icp/app/services/ICPAppService";
 import { useParams } from "react-router-dom";
+import { getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
+import { useWallet } from "../../contexts/WalletContext";
+import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
+import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
 
 export default function GameDetailLibrary() {
   const { appId } = useParams();
+  const { wallet } = useWallet();
+  const [announcements, setAnnouncements] = useState<
+    AnnouncementInterface[] | null
+  >(null);
 
   const [list_announcement] = useState([
     {
@@ -64,10 +72,37 @@ export default function GameDetailLibrary() {
 
     let cancelled = false;
     async function fetchData() {
+      let isMounted = true;
       try {
         setTheApp(null); // reset agar tidak menampilkan data lama
         const res = await getAppById({ appId: idNum });
         if (!cancelled) setTheApp(res);
+
+        let listAnnouncement =
+          (await getAllAnnouncementsByAppId({
+            appId: Number(appId),
+            wallet,
+          })) ?? [];
+        // Sort: pinned first, then by createdAt descending
+        // Filter only published announcements
+        listAnnouncement = listAnnouncement.filter(
+          (item) =>
+            item.status &&
+            typeof item.status === "object" &&
+            Object.keys(item.status)[0] === "published"
+        );
+        // Sort: pinned first, then by createdAt descending
+        listAnnouncement = listAnnouncement.sort((a, b) => {
+          // Pinned first
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          // Then by createdAt descending
+          const aCreated = a.createdAt ? Number(a.createdAt) : 0;
+          const bCreated = b.createdAt ? Number(b.createdAt) : 0;
+          return bCreated - aCreated;
+        });
+
+        if (isMounted) setAnnouncements(listAnnouncement);
       } catch (e) {
         if (!cancelled) setTheApp(null);
         // optionally: tampilkan notifikasi error
@@ -78,34 +113,7 @@ export default function GameDetailLibrary() {
     return () => {
       cancelled = true;
     };
-  }, [appId]);
-
-  const AnnouncementContainer = ({
-    img_url,
-    type,
-    title,
-    description,
-  }: {
-    img_url: string;
-    type: string;
-    title: string;
-    description: string;
-  }) => {
-    return (
-      <section className="p-6 shadow-arise-sm hover:shadow-sunken-sm rounded-2xl flex gap-6">
-        <img
-          src={img_url}
-          alt=""
-          className="w-[300px] aspect-video shadow-sunken-sm object-cover rounded-xl"
-        />
-        <div className="gap-2 flex flex-col">
-          <p className="text-text_disabled uppercase line-clamp-1">{type}</p>
-          <p className="line-clamp-2 text-xl">{title}</p>
-          <p className="line-clamp-4 text-text_disabled">{description}</p>
-        </div>
-      </section>
-    );
-  };
+  }, [appId, wallet]);
 
   function unwrapOptVec<T>(v: T[] | [T[]] | null | undefined): T[] {
     if (!v) return [];
@@ -176,23 +184,17 @@ export default function GameDetailLibrary() {
           </section>
 
           {/* Announcements  */}
-          {list_announcement.map((item, index) => (
+          {/* {list_announcement.map((item, index) => (
             <div key={index} className="flex flex-col gap-5">
               <div className="flex items-center">
                 <p className="text-xl w-[150px]">{item.date}</p>
                 <hr className="border-background_disabled w-full" />
-              </div>
-              {item.announcements.map((item, index) => (
-                <AnnouncementContainer
-                  key={index}
-                  img_url={item.img_url}
-                  description={item.description}
-                  title={item.title}
-                  type={item.type}
-                />
-              ))}
-            </div>
+              </div> */}
+          {announcements?.map((item, index) => (
+            <AnnouncementContainer key={index} item={item} />
           ))}
+          {/* </div>
+          ))} */}
         </div>
         {/* right column ========================================== */}
         <div className="w-1/3 min-w-[300px] flex flex-col gap-8">
