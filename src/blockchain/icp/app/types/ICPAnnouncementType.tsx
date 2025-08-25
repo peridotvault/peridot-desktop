@@ -30,5 +30,12 @@ export const ICPAnnouncementTypes = (IDL: CandidIDL) => {
         comment: IDL.Text,
     });
 
-    return { DTOAppAnnouncement, AppAnnouncement };
+    const AnnouncementInteraction = IDL.Record({
+        announcementId: ICPAnnouncementId,
+        interactionType: IDL.Text,
+        comment: IDL.Text,
+        createdAt: ICPTimestamp,
+    });
+
+    return { DTOAppAnnouncement, AppAnnouncement, CreateAnnouncementInteraction, AnnouncementInteraction };
 };
