@@ -1,4 +1,4 @@
-import { Timestamp, Opt, AppId, AnnouncementId } from "../CoreInterface";
+import { Timestamp, Opt, AppId, AnnouncementId, UserId } from "../CoreInterface";
 
 export type AnnouncementStatus = { draft: null } | { published: null } | { archived: null };
 export type AnnouncementInteractionType = { like: null } | { dislike: null };
@@ -24,9 +24,10 @@ export interface AnnouncementInterface {
     publishAt: Opt<Timestamp>;
 }
 
-export interface AnnouncementInteraction {
+export interface AnnouncementInteractionInterface {
     announcementId: AnnouncementId;
-    interactionType: AnnouncementInteractionType;
-    comment: string;
+    userId: UserId;
+    interactionType: Opt<AnnouncementInteractionType>;
+    comment: Opt<string>;
     createdAt: Timestamp;
 }

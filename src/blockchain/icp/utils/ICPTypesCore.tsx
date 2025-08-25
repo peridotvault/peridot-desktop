@@ -8,29 +8,34 @@ export const ICPTimestamp = IDL.Int;
 export const ICPCategory = IDL.Text;
 export const ICPAppTags = IDL.Text;
 export const ICPAppStatus = IDL.Variant({
-  publish: IDL.Null,
-  notPublish: IDL.Null,
+    publish: IDL.Null,
+    notPublish: IDL.Null,
+});
+
+export const ICPAnnouncementInteraction = IDL.Variant({
+    like: IDL.Null,
+    dislike: IDL.Null,
 });
 
 export const ICPAnnouncementStatus = IDL.Variant({
-  draft: IDL.Null,
-  published: IDL.Null,
-  archived: IDL.Null,
+    draft: IDL.Null,
+    published: IDL.Null,
+    archived: IDL.Null,
 });
 
 // Handlers
 export const ICPCoreError = IDL.Variant({
-  InvalidInput: IDL.Text,
-  NotFound: IDL.Text,
-  ValidationError: IDL.Text,
-  NotAuthorized: IDL.Text,
-  AlreadyExists: IDL.Text,
-  StorageError: IDL.Text,
-  InternalError: IDL.Text,
+    InvalidInput: IDL.Text,
+    NotFound: IDL.Text,
+    ValidationError: IDL.Text,
+    NotAuthorized: IDL.Text,
+    AlreadyExists: IDL.Text,
+    StorageError: IDL.Text,
+    InternalError: IDL.Text,
 });
 
 export const ICPCoreResult = (ok: any) =>
-  IDL.Variant({
-    ok: ok,
-    err: ICPCoreError,
-  });
+    IDL.Variant({
+        ok: ok,
+        err: ICPCoreError,
+    });

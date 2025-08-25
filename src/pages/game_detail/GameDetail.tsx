@@ -14,7 +14,7 @@ import { PurchaseInterface } from "../../interfaces/app/PurchaseInterface";
 import CarouselPreview, { MediaItem } from "../../components/organisms/CarouselPreview";
 import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
-import { getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
+import { getAllAnnouncementsByAppId, likeByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 
 export default function GameDetail() {
     const { appId } = useParams();
@@ -97,6 +97,20 @@ export default function GameDetail() {
                     alt: p.alt ?? "preview",
                 } as MediaItem;
             });
+    }
+
+    async function likeByAnnouncementIdHandler(announcementId: any) {
+        console.log(announcementId);
+        try {
+            const announcementInteraction = await likeByAnnouncementId({
+                announcementId: BigInt(Number(announcementId)),
+                wallet,
+            });
+
+            console.log(announcementInteraction);
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     return (
@@ -185,7 +199,7 @@ export default function GameDetail() {
                                     </div>
                                     <div>
                                         <button type="button">
-                                            <FontAwesomeIcon icon={faThumbsUp} className="mr-4" />
+                                            <FontAwesomeIcon icon={faThumbsUp} onClick={() => likeByAnnouncementIdHandler(item.announcementId)} className="mr-4" />
                                         </button>
                                         <button>
                                             <FontAwesomeIcon icon={faThumbsDown} className="mr-4" />

@@ -1,5 +1,5 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
-import { AnnouncementInterface, CreateAnnouncementInterface } from "../../../../interfaces/announcement/AnnouncementInterface";
+import { AnnouncementInteractionInterface, AnnouncementInterface, CreateAnnouncementInterface } from "../../../../interfaces/announcement/AnnouncementInterface";
 import { walletService } from "../../../../features/wallet/services/WalletService";
 import { hexToArrayBuffer } from "../../../../utils/crypto";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
@@ -79,10 +79,10 @@ export async function likeByAnnouncementId({ announcementId, wallet }: { announc
             canisterId: appCanister,
         });
 
-        const result = (await actor.likeByAnnouncementId(announcementId)) as ApiResponse<AnnouncementInterface>;
+        const result = (await actor.likeByAnnouncementId(announcementId)) as ApiResponse<AnnouncementInteractionInterface[]>;
         if ("err" in result) {
             const [k, v] = Object.entries(result.err)[0] as [string, string];
-            throw new Error(`getAllApps failed: ${k} - ${v}`);
+            throw new Error(`likeByAnnouncementId failed: ${k} - ${v}`);
         }
 
         return result.ok;

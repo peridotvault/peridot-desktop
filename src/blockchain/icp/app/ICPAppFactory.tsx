@@ -34,6 +34,6 @@ export const ICPAnnouncementFactory = ({ IDL }: { IDL: any }) => {
         // GET
         getAllAnnouncementsByAppId: IDL.Func([ICPAppId], [ICPCoreResult(IDL.Vec(AnnouncementTypes.AppAnnouncement))], []),
         // UPDATE
-        likeByAnnouncementId: IDL.Func([ICPAnnouncementId, AnnouncementTypes.CreateAnnouncementInteraction], [ICPCoreResult(AnnouncementTypes.AnnouncementInteraction)]),
+        likeByAnnouncementId: IDL.Func([ICPAnnouncementId], [ICPCoreResult(AnnouncementTypes.AnnouncementInteractionInterface)], []),
     });
 };
