@@ -1,8 +1,9 @@
 // @ts-ignore
 import React, { useEffect, useState } from "react";
 import { StarComponent } from "../../components/atoms/StarComponent";
+import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight, faThumbTack, faThumbsUp, faThumbsDown, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faAngleRight, faThumbTack, faThumbsUp, faThumbsDown, faMessage } from "@fortawesome/free-solid-svg-icons";
 import { AppPayment } from "../../features/wallet/views/Payment";
 import { AppInterface, Preview } from "../../interfaces/app/AppInterface";
 import { useParams } from "react-router-dom";
@@ -16,7 +17,6 @@ import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
 import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 import Modal from "@mui/material/Modal";
-import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
 
 export default function GameDetail() {
     const { appId } = useParams();
@@ -28,6 +28,7 @@ export default function GameDetail() {
     const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
     const [isAnnouncementModalShowed, setIsAnnouncementModalShowed] = useState(false);
     const [selectedAnnouncementId, setSelectedAnnouncementId] = useState("");
+    const [comment, setComment] = useState("");
 
     useEffect(() => {
         async function fetchData() {
@@ -137,11 +138,41 @@ export default function GameDetail() {
         <main className="flex justify-center duration-300">
             {/* Announcement modal */}
             <Modal open={isAnnouncementModalShowed} onClose={() => setIsAnnouncementModalShowed(false)} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-shadow_primary rounded-2xl w-3/4 h-3/4 border-2 border-green-900">
-                    <span className="absolute top-0 right-0 p-6 translate-x-1/2 -translate-y-1/2 bg-green-900 rounded-full cursor-pointer" onClick={() => setIsAnnouncementModalShowed(false)}>
-                        <FontAwesomeIcon icon={faXmark} />
-                    </span>
-                    <p>{selectedAnnouncementId}</p>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-shadow_primary rounded-2xl w-1/2 h-1/2 border-2 border-green-900 p-12">
+                    <p className="absolute top-0 right-0 pb-4 px-5 translate-x-1/2 -translate-y-1/2 bg-green-900 rounded-full cursor-pointer text-4xl" onClick={() => setIsAnnouncementModalShowed(false)}>
+                        x
+                    </p>
+
+                    <div className="flex justify-between">
+                        <div>
+                            <div className="mb-16">
+                                <div className="mb-4">
+                                    <p className="text-4xl">Test headline</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-500">PUBLISHED 25, August 2025</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p>Test content</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div>
+                            <p className="text-2xl">Comments</p>
+                        </div>
+                        <div>
+                            <form action="">
+                                <InputFieldComponent name="Comment" icon={faMessage} type="text" placeholder="Comment" value={comment} onChange={(e) => setComment((e.target as HTMLInputElement).value)} />
+                                <div className="flex justify-end">
+                                    <button type="submit" className={`shadow-flat-sm my-6 px-6 py-3 rounded-md`}>
+                                        Post Comment
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </Modal>
 
