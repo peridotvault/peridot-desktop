@@ -15,6 +15,8 @@ import CarouselPreview, { MediaItem } from "../../components/organisms/CarouselP
 import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
 import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
+import Modal from "@mui/material/Modal";
+import Box from "@mui/material/Box";
 
 export default function GameDetail() {
     const { appId } = useParams();
@@ -24,6 +26,8 @@ export default function GameDetail() {
     const [allGames, setAllGames] = useState<AppInterface[] | null>();
     const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
     const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
+    const [isAnnouncementModalShowed, setIsAnnouncementModalShowed] = useState(false);
+    const [selectedAnnouncementId, setSelectedAnnouncementId] = useState("");
 
     useEffect(() => {
         async function fetchData() {
@@ -127,6 +131,13 @@ export default function GameDetail() {
 
     return (
         <main className="flex justify-center duration-300">
+            {/* Announcement modal */}
+            <Modal open={isAnnouncementModalShowed} onClose={() => setIsAnnouncementModalShowed(false)} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-500 w-3/4">
+                    <p>{selectedAnnouncementId}</p>
+                </div>
+            </Modal>
+
             <div className="max-w-[1400px] w-full flex flex-col gap-6 duration-300">
                 <div className="mb-20"></div>
                 {/* title */}
@@ -195,7 +206,14 @@ export default function GameDetail() {
                     <h1 className="text-3xl pb-4">Announcements</h1>
                     <div className="flex flex-col gap-6">
                         {announcements?.map((item, index) => (
-                            <div key={index} className={item.pinned ? "bg-green-500/20 p-6 flex justify-between" : "bg-gray-600 p-6 flex justify-between"}>
+                            <div
+                                key={index}
+                                className={item.pinned ? "bg-green-500/20 p-6 flex justify-between cursor-pointer" : "bg-gray-600 p-6 flex justify-between cursor-pointer"}
+                                onClick={() => {
+                                    setIsAnnouncementModalShowed(true);
+                                    setSelectedAnnouncementId(String(item.announcementId));
+                                }}
+                            >
                                 <div className="flex flex-col justify-between">
                                     <div>
                                         <div className="flex content-center mb-8">
