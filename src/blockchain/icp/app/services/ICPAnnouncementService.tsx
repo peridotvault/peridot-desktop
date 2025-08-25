@@ -64,21 +64,32 @@ export async function getAllAnnouncementsByAppId({ appId, wallet }: { appId: any
     }
 }
 
-// export async function getAnnouncementByAnnouncementId({ announcementId, wallet }: { announcementId: any; wallet: any }): Promise<AnnouncementInteractionInterface> {
-//     const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
-//     const secretKey = hexToArrayBuffer(privateKey);
+export async function getAnnouncementsByAnnouncementId({ announcementId, wallet }: { announcementId: any; wallet: any }): Promise<AnnouncementInterface> {
+    const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
+    const secretKey = hexToArrayBuffer(privateKey);
 
-//     try {
-//         const agent = new HttpAgent({
-//             host: import.meta.env.VITE_HOST,
-//             identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
-//         });
+    try {
+        const agent = new HttpAgent({
+            host: import.meta.env.VITE_HOST,
+            identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+        });
 
-//         // const actor = Actor
-//     } catch (error) {
-//         throw new Error("Error Service Get Announcement by Id: " + error);
-//     }
-// }
+        const actor = Actor.createActor(ICPAnnouncementFactory, {
+            agent,
+            canisterId: appCanister,
+        });
+
+        const result = (await actor.getAnnouncementsByAnnouncementId(announcementId)) as ApiResponse<AnnouncementInterface>;
+        if ("err" in result) {
+            const [k, v] = Object.entries(result.err)[0] as [string, string];
+            throw new Error(`likeByAnnouncementId failed: ${k} - ${v}`);
+        }
+
+        return result.ok;
+    } catch (error) {
+        throw new Error("Error Service Get Announcement by Id: " + error);
+    }
+}
 
 export async function likeByAnnouncementId({ announcementId, wallet }: { announcementId: any; wallet: any }): Promise<AnnouncementInteractionInterface[]> {
     const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
