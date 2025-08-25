@@ -16,6 +16,7 @@ import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
 import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 import Modal from "@mui/material/Modal";
+import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
 
 export default function GameDetail() {
     const { appId } = useParams();
@@ -49,7 +50,11 @@ export default function GameDetail() {
         (async () => {
             try {
                 if (!wallet) return;
-                let listAnnouncement = (await getAllAnnouncementsByAppId({ appId: Number(appId), wallet })) ?? [];
+                let listAnnouncement =
+                    (await getAllAnnouncementsByAppId({
+                        appId: Number(appId),
+                        wallet,
+                    })) ?? [];
                 // Sort: pinned first, then by createdAt descending
                 // Filter only published announcements
                 listAnnouncement = listAnnouncement.filter((item) => item.status && typeof item.status === "object" && Object.keys(item.status)[0] === "published");
@@ -251,7 +256,7 @@ export default function GameDetail() {
                     <div className="flex flex-col gap-6 w-full max-w-[1400px]">
                         {/* title  */}
                         <button className="flex items-center gap-3">
-                            <p className="text-xl font-semibold">Similar Games</p>
+                            <p className="text-xl font-bold">Similar Games</p>
                             <FontAwesomeIcon icon={faAngleRight} />
                         </button>
 
