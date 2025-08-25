@@ -20,6 +20,7 @@ import CarouselPreview, {
 import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
 import { getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
+import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
 
 export default function GameDetail() {
   const { appId } = useParams();
@@ -28,7 +29,9 @@ export default function GameDetail() {
   const [detailGame, setDetailGame] = useState<AppInterface | null>();
   const [allGames, setAllGames] = useState<AppInterface[] | null>();
   const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
-  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
+  const [announcements, setAnnouncements] = useState<
+    AnnouncementInterface[] | null
+  >(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -46,41 +49,45 @@ export default function GameDetail() {
   }, []);
 
   // Get all announcements by app id
-    useEffect(() => {
-      let isMounted = true;
-      (async () => {
-        try {
-          if (!wallet) return;
-          let listAnnouncement = await getAllAnnouncementsByAppId({ appId: Number(appId), wallet }) ?? [];
-          // Sort: pinned first, then by createdAt descending
-            // Filter only published announcements
-            listAnnouncement = listAnnouncement.filter(
-            (item) =>
-              item.status &&
-              typeof item.status === "object" &&
-              Object.keys(item.status)[0] === "published"
-            );
-            // Sort: pinned first, then by createdAt descending
-            listAnnouncement = listAnnouncement.sort((a, b) => {
-            // Pinned first
-            if (a.pinned && !b.pinned) return -1;
-            if (!a.pinned && b.pinned) return 1;
-            // Then by createdAt descending
-            const aCreated = a.createdAt ? Number(a.createdAt) : 0;
-            const bCreated = b.createdAt ? Number(b.createdAt) : 0;
-            return bCreated - aCreated;
-          });
-          
-          if (isMounted) setAnnouncements(listAnnouncement);
-        } catch (e) {
-          console.error(e);
-        }
-      })();
-  
-      return () => {
-        isMounted = false;
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        if (!wallet) return;
+        let listAnnouncement =
+          (await getAllAnnouncementsByAppId({
+            appId: Number(appId),
+            wallet,
+          })) ?? [];
+        // Sort: pinned first, then by createdAt descending
+        // Filter only published announcements
+        listAnnouncement = listAnnouncement.filter(
+          (item) =>
+            item.status &&
+            typeof item.status === "object" &&
+            Object.keys(item.status)[0] === "published"
+        );
+        // Sort: pinned first, then by createdAt descending
+        listAnnouncement = listAnnouncement.sort((a, b) => {
+          // Pinned first
+          if (a.pinned && !b.pinned) return -1;
+          if (!a.pinned && b.pinned) return 1;
+          // Then by createdAt descending
+          const aCreated = a.createdAt ? Number(a.createdAt) : 0;
+          const bCreated = b.createdAt ? Number(b.createdAt) : 0;
+          return bCreated - aCreated;
+        });
+
+        if (isMounted) setAnnouncements(listAnnouncement);
+      } catch (e) {
+        console.error(e);
       }
-    }, [appId, wallet])
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [appId, wallet]);
 
   function isOptVecShape(v: any): v is [any[]] {
     return Array.isArray(v) && v.length === 1 && Array.isArray(v[0]);
@@ -123,9 +130,9 @@ export default function GameDetail() {
         <div className="mb-20"></div>
         {/* title */}
         <div className="px-12 pt-6 flex flex-col gap-3">
-          <p className="text-3xl font-bold">
+          <h1 className="text-3xl font-bold">
             {detailGame?.title ? detailGame?.title : "PeridotVault Game"}
-          </p>
+          </h1>
           <StarComponent rate={4} />
         </div>
         {/* First Section */}
@@ -141,6 +148,20 @@ export default function GameDetail() {
             />
             {/* section 1 */}
             <p>{detailGame?.description}</p>
+
+            {/* Announcement */}
+            <div className="flex flex-col gap-6">
+              {/* title  */}
+              <button className="flex items-center gap-3">
+                <h2 className="text-xl font-bold">Announcements</h2>
+                <FontAwesomeIcon icon={faAngleRight} />
+              </button>
+              <div className="flex flex-col gap-6">
+                {announcements?.map((item, index) => (
+                  <AnnouncementContainer key={index} item={item} />
+                ))}
+              </div>
+            </div>
           </div>
           {/* right side ======================== */}
           <div className="w-1/4 min-w-[300px]  flex flex-col gap-6">
@@ -217,46 +238,12 @@ export default function GameDetail() {
           </div>
         </section>
 
-        {/* Announcement */}
-        <div>
-          <h1 className="text-3xl pb-4">Announcements</h1>
-          <div className="flex flex-col gap-6">
-          {announcements?.map((item, index) => (
-              <div key={index} className={item.pinned ? "bg-green-500/20 p-6 flex justify-between" : "bg-gray-600 p-6 flex justify-between"}>
-                <div>
-                  <div className="flex content-center mb-8">
-                    {item.pinned ? <FontAwesomeIcon icon={faThumbTack} className="mr-4" /> : ""}
-                    <p>
-                      {item.createdAt
-                        ? new Date(Number(item.createdAt) / 1_000_000).toLocaleDateString()
-                        : ""}
-                    </p>
-                  </div>
-                  <div className="mb-4">
-                    <p className="text-3xl font-bold">{item.headline}</p>
-                  </div>
-                  <div>
-                    <p className="text-lg">{item.content}</p>
-                  </div>
-                </div>
-                <div>
-                  <img
-                    src={item.coverImage}
-                    className="w-64 h-72 object-cover"
-                    alt="preview"
-                  />
-                </div>
-              </div>
-          ))}
-          </div>
-        </div>
-
         {/* Similar Games  */}
         <section className="flex justify-center px-12 py-6">
           <div className="flex flex-col gap-6 w-full max-w-[1400px]">
             {/* title  */}
             <button className="flex items-center gap-3">
-              <p className="text-xl font-semibold">Similar Games</p>
+              <p className="text-xl font-bold">Similar Games</p>
               <FontAwesomeIcon icon={faAngleRight} />
             </button>
 
