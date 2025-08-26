@@ -83,12 +83,12 @@ export const Slide: React.FC<SlideProps> = ({ onClose }) => {
             icon: faUserGear,
             show: "always",
           },
-          {
-            label: "Downloads",
-            url: "/downloads",
-            icon: faDownload,
-            show: "always",
-          },
+          // {
+          //   label: "Downloads",
+          //   url: "/downloads",
+          //   icon: faDownload,
+          //   show: "always",
+          // },
         ],
       },
       {

@@ -10,7 +10,7 @@ import { getCoverImage, getProfileImage } from "../../utils/Additional";
 import { UserInterface } from "../../interfaces/user/UserInterface";
 import {
   getFriendRequestList,
-  getUserByPrincipalId,
+  getUserData,
   searchUsersByPrefixWithLimit,
 } from "../../blockchain/icp/user/services/ICPUserService";
 import { GetOpt } from "../../interfaces/CoreInterface";
@@ -41,7 +41,7 @@ export const ProfileUser = () => {
   useEffect(() => {
     async function checkUser() {
       if (wallet.encryptedPrivateKey) {
-        const isUserExist = await getUserByPrincipalId({
+        const isUserExist = await getUserData({
           wallet: wallet,
         });
         if (isUserExist) {
@@ -239,7 +239,7 @@ export const ProfileUser = () => {
               </div>
             </div>
           </section>
-          <section className="pt-6 p-16">
+          {/* <section className="pt-6 p-16">
             <div className="flex flex-col gap-5">
               <div className="flex items-center">
                 <p className="text-xl w-[170px]">Recent Activity</p>
@@ -256,7 +256,7 @@ export const ProfileUser = () => {
                 />
               ))}
             </div>
-          </section>
+          </section> */}
         </div>
         {/* right  ============================ */}
         <div className="w-2/5 max-w-[350px] flex flex-col gap-6 duration-300 transition-all">
@@ -269,7 +269,7 @@ export const ProfileUser = () => {
             />
           </section>
           {/* Friend Section  */}
-          <section className="p-10 shadow-arise-sm rounded-3xl flex flex-col gap-5">
+          {/* <section className="p-10 shadow-arise-sm rounded-3xl flex flex-col gap-5">
             <div className="flex items-center justify-between">
               <p className="text-2xl font-medium">Friends {"(" + 32 + ")"}</p>
               <button
@@ -280,7 +280,7 @@ export const ProfileUser = () => {
               </button>
             </div>
             {isOpenAddFriend ? <FriendComponent /> : ""}
-            {/* lists friend  */}
+            // lists friend  
             <div className="flex gap-3 items-center">
               <img
                 src={getProfileImage(GetOpt(userData?.imageUrl!))}
@@ -329,7 +329,7 @@ export const ProfileUser = () => {
                 <p className="text-text_disabled">Last Online 300 days ago</p>
               </div>
             </div>
-          </section>
+          </section> */}
         </div>
       </div>
     </main>

@@ -2,13 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { StarComponent } from "../../components/atoms/StarComponent";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight, faThumbTack } from "@fortawesome/free-solid-svg-icons";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { AppPayment } from "../../features/wallet/views/Payment";
 import { AppInterface, Preview } from "../../interfaces/app/AppInterface";
 import { useParams } from "react-router-dom";
 import { nsToDateStr } from "../../utils/Additional";
 import {
-  getAllApps,
+  getAllPublishApps,
   getAppById,
 } from "../../blockchain/icp/app/services/ICPAppService";
 import { useWallet } from "../../contexts/WalletContext";
@@ -21,12 +21,15 @@ import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
 import { getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
+import { getUserByPrincipalId } from "../../blockchain/icp/user/services/ICPUserService";
+import { UserInterface } from "../../interfaces/user/UserInterface";
 
 export default function GameDetail() {
   const { appId } = useParams();
   const { wallet } = useWallet();
   const [isOnPayment, setIsOnPayment] = useState(false);
   const [detailGame, setDetailGame] = useState<AppInterface | null>();
+  const [developerData, setDeveloperData] = useState<UserInterface | null>();
   const [allGames, setAllGames] = useState<AppInterface[] | null>();
   const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
   const [announcements, setAnnouncements] = useState<
@@ -37,11 +40,17 @@ export default function GameDetail() {
     async function fetchData() {
       window.scrollTo(0, 0);
 
-      const resDetailGame = await getAppById({ appId: Number(appId) });
+      const resDetailGame = (await getAppById({
+        appId: Number(appId),
+      })) as AppInterface;
+      const developer = await getUserByPrincipalId({
+        userId: resDetailGame.developerId,
+      });
       console.log(resDetailGame);
       setDetailGame(resDetailGame);
+      setDeveloperData(developer);
       setHumanPriceStr(Number(resDetailGame?.price) / 1e8);
-      const resAllGames = await getAllApps();
+      const resAllGames = await getAllPublishApps();
       setAllGames(resAllGames);
     }
 
@@ -197,14 +206,17 @@ export default function GameDetail() {
             </div>
             {/* details game  */}
             <div className="flex flex-col">
-              <GameTypes title="Developer" content="Antigane Inc." />
-              <GameTypes title="Publisher" content="Antigane Inc." />
+              <GameTypes
+                title="Developer"
+                content={developerData?.displayName!}
+              />
+              {/* <GameTypes title="Publisher" content="Antigane Inc." /> */}
               <GameTypes
                 title="Release Date"
                 content={nsToDateStr(detailGame?.releaseDate.toString()) || ""}
               />
-              <GameTypes title="Requirement" content="RAM 16GB / 256GB" />
-              <GameTypes title="Platform" content="Windows" />
+              <GameTypes title="Requirement" content="RAM 8GB" />
+              <GameTypes title="Platform" content="Web" />
             </div>
             {/* Buy Game  */}
             <div className="flex flex-col gap-4 py-3">

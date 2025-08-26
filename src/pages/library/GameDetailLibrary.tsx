@@ -203,7 +203,7 @@ export default function GameDetailLibrary() {
             <div className="flex flex-col gap-2">
               <p>current price</p>
               <p className="text-3xl font-bold">
-                {Number(theApp?.price) > 0 ? "$" + theApp?.price : "FREE"}
+                {Number(theApp?.price) > 0 ? theApp?.price + " PER" : "FREE"}
               </p>
             </div>
             {/* button  */}
@@ -221,8 +221,8 @@ export default function GameDetailLibrary() {
               </button>
             </div>
             {/* Details  */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
+            {/* <div className="flex flex-col gap-2"> */}
+            {/* <div className="flex items-center gap-2">
                 <div className="bg-background_primary w-7 h-7 flex justify-center items-center rounded-full ">
                   <FontAwesomeIcon
                     icon={faCode}
@@ -230,8 +230,8 @@ export default function GameDetailLibrary() {
                   />
                 </div>
                 <p>Created by Antigane Studio</p>
-              </div>
-              <div className="flex items-center gap-2">
+              </div> */}
+            {/* <div className="flex items-center gap-2">
                 <div className="bg-background_primary w-7 h-7 flex justify-center items-center rounded-full ">
                   <FontAwesomeIcon
                     icon={faHardDrive}
@@ -248,12 +248,12 @@ export default function GameDetailLibrary() {
                   />
                 </div>
                 <p>for Everyone</p>
-              </div>
-            </div>
+              </div> */}
+            {/* </div> */}
           </section>
 
           {/* friend list  */}
-          <section className="flex flex-col gap-4">
+          {/* <section className="flex flex-col gap-4">
             <p className="text-xl font-medium">Friends who play</p>
             <div className="flex flex-wrap gap-4">
               <img
@@ -302,7 +302,7 @@ export default function GameDetailLibrary() {
                 alt=""
               />
             </div>
-          </section>
+          </section> */}
           <div className="my-32"></div>
         </div>
       </div>

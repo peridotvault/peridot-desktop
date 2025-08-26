@@ -1,4 +1,4 @@
-import { ICPCoreResult } from "../utils/ICPTypesCore";
+import { ICPCoreResult, ICPUserId } from "../utils/ICPTypesCore";
 import { ICPFriendTypes } from "./types/ICPFriendTypes";
 import { ICPUserTypes } from "./types/ICPUserTypes";
 
@@ -18,7 +18,12 @@ export const ICPUserFactory = ({ IDL }: { IDL: any }) => {
       [ICPCoreResult(UserTypes.User)],
       []
     ),
-    getUserByPrincipalId: IDL.Func([], [ICPCoreResult(UserTypes.User)], []),
+    getUserData: IDL.Func([], [ICPCoreResult(UserTypes.User)], []),
+    getUserByPrincipalId: IDL.Func(
+      [ICPUserId],
+      [ICPCoreResult(UserTypes.User)],
+      []
+    ),
     getUsersByPrefixWithLimit: IDL.Func(
       [IDL.Text, IDL.Nat],
       [ICPCoreResult(UserTypes.User)],

@@ -8,7 +8,7 @@ import { useWallet } from "../contexts/WalletContext";
 import { UserInterface } from "../interfaces/user/UserInterface";
 import { getUserInfo, saveUserInfo } from "../utils/IndexedDb";
 import { walletService } from "../features/wallet/services/WalletService";
-import { getUserByPrincipalId } from "../blockchain/icp/user/services/ICPUserService";
+import { getUserData } from "../blockchain/icp/user/services/ICPUserService";
 import { Wallet } from "../features/wallet/views/Wallet";
 import { InputField } from "../components/atoms/InputField";
 import { GetOpt } from "../interfaces/CoreInterface";
@@ -61,7 +61,7 @@ export default function MainLayout() {
           const isValidSession = lock ? Date.now() <= lock.expiresAt : false;
           setIsCheckingWallet(false);
           if (isValidSession) {
-            const isUserExist = (await getUserByPrincipalId({
+            const isUserExist = (await getUserData({
               wallet: wallet,
             })) as UserInterface;
             if (isUserExist) {

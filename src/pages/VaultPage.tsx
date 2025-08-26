@@ -4,7 +4,10 @@ import { VerticalCard } from "../components/cards/VerticalCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { AppInterface } from "../interfaces/app/AppInterface";
-import { getAllApps } from "../blockchain/icp/app/services/ICPAppService";
+import {
+  getAllApps,
+  getAllPublishApps,
+} from "../blockchain/icp/app/services/ICPAppService";
 
 export default function VaultPage() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -22,7 +25,7 @@ export default function VaultPage() {
     async function fetchData() {
       window.scrollTo(0, 0);
 
-      const resAllGames = await getAllApps();
+      const resAllGames = await getAllPublishApps();
       console.log(resAllGames);
       setAllApps(resAllGames);
     }

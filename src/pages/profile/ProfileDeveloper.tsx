@@ -14,7 +14,7 @@ import { AnimatePresence } from "framer-motion";
 import { Slide } from "../Slide";
 import { useWallet } from "../../contexts/WalletContext";
 import { LoadingScreen } from "../../components/organisms/LoadingScreen";
-import { getUserByPrincipalId } from "../../blockchain/icp/user/services/ICPUserService";
+import { getUserData } from "../../blockchain/icp/user/services/ICPUserService";
 import { UserInterface } from "../../interfaces/user/UserInterface";
 import { GetOpt } from "../../interfaces/CoreInterface";
 
@@ -27,7 +27,7 @@ export const ProfileDeveloper = () => {
   useEffect(() => {
     async function checkUser() {
       if (wallet.encryptedPrivateKey) {
-        const isUserExist = await getUserByPrincipalId({
+        const isUserExist = await getUserData({
           wallet: wallet,
         });
         if (isUserExist) {

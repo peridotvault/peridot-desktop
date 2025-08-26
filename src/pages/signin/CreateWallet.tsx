@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft, faDice } from "@fortawesome/free-solid-svg-icons";
 import { clearWalletData } from "../../utils/StoreService";
 import { SeedPhraseInput } from "../../features/wallet/components/SeedPhraseInput";
-import { getUserByPrincipalId } from "../../blockchain/icp/user/services/ICPUserService";
+import { getUserData } from "../../blockchain/icp/user/services/ICPUserService";
 
 export default function CreateWallet() {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } =
@@ -21,7 +21,7 @@ export default function CreateWallet() {
     async function userHandle() {
       try {
         if (wallet.encryptedPrivateKey) {
-          const isUserExist = await getUserByPrincipalId({
+          const isUserExist = await getUserData({
             wallet: wallet,
           });
           if (isUserExist) {

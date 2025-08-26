@@ -34,7 +34,6 @@ export async function createApp({
       agent,
       canisterId: appCanister,
     });
-    console.log("trying");
     const result = (await actor.createApp(
       createAppTypes
     )) as ApiResponse<AppInterface>;
@@ -139,6 +138,31 @@ export async function getAllApps(): Promise<AppInterface[] | null> {
     });
 
     const result = (await actor.getAllApps()) as ApiResponse<AppInterface[]>;
+    if ("err" in result) {
+      const [k, v] = Object.entries(result.err)[0] as [string, string];
+      throw new Error(`getAllApps failed: ${k} - ${v}`);
+    }
+    return result.ok;
+  } catch (error) {
+    throw new Error("Error Service Get All Apps : " + error);
+  }
+}
+
+export async function getAllPublishApps(): Promise<AppInterface[] | null> {
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+    });
+
+    const actor = Actor.createActor(ICPAppFactory, {
+      agent,
+      canisterId: appCanister,
+    });
+
+    const result = (await actor.getAllPublishApps()) as ApiResponse<
+      AppInterface[]
+    >;
     if ("err" in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`getAllApps failed: ${k} - ${v}`);

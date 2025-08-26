@@ -26,7 +26,7 @@ import {
 } from "../../interfaces/user/UserInterface";
 import {
   getIsUsernameValid,
-  getUserByPrincipalId,
+  getUserData,
   updateUser,
 } from "../../blockchain/icp/user/services/ICPUserService";
 
@@ -118,7 +118,7 @@ export const UpdateProfile = () => {
     (async () => {
       try {
         if (!wallet?.encryptedPrivateKey) return; // ← perbaikan (jangan return saat wallet ada)
-        const user: UserInterface = await getUserByPrincipalId({ wallet });
+        const user: UserInterface = await getUserData({ wallet });
         setForm({
           username: user.username,
           displayName: user.displayName,

@@ -10,7 +10,7 @@ import {
 import { walletService } from "../../../../features/wallet/services/WalletService";
 import { hexToArrayBuffer } from "../../../../utils/crypto";
 import { ICPUserFactory } from "../ICPUserFactory";
-import { ApiResponse } from "../../../../interfaces/CoreInterface";
+import { ApiResponse, UserId } from "../../../../interfaces/CoreInterface";
 
 const userCanister = import.meta.env.VITE_PERIDOT_CANISTER_USER_BACKEND;
 
@@ -113,6 +113,35 @@ async function getIsUsernameValid(
 }
 
 async function getUserByPrincipalId({
+  userId,
+}: {
+  userId: UserId;
+}): Promise<UserInterface> {
+  try {
+    // Initialize agent with identity
+    const agent = new HttpAgent({
+      host: import.meta.env.VITE_HOST,
+    });
+
+    const actor = Actor.createActor(ICPUserFactory, {
+      agent,
+      canisterId: userCanister,
+    });
+
+    const result = (await actor.getUserByPrincipalId(
+      userId
+    )) as ApiResponse<UserInterface>;
+    if ("err" in result) {
+      const [k, _] = Object.entries(result.err)[0] as [string, string];
+      throw new Error(` ${k}`);
+    }
+    return result.ok;
+  } catch (error) {
+    throw new Error("Error Service Get User By PrincipalId : " + error);
+  }
+}
+
+async function getUserData({
   wallet,
 }: {
   wallet: any;
@@ -133,15 +162,14 @@ async function getUserByPrincipalId({
       canisterId: userCanister,
     });
 
-    const result =
-      (await actor.getUserByPrincipalId()) as ApiResponse<UserInterface>;
+    const result = (await actor.getUserData()) as ApiResponse<UserInterface>;
     if ("err" in result) {
       const [k, _] = Object.entries(result.err)[0] as [string, string];
       throw new Error(` ${k}`);
     }
     return result.ok;
   } catch (error) {
-    throw new Error("Error Service Get User By PrincipalId : " + error);
+    throw new Error("Error Service Get UserData : " + error);
   }
 }
 
@@ -249,6 +277,7 @@ export {
   updateUser,
   getIsUsernameValid,
   getUserByPrincipalId,
+  getUserData,
   searchUsersByPrefixWithLimit,
   getFriendRequestList,
   createDeveloperProfile,
