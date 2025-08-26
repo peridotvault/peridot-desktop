@@ -25,6 +25,7 @@ import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from "../../ap
 import { useParams } from "react-router-dom";
 import { AnnouncementInterface, AnnouncementStatus, CreateAnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
 import { createAnnouncement, getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
+import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
 
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
@@ -726,24 +727,7 @@ export default function UpdateApp() {
                         </form>
                         <div className="flex flex-col gap-6">
                             {announcements?.map((item, index) => (
-                                <div key={index} className={item.pinned ? "bg-green-500/20 p-6 flex justify-between" : "bg-gray-600 p-6 flex justify-between"}>
-                                    <div>
-                                        <div className="flex content-center mb-8">
-                                            {item.pinned ? <FontAwesomeIcon icon={faThumbTack} className="mr-4" /> : ""}
-                                            <p className="text-xl capitalize mr-4">{item.status && typeof item.status === "object" ? Object.keys(item.status)[0] : ""}</p>
-                                            <p>{item.createdAt ? new Date(Number(item.createdAt) / 1_000_000).toLocaleDateString() : ""}</p>
-                                        </div>
-                                        <div className="mb-4">
-                                            <p className="text-3xl font-bold">{item.headline}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-lg">{item.content}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <img src={item.coverImage} className="w-64 h-72 object-cover" alt="preview" />
-                                    </div>
-                                </div>
+                                <AnnouncementContainer item={item} key={index} />
                             ))}
                         </div>
                     </div>
