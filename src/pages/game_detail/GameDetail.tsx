@@ -1,28 +1,23 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { StarComponent } from "../../components/atoms/StarComponent";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import { AppPayment } from "../../features/wallet/views/Payment";
-import { AppInterface, Preview } from "../../interfaces/app/AppInterface";
-import { useParams } from "react-router-dom";
-import { nsToDateStr } from "../../utils/Additional";
-import {
-  getAllPublishApps,
-  getAppById,
-} from "../../blockchain/icp/app/services/ICPAppService";
-import { useWallet } from "../../contexts/WalletContext";
-import { buyApp } from "../../blockchain/icp/app/services/ICPPurchaseService";
-import { PurchaseInterface } from "../../interfaces/app/PurchaseInterface";
-import CarouselPreview, {
-  MediaItem,
-} from "../../components/organisms/CarouselPreview";
-import { VerticalCard } from "../../components/cards/VerticalCard";
-import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
-import { getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
-import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
-import { getUserByPrincipalId } from "../../blockchain/icp/user/services/ICPUserService";
-import { UserInterface } from "../../interfaces/user/UserInterface";
+import React, { useEffect, useState } from 'react';
+import { StarComponent } from '../../components/atoms/StarComponent';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { AppPayment } from '../../features/wallet/views/Payment';
+import { AppInterface, Preview } from '../../interfaces/app/AppInterface';
+import { useParams } from 'react-router-dom';
+import { nsToDateStr } from '../../utils/Additional';
+import { getAllPublishApps, getAppById } from '../../blockchain/icp/app/services/ICPAppService';
+import { useWallet } from '../../contexts/WalletContext';
+import { buyApp } from '../../blockchain/icp/app/services/ICPPurchaseService';
+import { PurchaseInterface } from '../../interfaces/app/PurchaseInterface';
+import CarouselPreview, { MediaItem } from '../../components/organisms/CarouselPreview';
+import { VerticalCard } from '../../components/cards/VerticalCard';
+import { AnnouncementInterface } from '../../interfaces/announcement/AnnouncementInterface';
+import { getAllAnnouncementsByAppId } from '../../blockchain/icp/app/services/ICPAnnouncementService';
+import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
+import { getUserByPrincipalId } from '../../blockchain/icp/user/services/ICPUserService';
+import { UserInterface } from '../../interfaces/user/UserInterface';
 
 export default function GameDetail() {
   const { appId } = useParams();
@@ -32,9 +27,7 @@ export default function GameDetail() {
   const [developerData, setDeveloperData] = useState<UserInterface | null>();
   const [allGames, setAllGames] = useState<AppInterface[] | null>();
   const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
-  const [announcements, setAnnouncements] = useState<
-    AnnouncementInterface[] | null
-  >(null);
+  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -73,8 +66,8 @@ export default function GameDetail() {
         listAnnouncement = listAnnouncement.filter(
           (item) =>
             item.status &&
-            typeof item.status === "object" &&
-            Object.keys(item.status)[0] === "published"
+            typeof item.status === 'object' &&
+            Object.keys(item.status)[0] === 'published',
         );
         // Sort: pinned first, then by createdAt descending
         listAnnouncement = listAnnouncement.sort((a, b) => {
@@ -102,33 +95,29 @@ export default function GameDetail() {
     return Array.isArray(v) && v.length === 1 && Array.isArray(v[0]);
   }
 
-  function extLooksVideo(url = ""): boolean {
+  function extLooksVideo(url = ''): boolean {
     return /\.(mp4|webm|mov|m4v)$/i.test(url);
   }
 
-  function previewsToMediaItems(
-    previewsAny?: Preview[] | [Preview[]] | null
-  ): MediaItem[] {
+  function previewsToMediaItems(previewsAny?: Preview[] | [Preview[]] | null): MediaItem[] {
     // 1) unwrap opt vec: [] => [], [ [..] ] => [..]
     const arr: any[] = !previewsAny
       ? []
       : isOptVecShape(previewsAny)
-      ? previewsAny[0]
-      : (previewsAny as any[]);
+        ? previewsAny[0]
+        : (previewsAny as any[]);
 
     // 2) map aman + fallback deteksi video dari ekstensi
     return arr
-      .filter((p) => p && typeof p === "object")
+      .filter((p) => p && typeof p === 'object')
       .map((p) => {
-        const url = p.url ?? p.src ?? "";
+        const url = p.url ?? p.src ?? '';
         const kindObj = p.kind ?? {};
-        const isVideo =
-          (typeof kindObj === "object" && "video" in kindObj) ||
-          extLooksVideo(url);
+        const isVideo = (typeof kindObj === 'object' && 'video' in kindObj) || extLooksVideo(url);
         return {
-          kind: isVideo ? "video" : "image",
+          kind: isVideo ? 'video' : 'image',
           src: url,
-          alt: p.alt ?? "preview",
+          alt: p.alt ?? 'preview',
         } as MediaItem;
       });
   }
@@ -140,7 +129,7 @@ export default function GameDetail() {
         {/* title */}
         <div className="px-12 pt-6 flex flex-col gap-3">
           <h1 className="text-3xl font-bold">
-            {detailGame?.title ? detailGame?.title : "PeridotVault Game"}
+            {detailGame?.title ? detailGame?.title : 'PeridotVault Game'}
           </h1>
           <StarComponent rate={4} />
         </div>
@@ -178,11 +167,7 @@ export default function GameDetail() {
             <div className="flex items-center justify-center ">
               <div className="w-full aspect-[3/4] relative overflow-hidden shadow-arise-sm rounded-xl">
                 <img
-                  src={
-                    detailGame?.coverImage
-                      ? detailGame.coverImage
-                      : "/assets/cover1.png"
-                  }
+                  src={detailGame?.coverImage ? detailGame.coverImage : '/assets/cover1.png'}
                   className="w-full h-full object-cover"
                   alt=""
                 />
@@ -199,21 +184,18 @@ export default function GameDetail() {
                 <p className="font-bold">Everyone</p>
                 <hr className="border-text_disabled/50" />
                 <p>
-                  A safe game for all, although it may contain some mild
-                  violence or more complex themes.
+                  A safe game for all, although it may contain some mild violence or more complex
+                  themes.
                 </p>
               </div>
             </div>
             {/* details game  */}
             <div className="flex flex-col">
-              <GameTypes
-                title="Developer"
-                content={developerData?.displayName!}
-              />
+              <GameTypes title="Developer" content={developerData?.displayName!} />
               {/* <GameTypes title="Publisher" content="Antigane Inc." /> */}
               <GameTypes
                 title="Release Date"
-                content={nsToDateStr(detailGame?.releaseDate.toString()) || ""}
+                content={nsToDateStr(detailGame?.releaseDate.toString()) || ''}
               />
               <GameTypes title="Requirement" content="RAM 8GB" />
               <GameTypes title="Platform" content="Web" />

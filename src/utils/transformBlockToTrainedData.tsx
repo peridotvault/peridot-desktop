@@ -1,10 +1,7 @@
-import { Block } from "../local_db/wallet/models/Block";
-import { TrainedDataInterface } from "../features/wallet/interfaces/History";
+import { Block } from '../local_db/wallet/models/Block';
+import { TrainedDataInterface } from '../features/wallet/interfaces/History';
 
-export function transformBlockToTrained(
-  block: Block,
-  principalId: string
-): TrainedDataInterface {
+export function transformBlockToTrained(block: Block, principalId: string): TrainedDataInterface {
   const isSender = block.from === principalId;
 
   return {
@@ -15,11 +12,11 @@ export function transformBlockToTrained(
     canisterId: block.coinArchiveAddress,
     value: block.amt,
     timestamp: String(block.timestamp),
-    currency: "", // kamu bisa ambil dari coin.symbol jika mau
+    currency: '', // kamu bisa ambil dari coin.symbol jika mau
     sender: block.from,
     receiver: block.to,
     isSender,
     is_suspicious: false,
-    valueCategory: "", // bisa diisi berdasarkan aturan nanti
+    valueCategory: '', // bisa diisi berdasarkan aturan nanti
   };
 }

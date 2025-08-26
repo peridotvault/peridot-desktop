@@ -1,4 +1,4 @@
-import { AppId, Timestamp, UserId } from "../CoreInterface";
+import { AppId, Timestamp, UserId } from '../CoreInterface';
 
 /** =========================
  *  Purchase

@@ -1,5 +1,5 @@
-import { UserInterface } from "../../../interfaces/user/UserInterface";
-import { dbUser } from "../database";
+import { UserInterface } from '../../../interfaces/user/UserInterface';
+import { dbUser } from '../database';
 
 export const userService = {
   // Create

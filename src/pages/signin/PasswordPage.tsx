@@ -1,27 +1,20 @@
-import React, { useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState } from 'react';
+import { useWallet } from '../../contexts/WalletContext';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons/faChevronLeft';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface PasswordProps {
   backFunction: () => void;
   handlePassword: (password: string) => void;
 }
 
-export const PasswordPage: React.FC<PasswordProps> = ({
-  backFunction,
-  handlePassword,
-}) => {
+export const PasswordPage: React.FC<PasswordProps> = ({ backFunction, handlePassword }) => {
   const { setWallet } = useWallet();
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSubmit = () => {
-    if (
-      password !== "" &&
-      password === confirmPassword &&
-      password.length >= 5
-    ) {
+    if (password !== '' && password === confirmPassword && password.length >= 5) {
       // First update the wallet with the password
       setWallet((prev) => ({
         ...prev,
@@ -45,7 +38,7 @@ export const PasswordPage: React.FC<PasswordProps> = ({
         name="password"
         className="border border-white/10 shadow-sunken-lg p-3 w-72 rounded-lg text-white bg-background_primary outline-none"
         placeholder="Enter your password"
-        value={password || ""}
+        value={password || ''}
         onChange={(e) => setPassword(e.target.value)}
       />
       <input
@@ -53,14 +46,14 @@ export const PasswordPage: React.FC<PasswordProps> = ({
         name="confirmPassword"
         className="border border-white/10 shadow-sunken-lg p-3 w-72 rounded-lg text-white bg-background_primary outline-none"
         placeholder="Confirm your password"
-        value={confirmPassword || ""}
+        value={confirmPassword || ''}
         onChange={(e) => setConfirmPassword(e.target.value)}
       />
 
       {/* debug user  */}
-      {password.length < 5 && password !== "" ? (
+      {password.length < 5 && password !== '' ? (
         <p className="text-red-500 text-sm">your password less then 5</p>
-      ) : password !== confirmPassword && confirmPassword !== "" ? (
+      ) : password !== confirmPassword && confirmPassword !== '' ? (
         <p className="text-red-500 text-sm">your password not same</p>
       ) : (
         <div className=""></div>
@@ -70,11 +63,9 @@ export const PasswordPage: React.FC<PasswordProps> = ({
       <button
         onClick={handleSubmit}
         className={`bg-white text-black py-3 px-10 rounded-full ${
-          password !== "" &&
-          password === confirmPassword &&
-          password.length >= 5
-            ? ""
-            : "opacity-30 cursor-not-allowed "
+          password !== '' && password === confirmPassword && password.length >= 5
+            ? ''
+            : 'opacity-30 cursor-not-allowed '
         }`}
       >
         Create Password

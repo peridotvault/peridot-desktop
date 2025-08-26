@@ -76,9 +76,9 @@ export const ICPLedgerFactory = ({ IDL }: { IDL: any }) => {
   const TransferFromResult = IDL.Variant({ Ok: TxIndex, Err: TransferFromErr });
 
   return IDL.Service({
-    icrc1_decimals: IDL.Func([], [IDL.Nat8], ["query"]),
-    icrc1_fee: IDL.Func([], [IDL.Nat], ["query"]),
-    icrc2_allowance: IDL.Func([AllowanceArgs], [Allowance], ["query"]),
+    icrc1_decimals: IDL.Func([], [IDL.Nat8], ['query']),
+    icrc1_fee: IDL.Func([], [IDL.Nat], ['query']),
+    icrc2_allowance: IDL.Func([AllowanceArgs], [Allowance], ['query']),
     icrc2_approve: IDL.Func([ApproveArgs], [ApproveResult], []),
     icrc2_transfer_from: IDL.Func([TransferFromArgs], [TransferFromResult], []),
   });

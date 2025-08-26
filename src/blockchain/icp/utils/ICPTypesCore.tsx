@@ -1,4 +1,4 @@
-import { IDL } from "@dfinity/candid";
+import { IDL } from '@dfinity/candid';
 
 export const ICPAppId = IDL.Nat;
 export const ICPAnnouncementId = IDL.Nat;

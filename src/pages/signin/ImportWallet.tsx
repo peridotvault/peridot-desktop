@@ -1,21 +1,20 @@
 // @ts-ignore
-import React, { useCallback, useEffect, useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
-import { walletService } from "../../features/wallet/services/WalletService";
-import { useNavigate } from "react-router-dom";
-import { PasswordPage } from "./PasswordPage";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons/faChevronLeft";
-import { clearWalletData } from "../../utils/StoreService";
-import { SeedPhraseInput } from "../../features/wallet/components/SeedPhraseInput";
-import { getUserData } from "../../blockchain/icp/user/services/ICPUserService";
+import React, { useCallback, useEffect, useState } from 'react';
+import { useWallet } from '../../contexts/WalletContext';
+import { walletService } from '../../features/wallet/services/WalletService';
+import { useNavigate } from 'react-router-dom';
+import { PasswordPage } from './PasswordPage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons/faChevronLeft';
+import { clearWalletData } from '../../utils/StoreService';
+import { SeedPhraseInput } from '../../features/wallet/components/SeedPhraseInput';
+import { getUserData } from '../../blockchain/icp/user/services/ICPUserService';
 
 export default function ImportWallet() {
-  const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } =
-    useWallet();
+  const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } = useWallet();
 
   const navigate = useNavigate();
-  const [tempSeedPhrase, setTempSeedPhrase] = useState("");
+  const [tempSeedPhrase, setTempSeedPhrase] = useState('');
 
   useEffect(() => {
     async function userHandle() {
@@ -25,12 +24,12 @@ export default function ImportWallet() {
             wallet: wallet,
           });
           if (isUserExist) {
-            navigate("/");
+            navigate('/');
           }
         }
       } catch (error) {
         const msg = String((error as Error)?.message ?? error);
-        if (msg.includes("NotFound")) navigate("/create_profile");
+        if (msg.includes('NotFound')) navigate('/create_profile');
         else console.error(error);
       }
     }
@@ -40,7 +39,7 @@ export default function ImportWallet() {
 
   const clearSeedPhrase = async () => {
     await clearWalletData();
-    setTempSeedPhrase("");
+    setTempSeedPhrase('');
     setIsGeneratedSeedPhrase(false);
     setWallet((prevWallet) => ({
       ...prevWallet,
@@ -57,10 +56,7 @@ export default function ImportWallet() {
     async (seedPhrase: string, password: string) => {
       const result = await walletService.generateWallet(seedPhrase, password);
       if (result.success) {
-        const lock = await walletService.openLock(
-          password,
-          result.verificationData
-        );
+        const lock = await walletService.openLock(password, result.verificationData);
         setWallet((prevWallet) => ({
           ...prevWallet,
           encryptedSeedPhrase: result.encryptedSeedPhrase,
@@ -71,10 +67,10 @@ export default function ImportWallet() {
           lock: lock,
         }));
       } else {
-        console.error("Error importing wallet:", result.error);
+        console.error('Error importing wallet:', result.error);
       }
     },
-    [setWallet, navigate]
+    [setWallet, navigate],
   );
 
   if (!wallet.encryptedPrivateKey) {
@@ -86,7 +82,7 @@ export default function ImportWallet() {
               className="w-6"
               onClick={() => {
                 clearSeedPhrase();
-                navigate("/login");
+                navigate('/login');
               }}
             >
               <FontAwesomeIcon icon={faChevronLeft} />

@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useWallet } from "../../../contexts/WalletContext";
-import { clearWalletData } from "../../../utils/StoreService";
-import { useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useWallet } from '../../../contexts/WalletContext';
+import { clearWalletData } from '../../../utils/StoreService';
+import { useNavigate } from 'react-router-dom';
 import {
   faArrowRightFromBracket,
   faBitcoinSign,
@@ -13,25 +13,25 @@ import {
   faSeedling,
   faTriangleExclamation,
   faXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ICRC1Coin } from "../../../features/wallet/components/ICRC1Coin";
-import { walletService } from "../../../features/wallet/services/WalletService";
-import { Manage } from "../../../features/wallet/views/Manage";
-import { Receive } from "../../../features/wallet/views/Receive";
-import { SendToken } from "../../../features/wallet/views/SendToken";
-import theCoin from "./../../../assets/json/coins.json";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ICRC1Coin } from '../../../features/wallet/components/ICRC1Coin';
+import { walletService } from '../../../features/wallet/services/WalletService';
+import { Manage } from '../../../features/wallet/views/Manage';
+import { Receive } from '../../../features/wallet/views/Receive';
+import { SendToken } from '../../../features/wallet/views/SendToken';
+import theCoin from './../../../assets/json/coins.json';
 import {
   getCurrencyByCode,
   getWalletInfo,
   saveCurrencyToWallet,
   saveRatesByCode,
-} from "../../../utils/IndexedDb";
-import { Currency } from "../../../features/wallet/interfaces/Currency";
-import { WalletInfo } from "../../../features/wallet/interfaces/Wallet";
-import { InputField } from "../../../components/atoms/InputField";
-import { CoinService } from "../../../local_db/wallet/services/coinService";
-import { Coin } from "../../../local_db/wallet/models/Coin";
+} from '../../../utils/IndexedDb';
+import { Currency } from '../../../features/wallet/interfaces/Currency';
+import { WalletInfo } from '../../../features/wallet/interfaces/Wallet';
+import { InputField } from '../../../components/atoms/InputField';
+import { CoinService } from '../../../local_db/wallet/services/coinService';
+import { Coin } from '../../../local_db/wallet/models/Coin';
 
 interface HomeProps {
   onLockChanged: () => void;
@@ -42,13 +42,13 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
   const navigate = useNavigate();
   const [isOpenWalletAddress, setIsOpenWalletAddress] = useState(false);
   const [isModalOpenKey, setIsModalOpenKey] = useState(false);
-  const [isModalOpenKeyPKSP, setIsModalOpenKeyPKSP] = useState("");
+  const [isModalOpenKeyPKSP, setIsModalOpenKeyPKSP] = useState('');
   const [myBalance, setMyBalance] = useState(0);
   const [currency, setCurrency] = useState<Currency>({
-    currency_name: "",
-    currency: "",
-    symbol: "",
-    flag_url: "",
+    currency_name: '',
+    currency: '',
+    symbol: '',
+    flag_url: '',
     rates: 0,
   });
   const [openButton, setOpenButton] = useState({
@@ -67,7 +67,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
       try {
         // 1) Currency
         const myWallet = (await getWalletInfo()) as WalletInfo;
-        await fetchAPICurrency(myWallet ? myWallet.currency.currency : "USD");
+        await fetchAPICurrency(myWallet ? myWallet.currency.currency : 'USD');
 
         // 2) Seed dulu (first run), lalu pastikan coin baru di JSON ikut masuk
         await CoinService.seedIfEmpty(defaultCoins);
@@ -77,7 +77,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
         const actives = await CoinService.getCoinActive();
         setActiveCoins(actives);
       } catch (error) {
-        console.error("Error bootstrapping wallet:", error);
+        console.error('Error bootstrapping wallet:', error);
         // fallback visual saja kalau DB error
         setActiveCoins(defaultCoins.filter((c) => c.isChecked === 1));
       }
@@ -89,20 +89,14 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
   }, [openButton.manage]);
 
   // Function to update a token's balance and recalculate total
-  const updateTokenBalance = useCallback(
-    (canisterId: string, balanceUsd: number) => {
-      setTokenBalances((prev) => {
-        const newBalances = { ...prev, [canisterId]: balanceUsd };
-        const total = Object.values(newBalances).reduce(
-          (sum, value) => sum + value,
-          0
-        );
-        setMyBalance(total);
-        return newBalances;
-      });
-    },
-    []
-  );
+  const updateTokenBalance = useCallback((canisterId: string, balanceUsd: number) => {
+    setTokenBalances((prev) => {
+      const newBalances = { ...prev, [canisterId]: balanceUsd };
+      const total = Object.values(newBalances).reduce((sum, value) => sum + value, 0);
+      setMyBalance(total);
+      return newBalances;
+    });
+  }, []);
 
   const handleClearData = async () => {
     try {
@@ -116,14 +110,14 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
         verificationData: null,
       });
       setIsGeneratedSeedPhrase(false);
-      navigate("/login");
+      navigate('/login');
     } catch (error) {
-      console.error("Error clearing wallet data:", error);
+      console.error('Error clearing wallet data:', error);
     }
   };
 
   const fetchAPICurrency = async (currency: string) => {
-    const url = "https://open.er-api.com/v6/latest/USD";
+    const url = 'https://open.er-api.com/v6/latest/USD';
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -178,7 +172,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
           {/* MODAL =================================================== */}
           <div
             className={`fixed right-[370px] top-6 ${
-              isOpenWalletAddress ? "flex" : "hidden"
+              isOpenWalletAddress ? 'flex' : 'hidden'
             } justify-start flex-col bg-background_primary py-6 px-10 mx-6 rounded-b-2xl rounded-tl-2xl gap-5 duration-300`}
           >
             {/* Peridot Wallet Address */}
@@ -191,36 +185,28 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
             </div>
             {/* Change Currency  */}
             <button
-              onClick={() =>
-                fetchAPICurrency(currency.currency == "USD" ? "IDR" : "USD")
-              }
+              onClick={() => fetchAPICurrency(currency.currency == 'USD' ? 'IDR' : 'USD')}
               className="flex gap-3 items-center hover:scale-105 duration-300"
             >
               <div className="w-12 h-12 shadow-arise-sm rounded-xl flex justify-center items-center">
-                <FontAwesomeIcon
-                  icon={faMoneyBillTransfer}
-                  className="text-blue-400 size-5"
-                />
+                <FontAwesomeIcon icon={faMoneyBillTransfer} className="text-blue-400 size-5" />
               </div>
               <div className="flex flex-col items-start">
                 <p className="text-md font-semibold">Change Currency</p>
-                <p>{currency.currency + " - " + currency.currency_name}</p>
+                <p>{currency.currency + ' - ' + currency.currency_name}</p>
               </div>
             </button>
             {/* Seed Phrase */}
             <button
               onClick={() => {
                 setIsModalOpenKey(true);
-                setIsModalOpenKeyPKSP("seedPhrase");
+                setIsModalOpenKeyPKSP('seedPhrase');
               }}
               className="flex gap-5 justify-between items-center hover:scale-105 duration-300"
             >
               <div className="flex gap-3 items-center">
                 <div className="w-12 h-12 shadow-arise-sm rounded-xl flex justify-center items-center">
-                  <FontAwesomeIcon
-                    icon={faSeedling}
-                    className="text-accent_primary size-5"
-                  />
+                  <FontAwesomeIcon icon={faSeedling} className="text-accent_primary size-5" />
                 </div>
                 <div className="flex flex-col items-start">
                   <p className="text-md font-semibold">Seed Phrase</p>
@@ -233,16 +219,13 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
             <button
               onClick={() => {
                 setIsModalOpenKey(true);
-                setIsModalOpenKeyPKSP("privateKey");
+                setIsModalOpenKeyPKSP('privateKey');
               }}
               className="flex gap-5 justify-between items-center hover:scale-105 duration-300"
             >
               <div className="flex gap-3 items-center">
                 <div className="w-12 h-12 shadow-arise-sm rounded-xl flex justify-center items-center">
-                  <FontAwesomeIcon
-                    icon={faKey}
-                    className="text-yellow-300 size-5"
-                  />
+                  <FontAwesomeIcon icon={faKey} className="text-yellow-300 size-5" />
                 </div>
                 <div className="flex flex-col items-start">
                   <p className="text-md font-semibold">Private Key</p>
@@ -257,10 +240,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
             onClick={handleClearData}
             className="w-12 h-12 flex justify-center items-center rounded-xl bg-background_primary shadow-arise-sm hover:shadow-flat-sm opacity-80 hover:opacity-100 duration-300"
           >
-            <FontAwesomeIcon
-              icon={faArrowRightFromBracket}
-              className="text-md"
-            />
+            <FontAwesomeIcon icon={faArrowRightFromBracket} className="text-md" />
           </button>
         </div>
 
@@ -323,42 +303,35 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
           <ModalOpenKey
             pkORsp={isModalOpenKeyPKSP}
             onClose={() => setIsModalOpenKey(false)}
-            onConfirm={async (
-              password: string,
-              pkORsp: string
-            ): Promise<string> => {
-              if (
-                wallet.encryptedPrivateKey &&
-                wallet.encryptedSeedPhrase &&
-                password
-              ) {
+            onConfirm={async (password: string, pkORsp: string): Promise<string> => {
+              if (wallet.encryptedPrivateKey && wallet.encryptedSeedPhrase && password) {
                 try {
                   const decrypt = await walletService.decryptWalletData(
-                    pkORsp === "seedPhrase"
+                    pkORsp === 'seedPhrase'
                       ? wallet.encryptedSeedPhrase
                       : wallet.encryptedPrivateKey,
-                    password
+                    password,
                   );
 
                   // Validate the decrypted data
-                  const isSeedPhrase = decrypt.includes(" ");
+                  const isSeedPhrase = decrypt.includes(' ');
                   if (isSeedPhrase) {
                     // For seed phrases: only allow letters and spaces
                     if (!/^[a-z\s]+$/i.test(decrypt)) {
-                      throw new Error("Incorrect password");
+                      throw new Error('Incorrect password');
                     }
                   } else {
                     // For private keys: only allow hex characters
                     if (!/^[0-9a-f]+$/i.test(decrypt)) {
-                      throw new Error("Incorrect password");
+                      throw new Error('Incorrect password');
                     }
                   }
                   return decrypt;
                 } catch (e) {
-                  throw new Error("Incorrect password");
+                  throw new Error('Incorrect password');
                 }
               }
-              throw new Error("No encrypted data available");
+              throw new Error('No encrypted data available');
             }}
           />
         )}
@@ -410,7 +383,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
             }
           />
         ) : (
-          ""
+          ''
         )}
       </div>
     </div>
@@ -423,13 +396,9 @@ interface ModalOpenKeyProps {
   onConfirm: (password: string, pkORsp: string) => Promise<string>;
 }
 
-const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
-  pkORsp,
-  onClose,
-  onConfirm,
-}) => {
+const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({ pkORsp, onClose, onConfirm }) => {
   // ModalOpenKey component remains unchanged
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState('');
   const [decryptedKey, setDecryptedKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [countdownHold, setCountdownHold] = useState(3);
@@ -437,11 +406,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
   const holdTimeRef = useRef<number | null>(null);
   const [countdown, setCountdown] = useState<number>(60);
   const title =
-    pkORsp === "seedPhrase"
-      ? "Seed Phrase"
-      : pkORsp === "privateKey"
-      ? "Private Key"
-      : "none";
+    pkORsp === 'seedPhrase' ? 'Seed Phrase' : pkORsp === 'privateKey' ? 'Private Key' : 'none';
 
   const handleConfirm = async () => {
     try {
@@ -451,7 +416,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
       // Start countdown from
       setCountdown(60);
     } catch (err) {
-      setError("Failed to decrypt. Please check your password.");
+      setError('Failed to decrypt. Please check your password.');
     }
   };
 
@@ -508,7 +473,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
   const copyToClipboard = (data: string) => {
     if (!data) return;
     navigator.clipboard.writeText(data).catch((err) => {
-      console.error("Failed to copy: ", err);
+      console.error('Failed to copy: ', err);
     });
   };
 
@@ -543,18 +508,15 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
           )}
         </div>
         <div className="bg-danger/10 font-bold p-3 pr-5 items-start flex gap-3 border-l-4 border-danger rounded-r-lg">
-          <FontAwesomeIcon
-            icon={faTriangleExclamation}
-            className="size-6 text-danger"
-          />
+          <FontAwesomeIcon icon={faTriangleExclamation} className="size-6 text-danger" />
           <p className="">
             {decryptedKey !== null
-              ? "Your " +
+              ? 'Your ' +
                 title +
-                " provides full access to your wallet and funds. Do not share this with anyone."
-              : "Warning: Never disclose this key. Anyone with your " +
+                ' provides full access to your wallet and funds. Do not share this with anyone.'
+              : 'Warning: Never disclose this key. Anyone with your ' +
                 title +
-                " can steal any assets held in your account."}
+                ' can steal any assets held in your account.'}
           </p>
         </div>
         <div className="flex w-full gap-6">
@@ -572,20 +534,18 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({
             onTouchEnd={stopHolding}
             className={`w-1/2 ${
               password.length === 0 || decryptedKey !== null
-                ? "bg-accent_secondary/30 text-text_disabled"
-                : "bg-accent_secondary hover:scale-105"
+                ? 'bg-accent_secondary/30 text-text_disabled'
+                : 'bg-accent_secondary hover:scale-105'
             } p-3 rounded-2xl font-bold duration-300 overflow-hidden`}
             disabled={password.length === 0 || decryptedKey !== null}
           >
             <span className="relative z-10">
-              {isHolding ? `Hold... ${countdownHold}` : "Confirm"}
+              {isHolding ? `Hold... ${countdownHold}` : 'Confirm'}
             </span>
           </button>
         </div>
         {decryptedKey && (
-          <p className="text-sm text-text_disabled">
-            This page will close in {countdown} seconds
-          </p>
+          <p className="text-sm text-text_disabled">This page will close in {countdown} seconds</p>
         )}
       </div>
     </div>

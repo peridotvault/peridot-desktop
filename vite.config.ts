@@ -10,14 +10,12 @@ export default defineConfig({
     wasm(),
     nodeResolve({
       preferBuiltins: false,
-      browser: true
+      browser: true,
     }),
     react({
       jsxRuntime: 'automatic',
       babel: {
-        plugins: [
-          '@babel/plugin-transform-react-jsx',
-        ],
+        plugins: ['@babel/plugin-transform-react-jsx'],
       },
     }),
     electron({
@@ -27,9 +25,7 @@ export default defineConfig({
       preload: {
         input: path.join(__dirname, 'electron/preload.ts'),
       },
-      renderer: process.env.NODE_ENV === 'test'
-        ? undefined
-        : {},
+      renderer: process.env.NODE_ENV === 'test' ? undefined : {},
     }),
   ],
   resolve: {
@@ -43,7 +39,7 @@ export default defineConfig({
     },
   },
   define: {
-    'global': 'globalThis',
+    global: 'globalThis',
     'process.env': process.env,
     // 'process.version': '"v16.0.0"',
   },
@@ -51,16 +47,10 @@ export default defineConfig({
     esbuildOptions: {
       target: 'esnext',
       supported: {
-        bigint: true
+        bigint: true,
       },
     },
-    include: [
-      'buffer',
-      'process',
-      '@dfinity/agent',
-      '@dfinity/principal',
-      '@dfinity/candid',
-    ],
+    include: ['buffer', 'process', '@dfinity/agent', '@dfinity/principal', '@dfinity/candid'],
   },
   base: './',
   build: {

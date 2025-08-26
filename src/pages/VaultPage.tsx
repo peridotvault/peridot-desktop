@@ -1,10 +1,10 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { VerticalCard } from "../components/cards/VerticalCard";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import { AppInterface } from "../interfaces/app/AppInterface";
-import { getAllPublishApps } from "../blockchain/icp/app/services/ICPAppService";
+import React, { useEffect, useState } from 'react';
+import { VerticalCard } from '../components/cards/VerticalCard';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { AppInterface } from '../interfaces/app/AppInterface';
+import { getAllPublishApps } from '../blockchain/icp/app/services/ICPAppService';
 
 export default function VaultPage() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -13,9 +13,9 @@ export default function VaultPage() {
   const [allApps, setAllApps] = useState<AppInterface[] | null>();
 
   const images: string[] = [
-    "./assets/vault/Content1.png",
-    "./assets/vault/Content2.png",
-    "./assets/vault/Content3.png",
+    './assets/vault/Content1.png',
+    './assets/vault/Content2.png',
+    './assets/vault/Content3.png',
   ];
 
   useEffect(() => {
@@ -58,11 +58,7 @@ export default function VaultPage() {
     <main className="flex flex-col gap-3">
       {/* section 1  */}
       <section className="w-full h-[30rem] pt-20 mb-4 relative">
-        <img
-          src="https://i.imgur.com/ZlbIhY2.gif"
-          alt=""
-          className="w-full h-full object-cover"
-        />
+        <img src="https://i.imgur.com/ZlbIhY2.gif" alt="" className="w-full h-full object-cover" />
         <div className="w-full h-16 absolute bottom-0 bg-gradient-to-t from-background_primary"></div>
       </section>
 
@@ -73,20 +69,12 @@ export default function VaultPage() {
             <div
               key={index}
               className={`w-1/3 aspect-video rounded-xl bg-background_primary overflow-hidden duration-300 flex items-center justify-center 
-          ${
-            activeIndex === index
-              ? "scale-105 opacity-100 shadow-flat"
-              : "scale-100 opacity-70"
-          }
+          ${activeIndex === index ? 'scale-105 opacity-100 shadow-flat' : 'scale-100 opacity-70'}
         `}
               onMouseEnter={() => handleMouseEnter(index)}
               onMouseLeave={() => handleMouseLeave()}
             >
-              <img
-                src={image}
-                alt=""
-                className="w-full h-full object-cover rounded-xl"
-              />
+              <img src={image} alt="" className="w-full h-full object-cover rounded-xl" />
             </div>
           ))}
         </div>
@@ -97,9 +85,7 @@ export default function VaultPage() {
         <div className="flex flex-col gap-6 w-full container">
           {/* title  */}
           <button className="flex items-center gap-3">
-            <p className="text-xl font-semibold">
-              Black Friday - Cyber Monday Spotlight
-            </p>
+            <p className="text-xl font-semibold">Black Friday - Cyber Monday Spotlight</p>
             <FontAwesomeIcon icon={faAngleRight} />
           </button>
 
@@ -123,9 +109,7 @@ export default function VaultPage() {
         <div className="flex flex-col gap-6  w-full container">
           {/* title  */}
           <button className="flex items-center gap-3">
-            <p className="text-xl font-semibold">
-              Black Friday - Cyber Monday Spotlight
-            </p>
+            <p className="text-xl font-semibold">Black Friday - Cyber Monday Spotlight</p>
             <FontAwesomeIcon icon={faAngleRight} />
           </button>
 

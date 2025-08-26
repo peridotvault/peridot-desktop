@@ -1,22 +1,18 @@
-import React, { useEffect, useState } from "react";
-import {
-  faChevronLeft,
-  faPlus,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { InputField } from "../../../components/atoms/InputField";
-import { AddCoin } from "../components/AddCoin";
-import theCoin from "../../../assets/json/coins.json";
-import { Coin } from "../../../local_db/wallet/models/Coin";
-import { CoinService } from "../../../local_db/wallet/services/coinService";
+import React, { useEffect, useState } from 'react';
+import { faChevronLeft, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { InputField } from '../../../components/atoms/InputField';
+import { AddCoin } from '../components/AddCoin';
+import theCoin from '../../../assets/json/coins.json';
+import { Coin } from '../../../local_db/wallet/models/Coin';
+import { CoinService } from '../../../local_db/wallet/services/coinService';
 
 interface Props {
   onClose: () => void;
 }
 
 export const Manage: React.FC<Props> = ({ onClose }) => {
-  const [searchToken, setSearchToken] = useState("");
+  const [searchToken, setSearchToken] = useState('');
   const [listCoins, setListCoins] = useState<Coin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddCoin, setIsAddCoin] = useState(false);
@@ -35,7 +31,7 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
       //   setListCoins(defaultCoins);
       // }
     } catch (error) {
-      console.error("Error loading coins:", error);
+      console.error('Error loading coins:', error);
       setListCoins(defaultCoins);
     } finally {
       setIsLoading(false);
@@ -79,7 +75,7 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
   // };
 
   const filteredCoins = listCoins.filter((token) =>
-    token.name.toLowerCase().includes(searchToken.toLowerCase())
+    token.name.toLowerCase().includes(searchToken.toLowerCase()),
   );
 
   const handleToggle = async (coinAddress: string) => {
@@ -87,7 +83,7 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
       await CoinService.updateIsChecked(coinAddress);
       loadCoins();
     } catch (error) {
-      console.error("Error toggling coin:", error);
+      console.error('Error toggling coin:', error);
     }
   };
 
@@ -149,12 +145,10 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
               <div className="w-12 h-12 shadow-arise-sm rounded-full flex justify-center items-center overflow-hidden">
                 {item?.logo != null ? (
                   <img
-                    src={item?.logo != null ? item?.logo : "null"}
+                    src={item?.logo != null ? item?.logo : 'null'}
                     alt=""
                     className={`w-full ${
-                      item?.coinAddress == "ryjl3-tyaaa-aaaaa-aaaba-cai"
-                        ? "p-3"
-                        : ""
+                      item?.coinAddress == 'ryjl3-tyaaa-aaaaa-aaaba-cai' ? 'p-3' : ''
                     }`}
                   />
                 ) : (
@@ -190,14 +184,12 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
                 />
                 <span
                   className={`absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-background_primary shadow-arise-sm transition-all duration-500 rounded-lg ${
-                    item.isChecked ? "bg-white shadow-lg" : ""
+                    item.isChecked ? 'bg-white shadow-lg' : ''
                   }`}
                 ></span>
                 <span
                   className={`absolute content-[''] h-[.9em] w-[0.1em] rounded-none left-[0.5em] bottom-[0.3em]  transition-transform duration-500 ${
-                    item.isChecked
-                      ? " bg-black translate-x-[2.4em] rotate-180"
-                      : "bg-white"
+                    item.isChecked ? ' bg-black translate-x-[2.4em] rotate-180' : 'bg-white'
                   }`}
                 ></span>
               </label>
@@ -225,7 +217,7 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
           }}
         />
       ) : (
-        ""
+        ''
       )}
     </div>
   );

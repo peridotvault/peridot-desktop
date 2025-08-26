@@ -1,9 +1,9 @@
-import Dexie, { Table } from "dexie";
-import { schema } from "./schema";
+import Dexie, { Table } from 'dexie';
+import { schema } from './schema';
 
-import { Block } from "./models/Block";
-import { Coin } from "./models/Coin";
-import { UserProgress } from "./models/UserProgress";
+import { Block } from './models/Block';
+import { Coin } from './models/Coin';
+import { UserProgress } from './models/UserProgress';
 
 class WalletDatabase extends Dexie {
   coins!: Table<Coin, string>;
@@ -11,7 +11,7 @@ class WalletDatabase extends Dexie {
   user_progress!: Table<UserProgress, number>;
 
   constructor() {
-    super("WalletDatabase");
+    super('WalletDatabase');
     this.version(1).stores(schema);
   }
 }

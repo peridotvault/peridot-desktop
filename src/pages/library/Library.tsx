@@ -1,9 +1,9 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
-import { AppInterface } from "../../interfaces/app/AppInterface";
-import { Link } from "react-router-dom";
-import { getMyApps } from "../../blockchain/icp/app/services/ICPAppService";
+import React, { useEffect, useState } from 'react';
+import { useWallet } from '../../contexts/WalletContext';
+import { AppInterface } from '../../interfaces/app/AppInterface';
+import { Link } from 'react-router-dom';
+import { getMyApps } from '../../blockchain/icp/app/services/ICPAppService';
 
 export const Library = () => {
   const { wallet } = useWallet();
@@ -19,7 +19,7 @@ export const Library = () => {
   }, []);
 
   const formatTitle = (title: string): string => {
-    return title.toLowerCase().replace(/\s+/g, "_");
+    return title.toLowerCase().replace(/\s+/g, '_');
   };
 
   return (

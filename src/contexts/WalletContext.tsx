@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import type { WalletData } from "../features/wallet/services/WalletService";
-import { saveWalletData, getWalletData } from "../utils/StoreService";
-import { EncryptedData } from "@antigane/encryption";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import type { WalletData } from '../features/wallet/services/WalletService';
+import { saveWalletData, getWalletData } from '../utils/StoreService';
+import { EncryptedData } from '@antigane/encryption';
 
 interface WalletContextData {
   wallet: WalletData;
@@ -39,7 +39,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         }
         setIsCheckingWallet(false);
       } catch (error) {
-        console.error("Error loading initial wallet data:", error);
+        console.error('Error loading initial wallet data:', error);
         setIsCheckingWallet(false);
       }
     };
@@ -56,7 +56,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
           await saveWalletData(wallet);
         }
       } catch (error) {
-        console.error("Error saving wallet:", error);
+        console.error('Error saving wallet:', error);
       }
     };
 
@@ -79,18 +79,16 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       setIsGeneratedSeedPhrase,
       isCheckingWallet,
       setIsCheckingWallet,
-    ]
+    ],
   );
 
-  return (
-    <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
-  );
+  return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }
 
 export function useWallet() {
   const context = useContext(WalletContext);
   if (context === undefined) {
-    throw new Error("useWallet must be used within a WalletProvider");
+    throw new Error('useWallet must be used within a WalletProvider');
   }
   return context;
 }
@@ -109,7 +107,7 @@ export function useWalletUpdate() {
         ...updates,
       }));
     },
-    [setWallet]
+    [setWallet],
   );
 }
 

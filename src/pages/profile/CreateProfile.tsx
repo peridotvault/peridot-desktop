@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, { ChangeEvent, ChangeEventHandler, useState } from "react";
+import React, { ChangeEvent, ChangeEventHandler, useState } from 'react';
 import {
   faChevronLeft,
   faEarthAsia,
@@ -9,21 +9,18 @@ import {
   faUser,
   faVenusMars,
   IconDefinition,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useWallet } from "../../contexts/WalletContext";
-import { useNavigate } from "react-router-dom";
-import countriesData from "../../assets/json/countries.json";
-import { clearWalletData } from "../../utils/StoreService";
-import {
-  CreateUserInterface,
-  Gender,
-} from "../../interfaces/user/UserInterface";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useWallet } from '../../contexts/WalletContext';
+import { useNavigate } from 'react-router-dom';
+import countriesData from '../../assets/json/countries.json';
+import { clearWalletData } from '../../utils/StoreService';
+import { CreateUserInterface, Gender } from '../../interfaces/user/UserInterface';
 import {
   createAccount,
   getIsUsernameValid,
-} from "../../blockchain/icp/user/services/ICPUserService";
-import { ApiResponse } from "../../interfaces/CoreInterface";
+} from '../../blockchain/icp/user/services/ICPUserService';
+import { ApiResponse } from '../../interfaces/CoreInterface';
 
 interface CountryOption {
   code: string;
@@ -87,8 +84,7 @@ const AccountSettingsDropdownField = ({
   options: { code: string; name: string }[];
   onChange: ChangeEventHandler<HTMLSelectElement>;
 }) => {
-  const displayValue =
-    typeof value === "object" ? Object.keys(value)[0] : value;
+  const displayValue = typeof value === 'object' ? Object.keys(value)[0] : value;
   return (
     <section className="flex flex-col gap-3">
       <p className="capitalize font-semibold">
@@ -122,20 +118,20 @@ export const CreateProfile = () => {
   const { setWallet, setIsGeneratedSeedPhrase } = useWallet();
   const [isValidUsername, setIsValidUsername] = useState({
     valid: true,
-    msg: "",
+    msg: '',
   });
-  const [username, setUsername] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [gender, setGender] = useState("");
-  const [country, setCountry] = useState("");
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [birthDate, setBirthDate] = useState('');
+  const [gender, setGender] = useState('');
+  const [country, setCountry] = useState('');
   const { wallet } = useWallet();
   const navigate = useNavigate();
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement>,
-    setter: React.Dispatch<React.SetStateAction<string>>
+    setter: React.Dispatch<React.SetStateAction<string>>,
   ) => {
     setter(e.target.value);
   };
@@ -143,7 +139,7 @@ export const CreateProfile = () => {
   function dateToNanoSeconds(dateStr: string): bigint {
     // Expect "YYYY-MM-DD"
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
-    if (!m) throw new Error("Invalid date format, expected YYYY-MM-DD");
+    if (!m) throw new Error('Invalid date format, expected YYYY-MM-DD');
     const [_, y, mo, d] = m;
     const ms = Date.UTC(Number(y), Number(mo) - 1, Number(d)); // milliseconds UTC
     return BigInt(ms) * 1_000_000n; // -> nanoseconds
@@ -155,7 +151,7 @@ export const CreateProfile = () => {
     email: string,
     birthDate: string,
     gender: string,
-    country: string
+    country: string,
   ) => {
     const genderVariant: Gender = {
       [gender]: null,
@@ -170,11 +166,11 @@ export const CreateProfile = () => {
       country: country,
     };
     const isFormValid = Object.values(metadataCreateUser).every(
-      (value) => value !== "" && value !== null
+      (value) => value !== '' && value !== null,
     );
 
     if (!isFormValid) {
-      alert("Please fill in all fields");
+      alert('Please fill in all fields');
       return;
     }
 
@@ -185,18 +181,18 @@ export const CreateProfile = () => {
       });
       if (result) {
         // Handle successful creation
-        console.log("Account created successfully");
-        navigate("/");
+        console.log('Account created successfully');
+        navigate('/');
       }
     } catch (error) {
-      console.error("Error creating account:", error);
+      console.error('Error creating account:', error);
     }
   };
 
   const genderOptions: CountryOption[] = [
-    { code: "male", name: "Male" },
-    { code: "female", name: "Female" },
-    { code: "other", name: "Other" },
+    { code: 'male', name: 'Male' },
+    { code: 'female', name: 'Female' },
+    { code: 'other', name: 'Other' },
   ];
   const countryOptions: CountryOption[] = countriesData;
 
@@ -221,7 +217,7 @@ export const CreateProfile = () => {
         <button
           onClick={() => {
             clearSeedPhrase();
-            navigate("/login");
+            navigate('/login');
           }}
           className=" w-10 h-10 flex justify-center items-center rounded-xl"
         >
@@ -244,26 +240,20 @@ export const CreateProfile = () => {
               value={username}
               onChange={async (e) => {
                 handleInputChange(e, setUsername);
-                const result: ApiResponse<Boolean> = await getIsUsernameValid(
-                  e.target.value
-                );
+                const result: ApiResponse<Boolean> = await getIsUsernameValid(e.target.value);
 
-                if ("err" in result) {
+                if ('err' in result) {
                   const error = result as { err: { InvalidInput: string } };
                   setIsValidUsername({
                     valid: false,
-                    msg: error.err.InvalidInput ?? "Invalid username",
+                    msg: error.err.InvalidInput ?? 'Invalid username',
                   });
                 } else {
-                  setIsValidUsername({ valid: true, msg: "username valid" });
+                  setIsValidUsername({ valid: true, msg: 'username valid' });
                 }
               }}
             />
-            <p
-              className={` ${
-                isValidUsername.valid ? "text-success" : "text-danger"
-              }`}
-            >
+            <p className={` ${isValidUsername.valid ? 'text-success' : 'text-danger'}`}>
               {isValidUsername.msg}
             </p>
           </div>
@@ -314,16 +304,7 @@ export const CreateProfile = () => {
           />
         </section>
         <button
-          onClick={() =>
-            handleSubmit(
-              username,
-              displayName,
-              email,
-              birthDate,
-              gender,
-              country
-            )
-          }
+          onClick={() => handleSubmit(username, displayName, email, birthDate, gender, country)}
           className="w-52 p-3 rounded-xl hover:shadow-arise-sm shadow-flat-sm duration-300 hover:text-white text-text_disabled"
         >
           Submit

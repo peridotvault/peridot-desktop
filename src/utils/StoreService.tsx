@@ -1,4 +1,4 @@
-import { WalletData } from "../features/wallet/services/WalletService";
+import { WalletData } from '../features/wallet/services/WalletService';
 
 export const saveWalletData = async (data: WalletData): Promise<void> => {
   try {
@@ -12,7 +12,7 @@ export const saveWalletData = async (data: WalletData): Promise<void> => {
       throw new Error(result.error);
     }
   } catch (error) {
-    console.error("Error saving wallet data:", error);
+    console.error('Error saving wallet data:', error);
     throw error;
   }
 };
@@ -32,7 +32,7 @@ export const getWalletData = async (): Promise<WalletData | undefined> => {
     }
     return undefined;
   } catch (error) {
-    console.error("Error getting wallet data:", error);
+    console.error('Error getting wallet data:', error);
     return undefined;
   }
 };
@@ -44,7 +44,7 @@ export const clearWalletData = async (): Promise<void> => {
       throw new Error(result.error);
     }
   } catch (error) {
-    console.error("Error clearing wallet data:", error);
+    console.error('Error clearing wallet data:', error);
     throw error;
   }
 };

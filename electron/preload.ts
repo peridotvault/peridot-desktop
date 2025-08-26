@@ -1,6 +1,6 @@
 // preload.ts
-import { ipcRenderer } from 'electron'
-import type { WalletData } from '../src/features/wallet/services/WalletService'
+import { ipcRenderer } from 'electron';
+import type { WalletData } from '../src/features/wallet/services/WalletService';
 import { EncryptedData } from '@antigane/encryption';
 
 interface SerializedWalletData {
@@ -19,9 +19,10 @@ window.electronAPI = {
     ipcRenderer.send('go-forward');
   },
 
-  // wallet 
-  saveWallet: (data: SerializedWalletData | WalletData): Promise<{ success: boolean; error?: string }> =>
-    ipcRenderer.invoke('save-wallet', data),
+  // wallet
+  saveWallet: (
+    data: SerializedWalletData | WalletData,
+  ): Promise<{ success: boolean; error?: string }> => ipcRenderer.invoke('save-wallet', data),
 
   getWallet: (): Promise<{ success: boolean; data?: SerializedWalletData; error?: string }> =>
     ipcRenderer.invoke('get-wallet'),
@@ -29,8 +30,7 @@ window.electronAPI = {
   clearWallet: (): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('clear-wallet'),
 
-
   openWebGame: (url: string): void => {
     ipcRenderer.send('open-web-game', url);
   },
-}
+};

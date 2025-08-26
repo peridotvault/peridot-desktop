@@ -1,7 +1,7 @@
 // UpdateProfile.tsx
 // @ts-ignore
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
+import React, { ChangeEvent, useEffect, useState } from 'react';
+import { useWallet } from '../../contexts/WalletContext';
 import {
   faEarthAsia,
   faEnvelope,
@@ -9,60 +9,52 @@ import {
   faTv,
   faUser,
   faVenusMars,
-} from "@fortawesome/free-solid-svg-icons";
-import countriesData from "../../assets/json/countries.json";
-import { LoadingScreen } from "../../components/organisms/LoadingScreen";
-import { getCoverImage, getProfileImage } from "../../utils/Additional";
-import { saveUserInfo } from "../../utils/IndexedDb";
-import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";
-import { DropDownComponent } from "../../components/atoms/DropDownComponent";
-import { AlertMessage } from "../../features/wallet/components/AlertMessage";
-import { GetOpt, ToOpt } from "../../interfaces/CoreInterface";
+} from '@fortawesome/free-solid-svg-icons';
+import countriesData from '../../assets/json/countries.json';
+import { LoadingScreen } from '../../components/organisms/LoadingScreen';
+import { getCoverImage, getProfileImage } from '../../utils/Additional';
+import { saveUserInfo } from '../../utils/IndexedDb';
+import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
+import { DropDownComponent } from '../../components/atoms/DropDownComponent';
+import { AlertMessage } from '../../features/wallet/components/AlertMessage';
+import { GetOpt, ToOpt } from '../../interfaces/CoreInterface';
 
-import {
-  Gender,
-  UserInterface,
-  UpdateUserInterface,
-} from "../../interfaces/user/UserInterface";
+import { Gender, UserInterface, UpdateUserInterface } from '../../interfaces/user/UserInterface';
 import {
   getIsUsernameValid,
   getUserData,
   updateUser,
-} from "../../blockchain/icp/user/services/ICPUserService";
+} from '../../blockchain/icp/user/services/ICPUserService';
 
 /** Utils — konversi tanggal (ns <-> YYYY-MM-DD UTC) */
 function unixNsToDateStr(ns: bigint): string {
-  if (!ns || ns === 0n) return "";
+  if (!ns || ns === 0n) return '';
   const ms = Number(ns / 1_000_000n);
   const d = new Date(ms);
   // normalisasi ke midnight UTC supaya cocok <input type="date">
-  const iso = new Date(
-    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
-  )
+  const iso = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
     .toISOString()
     .slice(0, 10);
   return iso;
 }
 function dateStrToUnixNs(dateStr: string): bigint {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
-  if (!m) throw new Error("Invalid date format (YYYY-MM-DD)");
+  if (!m) throw new Error('Invalid date format (YYYY-MM-DD)');
   const y = Number(m[1]),
     mo = Number(m[2]) - 1,
     d = Number(m[3]);
   const ms = Date.UTC(y, mo, d, 0, 0, 0, 0);
   return BigInt(ms) * 1_000_000n;
 }
-function genderVariantToCode(
-  g: Gender | null | undefined
-): "male" | "female" | "other" {
-  if (!g) return "other";
-  if ("male" in g) return "male";
-  if ("female" in g) return "female";
-  return "other";
+function genderVariantToCode(g: Gender | null | undefined): 'male' | 'female' | 'other' {
+  if (!g) return 'other';
+  if ('male' in g) return 'male';
+  if ('female' in g) return 'female';
+  return 'other';
 }
 function genderCodeToVariant(code: string): Gender {
-  if (code === "male") return { male: null };
-  if (code === "female") return { female: null };
+  if (code === 'male') return { male: null };
+  if (code === 'female') return { female: null };
   return { other: null };
 }
 
@@ -72,9 +64,9 @@ interface Option {
   name: string;
 }
 const genderOptions: Option[] = [
-  { code: "male", name: "Male" },
-  { code: "female", name: "Female" },
-  { code: "other", name: "Other" },
+  { code: 'male', name: 'Male' },
+  { code: 'female', name: 'Female' },
+  { code: 'other', name: 'Other' },
 ];
 const countryOptions: Option[] = countriesData as Option[];
 
@@ -84,7 +76,7 @@ type UpdateForm = {
   displayName: string;
   email: string;
   birthDateStr: string; // YYYY-MM-DD
-  genderCode: "male" | "female" | "other";
+  genderCode: 'male' | 'female' | 'other';
   country: string;
   imageUrl: string | null; // base64/url untuk preview
   backgroundImageUrl: string | null; // base64/url untuk preview
@@ -95,19 +87,19 @@ export const UpdateProfile = () => {
   const [updating, setUpdating] = useState(false);
 
   const [form, setForm] = useState<UpdateForm>({
-    username: "",
-    displayName: "",
-    email: "",
-    birthDateStr: "",
-    genderCode: "other",
-    country: "",
+    username: '',
+    displayName: '',
+    email: '',
+    birthDateStr: '',
+    genderCode: 'other',
+    country: '',
     imageUrl: null,
     backgroundImageUrl: null,
   });
 
   const [isValidUsername, setIsValidUsername] = useState({
     valid: true,
-    msg: "",
+    msg: '',
   });
   const [isLoading, setIsLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -143,58 +135,46 @@ export const UpdateProfile = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
   const onGenderChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const code = e.target.value as UpdateForm["genderCode"];
+    const code = e.target.value as UpdateForm['genderCode'];
     setForm((p) => ({ ...p, genderCode: code }));
   };
 
   const handleImageUpload = async (
     e: ChangeEvent<HTMLInputElement>,
-    field: "imageUrl" | "backgroundImageUrl"
+    field: 'imageUrl' | 'backgroundImageUrl',
   ) => {
     try {
       const file = e.target.files?.[0];
       if (!file) return;
       const MAX = 1.5 * 1024 * 1024;
       if (file.size > MAX) {
-        alert(
-          `File too large (>1.5MB). Size: ${(file.size / 1024 / 1024).toFixed(
-            2
-          )}MB`
-        );
-        e.target.value = "";
+        alert(`File too large (>1.5MB). Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        e.target.value = '';
         return;
       }
       const base64 = await new Promise<string>((resolve, reject) => {
         const r = new FileReader();
         r.onload = () =>
-          typeof r.result === "string"
-            ? resolve(r.result)
-            : reject(new Error("toBase64 failed"));
+          typeof r.result === 'string' ? resolve(r.result) : reject(new Error('toBase64 failed'));
         r.onerror = () => reject(r.error);
         r.readAsDataURL(file);
       });
       setForm((p) => ({ ...p, [field]: base64 }));
     } catch (err) {
       console.error(err);
-      e.target.value = "";
-      alert("Failed to upload image.");
+      e.target.value = '';
+      alert('Failed to upload image.');
     }
   };
 
   const handleSubmit = async () => {
     // Validasi ringan
-    if (
-      !form.username ||
-      !form.displayName ||
-      !form.email ||
-      !form.birthDateStr ||
-      !form.country
-    ) {
-      alert("Please fill in all fields");
+    if (!form.username || !form.displayName || !form.email || !form.birthDateStr || !form.country) {
+      alert('Please fill in all fields');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      alert("Please enter a valid email address");
+      alert('Please enter a valid email address');
       return;
     }
 
@@ -217,7 +197,7 @@ export const UpdateProfile = () => {
       await saveUserInfo(updated as unknown as UserInterface);
       setShowSuccess(true);
     } catch (error) {
-      console.error("Error updating account:", error);
+      console.error('Error updating account:', error);
       setShowFailed(true);
       setTimeout(() => setShowFailed(false), 2000);
       setShowFailed(true);
@@ -233,17 +213,17 @@ export const UpdateProfile = () => {
     onChange(e);
     try {
       const res = await getIsUsernameValid(e.target.value);
-      if ("ok" in res) {
-        setIsValidUsername({ valid: true, msg: "username valid" });
-      } else if ("err" in res) {
+      if ('ok' in res) {
+        setIsValidUsername({ valid: true, msg: 'username valid' });
+      } else if ('err' in res) {
         const err = res.err as { InvalidInput?: string };
         setIsValidUsername({
           valid: false,
-          msg: err.InvalidInput ?? "Invalid username",
+          msg: err.InvalidInput ?? 'Invalid username',
         });
       }
     } catch {
-      setIsValidUsername({ valid: false, msg: "Validation failed" });
+      setIsValidUsername({ valid: false, msg: 'Validation failed' });
     }
   };
 
@@ -252,12 +232,8 @@ export const UpdateProfile = () => {
   return (
     <main className="pt-20 w-full flex flex-col">
       <div className="flex flex-col items-center">
-        {showSuccess && (
-          <AlertMessage msg="Account Updated Successfully" isSuccess />
-        )}
-        {showFailed && (
-          <AlertMessage msg="Account Update Failed" isSuccess={false} />
-        )}
+        {showSuccess && <AlertMessage msg="Account Updated Successfully" isSuccess />}
+        {showFailed && <AlertMessage msg="Account Update Failed" isSuccess={false} />}
 
         <div className="mb-3 py-6 px-10 border-b border-background_disabled flex justify-between items-center w-full">
           <p className="text-2xl font-semibold">Account Settings</p>
@@ -296,7 +272,7 @@ export const UpdateProfile = () => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleImageUpload(e, "imageUrl")}
+                onChange={(e) => handleImageUpload(e, 'imageUrl')}
                 className="w-full bg-transparent shadow-sunken-sm px-5 mt-3 py-3 rounded-lg"
               />
             </div>
@@ -317,7 +293,7 @@ export const UpdateProfile = () => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleImageUpload(e, "backgroundImageUrl")}
+                onChange={(e) => handleImageUpload(e, 'backgroundImageUrl')}
                 className="w-full bg-transparent shadow-sunken-sm px-5 mt-3 py-3 rounded-lg"
               />
             </div>
@@ -327,8 +303,8 @@ export const UpdateProfile = () => {
             <div className="flex flex-col gap-2">
               <p className="text-xl font-semibold">User Information</p>
               <p className="text-text_disabled">
-                Here you can edit public information about yourself. The changes
-                will be visible to other users.
+                Here you can edit public information about yourself. The changes will be visible to
+                other users.
               </p>
             </div>
 
@@ -341,11 +317,7 @@ export const UpdateProfile = () => {
                 value={form.username}
                 onChange={onUsernameChange}
               />
-              <p
-                className={`${
-                  isValidUsername.valid ? "text-success" : "text-danger"
-                }`}
-              >
+              <p className={`${isValidUsername.valid ? 'text-success' : 'text-danger'}`}>
                 {isValidUsername.msg}
               </p>
             </div>

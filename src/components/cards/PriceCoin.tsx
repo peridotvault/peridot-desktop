@@ -1,5 +1,5 @@
 // @ts-ignore
-import React from "react";
+import React from 'react';
 
 export const PriceCoin = ({ price }: { price: number }) => {
   if (price <= 0) {
@@ -12,10 +12,7 @@ export const PriceCoin = ({ price }: { price: number }) => {
 
   return (
     <div className="flex gap-2 items-center text-start">
-      <img
-        src="./assets/coin-peridot.png"
-        className="h-5 aspect-square object-contain"
-      />
+      <img src="./assets/coin-peridot.png" className="h-5 aspect-square object-contain" />
       <p>{price} PER</p>
     </div>
   );

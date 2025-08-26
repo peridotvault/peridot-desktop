@@ -1,34 +1,34 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { Navbar } from "./Navbar";
-import { Outlet, useNavigate } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
-import _ from "lodash";
-import { useWallet } from "../contexts/WalletContext";
-import { UserInterface } from "../interfaces/user/UserInterface";
-import { getUserInfo, saveUserInfo } from "../utils/IndexedDb";
-import { walletService } from "../features/wallet/services/WalletService";
-import { getUserData } from "../blockchain/icp/user/services/ICPUserService";
-import { Wallet } from "../features/wallet/views/Wallet";
-import { InputField } from "../components/atoms/InputField";
-import { GetOpt } from "../interfaces/CoreInterface";
+import React, { useEffect, useState } from 'react';
+import { Navbar } from './Navbar';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import _ from 'lodash';
+import { useWallet } from '../contexts/WalletContext';
+import { UserInterface } from '../interfaces/user/UserInterface';
+import { getUserInfo, saveUserInfo } from '../utils/IndexedDb';
+import { walletService } from '../features/wallet/services/WalletService';
+import { getUserData } from '../blockchain/icp/user/services/ICPUserService';
+import { Wallet } from '../features/wallet/views/Wallet';
+import { InputField } from '../components/atoms/InputField';
+import { GetOpt } from '../interfaces/CoreInterface';
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
   const { wallet, isCheckingWallet, setIsCheckingWallet } = useWallet();
   const navigate = useNavigate();
   const [isRequiredPassword, setIsRequiredPassword] = useState(false);
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserInterface | null>(null);
 
   const saveMetadata = async (
     oldUserMetadata: UserInterface | null,
-    newMetadata: UserInterface
+    newMetadata: UserInterface,
   ): Promise<void> => {
     try {
       if (!_.isEqual(oldUserMetadata, newMetadata)) {
-        console.log("check if not same");
+        console.log('check if not same');
         await saveUserInfo(newMetadata);
       }
     } catch (error) {
@@ -48,7 +48,7 @@ export default function MainLayout() {
         !wallet.encryptedSeedPhrase ||
         !wallet.verificationData
       ) {
-        navigate("/login");
+        navigate('/login');
         return;
       }
       try {
@@ -69,7 +69,7 @@ export default function MainLayout() {
 
               setIsRequiredPassword(false);
             } else {
-              navigate("/create_profile");
+              navigate('/create_profile');
             }
           } else {
             setIsRequiredPassword(true);
@@ -94,10 +94,7 @@ export default function MainLayout() {
           setIsRequiredPassword(true);
         }
       } catch (error) {
-        console.error(
-          "Error checking wallet or scheduling lock expiry:",
-          error
-        );
+        console.error('Error checking wallet or scheduling lock expiry:', error);
         setIsRequiredPassword(true);
       }
     }
@@ -115,12 +112,12 @@ export default function MainLayout() {
       if (wallet.verificationData) {
         // Open lock and save to session
         await walletService.openLock(password, wallet.verificationData);
-        setPassword("");
+        setPassword('');
         setIsRequiredPassword(false);
       }
     } catch (err) {
-      console.error("Lock error:", err);
-      setError("Failed to open Lock. Please check your password.");
+      console.error('Lock error:', err);
+      setError('Failed to open Lock. Please check your password.');
     }
   };
 
@@ -136,18 +133,9 @@ export default function MainLayout() {
 
   return (
     <main className="min-h-screen flex flex-col">
-      <Navbar
-        onOpenWallet={() => setIOpenWallet(true)}
-        profileImage={GetOpt(userData?.imageUrl)}
-      />
-      <div
-        className={`flex-1  ${
-          isRequiredPassword || isOpenWallet ? "overflow-y-hidden" : ""
-        } `}
-      >
-        <div
-          className={` ${isRequiredPassword || isOpenWallet ? "h-dvh" : ""} `}
-        >
+      <Navbar onOpenWallet={() => setIOpenWallet(true)} profileImage={GetOpt(userData?.imageUrl)} />
+      <div className={`flex-1  ${isRequiredPassword || isOpenWallet ? 'overflow-y-hidden' : ''} `}>
+        <div className={` ${isRequiredPassword || isOpenWallet ? 'h-dvh' : ''} `}>
           <Outlet />
         </div>
       </div>
@@ -172,7 +160,7 @@ export default function MainLayout() {
                 onChange={setPassword}
                 placeholder="Password"
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === 'Enter') {
                     handleConfirm();
                   }
                 }}

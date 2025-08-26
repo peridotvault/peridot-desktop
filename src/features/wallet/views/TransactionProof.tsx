@@ -1,12 +1,12 @@
 // @ts-ignore
-import React from "react";
-import { TrainedDataInterface } from "../interfaces/History";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import { shortenAddress } from "../../../utils/Additional";
-import { ButtonTransaction } from "../../../components/atoms/ButtonTransaction";
-import { ipcRenderer } from "electron";
-import { DateTime } from "luxon";
+import React from 'react';
+import { TrainedDataInterface } from '../interfaces/History';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { shortenAddress } from '../../../utils/Additional';
+import { ButtonTransaction } from '../../../components/atoms/ButtonTransaction';
+import { ipcRenderer } from 'electron';
+import { DateTime } from 'luxon';
 
 export function millisecondsToTimestamp(milliseconds: number): string {
   return DateTime.fromMillis(milliseconds / 1_000_000)
@@ -27,30 +27,26 @@ export const TransactionProof = ({
   const isUserSender = parseMetadata.sender === user_address ? true : false;
   const metadata = [
     {
-      title: "Block Id",
+      title: 'Block Id',
       content: parseMetadata.index,
     },
     {
-      title: "Type",
+      title: 'Type',
       content: receivedComponent(isUserSender),
     },
     {
-      title: "Amount",
+      title: 'Amount',
       content:
         ((isUserSender ? -1 : 1) * parseMetadata.value) / E8S_PER_TOKEN +
-        " " +
+        ' ' +
         parseMetadata.currency,
     },
     {
-      title: isUserSender ? "To" : "From",
-      content: shortenAddress(
-        isUserSender ? parseMetadata.receiver : parseMetadata.sender,
-        10,
-        10
-      ),
+      title: isUserSender ? 'To' : 'From',
+      content: shortenAddress(isUserSender ? parseMetadata.receiver : parseMetadata.sender, 10, 10),
     },
     {
-      title: "Timestamp",
+      title: 'Timestamp',
       content: millisecondsToTimestamp(Number(parseMetadata.timestamp)),
     },
   ];
@@ -59,7 +55,7 @@ export const TransactionProof = ({
     return (
       <div className="flex">
         <p className="bg-accent_primary px-3 text-sm rounded-full text-black">
-          {isUserSender ? "Sent" : "Received"}
+          {isUserSender ? 'Sent' : 'Received'}
         </p>
       </div>
     );
@@ -84,7 +80,7 @@ export const TransactionProof = ({
               <tr
                 key={index}
                 className={`${
-                  metadata.length - 1 == index ? "" : "border-b"
+                  metadata.length - 1 == index ? '' : 'border-b'
                 } border-background_disabled`}
               >
                 <td className="pl-6 py-6 text-text_disabled">{item.title}</td>
@@ -99,8 +95,8 @@ export const TransactionProof = ({
         text="View On Explorer"
         onClick={() => {
           ipcRenderer.send(
-            "open-external-link",
-            `https://peridot-explorer.vercel.app/${parseMetadata.canisterId}/transaction/${parseMetadata.transaction_identifier}`
+            'open-external-link',
+            `https://peridot-explorer.vercel.app/${parseMetadata.canisterId}/transaction/${parseMetadata.transaction_identifier}`,
           );
         }}
       />

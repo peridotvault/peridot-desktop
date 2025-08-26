@@ -1,22 +1,19 @@
 // @ts-ignore
-import React, { useState, useRef, useEffect } from "react";
-import { InputField } from "../../../components/atoms/InputField";
-import { copyToClipboard } from "../../../utils/Additional";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClone } from "@fortawesome/free-solid-svg-icons";
-import { validateMnemonic, wordlists } from "bip39";
+import React, { useState, useRef, useEffect } from 'react';
+import { InputField } from '../../../components/atoms/InputField';
+import { copyToClipboard } from '../../../utils/Additional';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClone } from '@fortawesome/free-solid-svg-icons';
+import { validateMnemonic, wordlists } from 'bip39';
 
 interface SeedPhraseInputProps {
   onContinue: (seedPhrase: string) => void;
   seedPhrase?: string;
 }
 
-export const SeedPhraseInput = ({
-  onContinue,
-  seedPhrase,
-}: SeedPhraseInputProps) => {
+export const SeedPhraseInput = ({ onContinue, seedPhrase }: SeedPhraseInputProps) => {
   const EN = wordlists.english;
-  const [words, setWords] = useState(Array(12).fill(""));
+  const [words, setWords] = useState(Array(12).fill(''));
   const [errors] = useState(Array(12).fill(false));
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -24,7 +21,7 @@ export const SeedPhraseInput = ({
   useEffect(() => {
     if (seedPhrase) {
       const splitWords = seedPhrase.trim().split(/\s+/);
-      const padded = [...splitWords, ...Array(12 - splitWords.length).fill("")];
+      const padded = [...splitWords, ...Array(12 - splitWords.length).fill('')];
       setWords(padded.slice(0, 12));
     }
   }, [seedPhrase]);
@@ -35,20 +32,17 @@ export const SeedPhraseInput = ({
     setWords(newWords);
   };
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    index: number
-  ) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
     const key = e.key;
 
-    if (key === " " && words[index].trim() !== "") {
+    if (key === ' ' && words[index].trim() !== '') {
       // tekan spasi -> pindah ke input berikutnya
       e.preventDefault();
       const nextIndex = index + 1;
       if (nextIndex < inputRefs.current.length) {
         inputRefs.current[nextIndex]?.focus();
       }
-    } else if (key === "Backspace" && words[index] === "") {
+    } else if (key === 'Backspace' && words[index] === '') {
       // tekan backspace saat input kosong -> pindah ke sebelumnya
       const prevIndex = index - 1;
       if (prevIndex >= 0) {
@@ -58,12 +52,9 @@ export const SeedPhraseInput = ({
     }
   };
 
-  const handlePaste = (
-    e: React.ClipboardEvent<HTMLInputElement>,
-    index: number
-  ) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
     e.preventDefault();
-    const paste = e.clipboardData.getData("text");
+    const paste = e.clipboardData.getData('text');
     const pastedWords = paste.trim().split(/\s+/); // split by space or newline
 
     const newWords = [...words];
@@ -88,15 +79,15 @@ export const SeedPhraseInput = ({
     if (!cleaned.every((w) => EN.includes(w))) return false;
 
     // cek checksum mnemonic
-    return validateMnemonic(cleaned.join(" "), EN);
+    return validateMnemonic(cleaned.join(' '), EN);
   };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
     if (isValid()) {
-      console.log("Seed Phrase:", words.join(" "));
+      console.log('Seed Phrase:', words.join(' '));
     } else {
-      console.error("Please fill in all fields.");
+      console.error('Please fill in all fields.');
     }
   };
 
@@ -130,19 +121,19 @@ export const SeedPhraseInput = ({
           Copy to Clipboard
         </button>
       ) : (
-        ""
+        ''
       )}
 
       <button
         type="submit"
         onClick={() => {
           if (isValid()) {
-            const phrase = words.join(" ").trim();
+            const phrase = words.join(' ').trim();
             onContinue(phrase);
           }
         }}
         className={`w-full bg-gradient-to-tr from-accent_primary to-accent_secondary text-white font-bold p-3 rounded-xl ${
-          isValid() ? "" : "opacity-30 cursor-not-allowed"
+          isValid() ? '' : 'opacity-30 cursor-not-allowed'
         }`}
         disabled={!isValid()}
       >

@@ -1,4 +1,4 @@
-import { AppId, Opt, Timestamp, UserId } from "../CoreInterface";
+import { AppId, Opt, Timestamp, UserId } from '../CoreInterface';
 
 /** Jika kamu punya enum/variant final, impor dari file lain */
 export type AppStatus = { publish: null } | { notPublish: null };
@@ -114,10 +114,9 @@ export interface AppInterface {
 /** =========================
  *  Type Guards
  *  ========================= */
-export const isWeb = (d: Distribution): d is { web: WebBuild } => "web" in d;
-export const isNative = (d: Distribution): d is { native: NativeBuild } =>
-  "native" in d;
+export const isWeb = (d: Distribution): d is { web: WebBuild } => 'web' in d;
+export const isNative = (d: Distribution): d is { native: NativeBuild } => 'native' in d;
 
-export const isWindows = (os: OS): os is { windows: null } => "windows" in os;
-export const isMac = (os: OS): os is { macos: null } => "macos" in os;
-export const isLinux = (os: OS): os is { linux: null } => "linux" in os;
+export const isWindows = (os: OS): os is { windows: null } => 'windows' in os;
+export const isMac = (os: OS): os is { macos: null } => 'macos' in os;
+export const isLinux = (os: OS): os is { linux: null } => 'linux' in os;

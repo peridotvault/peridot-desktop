@@ -1,232 +1,191 @@
 {
-    "categories": [
-        {
-            "id": "action",
-            "name": "Action",
-            "subgenres": [
-                "Platformer",
-                "Shooter",
-                "Fighting",
-                "Beat 'em Up",
-                "Hack and Slash",
-                "Stealth",
-                "Survival",
-                "Rhythm",
-                "Battle Royale"
-            ]
-        },
-        {
-            "id": "adventure",
-            "name": "Adventure",
-            "subgenres": [
-                "Point and Click",
-                "Visual Novel",
-                "Narrative",
-                "Walking Simulator",
-                "Interactive Fiction",
-                "Mystery"
-            ]
-        },
-        {
-            "id": "role_playing",
-            "name": "Role-Playing (RPG)",
-            "subgenres": [
-                "Action RPG",
-                "Turn-Based RPG",
-                "Tactical RPG",
-                "JRPG",
-                "CRPG",
-                "MMORPG",
-                "Roguelike",
-                "Roguelite",
-                "Dungeon Crawler"
-            ]
-        },
-        {
-            "id": "simulation",
-            "name": "Simulation",
-            "subgenres": [
-                "Life Simulation",
-                "Farming Sim",
-                "Vehicle Sim",
-                "Flight Simulator",
-                "Space Sim",
-                "Building & Crafting",
-                "Medical Sim",
-                "Job Simulator"
-            ]
-        },
-        {
-            "id": "strategy",
-            "name": "Strategy",
-            "subgenres": [
-                "Real-Time Strategy (RTS)",
-                "Turn-Based Strategy (TBS)",
-                "4X",
-                "Tower Defense",
-                "Auto Battler",
-                "Tactics",
-                "Deckbuilder Strategy"
-            ]
-        },
-        {
-            "id": "sports",
-            "name": "Sports",
-            "subgenres": [
-                "Soccer",
-                "Basketball",
-                "Racing",
-                "Fighting Sports (MMA, Boxing)",
-                "Extreme Sports",
-                "Winter Sports",
-                "Skateboarding",
-                "Golf",
-                "Tennis"
-            ]
-        },
-        {
-            "id": "casual",
-            "name": "Casual",
-            "subgenres": [
-                "Idle / Incremental",
-                "Puzzle",
-                "Trivia",
-                "Card Games",
-                "Board Games",
-                "Hidden Object",
-                "Coloring / Relaxation",
-                "Match-3"
-            ]
-        },
-        {
-            "id": "puzzle",
-            "name": "Puzzle",
-            "subgenres": [
-                "Physics Puzzle",
-                "Logic Puzzle",
-                "Word Puzzle",
-                "Escape Room",
-                "Sudoku",
-                "Tile Matching",
-                "Programming Puzzle"
-            ]
-        },
-        {
-            "id": "horror",
-            "name": "Horror",
-            "subgenres": [
-                "Survival Horror",
-                "Psychological Horror",
-                "Jump Scare",
-                "Lovecraftian",
-                "First-Person Horror",
-                "Multiplayer Horror"
-            ]
-        },
-        {
-            "id": "sandbox",
-            "name": "Sandbox",
-            "subgenres": [
-                "Open World",
-                "Creative Sandbox",
-                "Destruction Sandbox",
-                "Moddable Sandbox"
-            ]
-        },
-        {
-            "id": "platformer",
-            "name": "Platformer",
-            "subgenres": [
-                "2D Platformer",
-                "3D Platformer",
-                "Metroidvania",
-                "Precision Platformer"
-            ]
-        },
-        {
-            "id": "shooter",
-            "name": "Shooter",
-            "subgenres": [
-                "First-Person Shooter (FPS)",
-                "Third-Person Shooter",
-                "Twin-Stick Shooter",
-                "Arena Shooter",
-                "Hero Shooter",
-                "Tactical Shooter",
-                "Shoot 'em Up (SHMUP)"
-            ]
-        },
-        {
-            "id": "fighting",
-            "name": "Fighting",
-            "subgenres": [
-                "2D Fighter",
-                "3D Fighter",
-                "Arena Fighting",
-                "Platform Fighting"
-            ]
-        },
-        {
-            "id": "party",
-            "name": "Party",
-            "subgenres": [
-                "Minigame Collection",
-                "Local Multiplayer",
-                "Online Party Game",
-                "Drawing/Guessing",
-                "Co-op Party"
-            ]
-        },
-        {
-            "id": "educational",
-            "name": "Educational",
-            "subgenres": [
-                "Math",
-                "Language Learning",
-                "Science",
-                "Typing",
-                "History"
-            ]
-        },
-        {
-            "id": "music",
-            "name": "Music / Rhythm",
-            "subgenres": [
-                "Rhythm Game",
-                "Instrument Simulation",
-                "Music Creation",
-                "Dance Game"
-            ]
-        },
-        {
-            "id": "narrative",
-            "name": "Narrative",
-            "subgenres": [
-                "Choice-Based",
-                "Interactive Story",
-                "Cinematic",
-                "Emotional Journey"
-            ]
-        },
-        {
-            "id": "vr_ar",
-            "name": "VR / AR",
-            "subgenres": [
-                "VR Action",
-                "VR Puzzle",
-                "VR Exploration",
-                "AR Adventure"
-            ]
-        },
-        {
-            "id": "experimental",
-            "name": "Experimental",
-            "subgenres": [
-                "Abstract",
-                "Art Game",
-                "Short Form",
-                "Experimental Mechanics"
-            ]
-        }
-    ]
+  "categories": [
+    {
+      "id": "action",
+      "name": "Action",
+      "subgenres": [
+        "Platformer",
+        "Shooter",
+        "Fighting",
+        "Beat 'em Up",
+        "Hack and Slash",
+        "Stealth",
+        "Survival",
+        "Rhythm",
+        "Battle Royale"
+      ]
+    },
+    {
+      "id": "adventure",
+      "name": "Adventure",
+      "subgenres": [
+        "Point and Click",
+        "Visual Novel",
+        "Narrative",
+        "Walking Simulator",
+        "Interactive Fiction",
+        "Mystery"
+      ]
+    },
+    {
+      "id": "role_playing",
+      "name": "Role-Playing (RPG)",
+      "subgenres": [
+        "Action RPG",
+        "Turn-Based RPG",
+        "Tactical RPG",
+        "JRPG",
+        "CRPG",
+        "MMORPG",
+        "Roguelike",
+        "Roguelite",
+        "Dungeon Crawler"
+      ]
+    },
+    {
+      "id": "simulation",
+      "name": "Simulation",
+      "subgenres": [
+        "Life Simulation",
+        "Farming Sim",
+        "Vehicle Sim",
+        "Flight Simulator",
+        "Space Sim",
+        "Building & Crafting",
+        "Medical Sim",
+        "Job Simulator"
+      ]
+    },
+    {
+      "id": "strategy",
+      "name": "Strategy",
+      "subgenres": [
+        "Real-Time Strategy (RTS)",
+        "Turn-Based Strategy (TBS)",
+        "4X",
+        "Tower Defense",
+        "Auto Battler",
+        "Tactics",
+        "Deckbuilder Strategy"
+      ]
+    },
+    {
+      "id": "sports",
+      "name": "Sports",
+      "subgenres": [
+        "Soccer",
+        "Basketball",
+        "Racing",
+        "Fighting Sports (MMA, Boxing)",
+        "Extreme Sports",
+        "Winter Sports",
+        "Skateboarding",
+        "Golf",
+        "Tennis"
+      ]
+    },
+    {
+      "id": "casual",
+      "name": "Casual",
+      "subgenres": [
+        "Idle / Incremental",
+        "Puzzle",
+        "Trivia",
+        "Card Games",
+        "Board Games",
+        "Hidden Object",
+        "Coloring / Relaxation",
+        "Match-3"
+      ]
+    },
+    {
+      "id": "puzzle",
+      "name": "Puzzle",
+      "subgenres": [
+        "Physics Puzzle",
+        "Logic Puzzle",
+        "Word Puzzle",
+        "Escape Room",
+        "Sudoku",
+        "Tile Matching",
+        "Programming Puzzle"
+      ]
+    },
+    {
+      "id": "horror",
+      "name": "Horror",
+      "subgenres": [
+        "Survival Horror",
+        "Psychological Horror",
+        "Jump Scare",
+        "Lovecraftian",
+        "First-Person Horror",
+        "Multiplayer Horror"
+      ]
+    },
+    {
+      "id": "sandbox",
+      "name": "Sandbox",
+      "subgenres": ["Open World", "Creative Sandbox", "Destruction Sandbox", "Moddable Sandbox"]
+    },
+    {
+      "id": "platformer",
+      "name": "Platformer",
+      "subgenres": ["2D Platformer", "3D Platformer", "Metroidvania", "Precision Platformer"]
+    },
+    {
+      "id": "shooter",
+      "name": "Shooter",
+      "subgenres": [
+        "First-Person Shooter (FPS)",
+        "Third-Person Shooter",
+        "Twin-Stick Shooter",
+        "Arena Shooter",
+        "Hero Shooter",
+        "Tactical Shooter",
+        "Shoot 'em Up (SHMUP)"
+      ]
+    },
+    {
+      "id": "fighting",
+      "name": "Fighting",
+      "subgenres": ["2D Fighter", "3D Fighter", "Arena Fighting", "Platform Fighting"]
+    },
+    {
+      "id": "party",
+      "name": "Party",
+      "subgenres": [
+        "Minigame Collection",
+        "Local Multiplayer",
+        "Online Party Game",
+        "Drawing/Guessing",
+        "Co-op Party"
+      ]
+    },
+    {
+      "id": "educational",
+      "name": "Educational",
+      "subgenres": ["Math", "Language Learning", "Science", "Typing", "History"]
+    },
+    {
+      "id": "music",
+      "name": "Music / Rhythm",
+      "subgenres": ["Rhythm Game", "Instrument Simulation", "Music Creation", "Dance Game"]
+    },
+    {
+      "id": "narrative",
+      "name": "Narrative",
+      "subgenres": ["Choice-Based", "Interactive Story", "Cinematic", "Emotional Journey"]
+    },
+    {
+      "id": "vr_ar",
+      "name": "VR / AR",
+      "subgenres": ["VR Action", "VR Puzzle", "VR Exploration", "AR Adventure"]
+    },
+    {
+      "id": "experimental",
+      "name": "Experimental",
+      "subgenres": ["Abstract", "Art Game", "Short Form", "Experimental Mechanics"]
+    }
+  ]
 }

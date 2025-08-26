@@ -1,17 +1,17 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
-import { LoadingScreen } from "../../components/organisms/LoadingScreen";
+import React, { useEffect, useState } from 'react';
+import { useWallet } from '../../contexts/WalletContext';
+import { LoadingScreen } from '../../components/organisms/LoadingScreen';
 // import { InputField } from "../../components/atoms/InputField";
 // import { LoadingLogo } from "../../components/organisms/LoadingLogo";
-import { getCoverImage, getProfileImage } from "../../utils/Additional";
-import { UserInterface } from "../../interfaces/user/UserInterface";
+import { getCoverImage, getProfileImage } from '../../utils/Additional';
+import { UserInterface } from '../../interfaces/user/UserInterface';
 import {
   // getFriendRequestList,
   getUserData,
   // searchUsersByPrefixWithLimit,
-} from "../../blockchain/icp/user/services/ICPUserService";
-import { GetOpt } from "../../interfaces/CoreInterface";
+} from '../../blockchain/icp/user/services/ICPUserService';
+import { GetOpt } from '../../interfaces/CoreInterface';
 
 export const ProfileUser = () => {
   const { wallet } = useWallet();
@@ -154,7 +154,7 @@ export const ProfileUser = () => {
 
   return (
     <main className="pt-20 flex flex-col items-center mb-10 px-10">
-      {isLoading ? <LoadingScreen /> : ""}
+      {isLoading ? <LoadingScreen /> : ''}
       <div className="container flex gap-6 mt-6 duration-300">
         {/* left   ============================ */}
         <div className="w-full flex flex-col gap-6 duration-300 transition-all">
@@ -183,9 +183,7 @@ export const ProfileUser = () => {
             <div className="flex flex-col gap-3 mt-3 px-10">
               <div className="flex flex-col gap-1">
                 <div className="flex gap-2">
-                  <p className="font-medium text-2xl">
-                    {userData?.displayName}
-                  </p>
+                  <p className="font-medium text-2xl">{userData?.displayName}</p>
                   {GetOpt(userData?.developer!) && (
                     <div className="">
                       <span className="px-2 py-1 rounded-full border-accent_primary/50 border text-xs text-accent_primary">
@@ -195,9 +193,7 @@ export const ProfileUser = () => {
                   )}
                 </div>
 
-                <p className="text-text_disabled text-lg">
-                  @{userData?.username}
-                </p>
+                <p className="text-text_disabled text-lg">@{userData?.username}</p>
               </div>
             </div>
           </section>

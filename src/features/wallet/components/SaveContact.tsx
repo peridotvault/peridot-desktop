@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { InputField } from "../../../components/atoms/InputField";
-import localforage from "localforage";
-import { Contact } from "../views/SendToken";
+import React, { useState } from 'react';
+import { InputField } from '../../../components/atoms/InputField';
+import localforage from 'localforage';
+import { Contact } from '../views/SendToken';
 
 interface NavbarProps {
   onClose: () => void;
@@ -9,8 +9,8 @@ interface NavbarProps {
 }
 
 export const SaveContact: React.FC<NavbarProps> = ({ onClose, address }) => {
-  const [emoji, setEmoji] = useState("");
-  const [username, setUsername] = useState("");
+  const [emoji, setEmoji] = useState('');
+  const [username, setUsername] = useState('');
 
   const handleAddContact = async () => {
     try {
@@ -19,12 +19,10 @@ export const SaveContact: React.FC<NavbarProps> = ({ onClose, address }) => {
         username: username,
         address: address,
       };
-      const currentContacts = await localforage.getItem<Contact[]>("contacts");
-      const updatedContacts = currentContacts
-        ? [...currentContacts, newContact]
-        : [newContact];
+      const currentContacts = await localforage.getItem<Contact[]>('contacts');
+      const updatedContacts = currentContacts ? [...currentContacts, newContact] : [newContact];
 
-      const result = await localforage.setItem("contacts", updatedContacts);
+      const result = await localforage.setItem('contacts', updatedContacts);
       console.log(result);
       onClose();
       return result;
@@ -52,20 +50,20 @@ export const SaveContact: React.FC<NavbarProps> = ({ onClose, address }) => {
           value={emoji}
           onChange={(e) => {
             const value = e.target.value;
-            let firstChar = "";
-            if ("Segmenter" in Intl) {
+            let firstChar = '';
+            if ('Segmenter' in Intl) {
               // Type assertion untuk menghindari error TS
               const segmenter = new (Intl as any).Segmenter(undefined, {
-                granularity: "grapheme",
+                granularity: 'grapheme',
               });
               const segments = Array.from(
                 segmenter.segment(value),
-                (segment: any) => segment.segment
+                (segment: any) => segment.segment,
               );
-              firstChar = segments[0] || "";
+              firstChar = segments[0] || '';
             } else {
               // fallback menggunakan Array.from
-              firstChar = Array.from(value)[0] || "";
+              firstChar = Array.from(value)[0] || '';
             }
             setEmoji(firstChar);
           }}

@@ -1,5 +1,5 @@
 // DeveloperInterface.tsx
-import type { Opt, Timestamp, UserId } from "../CoreInterface";
+import type { Opt, Timestamp, UserId } from '../CoreInterface';
 
 export type AnnouncementId = string;
 

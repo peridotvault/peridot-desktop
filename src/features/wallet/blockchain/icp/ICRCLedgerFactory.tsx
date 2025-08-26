@@ -1,5 +1,5 @@
 // types/icrc.ts
-import type { Principal } from "@dfinity/principal";
+import type { Principal } from '@dfinity/principal';
 
 type Opt<T> = [] | [T];
 
@@ -38,10 +38,7 @@ export type ICRCLedgerActor = {
   icrc1_decimals: () => Promise<number>; // Nat8 as number
   icrc1_metadata: () => Promise<Array<[string, unknown]>>;
   icrc1_fee: () => Promise<bigint>;
-  icrc2_allowance: (x: {
-    account: Account;
-    spender: Account;
-  }) => Promise<Allowance>;
+  icrc2_allowance: (x: { account: Account; spender: Account }) => Promise<Allowance>;
   icrc2_approve: (x: {
     fee: Opt<bigint>;
     memo: Opt<Uint8Array>;

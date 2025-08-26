@@ -1,3 +1,3 @@
 export const schema = {
-  user: "username",
+  user: 'username',
 };

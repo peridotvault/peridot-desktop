@@ -1,8 +1,8 @@
-import { faChevronLeft, faClone } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
-import { useWallet } from "../../../contexts/WalletContext";
-import { copyToClipboard, shortenAddress } from "../../../utils/Additional";
+import { faChevronLeft, faClone } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useState } from 'react';
+import { useWallet } from '../../../contexts/WalletContext';
+import { copyToClipboard, shortenAddress } from '../../../utils/Additional';
 
 interface Props {
   onClose: () => void;
@@ -13,13 +13,13 @@ export const Receive: React.FC<Props> = ({ onClose }) => {
   const [walletAddress] = useState([
     {
       address: wallet.principalId,
-      network: "Principal ID",
-      logo: "./assets/logo-icp.svg",
+      network: 'Principal ID',
+      logo: './assets/logo-icp.svg',
     },
     {
       address: wallet.accountId,
-      network: "Account ID",
-      logo: "./assets/logo-icp.svg",
+      network: 'Account ID',
+      logo: './assets/logo-icp.svg',
     },
   ]);
 
@@ -47,11 +47,7 @@ export const Receive: React.FC<Props> = ({ onClose }) => {
           >
             <div className="flex gap-4 items-center">
               <div className="w-12 h-12 shadow-arise-sm rounded-xl flex justify-center items-center">
-                <img
-                  src={item.logo}
-                  alt={item.network + "Logo"}
-                  className="size-5"
-                />
+                <img src={item.logo} alt={item.network + 'Logo'} className="size-5" />
               </div>
               <div className="flex flex-col items-start">
                 <p className="text-md font-semibold">{item.network}</p>

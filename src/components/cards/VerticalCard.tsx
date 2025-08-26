@@ -1,7 +1,7 @@
 // @ts-ignore
-import React from "react";
-import { PriceCoin } from "./PriceCoin";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { PriceCoin } from './PriceCoin';
+import { Link } from 'react-router-dom';
 
 export const VerticalCard = ({
   appId,
@@ -17,7 +17,7 @@ export const VerticalCard = ({
   const convertedPrice = Number(price) / 1e8;
   // const convertedPrice = Number(price);
   const formatTitle = (title: string): string => {
-    return title.toLowerCase().replace(/\s+/g, "_");
+    return title.toLowerCase().replace(/\s+/g, '_');
   };
   return (
     <Link

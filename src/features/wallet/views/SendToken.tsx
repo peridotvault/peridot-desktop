@@ -1,21 +1,18 @@
-import {
-  faAddressBook,
-  faChevronLeft,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useCallback, useEffect, useState } from "react";
-import { InputField } from "../../../components/atoms/InputField";
-import { shortenAddress } from "../../../utils/Additional";
-import { Principal } from "@dfinity/principal";
-import localforage from "localforage";
-import { ICRC1Coin } from "../components/ICRC1Coin";
-import { useWallet } from "../../../contexts/WalletContext";
-import { SaveContact } from "../components/SaveContact";
-import theCoin from "../../../assets/json/coins.json";
-import { AlertMessage } from "../components/AlertMessage";
-import { Coin } from "../../../local_db/wallet/models/Coin";
-import { CoinService } from "../../../local_db/wallet/services/coinService";
-import { transferTokenICRC1 } from "../blockchain/icp/services/ICPCoinService";
+import { faAddressBook, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useCallback, useEffect, useState } from 'react';
+import { InputField } from '../../../components/atoms/InputField';
+import { shortenAddress } from '../../../utils/Additional';
+import { Principal } from '@dfinity/principal';
+import localforage from 'localforage';
+import { ICRC1Coin } from '../components/ICRC1Coin';
+import { useWallet } from '../../../contexts/WalletContext';
+import { SaveContact } from '../components/SaveContact';
+import theCoin from '../../../assets/json/coins.json';
+import { AlertMessage } from '../components/AlertMessage';
+import { Coin } from '../../../local_db/wallet/models/Coin';
+import { CoinService } from '../../../local_db/wallet/services/coinService';
+import { transferTokenICRC1 } from '../blockchain/icp/services/ICPCoinService';
 
 interface Props {
   onClose: () => void;
@@ -40,13 +37,13 @@ export interface Contact {
 
 export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
   const { wallet } = useWallet();
-  const [sendTokenAddress, setSendTokenAddress] = useState("");
+  const [sendTokenAddress, setSendTokenAddress] = useState('');
   const [finalAddress, setFinalAddress] = useState<Principal | null>(null);
   const [myContacts, setMyContacts] = useState<Contact[] | null>(null);
 
   useEffect(() => {
     async function loadContacts() {
-      const savedContact = await localforage.getItem<Contact[]>("contacts");
+      const savedContact = await localforage.getItem<Contact[]>('contacts');
       setMyContacts(savedContact);
     }
 
@@ -74,7 +71,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
         setListCoins(defaultCoins);
       }
     } catch (error) {
-      console.error("Error loading coins:", error);
+      console.error('Error loading coins:', error);
       setListCoins(defaultCoins);
     }
   }
@@ -85,9 +82,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
 
   const mergeCoins = (defaults: Coin[], saved: Coin[]): Coin[] => {
     // Create a map for quick lookup of saved coins
-    const savedCoinsMap = new Map(
-      saved.map((coin) => [coin.coinAddress, coin])
-    );
+    const savedCoinsMap = new Map(saved.map((coin) => [coin.coinAddress, coin]));
 
     // Start with processed defaults that preserve user preferences
     const result: Coin[] = defaults.map((defaultCoin) => {
@@ -119,7 +114,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
     (_canisterId: string, _balanceUsd: number, balanceToken: number) => {
       setTokenBalances(balanceToken);
     },
-    []
+    [],
   );
 
   // Save Contact
@@ -128,7 +123,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
   // Send Transaction Page
   const [finalCoinAddress, setFinalCoinAddress] = useState<Principal | null>();
   const [coinMetadata, setCoinMetadata] = useState<Coin | null>(null);
-  const [amountCoin, setAmountCoin] = useState<string>("");
+  const [amountCoin, setAmountCoin] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
 
@@ -142,10 +137,10 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
         Number(amountCoin),
         finalCoinAddress!,
         coinMetadata!.fee,
-        wallet
+        wallet,
       );
       if (result) {
-        console.log("Success");
+        console.log('Success');
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
@@ -158,7 +153,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
         setShowFailed(false);
         onLockChanged();
       }, 2000);
-      console.log("Error Send : " + error);
+      console.log('Error Send : ' + error);
     }
   }
 
@@ -191,7 +186,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
           }}
           placeholder="Address, Principal or Contact"
           type="text"
-          value={sendTokenAddress ? sendTokenAddress : ""}
+          value={sendTokenAddress ? sendTokenAddress : ''}
         />
       </section>
 
@@ -217,7 +212,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                   <p className="size-5">{item.icon}</p>
                 </div>
                 <div className="flex flex-col items-start">
-                  <p className="text-md font-semibold">{"@" + item.username}</p>
+                  <p className="text-md font-semibold">{'@' + item.username}</p>
                   <p>{shortenAddress(item.address, 20, 4)}</p>
                 </div>
               </div>
@@ -237,7 +232,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
           <section className="flex justify-between items-center">
             <button
               onClick={() => {
-                setSendTokenAddress("");
+                setSendTokenAddress('');
                 setFinalAddress(null);
                 setFinalCoinAddress(null);
                 setCoinMetadata(null);
@@ -271,7 +266,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
               address={finalAddress.toText()}
             />
           ) : (
-            ""
+            ''
           )}
 
           {finalCoinAddress == null ? (
@@ -285,12 +280,8 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                     className="hover:scale-105 duration-300 px-2"
                     onClick={async () => {
                       try {
-                        const coinAddress = Principal.fromText(
-                          item.coinAddress
-                        );
-                        const theCoinMetadata = await CoinService.getByAddress(
-                          item.coinAddress
-                        );
+                        const coinAddress = Principal.fromText(item.coinAddress);
+                        const theCoinMetadata = await CoinService.getByAddress(item.coinAddress);
 
                         setFinalCoinAddress(coinAddress);
                         setCoinMetadata(theCoinMetadata!);
@@ -300,10 +291,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                       }
                     }}
                   >
-                    <ICRC1Coin
-                      canisterId={item.coinAddress}
-                      onBalanceUpdate={updateTokenBalance}
-                    />
+                    <ICRC1Coin canisterId={item.coinAddress} onBalanceUpdate={updateTokenBalance} />
                   </button>
                 ))}
               </div>
@@ -324,15 +312,15 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                   <div className="flex items-center gap-2">
                     <InputField
                       onChange={(e) => {
-                        e = e.replace(/,/g, ".");
+                        e = e.replace(/,/g, '.');
 
-                        if (e === "" || e === "0") {
+                        if (e === '' || e === '0') {
                           setAmountCoin(e);
                           return;
                         }
 
                         if (/^0+[1-9][0-9]*$/.test(e)) {
-                          e = e.replace(/^0+/, "");
+                          e = e.replace(/^0+/, '');
                         }
 
                         if (/^(0|([1-9][0-9]*))([.,][0-9]*)?$/.test(e)) {
@@ -341,7 +329,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                       }}
                       placeholder="Amount"
                       type="text"
-                      value={amountCoin ? amountCoin : ""}
+                      value={amountCoin ? amountCoin : ''}
                     />
                     <div className="flex gap-8 items-center">
                       <p className="text-lg">{coinMetadata?.symbol}</p>
@@ -352,8 +340,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                   </div>
                   {!canSend && (
                     <p className="text-sm text-red-400">
-                      Amount exceeds balance ({tokenBalances}{" "}
-                      {coinMetadata?.symbol})
+                      Amount exceeds balance ({tokenBalances} {coinMetadata?.symbol})
                     </p>
                   )}
                 </div>
@@ -369,7 +356,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                   onClick={handleSend}
                   disabled={!canSend}
                   className={`w-full text-lg rounded-lg font bg-gradient-to-tr from-accent_primary to-accent_secondary p-2  duration-300 ${
-                    canSend ? "hover:scale-105" : "opacity-50"
+                    canSend ? 'hover:scale-105' : 'opacity-50'
                   } `}
                 >
                   Send
@@ -377,20 +364,13 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
               </div>
 
               {/* success modal */}
-              {showSuccess && (
-                <AlertMessage msg="Success" isSuccess={showSuccess} />
-              )}
-              {showFailed && (
-                <AlertMessage
-                  msg="Your Session is Over"
-                  isSuccess={showFailed}
-                />
-              )}
+              {showSuccess && <AlertMessage msg="Success" isSuccess={showSuccess} />}
+              {showFailed && <AlertMessage msg="Your Session is Over" isSuccess={showFailed} />}
             </section>
           )}
         </div>
       ) : (
-        ""
+        ''
       )}
     </div>
   );

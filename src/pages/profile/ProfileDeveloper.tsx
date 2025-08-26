@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   faBookmark,
   faComment,
@@ -7,16 +7,16 @@ import {
   faHeart,
   faShare,
   faUpRightFromSquare,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
-import { Slide } from "../Slide";
-import { useWallet } from "../../contexts/WalletContext";
-import { LoadingScreen } from "../../components/organisms/LoadingScreen";
-import { getUserData } from "../../blockchain/icp/user/services/ICPUserService";
-import { UserInterface } from "../../interfaces/user/UserInterface";
-import { GetOpt } from "../../interfaces/CoreInterface";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Link } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { Slide } from '../Slide';
+import { useWallet } from '../../contexts/WalletContext';
+import { LoadingScreen } from '../../components/organisms/LoadingScreen';
+import { getUserData } from '../../blockchain/icp/user/services/ICPUserService';
+import { UserInterface } from '../../interfaces/user/UserInterface';
+import { GetOpt } from '../../interfaces/CoreInterface';
 
 export const ProfileDeveloper = () => {
   const { wallet } = useWallet();
@@ -86,19 +86,16 @@ export const ProfileDeveloper = () => {
             <div className="flex flex-col gap-3 mt-3 px-10">
               <div className="flex flex-col gap-1">
                 <p className="font-medium text-2xl">{userData?.displayName}</p>
-                <p className="text-text_disabled text-lg">
-                  @{userData?.username}
-                </p>
+                <p className="text-text_disabled text-lg">@{userData?.username}</p>
               </div>
               <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit
-                quas nobis, eos unde saepe voluptates at culpa aliquam eaque
-                esse.
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quas nobis, eos
+                unde saepe voluptates at culpa aliquam eaque esse.
               </p>
             </div>
             {/* links  */}
             <div className="mt-3 px-10">
-              <Link to={"peridot.icu"} className="flex gap-2 items-center ">
+              <Link to={'peridot.icu'} className="flex gap-2 items-center ">
                 <FontAwesomeIcon
                   icon={faUpRightFromSquare}
                   className="text-sm text-text_disabled"
@@ -119,18 +116,11 @@ export const ProfileDeveloper = () => {
                 onClick={() => setIOpenWallet(true)}
               >
                 <div className="w-12 h-12 flex justify-center items-center">
-                  <FontAwesomeIcon
-                    icon={faGear}
-                    className="shadow-sunken-sm "
-                  />
+                  <FontAwesomeIcon icon={faGear} className="shadow-sunken-sm " />
                 </div>
               </button>
               <AnimatePresence>
-                {isOpenWallet ? (
-                  <Slide onClose={() => setIOpenWallet(false)} />
-                ) : (
-                  ""
-                )}
+                {isOpenWallet ? <Slide onClose={() => setIOpenWallet(false)} /> : ''}
               </AnimatePresence>
             </div>
           </section>
@@ -152,9 +142,8 @@ export const ProfileDeveloper = () => {
                 <p className="font-medium text-lg">@blacksamurai</p>
                 {/* text content */}
                 <p>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Veritatis provident ab error vitae sapiente. Totam excepturi
-                  aliquid repellendus officia consequatur.
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis provident ab
+                  error vitae sapiente. Totam excepturi aliquid repellendus officia consequatur.
                 </p>
                 {/* image content */}
                 <div className="mt-3">
@@ -206,9 +195,8 @@ export const ProfileDeveloper = () => {
                 <p className="font-medium text-lg">@blacksamurai</p>
                 {/* text content */}
                 <p>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Veritatis provident ab error vitae sapiente. Totam excepturi
-                  aliquid repellendus officia consequatur.
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis provident ab
+                  error vitae sapiente. Totam excepturi aliquid repellendus officia consequatur.
                 </p>
                 {/* image content */}
                 <div className="mt-3">

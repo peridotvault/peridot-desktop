@@ -1,30 +1,19 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import {
-  faClock,
-  faPlay,
-  faRocket,
-  faStore,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  AppInterface,
-  Distribution,
-  isWeb,
-} from "../../interfaces/app/AppInterface";
-import { getAppById } from "../../blockchain/icp/app/services/ICPAppService";
-import { useParams } from "react-router-dom";
-import { getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
-import { useWallet } from "../../contexts/WalletContext";
-import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
-import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
+import React, { useEffect, useState } from 'react';
+import { faClock, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AppInterface, Distribution, isWeb } from '../../interfaces/app/AppInterface';
+import { getAppById } from '../../blockchain/icp/app/services/ICPAppService';
+import { useParams } from 'react-router-dom';
+import { getAllAnnouncementsByAppId } from '../../blockchain/icp/app/services/ICPAnnouncementService';
+import { useWallet } from '../../contexts/WalletContext';
+import { AnnouncementInterface } from '../../interfaces/announcement/AnnouncementInterface';
+import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
 
 export default function GameDetailLibrary() {
   const { appId } = useParams();
   const { wallet } = useWallet();
-  const [announcements, setAnnouncements] = useState<
-    AnnouncementInterface[] | null
-  >(null);
+  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
 
   const [theApp, setTheApp] = useState<AppInterface | null>();
 
@@ -57,8 +46,8 @@ export default function GameDetailLibrary() {
         listAnnouncement = listAnnouncement.filter(
           (item) =>
             item.status &&
-            typeof item.status === "object" &&
-            Object.keys(item.status)[0] === "published"
+            typeof item.status === 'object' &&
+            Object.keys(item.status)[0] === 'published',
         );
         // Sort: pinned first, then by createdAt descending
         listAnnouncement = listAnnouncement.sort((a, b) => {
@@ -86,9 +75,7 @@ export default function GameDetailLibrary() {
 
   function unwrapOptVec<T>(v: T[] | [T[]] | null | undefined): T[] {
     if (!v) return [];
-    return Array.isArray(v) && v.length === 1 && Array.isArray(v[0])
-      ? v[0]
-      : (v as T[]);
+    return Array.isArray(v) && v.length === 1 && Array.isArray(v[0]) ? v[0] : (v as T[]);
   }
 
   // Ambil url web pertama dari distributions
@@ -102,7 +89,7 @@ export default function GameDetailLibrary() {
   const openWebApp = () => {
     const url = getWebUrlFromApp(theApp);
     if (!url) {
-      alert("Web build URL tidak tersedia untuk app ini.");
+      alert('Web build URL tidak tersedia untuk app ini.');
       return;
     }
     // Jika jalan di Electron + preload expose electronAPI
@@ -110,17 +97,13 @@ export default function GameDetailLibrary() {
       (window as any).electronAPI.openWebGame(url);
     } else {
       // fallback browser biasa
-      window.open(url, "_blank", "noopener,noreferrer");
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
   return (
     <main className="flex flex-col items-center gap-5 mb-32">
       <div className="bg-white w-full h-96 relative">
-        <img
-          src={theApp?.bannerImage}
-          className="object-cover w-full h-[30rem]"
-          alt=""
-        />
+        <img src={theApp?.bannerImage} className="object-cover w-full h-[30rem]" alt="" />
         <div className="bg-gradient-to-t from-background_primary via-background_primary/50 w-full h-[7rem] absolute bottom-0 translate-y-[6.2rem]"></div>
       </div>
 
@@ -133,21 +116,13 @@ export default function GameDetailLibrary() {
             <p className="text-3xl font-medium">{theApp?.title}</p>
             <div className="flex gap-4">
               <p className="flex gap-2 items-center">
-                <FontAwesomeIcon
-                  icon={faClock}
-                  className="text-text_disabled"
-                />
-                <label className="text-text_disabled">Play Time : </label> 2038
-                hours
+                <FontAwesomeIcon icon={faClock} className="text-text_disabled" />
+                <label className="text-text_disabled">Play Time : </label> 2038 hours
               </p>
               <div className="border border-background_disabled"></div>
               <p className="flex gap-2 items-center">
-                <FontAwesomeIcon
-                  icon={faRocket}
-                  className="text-text_disabled"
-                />
-                <label className="text-text_disabled">Last Launched : </label>{" "}
-                Nov 29, 2024
+                <FontAwesomeIcon icon={faRocket} className="text-text_disabled" />
+                <label className="text-text_disabled">Last Launched : </label> Nov 29, 2024
               </p>
             </div>
           </section>
@@ -172,7 +147,7 @@ export default function GameDetailLibrary() {
             <div className="flex flex-col gap-2">
               <p>current price</p>
               <p className="text-3xl font-bold">
-                {Number(theApp?.price) > 0 ? theApp?.price + " PER" : "FREE"}
+                {Number(theApp?.price) > 0 ? theApp?.price + ' PER' : 'FREE'}
               </p>
             </div>
             {/* button  */}

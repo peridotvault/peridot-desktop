@@ -1,15 +1,15 @@
 // @ts-ignore
-import React, { useState } from "react";
-import { InputField } from "../../components/atoms/InputField";
-import { ButtonTransaction } from "../../components/atoms/ButtonTransaction";
-import { useWallet } from "../../contexts/WalletContext";
-import { createDeveloperProfile } from "../../blockchain/icp/user/services/ICPUserService";
-import { AppPayment } from "../../features/wallet/views/Payment";
+import React, { useState } from 'react';
+import { InputField } from '../../components/atoms/InputField';
+import { ButtonTransaction } from '../../components/atoms/ButtonTransaction';
+import { useWallet } from '../../contexts/WalletContext';
+import { createDeveloperProfile } from '../../blockchain/icp/user/services/ICPUserService';
+import { AppPayment } from '../../features/wallet/views/Payment';
 
 export const CreateDeveloper = () => {
   const { wallet } = useWallet();
-  const [websiteUrl, setWebsiteUrl] = useState("");
-  const [bio, setBio] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [bio, setBio] = useState('');
   const [isOnPayment, setIsOnPayment] = useState(false);
   const priceUpgradeToDeveloperAccount = 10;
 
@@ -30,9 +30,7 @@ export const CreateDeveloper = () => {
       >
         <div className="bg-background_secondary aspect-video rounded-xl flex flex-col justify-center items-center">
           <p className="text-text_disabled">one-time payment for</p>
-          <p className="text-5xl font-bold">
-            {priceUpgradeToDeveloperAccount} PER
-          </p>
+          <p className="text-5xl font-bold">{priceUpgradeToDeveloperAccount} PER</p>
         </div>
         {/* title  */}
         <h1 className="text-xl capitalize">Every Developer need Identity</h1>
@@ -44,12 +42,7 @@ export const CreateDeveloper = () => {
             placeholder="Website Url"
             value={websiteUrl}
           />
-          <InputField
-            onChange={(e) => setBio(e)}
-            type="text"
-            placeholder="Bio"
-            value={bio}
-          />
+          <InputField onChange={(e) => setBio(e)} type="text" placeholder="Bio" value={bio} />
         </div>
         {/* Alert  */}
         <p className="text-text_disabled">

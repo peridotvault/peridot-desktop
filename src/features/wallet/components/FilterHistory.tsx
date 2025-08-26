@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 export const FilterHistory = ({
   filter,
@@ -11,9 +11,9 @@ export const FilterHistory = ({
   onCloseModal: () => void;
 }) => {
   const options = [
-    { value: "daily", label: "Daily" },
-    { value: "received", label: "Received" },
-    { value: "sent", label: "Sent" },
+    { value: 'daily', label: 'Daily' },
+    { value: 'received', label: 'Received' },
+    { value: 'sent', label: 'Sent' },
   ];
 
   return (
@@ -34,11 +34,7 @@ export const FilterHistory = ({
               key={option.value}
               onClick={() => setFilter(option.value)}
               className={`px-6 py-4 rounded-lg transition-all shadow-flat-sm
-              ${
-                filter === option.value
-                  ? "shadow-sunken-sm"
-                  : "hover:shadow-arise-sm "
-              }
+              ${filter === option.value ? 'shadow-sunken-sm' : 'hover:shadow-arise-sm '}
               `}
             >
               {option.label}

@@ -76,9 +76,9 @@ export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
         IDL.Record({
           _0_: IDL.Text,
           _1_: BlockValue,
-        })
+        }),
       ),
-    })
+    }),
   );
 
   // Block record: { id: nat; block: variant }
@@ -106,9 +106,9 @@ export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
             archived_blocks: IDL.Vec(ArchivedBlock),
           }),
         ],
-        ["query"]
+        ['query'],
       ),
-    })
+    }),
   );
 
   // Final return type
@@ -119,11 +119,11 @@ export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
   });
 
   return IDL.Service({
-    icrc1_name: IDL.Func([], [IDL.Text], ["query"]),
-    icrc1_symbol: IDL.Func([], [IDL.Text], ["query"]),
-    icrc1_decimals: IDL.Func([], [IDL.Nat8], ["query"]),
-    icrc1_total_supply: IDL.Func([], [IDL.Nat], ["query"]),
-    icrc1_fee: IDL.Func([], [IDL.Nat], ["query"]),
+    icrc1_name: IDL.Func([], [IDL.Text], ['query']),
+    icrc1_symbol: IDL.Func([], [IDL.Text], ['query']),
+    icrc1_decimals: IDL.Func([], [IDL.Nat8], ['query']),
+    icrc1_total_supply: IDL.Func([], [IDL.Nat], ['query']),
+    icrc1_fee: IDL.Func([], [IDL.Nat], ['query']),
     icrc1_metadata: IDL.Func(
       [],
       [
@@ -135,11 +135,11 @@ export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
               Nat: IDL.Nat,
               Blob: IDL.Vec(IDL.Nat8),
               Text: IDL.Text,
-            })
-          )
+            }),
+          ),
         ),
       ],
-      ["query"]
+      ['query'],
     ),
     icrc1_balance_of: IDL.Func(
       [
@@ -149,7 +149,7 @@ export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
         }),
       ],
       [IDL.Nat],
-      ["query"]
+      ['query'],
     ),
     icrc1_transfer: IDL.Func(
       [
@@ -183,10 +183,10 @@ export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
           }),
         }),
       ],
-      []
+      [],
     ),
     // ICRC-2
-    icrc2_allowance: IDL.Func([AllowanceArgs], [Allowance], ["query"]),
+    icrc2_allowance: IDL.Func([AllowanceArgs], [Allowance], ['query']),
     icrc2_approve: IDL.Func([ApproveArgs], [ApproveResult], []),
     icrc2_transfer_from: IDL.Func([TransferFromArgs], [TransferFromResult], []),
 
@@ -199,15 +199,11 @@ export const tokenIdlFactory = ({ IDL }: { IDL: any }) => {
             start: IDL.Nat,
             end: IDL.Nat,
             canister_id: IDL.Principal,
-          })
+          }),
         ),
       ],
-      ["query"]
+      ['query'],
     ),
-    icrc3_get_blocks: IDL.Func(
-      [IDL.Vec(GetBlocksArg)],
-      [GetBlocksResponse],
-      ["query"]
-    ),
+    icrc3_get_blocks: IDL.Func([IDL.Vec(GetBlocksArg)], [GetBlocksResponse], ['query']),
   });
 };

@@ -1,22 +1,22 @@
 [
-    {
-        "coinAddress": "ryjl3-tyaaa-aaaaa-aaaba-cai",
-        "coinArchiveAddress": "",
-        "name": "Internet Protocol",
-        "symbol": "ICP",
-        "logo": "./assets/logo-icp.svg",
-        "balance": 0,
-        "fee": 10000,
-        "isChecked": 1
-    },
-    {
-        "coinAddress": "a4js4-wiaaa-aaaak-qijqa-cai",
-        "coinArchiveAddress": "",
-        "name": "Peridot",
-        "symbol": "PER",
-        "logo": "https://raw.githubusercontent.com/peridotfoundation/metadata/main/logo.png",
-        "balance": 0,
-        "fee": 500,
-        "isChecked": 1
-    }
+  {
+    "coinAddress": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+    "coinArchiveAddress": "",
+    "name": "Internet Protocol",
+    "symbol": "ICP",
+    "logo": "./assets/logo-icp.svg",
+    "balance": 0,
+    "fee": 10000,
+    "isChecked": 1
+  },
+  {
+    "coinAddress": "a4js4-wiaaa-aaaak-qijqa-cai",
+    "coinArchiveAddress": "",
+    "name": "Peridot",
+    "symbol": "PER",
+    "logo": "https://raw.githubusercontent.com/peridotfoundation/metadata/main/logo.png",
+    "balance": 0,
+    "fee": 500,
+    "isChecked": 1
+  }
 ]

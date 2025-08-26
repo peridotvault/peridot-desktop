@@ -1,62 +1,53 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { useWallet } from "../../../contexts/WalletContext";
-import {
-  GroupByDayInterface,
-  TrainedDataInterface,
-} from "../interfaces/History";
-import { HistoryComponent } from "../components/HistoryComponent";
-import { TransactionProof } from "./TransactionProof";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { FilterHistory } from "../components/FilterHistory";
-import { BlockService } from "../../../local_db/wallet/services/blockService";
-import { filterByType, groupByDay } from "../../../utils/classifier";
-import { transformBlockToTrained } from "../../../utils/transformBlockToTrainedData";
-import { CoinService } from "../../../local_db/wallet/services/coinService";
-import { UserProgressService } from "../../../local_db/wallet/services/userProgressService";
-import { Principal } from "@dfinity/principal";
-import { formatShortEn } from "../../../utils/Additional";
+import React, { useEffect, useState } from 'react';
+import { useWallet } from '../../../contexts/WalletContext';
+import { GroupByDayInterface, TrainedDataInterface } from '../interfaces/History';
+import { HistoryComponent } from '../components/HistoryComponent';
+import { TransactionProof } from './TransactionProof';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFilter } from '@fortawesome/free-solid-svg-icons';
+import { FilterHistory } from '../components/FilterHistory';
+import { BlockService } from '../../../local_db/wallet/services/blockService';
+import { filterByType, groupByDay } from '../../../utils/classifier';
+import { transformBlockToTrained } from '../../../utils/transformBlockToTrainedData';
+import { CoinService } from '../../../local_db/wallet/services/coinService';
+import { UserProgressService } from '../../../local_db/wallet/services/userProgressService';
+import { Principal } from '@dfinity/principal';
+import { formatShortEn } from '../../../utils/Additional';
 import {
   getArchiveBlockLength,
   getLedgerBlockLength,
   getTokenBlocks,
-} from "../blockchain/icp/services/ICPCoinService";
+} from '../blockchain/icp/services/ICPCoinService';
 
 export const History = () => {
   const { wallet } = useWallet();
-  const [relevantOperations, setRelevantOperations] =
-    useState<GroupByDayInterface>({});
+  const [relevantOperations, setRelevantOperations] = useState<GroupByDayInterface>({});
   const [isDetailTransactionOpen, setIsDetailTransactionOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [metadataModal, setMetadataModal] =
-    useState<TrainedDataInterface | null>(null);
-  const [filter, setFilter] = useState("daily");
+  const [metadataModal, setMetadataModal] = useState<TrainedDataInterface | null>(null);
+  const [filter, setFilter] = useState('daily');
 
   async function loadTransactions() {
     if (!wallet?.principalId) return;
 
     const blocks = await BlockService.getByPrincipal(wallet.principalId);
-    console.log("Fetched blocks:", blocks);
+    console.log('Fetched blocks:', blocks);
 
     // 🔁 Konversi dari Block[] ke TrainedDataInterface[]
     const trainedBlocks: TrainedDataInterface[] = blocks.map((block) =>
-      transformBlockToTrained(block, wallet.principalId!)
+      transformBlockToTrained(block, wallet.principalId!),
     );
 
     let filteredBlocks: TrainedDataInterface[] = [];
 
-    if (filter === "daily") {
+    if (filter === 'daily') {
       setRelevantOperations(groupByDay(trainedBlocks));
-    } else if (filter === "received") {
-      filteredBlocks = filterByType(
-        trainedBlocks,
-        wallet.principalId,
-        "Received"
-      );
+    } else if (filter === 'received') {
+      filteredBlocks = filterByType(trainedBlocks, wallet.principalId, 'Received');
       setRelevantOperations(groupByDay(filteredBlocks));
-    } else if (filter === "sent") {
-      filteredBlocks = filterByType(trainedBlocks, wallet.principalId, "Sent");
+    } else if (filter === 'sent') {
+      filteredBlocks = filterByType(trainedBlocks, wallet.principalId, 'Sent');
       setRelevantOperations(groupByDay(filteredBlocks));
     }
   }
@@ -81,20 +72,15 @@ export const History = () => {
     let updated = false;
 
     for (const coin of listToken) {
-      const ledgerBlockLength = await getLedgerBlockLength(
-        Principal.fromText(coin.coinAddress)
-      );
+      const ledgerBlockLength = await getLedgerBlockLength(Principal.fromText(coin.coinAddress));
       const archiveBlockLength = await getArchiveBlockLength(
-        Principal.fromText(coin.coinArchiveAddress)
+        Principal.fromText(coin.coinArchiveAddress),
       );
-      console.log("Length Token ", coin.coinAddress, ": ", ledgerBlockLength);
+      console.log('Length Token ', coin.coinAddress, ': ', ledgerBlockLength);
 
-      const progressFetch = await UserProgressService.get(
-        wallet!.principalId!,
-        coin.coinAddress
-      );
+      const progressFetch = await UserProgressService.get(wallet!.principalId!, coin.coinAddress);
       const startBlock = progressFetch?.lastSavedBlock ?? 0;
-      console.log("Saved Block ", coin.coinAddress, ": ", startBlock);
+      console.log('Saved Block ', coin.coinAddress, ': ', startBlock);
 
       // ⏩ Skip kalau tidak ada perubahan dari chain
       if (ledgerBlockLength === startBlock) {
@@ -114,10 +100,7 @@ export const History = () => {
         });
 
         for (const block of result) {
-          if (
-            block.from === wallet!.principalId ||
-            block.to === wallet!.principalId
-          ) {
+          if (block.from === wallet!.principalId || block.to === wallet!.principalId) {
             await BlockService.add(block);
             updated = true;
           }
@@ -152,7 +135,7 @@ export const History = () => {
   return (
     <div
       className={`p-8 flex flex-col gap-8 h-full relative ${
-        isFilterOpen ? "overflow-hidden" : "overflow-auto"
+        isFilterOpen ? 'overflow-hidden' : 'overflow-auto'
       }`}
     >
       {/* Header  */}
@@ -193,7 +176,7 @@ export const History = () => {
           setFilter={setFilter}
         />
       ) : (
-        ""
+        ''
       )}
 
       {/* Detail Transaction */}
@@ -204,7 +187,7 @@ export const History = () => {
           onCloseModal={handleCloseModal}
         />
       ) : (
-        ""
+        ''
       )}
     </div>
   );

@@ -7,7 +7,7 @@
 export function hexToArrayBuffer(hex: string): ArrayBuffer {
   // Pastikan panjang string genap
   if (hex.length % 2 !== 0) {
-    throw new Error("Invalid hex string");
+    throw new Error('Invalid hex string');
   }
 
   const uint8Array = new Uint8Array(hex.length / 2);
