@@ -1,14 +1,14 @@
 // services/SyncService.ts
-import { Principal } from "@dfinity/principal";
-import { CoinService } from "../../../local_db/wallet/services/coinService";
-import { UserProgressService } from "../../../local_db/wallet/services/userProgressService";
-import { Block } from "../../../local_db/wallet/models/Block";
-import { BlockService } from "../../../local_db/wallet/services/blockService";
+import { Principal } from '@dfinity/principal';
+import { CoinService } from '../../../local_db/wallet/services/coinService';
+import { UserProgressService } from '../../../local_db/wallet/services/userProgressService';
+import { Block } from '../../../local_db/wallet/models/Block';
+import { BlockService } from '../../../local_db/wallet/services/blockService';
 import {
   getArchiveBlockLength,
   getLedgerBlockLength,
   getTokenBlocks,
-} from "../blockchain/icp/services/ICPCoinService";
+} from '../blockchain/icp/services/ICPCoinService';
 
 interface SyncProgress {
   current: number;
@@ -22,7 +22,7 @@ interface SyncBatch {
   archiveBlockLength: number;
   start: number;
   length: number;
-  priority: "high" | "normal";
+  priority: 'high' | 'normal';
 }
 
 class SyncServiceClass {
@@ -42,12 +42,12 @@ class SyncServiceClass {
 
   async startReverseSyncWithMonitoring(principalId: string) {
     if (this.isActive) {
-      console.log("Sync already active");
+      console.log('Sync already active');
       return;
     }
 
     this.isActive = true;
-    console.log("🚀 Starting reverse sync with monitoring");
+    console.log('🚀 Starting reverse sync with monitoring');
 
     try {
       // Get wallet context
@@ -74,7 +74,7 @@ class SyncServiceClass {
 
       this.completionCallback?.(globalUpdated);
     } catch (error) {
-      console.error("❌ Sync failed:", error);
+      console.error('❌ Sync failed:', error);
       this.isActive = false;
       throw error;
     }
@@ -88,22 +88,17 @@ class SyncServiceClass {
     principalId: string;
   }) {
     // Get current blockchain state
-    let currentLedgerLength = await getLedgerBlockLength(
-      Principal.fromText(coin.coinAddress)
-    );
+    let currentLedgerLength = await getLedgerBlockLength(Principal.fromText(coin.coinAddress));
     const archiveBlockLength = await getArchiveBlockLength(
-      Principal.fromText(coin.coinArchiveAddress)
+      Principal.fromText(coin.coinArchiveAddress),
     );
 
     // Get our current progress
-    const progressFetch = await UserProgressService.get(
-      principalId,
-      coin.coinAddress
-    );
+    const progressFetch = await UserProgressService.get(principalId, coin.coinAddress);
     const lastSavedBlock = progressFetch?.lastSavedBlock ?? 0;
 
     console.log(
-      `📊 ${coin.coinAddress} - Current: ${currentLedgerLength}, Saved: ${lastSavedBlock}`
+      `📊 ${coin.coinAddress} - Current: ${currentLedgerLength}, Saved: ${lastSavedBlock}`,
     );
 
     // Skip jika tidak ada blok baru
@@ -130,14 +125,10 @@ class SyncServiceClass {
     for (const batch of batches) {
       try {
         // Check for new blocks sebelum setiap batch
-        const newLedgerLength = await getLedgerBlockLength(
-          Principal.fromText(coin.coinAddress)
-        );
+        const newLedgerLength = await getLedgerBlockLength(Principal.fromText(coin.coinAddress));
 
         if (newLedgerLength > currentLedgerLength) {
-          console.log(
-            `🔔 New blocks detected! ${currentLedgerLength} -> ${newLedgerLength}`
-          );
+          console.log(`🔔 New blocks detected! ${currentLedgerLength} -> ${newLedgerLength}`);
 
           // Prioritaskan blocks baru yang muncul
           await this.syncNewlyAppearedBlocks({
@@ -164,8 +155,7 @@ class SyncServiceClass {
 
         // Filter dan simpan blocks yang relevan
         const relevantBlocks = result.filter(
-          (block: Block) =>
-            block.from === principalId || block.to === principalId
+          (block: Block) => block.from === principalId || block.to === principalId,
         );
 
         if (relevantBlocks.length > 0) {
@@ -178,7 +168,7 @@ class SyncServiceClass {
         this.progressCallback!({
           current: processedBlocks,
           total: totalBlocks,
-          coin: coin.coinAddress.slice(0, 8) + "...",
+          coin: coin.coinAddress.slice(0, 8) + '...',
         });
 
         // Update saved progress (save setiap batch untuk safety)
@@ -190,10 +180,8 @@ class SyncServiceClass {
         });
       } catch (error) {
         console.error(
-          `❌ Error processing batch ${batch.start}-${
-            batch.start + batch.length
-          }:`,
-          error
+          `❌ Error processing batch ${batch.start}-${batch.start + batch.length}:`,
+          error,
         );
         // Continue dengan batch berikutnya
       }
@@ -230,7 +218,7 @@ class SyncServiceClass {
         archiveBlockLength,
         start: batchStart,
         length: actualLength,
-        priority: "normal",
+        priority: 'normal',
       });
     }
 
@@ -252,9 +240,7 @@ class SyncServiceClass {
   }) {
     const batchSize = 100;
 
-    console.log(
-      `🔄 Syncing newly appeared blocks: ${oldLength} to ${newLength}`
-    );
+    console.log(`🔄 Syncing newly appeared blocks: ${oldLength} to ${newLength}`);
 
     for (let start = oldLength; start < newLength; start += batchSize) {
       const length = Math.min(batchSize, newLength - start);
@@ -270,8 +256,7 @@ class SyncServiceClass {
         });
 
         const relevantBlocks = result.filter(
-          (block: Block) =>
-            block.from === principalId || block.to === principalId
+          (block: Block) => block.from === principalId || block.to === principalId,
         );
 
         if (relevantBlocks.length > 0) {
@@ -285,10 +270,7 @@ class SyncServiceClass {
           lastSavedBlock: Math.max(...result.map((b) => b.blockId)),
         });
       } catch (error) {
-        console.error(
-          `❌ Error syncing new blocks ${start}-${start + length}:`,
-          error
-        );
+        console.error(`❌ Error syncing new blocks ${start}-${start + length}:`, error);
       }
     }
   }
@@ -304,19 +286,14 @@ class SyncServiceClass {
       if (!this.isActive) return;
 
       try {
-        const currentLength = await getLedgerBlockLength(
-          Principal.fromText(coin.coinAddress)
-        );
+        const currentLength = await getLedgerBlockLength(Principal.fromText(coin.coinAddress));
 
-        const progress = await UserProgressService.get(
-          principalId,
-          coin.coinAddress
-        );
+        const progress = await UserProgressService.get(principalId, coin.coinAddress);
         const lastSaved = progress?.lastSavedBlock ?? 0;
 
         if (currentLength > lastSaved) {
           console.log(
-            `📢 Real-time update needed for ${coin.coinAddress}: ${lastSaved} -> ${currentLength}`
+            `📢 Real-time update needed for ${coin.coinAddress}: ${lastSaved} -> ${currentLength}`,
           );
 
           await this.syncNewlyAppearedBlocks({
@@ -324,7 +301,7 @@ class SyncServiceClass {
             oldLength: lastSaved,
             newLength: currentLength,
             archiveBlockLength: await getArchiveBlockLength(
-              Principal.fromText(coin.coinArchiveAddress)
+              Principal.fromText(coin.coinArchiveAddress),
             ),
             principalId,
           });
@@ -341,7 +318,7 @@ class SyncServiceClass {
   }
 
   stopContinuousSync() {
-    console.log("🛑 Stopping continuous sync");
+    console.log('🛑 Stopping continuous sync');
     this.isActive = false;
 
     // Clear all monitoring intervals

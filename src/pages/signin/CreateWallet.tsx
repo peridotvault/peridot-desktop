@@ -1,21 +1,20 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
-import { walletService } from "../../features/wallet/services/WalletService";
-import { useNavigate } from "react-router-dom";
-import { PasswordPage } from "./PasswordPage";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faDice } from "@fortawesome/free-solid-svg-icons";
-import { clearWalletData } from "../../utils/StoreService";
-import { SeedPhraseInput } from "../../features/wallet/components/SeedPhraseInput";
-import { getUserData } from "../../blockchain/icp/user/services/ICPUserService";
+import React, { useEffect, useState } from 'react';
+import { useWallet } from '../../contexts/WalletContext';
+import { walletService } from '../../features/wallet/services/WalletService';
+import { useNavigate } from 'react-router-dom';
+import { PasswordPage } from './PasswordPage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft, faDice } from '@fortawesome/free-solid-svg-icons';
+import { clearWalletData } from '../../utils/StoreService';
+import { SeedPhraseInput } from '../../features/wallet/components/SeedPhraseInput';
+import { getUserData } from '../../blockchain/icp/user/services/ICPUserService';
 
 export default function CreateWallet() {
-  const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } =
-    useWallet();
+  const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } = useWallet();
 
   const navigate = useNavigate();
-  const [newSeedPhrase, setNewSeedPhrase] = useState("");
+  const [newSeedPhrase, setNewSeedPhrase] = useState('');
 
   useEffect(() => {
     async function userHandle() {
@@ -25,12 +24,12 @@ export default function CreateWallet() {
             wallet: wallet,
           });
           if (isUserExist) {
-            navigate("/");
+            navigate('/');
           }
         }
       } catch (error) {
         const msg = String((error as Error)?.message ?? error);
-        if (msg.includes("NotFound")) navigate("/create_profile");
+        if (msg.includes('NotFound')) navigate('/create_profile');
         else console.error(error);
       }
     }
@@ -45,7 +44,7 @@ export default function CreateWallet() {
 
   const clearSeedPhrase = async () => {
     await clearWalletData();
-    setNewSeedPhrase("");
+    setNewSeedPhrase('');
     setIsGeneratedSeedPhrase(false);
     setWallet((prevWallet) => ({
       ...prevWallet,
@@ -60,15 +59,9 @@ export default function CreateWallet() {
 
   const handleGenerateWallet = async (password: string) => {
     if (newSeedPhrase) {
-      const result = await walletService.generateWallet(
-        newSeedPhrase,
-        password
-      );
+      const result = await walletService.generateWallet(newSeedPhrase, password);
       if (result.success) {
-        const ol = await walletService.openLock(
-          password,
-          result.verificationData
-        );
+        const ol = await walletService.openLock(password, result.verificationData);
         console.log(ol);
         setWallet((prevWallet) => ({
           ...prevWallet,
@@ -79,7 +72,7 @@ export default function CreateWallet() {
           verificationData: result.verificationData,
         }));
       } else {
-        console.error("Failed to generate wallet:", result.error);
+        console.error('Failed to generate wallet:', result.error);
       }
     }
   };
@@ -97,7 +90,7 @@ export default function CreateWallet() {
               className="w-6"
               onClick={() => {
                 clearSeedPhrase();
-                navigate("/login");
+                navigate('/login');
               }}
             >
               <FontAwesomeIcon icon={faChevronLeft} />
@@ -118,7 +111,7 @@ export default function CreateWallet() {
           <SeedPhraseInput
             seedPhrase={newSeedPhrase}
             onContinue={() => {
-              if (newSeedPhrase !== "") {
+              if (newSeedPhrase !== '') {
                 setIsGeneratedSeedPhrase(true);
               }
             }}
@@ -127,12 +120,7 @@ export default function CreateWallet() {
       );
     }
 
-    return (
-      <PasswordPage
-        backFunction={clearSeedPhrase}
-        handlePassword={handlePasswordSubmit}
-      />
-    );
+    return <PasswordPage backFunction={clearSeedPhrase} handlePassword={handlePasswordSubmit} />;
   }
 
   return <div className="flex justify-center items-center">Redirecting...</div>;

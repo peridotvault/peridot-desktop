@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, { forwardRef } from "react";
+import React, { forwardRef } from 'react';
 
 interface InputFieldProps {
   value: string;
@@ -19,12 +19,12 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
       onChange,
       placeholder,
       disabled = false,
-      type = "password",
-      name = "Password",
+      type = 'password',
+      name = 'Password',
       onKeyDown,
       onPaste,
     },
-    ref
+    ref,
   ) => {
     return (
       <input
@@ -32,7 +32,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         type={type}
         name={name}
         className={`border border-white/10 focus:shadow-arise-sm p-3 w-full duration-300 rounded-lg bg-background_primary outline-none ${
-          disabled ? "text-text_disabled shadow-flat-sm" : "shadow-sunken-sm "
+          disabled ? 'text-text_disabled shadow-flat-sm' : 'shadow-sunken-sm '
         }`}
         placeholder={placeholder}
         value={value}
@@ -42,5 +42,5 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         disabled={disabled}
       />
     );
-  }
+  },
 );

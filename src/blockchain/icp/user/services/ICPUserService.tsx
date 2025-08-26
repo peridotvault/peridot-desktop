@@ -1,29 +1,21 @@
 // UserContext.tsx
-import { HttpAgent, Actor } from "@dfinity/agent";
+import { HttpAgent, Actor } from '@dfinity/agent';
 
-import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
+import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import {
   CreateUserInterface,
   UpdateUserInterface,
   UserInterface,
-} from "../../../../interfaces/user/UserInterface";
-import { walletService } from "../../../../features/wallet/services/WalletService";
-import { hexToArrayBuffer } from "../../../../utils/crypto";
-import { ICPUserFactory } from "../ICPUserFactory";
-import { ApiResponse, UserId } from "../../../../interfaces/CoreInterface";
+} from '../../../../interfaces/user/UserInterface';
+import { walletService } from '../../../../features/wallet/services/WalletService';
+import { hexToArrayBuffer } from '../../../../utils/crypto';
+import { ICPUserFactory } from '../ICPUserFactory';
+import { ApiResponse, UserId } from '../../../../interfaces/CoreInterface';
 
 const userCanister = import.meta.env.VITE_PERIDOT_CANISTER_USER_BACKEND;
 
-async function createAccount({
-  metadata,
-  wallet,
-}: {
-  metadata: CreateUserInterface;
-  wallet: any;
-}) {
-  const privateKey = await walletService.decryptWalletData(
-    wallet.encryptedPrivateKey
-  );
+async function createAccount({ metadata, wallet }: { metadata: CreateUserInterface; wallet: any }) {
+  const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
   try {
     const agent = new HttpAgent({
@@ -47,7 +39,7 @@ async function createAccount({
 
     return result;
   } catch (error) {
-    throw new Error("Error Context : " + error);
+    throw new Error('Error Context : ' + error);
   }
 }
 
@@ -58,9 +50,7 @@ async function updateUser({
   metadataUpdate: UpdateUserInterface;
   wallet: any;
 }): Promise<UpdateUserInterface> {
-  const privateKey = await walletService.decryptWalletData(
-    wallet.encryptedPrivateKey
-  );
+  const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
   try {
     // Initialize agent with identity
@@ -74,22 +64,18 @@ async function updateUser({
       canisterId: userCanister,
     });
 
-    const result = (await actor.updateUser(
-      metadataUpdate
-    )) as ApiResponse<UpdateUserInterface>;
-    if ("err" in result) {
+    const result = (await actor.updateUser(metadataUpdate)) as ApiResponse<UpdateUserInterface>;
+    if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`updateUser failed: ${k} - ${v}`);
     }
     return result.ok;
   } catch (error) {
-    throw new Error("Error Service Update User : " + error);
+    throw new Error('Error Service Update User : ' + error);
   }
 }
 
-async function getIsUsernameValid(
-  username: string
-): Promise<ApiResponse<Boolean>> {
+async function getIsUsernameValid(username: string): Promise<ApiResponse<Boolean>> {
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
@@ -102,21 +88,15 @@ async function getIsUsernameValid(
     });
 
     // Call balance method
-    const result = (await actor.getIsUsernameValid(
-      username
-    )) as ApiResponse<Boolean>;
+    const result = (await actor.getIsUsernameValid(username)) as ApiResponse<Boolean>;
 
     return result;
   } catch (error) {
-    throw new Error("Error getIsUsernameValid : " + error);
+    throw new Error('Error getIsUsernameValid : ' + error);
   }
 }
 
-async function getUserByPrincipalId({
-  userId,
-}: {
-  userId: UserId;
-}): Promise<UserInterface> {
+async function getUserByPrincipalId({ userId }: { userId: UserId }): Promise<UserInterface> {
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
@@ -128,27 +108,19 @@ async function getUserByPrincipalId({
       canisterId: userCanister,
     });
 
-    const result = (await actor.getUserByPrincipalId(
-      userId
-    )) as ApiResponse<UserInterface>;
-    if ("err" in result) {
+    const result = (await actor.getUserByPrincipalId(userId)) as ApiResponse<UserInterface>;
+    if ('err' in result) {
       const [k, _] = Object.entries(result.err)[0] as [string, string];
       throw new Error(` ${k}`);
     }
     return result.ok;
   } catch (error) {
-    throw new Error("Error Service Get User By PrincipalId : " + error);
+    throw new Error('Error Service Get User By PrincipalId : ' + error);
   }
 }
 
-async function getUserData({
-  wallet,
-}: {
-  wallet: any;
-}): Promise<UserInterface> {
-  const privateKey = await walletService.decryptWalletData(
-    wallet.encryptedPrivateKey
-  );
+async function getUserData({ wallet }: { wallet: any }): Promise<UserInterface> {
+  const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
   try {
     // Initialize agent with identity
@@ -163,24 +135,18 @@ async function getUserData({
     });
 
     const result = (await actor.getUserData()) as ApiResponse<UserInterface>;
-    if ("err" in result) {
+    if ('err' in result) {
       const [k, _] = Object.entries(result.err)[0] as [string, string];
       throw new Error(` ${k}`);
     }
     return result.ok;
   } catch (error) {
-    throw new Error("Error Service Get UserData : " + error);
+    throw new Error('Error Service Get UserData : ' + error);
   }
 }
 
-async function searchUsersByPrefixWithLimit(
-  wallet: any,
-  prefix: string,
-  limit: number
-) {
-  const privateKey = await walletService.decryptWalletData(
-    wallet.encryptedPrivateKey
-  );
+async function searchUsersByPrefixWithLimit(wallet: any, prefix: string, limit: number) {
+  const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
 
   try {
@@ -200,15 +166,13 @@ async function searchUsersByPrefixWithLimit(
 
     return result;
   } catch (error) {
-    throw new Error("Error Context : " + error);
+    throw new Error('Error Context : ' + error);
   }
 }
 
 // User Friend
 async function getFriendRequestList(wallet: any) {
-  const privateKey = await walletService.decryptWalletData(
-    wallet.encryptedPrivateKey
-  );
+  const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
 
   try {
@@ -228,7 +192,7 @@ async function getFriendRequestList(wallet: any) {
 
     return result;
   } catch (error) {
-    throw new Error("Error Context : " + error);
+    throw new Error('Error Context : ' + error);
   }
 }
 
@@ -244,9 +208,7 @@ async function createDeveloperProfile({
   websiteUrl: string;
   bio: string;
 }) {
-  const privateKey = await walletService.decryptWalletData(
-    wallet.encryptedPrivateKey
-  );
+  const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
 
   const secretKey = hexToArrayBuffer(privateKey);
 
@@ -267,7 +229,7 @@ async function createDeveloperProfile({
 
     return result;
   } catch (error) {
-    throw new Error("Error Context : " + error);
+    throw new Error('Error Context : ' + error);
   }
 }
 

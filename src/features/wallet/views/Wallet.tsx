@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { WalletNavigation } from "../components/WalletNavigation";
-import { Home } from "./Home";
-import { History } from "./History";
-import { Nft } from "./Nft";
-import { Settings } from "./Settings";
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { WalletNavigation } from '../components/WalletNavigation';
+import { Home } from './Home';
+import { History } from './History';
+import { Nft } from './Nft';
+import { Settings } from './Settings';
 
 interface NavbarProps {
   onClose: () => void;
@@ -12,7 +12,7 @@ interface NavbarProps {
 }
 
 export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
-  const [activeNav, setActiveNav] = useState<string>("home");
+  const [activeNav, setActiveNav] = useState<string>('home');
 
   return (
     <motion.div
@@ -27,16 +27,16 @@ export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
         initial={{ x: 400 }}
         animate={{ x: 0 }}
         exit={{ x: 400 }}
-        transition={{ type: "tween", duration: 0.2 }}
+        transition={{ type: 'tween', duration: 0.2 }}
       >
         {/* Content  */}
-        {activeNav == "home" ? (
+        {activeNav == 'home' ? (
           <Home onLockChanged={onLockChanged} />
-        ) : activeNav == "nft" ? (
+        ) : activeNav == 'nft' ? (
           <Nft />
-        ) : activeNav == "history" ? (
+        ) : activeNav == 'history' ? (
           <History />
-        ) : activeNav == "settings" ? (
+        ) : activeNav == 'settings' ? (
           <Settings />
         ) : (
           <div className=""></div>

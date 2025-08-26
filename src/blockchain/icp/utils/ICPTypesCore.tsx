@@ -1,4 +1,4 @@
-import { IDL } from "@dfinity/candid";
+import { IDL } from '@dfinity/candid';
 
 export const ICPAppId = IDL.Nat;
 export const ICPAnnouncementId = IDL.Nat;
@@ -10,6 +10,11 @@ export const ICPAppTags = IDL.Text;
 export const ICPAppStatus = IDL.Variant({
   publish: IDL.Null,
   notPublish: IDL.Null,
+});
+
+export const ICPAnnouncementInteraction = IDL.Variant({
+  like: IDL.Null,
+  dislike: IDL.Null,
 });
 
 export const ICPAnnouncementStatus = IDL.Variant({

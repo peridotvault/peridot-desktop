@@ -1,28 +1,29 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { StarComponent } from "../../components/atoms/StarComponent";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
-import { AppPayment } from "../../features/wallet/views/Payment";
-import { AppInterface, Preview } from "../../interfaces/app/AppInterface";
-import { useParams } from "react-router-dom";
-import { nsToDateStr } from "../../utils/Additional";
+import React, { useEffect, useState } from 'react';
+import { StarComponent } from '../../components/atoms/StarComponent';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleRight, faMessage } from '@fortawesome/free-solid-svg-icons';
+import { AppPayment } from '../../features/wallet/views/Payment';
+import { AppInterface, Preview } from '../../interfaces/app/AppInterface';
+import { useParams } from 'react-router-dom';
+import { nsToDateStr } from '../../utils/Additional';
+import { getAllPublishApps, getAppById } from '../../blockchain/icp/app/services/ICPAppService';
+import { useWallet } from '../../contexts/WalletContext';
+import { buyApp } from '../../blockchain/icp/app/services/ICPPurchaseService';
+import { PurchaseInterface } from '../../interfaces/app/PurchaseInterface';
+import CarouselPreview, { MediaItem } from '../../components/organisms/CarouselPreview';
+import { VerticalCard } from '../../components/cards/VerticalCard';
+import { AnnouncementInterface } from '../../interfaces/announcement/AnnouncementInterface';
 import {
-  getAllPublishApps,
-  getAppById,
-} from "../../blockchain/icp/app/services/ICPAppService";
-import { useWallet } from "../../contexts/WalletContext";
-import { buyApp } from "../../blockchain/icp/app/services/ICPPurchaseService";
-import { PurchaseInterface } from "../../interfaces/app/PurchaseInterface";
-import CarouselPreview, {
-  MediaItem,
-} from "../../components/organisms/CarouselPreview";
-import { VerticalCard } from "../../components/cards/VerticalCard";
-import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
-import { getAllAnnouncementsByAppId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
-import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
-import { getUserByPrincipalId } from "../../blockchain/icp/user/services/ICPUserService";
-import { UserInterface } from "../../interfaces/user/UserInterface";
+  commentByAnnouncementId,
+  getAllAnnouncementsByAppId,
+  getAnnouncementsByAnnouncementId,
+} from '../../blockchain/icp/app/services/ICPAnnouncementService';
+import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
+import { getUserByPrincipalId } from '../../blockchain/icp/user/services/ICPUserService';
+import { UserInterface } from '../../interfaces/user/UserInterface';
+import Modal from '@mui/material/Modal';
+import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
 
 export default function GameDetail() {
   const { appId } = useParams();
@@ -32,9 +33,12 @@ export default function GameDetail() {
   const [developerData, setDeveloperData] = useState<UserInterface | null>();
   const [allGames, setAllGames] = useState<AppInterface[] | null>();
   const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
-  const [announcements, setAnnouncements] = useState<
-    AnnouncementInterface[] | null
-  >(null);
+  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
+  const [isAnnouncementModalShowed, setIsAnnouncementModalShowed] = useState(false);
+  const [comment, setComment] = useState('');
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementInterface | null>(
+    null,
+  );
 
   useEffect(() => {
     async function fetchData() {
@@ -73,8 +77,8 @@ export default function GameDetail() {
         listAnnouncement = listAnnouncement.filter(
           (item) =>
             item.status &&
-            typeof item.status === "object" &&
-            Object.keys(item.status)[0] === "published"
+            typeof item.status === 'object' &&
+            Object.keys(item.status)[0] === 'published',
         );
         // Sort: pinned first, then by createdAt descending
         listAnnouncement = listAnnouncement.sort((a, b) => {
@@ -102,45 +106,135 @@ export default function GameDetail() {
     return Array.isArray(v) && v.length === 1 && Array.isArray(v[0]);
   }
 
-  function extLooksVideo(url = ""): boolean {
+  function extLooksVideo(url = ''): boolean {
     return /\.(mp4|webm|mov|m4v)$/i.test(url);
   }
 
-  function previewsToMediaItems(
-    previewsAny?: Preview[] | [Preview[]] | null
-  ): MediaItem[] {
+  function previewsToMediaItems(previewsAny?: Preview[] | [Preview[]] | null): MediaItem[] {
     // 1) unwrap opt vec: [] => [], [ [..] ] => [..]
     const arr: any[] = !previewsAny
       ? []
       : isOptVecShape(previewsAny)
-      ? previewsAny[0]
-      : (previewsAny as any[]);
+        ? previewsAny[0]
+        : (previewsAny as any[]);
 
     // 2) map aman + fallback deteksi video dari ekstensi
     return arr
-      .filter((p) => p && typeof p === "object")
+      .filter((p) => p && typeof p === 'object')
       .map((p) => {
-        const url = p.url ?? p.src ?? "";
+        const url = p.url ?? p.src ?? '';
         const kindObj = p.kind ?? {};
-        const isVideo =
-          (typeof kindObj === "object" && "video" in kindObj) ||
-          extLooksVideo(url);
+        const isVideo = (typeof kindObj === 'object' && 'video' in kindObj) || extLooksVideo(url);
         return {
-          kind: isVideo ? "video" : "image",
+          kind: isVideo ? 'video' : 'image',
           src: url,
-          alt: p.alt ?? "preview",
+          alt: p.alt ?? 'preview',
         } as MediaItem;
       });
   }
 
+  async function fetchAnnouncementByAnnouncementId(announcementId: any) {
+    setSelectedAnnouncement(null);
+    setIsAnnouncementModalShowed(true);
+    try {
+      const announcement = await getAnnouncementsByAnnouncementId({
+        announcementId: BigInt(Number(announcementId)),
+        wallet,
+      });
+
+      setSelectedAnnouncement(announcement);
+      console.log(announcement?.headline);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function onCommentSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      const result = await commentByAnnouncementId({
+        appId: BigInt(Number(selectedAnnouncement?.announcementId)),
+        wallet,
+        comment,
+      });
+      console.log(result?.comment);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return (
     <main className="flex justify-center duration-300">
+      {/* Announcement modal */}
+      <Modal
+        open={isAnnouncementModalShowed}
+        onClose={() => setIsAnnouncementModalShowed(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-shadow_primary rounded-2xl w-3/5 h-3/4 border-2 border-green-900 p-12">
+          <p
+            className="absolute top-0 right-0 pb-4 px-5 translate-x-1/2 -translate-y-1/2 bg-green-900 rounded-full cursor-pointer text-4xl"
+            onClick={() => setIsAnnouncementModalShowed(false)}
+          >
+            x
+          </p>
+
+          <div className="mb-12">
+            <div className="mb-12">
+              <div className="mb-4">
+                <p className="text-4xl">{selectedAnnouncement?.headline}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">
+                  PUBLISHED{' '}
+                  {selectedAnnouncement?.createdAt !== undefined
+                    ? new Date(
+                        Number(selectedAnnouncement.createdAt) / 1_000_000,
+                      ).toLocaleDateString('en-US', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })
+                    : ''}
+                </p>
+              </div>
+            </div>
+            <div>
+              <p>{selectedAnnouncement?.content}</p>
+            </div>
+          </div>
+          <div>
+            <div className="mb-4">
+              <p className="text-2xl">Comments</p>
+            </div>
+            <div>
+              <form onSubmit={onCommentSubmit}>
+                <InputFieldComponent
+                  name="Comment"
+                  icon={faMessage}
+                  type="text"
+                  placeholder="Comment"
+                  value={comment}
+                  onChange={(e) => setComment((e.target as HTMLInputElement).value)}
+                />
+                <div className="flex justify-end">
+                  <button type="submit" className={`shadow-flat-sm my-6 px-6 py-3 rounded-md`}>
+                    Post Comment
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div></div>
+        </div>
+      </Modal>
       <div className="max-w-[1400px] w-full flex flex-col gap-6 duration-300">
         <div className="mb-20"></div>
         {/* title */}
         <div className="px-12 pt-6 flex flex-col gap-3">
           <h1 className="text-3xl font-bold">
-            {detailGame?.title ? detailGame?.title : "PeridotVault Game"}
+            {detailGame?.title ? detailGame?.title : 'PeridotVault Game'}
           </h1>
           <StarComponent rate={4} />
         </div>
@@ -167,7 +261,11 @@ export default function GameDetail() {
               </button>
               <div className="flex flex-col gap-6">
                 {announcements?.map((item, index) => (
-                  <AnnouncementContainer key={index} item={item} />
+                  <AnnouncementContainer
+                    key={index}
+                    item={item}
+                    onClick={() => fetchAnnouncementByAnnouncementId(item.announcementId)}
+                  />
                 ))}
               </div>
             </div>
@@ -178,11 +276,7 @@ export default function GameDetail() {
             <div className="flex items-center justify-center ">
               <div className="w-full aspect-[3/4] relative overflow-hidden shadow-arise-sm rounded-xl">
                 <img
-                  src={
-                    detailGame?.coverImage
-                      ? detailGame.coverImage
-                      : "/assets/cover1.png"
-                  }
+                  src={detailGame?.coverImage ? detailGame.coverImage : '/assets/cover1.png'}
                   className="w-full h-full object-cover"
                   alt=""
                 />
@@ -199,21 +293,18 @@ export default function GameDetail() {
                 <p className="font-bold">Everyone</p>
                 <hr className="border-text_disabled/50" />
                 <p>
-                  A safe game for all, although it may contain some mild
-                  violence or more complex themes.
+                  A safe game for all, although it may contain some mild violence or more complex
+                  themes.
                 </p>
               </div>
             </div>
             {/* details game  */}
             <div className="flex flex-col">
-              <GameTypes
-                title="Developer"
-                content={developerData?.displayName!}
-              />
+              <GameTypes title="Developer" content={developerData?.displayName!} />
               {/* <GameTypes title="Publisher" content="Antigane Inc." /> */}
               <GameTypes
                 title="Release Date"
-                content={nsToDateStr(detailGame?.releaseDate.toString()) || ""}
+                content={nsToDateStr(detailGame?.releaseDate.toString()) || ''}
               />
               <GameTypes title="Requirement" content="RAM 8GB" />
               <GameTypes title="Platform" content="Web" />

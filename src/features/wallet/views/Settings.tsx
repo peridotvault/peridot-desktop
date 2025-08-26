@@ -1,22 +1,20 @@
 // @ts-ignore
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 import {
   getCurrency,
   getCurrencyByCode,
   getWalletInfo,
   saveCurrencyToWallet,
   saveRatesByCode,
-} from "../../../utils/IndexedDb";
-import { WalletInfo } from "../interfaces/Wallet";
-import { Currency } from "../interfaces/Currency";
+} from '../../../utils/IndexedDb';
+import { WalletInfo } from '../interfaces/Wallet';
+import { Currency } from '../interfaces/Currency';
 // import { faCircleInfo, faContactBook } from "@fortawesome/free-solid-svg-icons";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export const Settings = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const buttonRefs = useRef<{ [currency: string]: HTMLButtonElement | null }>(
-    {}
-  );
+  const buttonRefs = useRef<{ [currency: string]: HTMLButtonElement | null }>({});
   // const settingLists = [
   //   {
   //     title: "Contact",
@@ -36,14 +34,11 @@ export const Settings = () => {
 
   async function fetchAllData() {
     try {
-      const [currencyList, wallet] = await Promise.all([
-        getCurrency(),
-        getWalletInfo(),
-      ]);
+      const [currencyList, wallet] = await Promise.all([getCurrency(), getWalletInfo()]);
       setCurrencies(currencyList);
       setWalletInfo(wallet);
     } catch (error) {
-      console.error("Error loading data:", error);
+      console.error('Error loading data:', error);
     }
   }
 
@@ -55,7 +50,7 @@ export const Settings = () => {
     if (walletInfo?.currency?.currency) {
       const activeRef = buttonRefs.current[walletInfo.currency.currency];
       if (activeRef && scrollRef.current) {
-        activeRef.scrollIntoView({ behavior: "smooth", inline: "center" });
+        activeRef.scrollIntoView({ behavior: 'smooth', inline: 'center' });
       }
     }
   }, [walletInfo]);
@@ -83,7 +78,7 @@ export const Settings = () => {
   };
 
   const fetchAPICurrency = async (currency: string) => {
-    const url = "https://open.er-api.com/v6/latest/USD";
+    const url = 'https://open.er-api.com/v6/latest/USD';
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -125,18 +120,12 @@ export const Settings = () => {
               key={idx}
               ref={(el) => (buttonRefs.current[item.currency] = el)}
               className={`${
-                walletInfo?.currency.currency == item.currency
-                  ? "border border-accent_primary"
-                  : ""
+                walletInfo?.currency.currency == item.currency ? 'border border-accent_primary' : ''
               } shadow-arise-sm p-6 w-40 rounded-xl flex-shrink-0 flex flex-col justify-between aspect-[6/7] text-start`}
               onClick={() => fetchAPICurrency(item.currency)}
             >
               <div className="w-8 rounded-full aspect-square bg-background_disabled overflow-hidden">
-                <img
-                  src={item.flag_url}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
+                <img src={item.flag_url} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col items-start w-full gap-1">
                 <span className="font-bold">{item.symbol}</span>

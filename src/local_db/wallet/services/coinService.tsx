@@ -1,5 +1,5 @@
-import { dbWallet } from "../database";
-import { Coin } from "../models/Coin";
+import { dbWallet } from '../database';
+import { Coin } from '../models/Coin';
 
 export const CoinService = {
   // Create
@@ -35,7 +35,7 @@ export const CoinService = {
   },
 
   async getCoinActive(): Promise<Coin[]> {
-    return await dbWallet.coins.where("isChecked").equals(1).toArray();
+    return await dbWallet.coins.where('isChecked').equals(1).toArray();
   },
 
   // Update
@@ -45,7 +45,7 @@ export const CoinService = {
 
   async updateIsChecked(coinAddress: string) {
     const coin = await dbWallet.coins.get(coinAddress);
-    if (!coin) throw new Error("Coin not found");
+    if (!coin) throw new Error('Coin not found');
 
     return await dbWallet.coins.update(coinAddress, {
       isChecked: coin.isChecked === 1 ? 0 : 1,

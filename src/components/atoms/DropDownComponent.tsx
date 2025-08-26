@@ -1,9 +1,9 @@
 // @ts-ignore
-import React, { ChangeEventHandler } from "react";
-import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Gender } from "../../interfaces/user/UserInterface";
-import { Distribution } from "../../interfaces/app/AppInterface";
+import React, { ChangeEventHandler } from 'react';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Gender } from '../../interfaces/user/UserInterface';
+import { Distribution } from '../../interfaces/app/AppInterface';
 
 export const DropDownComponent = ({
   name,
@@ -23,9 +23,7 @@ export const DropDownComponent = ({
   onChange: ChangeEventHandler<HTMLSelectElement>;
 }) => {
   const displayValue =
-    name === "gender" && typeof value === "object"
-      ? Object.keys(value)[0]
-      : String(value);
+    name === 'gender' && typeof value === 'object' ? Object.keys(value)[0] : String(value);
   return (
     <section className="flex flex-col gap-3">
       <p className="capitalize font-semibold">

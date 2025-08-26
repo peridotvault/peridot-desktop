@@ -1,6 +1,6 @@
 // @ts-ignore
-import React, { useEffect, useRef, useState } from "react";
-import { Option } from "../../interfaces/Additional";
+import React, { useEffect, useRef, useState } from 'react';
+import { Option } from '../../interfaces/Additional';
 
 type MultiSelectProps = {
   maxValue: number;
@@ -18,7 +18,7 @@ export const MultiSelectComponent = ({
   onChange,
 }: MultiSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const containerRef = useRef<HTMLDivElement>(null);
 
   const toggleOption = (option: Option) => {
@@ -36,23 +36,20 @@ export const MultiSelectComponent = ({
 
   // Filter opsi berdasarkan search
   const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(search.toLowerCase())
+    option.label.toLowerCase().includes(search.toLowerCase()),
   );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        setSearch("");
+        setSearch('');
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -64,7 +61,7 @@ export const MultiSelectComponent = ({
       </label>
       <div
         className={`border border-text_disabled/30 rounded-lg p-2 cursor-text flex flex-wrap gap-2 min-h-[40px] max-h-44 overflow-auto duration-300  ${
-          isOpen ? "shadow-arise-sm" : "shadow-sunken-sm"
+          isOpen ? 'shadow-arise-sm' : 'shadow-sunken-sm'
         }`}
         onClick={() => setIsOpen(true)}
       >
@@ -88,7 +85,7 @@ export const MultiSelectComponent = ({
           hidden={selected.length >= maxValue}
           onChange={(e) => setSearch(e.target.value)}
           onFocus={() => setIsOpen(true)}
-          placeholder={selected.length === 0 ? placeholder : "Search..."}
+          placeholder={selected.length === 0 ? placeholder : 'Search...'}
           className="flex-grow min-w-[120px] border-none outline-none bg-transparent px-1 py-1"
         />
       </div>
@@ -100,13 +97,13 @@ export const MultiSelectComponent = ({
                 key={option.value}
                 onClick={() => {
                   toggleOption(option);
-                  setSearch("");
+                  setSearch('');
                   setIsOpen(true);
                 }}
                 className={`cursor-pointer px-3 py-2 hover:bg-background_disabled/50 ${
                   selected.find((o) => o.value === option.value)
-                    ? "bg-background_disabled border-y border-text_disabled/30"
-                    : ""
+                    ? 'bg-background_disabled border-y border-text_disabled/30'
+                    : ''
                 }`}
               >
                 {option.label}
@@ -117,7 +114,7 @@ export const MultiSelectComponent = ({
           )}
         </ul>
       ) : (
-        ""
+        ''
       )}
     </div>
   );

@@ -1,31 +1,24 @@
-import React, { useState } from "react";
-import {
-  faArrowLeft,
-  faArrowRight,
-  faWallet,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
-import { getProfileImage } from "../utils/Additional";
-import { useWallet } from "../contexts/WalletContext";
-import { Slide } from "../pages/Slide";
+import React, { useState } from 'react';
+import { faArrowLeft, faArrowRight, faWallet } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Link } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+import { getProfileImage } from '../utils/Additional';
+import { useWallet } from '../contexts/WalletContext';
+import { Slide } from '../pages/Slide';
 
 interface NavbarProps {
   onOpenWallet: () => void;
   profileImage: string | undefined | null;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-  onOpenWallet,
-  profileImage,
-}) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenWallet, profileImage }) => {
   const { wallet } = useWallet();
   const [isOpenSettings, setIsOpenSettings] = useState(false);
 
   const shortenAddress = (address: string | null) => {
     if (address) return `${address.slice(0, 4)}...${address.slice(-3)}`;
-    return "Connect Wallet"; // Tampilkan pesan jika tidak ada alamat
+    return 'Connect Wallet'; // Tampilkan pesan jika tidak ada alamat
   };
 
   const handleBack = () => {
@@ -83,11 +76,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       <AnimatePresence>
-        {isOpenSettings ? (
-          <Slide onClose={() => setIsOpenSettings(false)} />
-        ) : (
-          ""
-        )}
+        {isOpenSettings ? <Slide onClose={() => setIsOpenSettings(false)} /> : ''}
       </AnimatePresence>
     </div>
   );

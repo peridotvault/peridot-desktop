@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { InputField } from "../../../components/atoms/InputField";
-import { Principal } from "@dfinity/principal";
-import { useWallet } from "../../../contexts/WalletContext";
-import { Coin } from "../../../local_db/wallet/models/Coin";
-import { CoinService } from "../../../local_db/wallet/services/coinService";
-import { checkBalance } from "../blockchain/icp/services/ICPCoinService";
+import React, { useState } from 'react';
+import { InputField } from '../../../components/atoms/InputField';
+import { Principal } from '@dfinity/principal';
+import { useWallet } from '../../../contexts/WalletContext';
+import { Coin } from '../../../local_db/wallet/models/Coin';
+import { CoinService } from '../../../local_db/wallet/services/coinService';
+import { checkBalance } from '../blockchain/icp/services/ICPCoinService';
 
 interface NavbarProps {
   onClose: () => void;
@@ -12,16 +12,16 @@ interface NavbarProps {
 
 export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
   const { wallet } = useWallet();
-  const [coinAddress, setCoinAddress] = useState("");
+  const [coinAddress, setCoinAddress] = useState('');
   const [isCoinAvailable, setIsCoinAvailable] = useState(false);
   const [metadata, setMetadata] = useState<Coin>({
-    coinAddress: "",
-    coinArchiveAddress: "",
+    coinAddress: '',
+    coinArchiveAddress: '',
     balance: 0,
-    name: "",
-    symbol: "",
+    name: '',
+    symbol: '',
     fee: 0,
-    logo: "",
+    logo: '',
     isChecked: 0,
   });
 
@@ -91,14 +91,12 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
             />
           </div>
         ) : (
-          ""
+          ''
         )}
         <button
           onClick={handleSubmit}
           className={`w-full text-lg rounded-lg font bg-gradient-to-tr from-accent_primary to-accent_secondary p-2  duration-300 ${
-            !isCoinAvailable
-              ? "opacity-30 cursor-not-allowed "
-              : "hover:scale-105 cursor-pointer"
+            !isCoinAvailable ? 'opacity-30 cursor-not-allowed ' : 'hover:scale-105 cursor-pointer'
           }`}
           disabled={!isCoinAvailable}
         >

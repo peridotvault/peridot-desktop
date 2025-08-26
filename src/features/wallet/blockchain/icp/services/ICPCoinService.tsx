@@ -1,26 +1,21 @@
-import { Actor, HttpAgent } from "@dfinity/agent";
-import { Principal } from "@dfinity/principal";
-import { walletService } from "../../../services/WalletService";
-import { hexToArrayBuffer } from "../../../../../utils/crypto";
-import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
-import { tokenIdlFactory } from "../types/token";
-import { ArchiveInfo, ICRC1Metadata } from "../../../interfaces/Coin";
-import {
-  Block,
-  ICRC3BlockResponse,
-} from "../../../../../local_db/wallet/models/Block";
+import { Actor, HttpAgent } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
+import { walletService } from '../../../services/WalletService';
+import { hexToArrayBuffer } from '../../../../../utils/crypto';
+import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
+import { tokenIdlFactory } from '../types/token';
+import { ArchiveInfo, ICRC1Metadata } from '../../../interfaces/Coin';
+import { Block, ICRC3BlockResponse } from '../../../../../local_db/wallet/models/Block';
 
 export async function transferTokenICRC1(
   to: Principal,
   amount: number,
   icrc1Address: Principal,
   fee: number,
-  wallet: any
+  wallet: any,
 ) {
   const E8S_PER_TOKEN = 100000000; // 10^8 for 8 decimals
-  const privateKey = await walletService.decryptWalletData(
-    wallet.encryptedPrivateKey
-  );
+  const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
 
   const secretKey = hexToArrayBuffer(privateKey);
 
@@ -52,19 +47,19 @@ export async function transferTokenICRC1(
     const result = await actor.icrc1_transfer(transferRecord);
     return result;
   } catch (error) {
-    throw new Error("Error Transfer : " + error);
+    throw new Error('Error Transfer : ' + error);
   }
 }
 
 export async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
   if (!wallet?.principalId) {
-    throw new Error("Not Logged in");
+    throw new Error('Not Logged in');
   }
 
   try {
     // Gunakan host dari env; pastikan kompatibel CORS di browser.
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST || "https://icp-api.io",
+      host: import.meta.env.VITE_HOST || 'https://icp-api.io',
     });
     // Jika dev lokal (dfx): await agent.fetchRootKey();
 
@@ -76,18 +71,17 @@ export async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
     // -------------------------------
     // 1) (Opsional) Archives — aman dari error
     // -------------------------------
-    let coinArchiveAddress = "";
+    let coinArchiveAddress = '';
     try {
       const archives = (await actor.icrc3_get_archives({
         from: [],
       })) as ArchiveInfo[];
       if (Array.isArray(archives) && archives.length > 0) {
-        coinArchiveAddress =
-          archives[archives.length - 1].canister_id.toString();
+        coinArchiveAddress = archives[archives.length - 1].canister_id.toString();
       }
     } catch {
       // Ledger ICP (ryjl3-...) memang tidak mengekspor icrc3_get_archives → abaikan
-      coinArchiveAddress = "";
+      coinArchiveAddress = '';
     }
 
     // -------------------------------
@@ -106,9 +100,9 @@ export async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
     let fee = 0;
     try {
       const feeRaw = await actor.icrc1_fee();
-      if (typeof feeRaw === "bigint") {
+      if (typeof feeRaw === 'bigint') {
         fee = Number(feeRaw) / Math.pow(10, decimals);
-      } else if (typeof feeRaw === "number") {
+      } else if (typeof feeRaw === 'number') {
         // beberapa IDL custom bisa mengembalikan number
         fee = feeRaw / Math.pow(10, decimals);
       }
@@ -130,21 +124,17 @@ export async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
     // 4) Metadata tambahan (logo)
     // -------------------------------
     let logo: string | null =
-      icrc1CanisterId.toText() === "ryjl3-tyaaa-aaaaa-aaaba-cai"
-        ? "./assets/logo-icp.svg"
-        : null;
+      icrc1CanisterId.toText() === 'ryjl3-tyaaa-aaaaa-aaaba-cai' ? './assets/logo-icp.svg' : null;
 
     try {
       const metadataResult = (await actor.icrc1_metadata()) as any[][];
       // Cari entri 'icrc1:logo' → { Text: string }
       const logoEntry = Array.isArray(metadataResult)
-        ? metadataResult.find(
-            (it) => String(it?.[0]).toLowerCase() === "icrc1:logo"
-          )
+        ? metadataResult.find((it) => String(it?.[0]).toLowerCase() === 'icrc1:logo')
         : undefined;
       const v = logoEntry?.[1];
       const maybeText: unknown = v?.Text ?? v?.text ?? v;
-      if (typeof maybeText === "string" && maybeText.trim().length > 0) {
+      if (typeof maybeText === 'string' && maybeText.trim().length > 0) {
         logo = maybeText;
       }
     } catch {
@@ -171,9 +161,7 @@ export async function checkBalance(icrc1CanisterId: Principal, wallet: any) {
   }
 }
 
-export async function getLedgerBlockLength(
-  coinAddress: Principal
-): Promise<number> {
+export async function getLedgerBlockLength(coinAddress: Principal): Promise<number> {
   try {
     const agent = new HttpAgent({
       host: import.meta.env.VITE_HOST,
@@ -184,9 +172,7 @@ export async function getLedgerBlockLength(
       canisterId: coinAddress,
     });
 
-    const result = (await actor.icrc3_get_blocks([
-      { start: 0, length: 1 },
-    ])) as ICRC3BlockResponse;
+    const result = (await actor.icrc3_get_blocks([{ start: 0, length: 1 }])) as ICRC3BlockResponse;
 
     return Number(result.log_length);
   } catch (error) {
@@ -194,9 +180,7 @@ export async function getLedgerBlockLength(
   }
 }
 
-export async function getArchiveBlockLength(
-  coinArchiveAddress: Principal
-): Promise<number> {
+export async function getArchiveBlockLength(coinArchiveAddress: Principal): Promise<number> {
   try {
     const agent = new HttpAgent({
       host: import.meta.env.VITE_HOST,
@@ -207,9 +191,7 @@ export async function getArchiveBlockLength(
       canisterId: coinArchiveAddress,
     });
 
-    const result = (await actor.icrc3_get_blocks([
-      { start: 0, length: 1 },
-    ])) as ICRC3BlockResponse;
+    const result = (await actor.icrc3_get_blocks([{ start: 0, length: 1 }])) as ICRC3BlockResponse;
 
     return Number(result.log_length);
   } catch (error) {
@@ -231,21 +213,21 @@ function findInMap(map: any[] | undefined, key: string): any | undefined {
   return e ? valOf(e) : undefined;
 }
 function asNat(v: any): bigint | undefined {
-  if (!v || typeof v !== "object") return undefined;
-  if ("Nat" in v) return v.Nat as bigint;
-  if ("Int" in v) return BigInt(v.Int as bigint);
-  if ("Text" in v && /^\d+$/.test(v.Text)) return BigInt(v.Text);
+  if (!v || typeof v !== 'object') return undefined;
+  if ('Nat' in v) return v.Nat as bigint;
+  if ('Int' in v) return BigInt(v.Int as bigint);
+  if ('Text' in v && /^\d+$/.test(v.Text)) return BigInt(v.Text);
   return undefined;
 }
 function asText(v: any): string | undefined {
-  if (!v || typeof v !== "object") return undefined;
-  if ("Text" in v) return v.Text as string;
+  if (!v || typeof v !== 'object') return undefined;
+  if ('Text' in v) return v.Text as string;
   return undefined;
 }
 function decodePrincipalFromArrayField(arr?: any[]): string {
-  if (!Array.isArray(arr)) return "";
-  const blob = arr.find((x) => x && typeof x === "object" && "Blob" in x)?.Blob;
-  if (!blob) return "";
+  if (!Array.isArray(arr)) return '';
+  const blob = arr.find((x) => x && typeof x === 'object' && 'Blob' in x)?.Blob;
+  if (!blob) return '';
   try {
     return Principal.fromUint8Array(Uint8Array.from(blob)).toText();
   } catch {
@@ -253,7 +235,7 @@ function decodePrincipalFromArrayField(arr?: any[]): string {
   }
 }
 function toHex(u8: Uint8Array): string {
-  return [...u8].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return [...u8].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
 export async function getTokenBlocks({
@@ -272,7 +254,7 @@ export async function getTokenBlocks({
   wallet: any;
 }): Promise<Block[]> {
   if (!wallet.principalId) {
-    throw new Error("Not Logged in");
+    throw new Error('Not Logged in');
   }
   try {
     // Initialize agent with identity
@@ -314,32 +296,30 @@ export async function getTokenBlocks({
 
 function parseBlock(raw: any, coinArchiveAddress: string): Block | null {
   // Pastikan bentuknya map candid: { block: { Map: [...] }, id: Nat }
-  if (!raw?.block || !("Map" in raw.block)) return null;
+  if (!raw?.block || !('Map' in raw.block)) return null;
 
   const map: any[] = raw.block.Map;
 
   // --- TX map (kalau ada)
-  const txMap = findInMap(map, "tx")?.Map as any[] | undefined;
+  const txMap = findInMap(map, 'tx')?.Map as any[] | undefined;
 
   // --- Timestamp (prioritas: block.ts → tx.ts → tx.created_at_time → block.created_at_time)
-  const tsTop =
-    asNat(findInMap(map, "ts")) ?? asNat(findInMap(map, "timestamp"));
-  const tsTx = asNat(findInMap(txMap, "ts"));
+  const tsTop = asNat(findInMap(map, 'ts')) ?? asNat(findInMap(map, 'timestamp'));
+  const tsTx = asNat(findInMap(txMap, 'ts'));
   const tsCreated =
-    asNat(findInMap(txMap, "created_at_time")) ??
-    asNat(findInMap(map, "created_at_time"));
+    asNat(findInMap(txMap, 'created_at_time')) ?? asNat(findInMap(map, 'created_at_time'));
   const ts = tsTop ?? tsTx ?? tsCreated ?? 0n;
 
   // --- Fields lain dari tx
-  const amtNat = asNat(findInMap(txMap, "amt")) ?? 0n;
-  const opText = asText(findInMap(txMap, "op")) ?? "";
-  const memoBlob = findInMap(txMap, "memo")?.Blob as Uint8Array | undefined;
-  const fromArr = findInMap(txMap, "from")?.Array as any[] | undefined;
-  const toArr = findInMap(txMap, "to")?.Array as any[] | undefined;
+  const amtNat = asNat(findInMap(txMap, 'amt')) ?? 0n;
+  const opText = asText(findInMap(txMap, 'op')) ?? '';
+  const memoBlob = findInMap(txMap, 'memo')?.Blob as Uint8Array | undefined;
+  const fromArr = findInMap(txMap, 'from')?.Array as any[] | undefined;
+  const toArr = findInMap(txMap, 'to')?.Array as any[] | undefined;
 
   const from = decodePrincipalFromArrayField(fromArr);
   const to = decodePrincipalFromArrayField(toArr);
-  const memo = memoBlob ? toHex(Uint8Array.from(memoBlob)) : "";
+  const memo = memoBlob ? toHex(Uint8Array.from(memoBlob)) : '';
 
   // NOTE: simpan amount sebagai bigint kalau bisa, lalu format saat render
   return {

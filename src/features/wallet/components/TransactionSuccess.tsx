@@ -1,5 +1,5 @@
 // @ts-ignore
-import React from "react";
+import React from 'react';
 
 export const TransactionSuccess = ({ msg }: { msg: string }) => {
   return (

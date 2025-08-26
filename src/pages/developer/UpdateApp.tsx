@@ -1,7 +1,7 @@
 // UpdateApp.tsx (replaces your old CreateApp.tsx for edit flow)
 // @ts-ignore
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
 import {
   faBrain,
   faCheck,
@@ -12,14 +12,12 @@ import {
   faPersonCane,
   faCalendarDays,
   faThumbTack,
-} from "@fortawesome/free-solid-svg-icons";
-import { PhotoFieldComponent } from "../../components/atoms/PhotoFieldComponent";
-import { DropDownComponent } from "../../components/atoms/DropDownComponent";
-import { MultiSelectComponent } from "../../components/atoms/MultiSelectComponent";
-import { Option } from "../../interfaces/Additional";
-import CarouselPreview, {
-  MediaItem,
-} from "../../components/organisms/CarouselPreview";
+} from '@fortawesome/free-solid-svg-icons';
+import { PhotoFieldComponent } from '../../components/atoms/PhotoFieldComponent';
+import { DropDownComponent } from '../../components/atoms/DropDownComponent';
+import { MultiSelectComponent } from '../../components/atoms/MultiSelectComponent';
+import { Option } from '../../interfaces/Additional';
+import CarouselPreview, { MediaItem } from '../../components/organisms/CarouselPreview';
 import {
   AppStatus,
   ManifestInterface,
@@ -28,46 +26,36 @@ import {
   OS,
   UpdateAppInterface,
   AppInterface,
-} from "../../interfaces/app/AppInterface";
-import allCategories from "../../assets/json/app/categories.json";
-import { useWallet } from "../../contexts/WalletContext";
+} from '../../interfaces/app/AppInterface';
+import allCategories from '../../assets/json/app/categories.json';
+import { useWallet } from '../../contexts/WalletContext';
 import {
   getAppByDeveloperId,
   updateApp, // <<< make sure this exists in ICPAppService
-} from "../../blockchain/icp/app/services/ICPAppService";
-import { BannerFieldComponent } from "../../components/atoms/BannerFieldComponent";
-import { Opt, OSKey, ToOpt } from "../../interfaces/CoreInterface";
-import {
-  dateStrToNs,
-  hasDist,
-  nowNs,
-  nsToDateStr,
-  toOSKey,
-} from "../../utils/Additional";
+} from '../../blockchain/icp/app/services/ICPAppService';
+import { BannerFieldComponent } from '../../components/atoms/BannerFieldComponent';
+import { Opt, OSKey, ToOpt } from '../../interfaces/CoreInterface';
+import { dateStrToNs, hasDist, nowNs, nsToDateStr, toOSKey } from '../../utils/Additional';
 
-import { sha256Hex } from "../../utils/file";
-import {
-  initAppStorage,
-  InitResp,
-  safeFileName,
-  uploadToPrefix,
-} from "../../api/wasabiClient";
-import { useParams } from "react-router-dom";
+import { sha256Hex } from '../../utils/file';
+import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '../../api/wasabiClient';
+import { useParams } from 'react-router-dom';
 import {
   AnnouncementInterface,
   AnnouncementStatus,
   CreateAnnouncementInterface,
-} from "../../interfaces/announcement/AnnouncementInterface";
+} from '../../interfaces/announcement/AnnouncementInterface';
 import {
   createAnnouncement,
   getAllAnnouncementsByAppId,
-} from "../../blockchain/icp/app/services/ICPAnnouncementService";
+} from '../../blockchain/icp/app/services/ICPAnnouncementService';
 
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Box from "@mui/material/Box";
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -93,7 +81,7 @@ function CustomTabPanel(props: TabPanelProps) {
 function a11yProps(index: number) {
   return {
     id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
   };
 }
 
@@ -106,9 +94,7 @@ export default function UpdateApp() {
   const { appId } = useParams();
   const [storage, setStorage] = useState<InitResp | null>(null);
   const [apps, setApps] = useState<AppInterface[] | null>(null);
-  const [announcements, setAnnouncements] = useState<
-    AnnouncementInterface[] | null
-  >(null);
+  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
   const [loadedApp, setLoadedApp] = useState<AppInterface | null>(null);
 
   // fetch all dev apps (so we can hydrate by appId)
@@ -143,7 +129,7 @@ export default function UpdateApp() {
         const s = await initAppStorage(appId!);
         setStorage(s);
       } catch (e) {
-        console.error("initAppStorage failed:", e);
+        console.error('initAppStorage failed:', e);
       }
     })();
   }, [appId, wallet]);
@@ -181,36 +167,35 @@ export default function UpdateApp() {
   }, [appId, wallet]);
 
   // ===== Announcements =====
-  const [headline, setHeadline] = useState("");
-  const [content, setContent] = useState("");
-  const [announcementCoverImage, setAnnouncementCoverImage] =
-    useState<string>("");
-  const [announcementStatus, setAnnouncementStatus] = useState("");
+  const [headline, setHeadline] = useState('');
+  const [content, setContent] = useState('');
+  const [announcementCoverImage, setAnnouncementCoverImage] = useState<string>('');
+  const [announcementStatus, setAnnouncementStatus] = useState('');
   const [isAnnouncementPinned, setIsAnnouncementPinned] = useState(false);
   const announcementStatusOptions = [
-    { code: "draft", name: "Draft" },
-    { code: "published", name: "Published" },
-    { code: "archived", name: "Archived" },
+    { code: 'draft', name: 'Draft' },
+    { code: 'published', name: 'Published' },
+    { code: 'archived', name: 'Archived' },
   ];
 
   // ===== General form =====
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [coverImage, setCoverImage] = useState<string>("");
-  const [bannerImage, setBannerImage] = useState<string>("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [coverImage, setCoverImage] = useState<string>('');
+  const [bannerImage, setBannerImage] = useState<string>('');
 
-  const [priceStr, setPriceStr] = useState(""); // bigint
-  const [requiredAgeStr, setRequiredAgeStr] = useState(""); // bigint
+  const [priceStr, setPriceStr] = useState(''); // bigint
+  const [requiredAgeStr, setRequiredAgeStr] = useState(''); // bigint
   const [releaseDateStr, setReleaseDateStr] = useState(nsToDateStr(nowNs())); // YYYY-MM-DD
   const [selectedCategories, setSelectedCategories] = useState<Option[]>([]);
   const statusOptions = [
-    { code: "publish", name: "Publish" },
-    { code: "notPublish", name: "Not Publish" },
+    { code: 'publish', name: 'Publish' },
+    { code: 'notPublish', name: 'Not Publish' },
   ];
-  const [statusCode, setStatusCode] = useState("publish");
+  const [statusCode, setStatusCode] = useState('publish');
 
   // Tags (string array)
-  const [tagInput, setTagInput] = useState("");
+  const [tagInput, setTagInput] = useState('');
   const [appTags, setAppTags] = useState<string[]>([]);
 
   // Previews (URL public Wasabi)
@@ -222,13 +207,10 @@ export default function UpdateApp() {
           (it as any).storageKey ??
           (it as any).src ??
           (it as any).url ?? // kalau ada
-          "";
-        if (typeof url !== "string" || url.trim() === "") return null; // ⬅️ filter
+          '';
+        if (typeof url !== 'string' || url.trim() === '') return null; // ⬅️ filter
         return {
-          kind:
-            it.kind === "video"
-              ? ({ video: null } as const)
-              : ({ image: null } as const),
+          kind: it.kind === 'video' ? ({ video: null } as const) : ({ image: null } as const),
           url,
         };
       })
@@ -236,40 +218,36 @@ export default function UpdateApp() {
   }, [previewItems]);
 
   // Distribusi/OS
-  const [selectedDistribution, setSelectedDistribution] = useState<Option[]>(
-    []
-  );
+  const [selectedDistribution, setSelectedDistribution] = useState<Option[]>([]);
 
   // per-OS manifests
   const blankManifest = (): ManifestInterface => ({
-    version: "",
+    version: '',
     size: 0,
-    bucket: "",
-    basePath: "",
-    checksum: "",
-    content: "",
+    bucket: '',
+    basePath: '',
+    checksum: '',
+    content: '',
     createdAt: 0n,
   });
-  const [manifestsByOS, setManifestsByOS] = useState<
-    Record<OSKey, ManifestInterface[]>
-  >({
+  const [manifestsByOS, setManifestsByOS] = useState<Record<OSKey, ManifestInterface[]>>({
     windows: [],
     macos: [],
     linux: [],
   });
 
   // native shared hw
-  const [processor, setProcessor] = useState("");
-  const [memoryStr, setMemoryStr] = useState(""); // bigint
-  const [storageStr, setStorageStr] = useState(""); // bigint
-  const [graphics, setGraphics] = useState("");
-  const [notes, setNotes] = useState("");
+  const [processor, setProcessor] = useState('');
+  const [memoryStr, setMemoryStr] = useState(''); // bigint
+  const [storageStr, setStorageStr] = useState(''); // bigint
+  const [graphics, setGraphics] = useState('');
+  const [notes, setNotes] = useState('');
   const categoryOptions = allCategories.categories.map((tag: any) => ({
     value: tag.id,
     label: tag.name,
   }));
   // web build (URL app web public)
-  const [webUrl, setWebUrl] = useState("");
+  const [webUrl, setWebUrl] = useState('');
 
   // UI
   const [busy, setBusy] = useState(false);
@@ -280,14 +258,13 @@ export default function UpdateApp() {
     const chosenOS = new Set(
       selectedDistribution
         .map((o) => o.value)
-        .filter((v) => v !== "web")
-        .map((v) => toOSKey(v))
+        .filter((v) => v !== 'web')
+        .map((v) => toOSKey(v)),
     );
     setManifestsByOS((prev) => {
       const next = { ...prev };
-      (["windows", "macos", "linux"] as OSKey[]).forEach((k) => {
-        if (chosenOS.has(k) && next[k].length === 0)
-          next[k] = [blankManifest()];
+      (['windows', 'macos', 'linux'] as OSKey[]).forEach((k) => {
+        if (chosenOS.has(k) && next[k].length === 0) next[k] = [blankManifest()];
         if (!chosenOS.has(k)) next[k] = [];
       });
       return next;
@@ -298,9 +275,9 @@ export default function UpdateApp() {
    *  HYDRATE FROM EXISTING APP
    *  ====================== */
   function osKeyFromOS(os: OS): OSKey {
-    if ((os as any).windows !== undefined) return "windows";
-    if ((os as any).macos !== undefined) return "macos";
-    return "linux";
+    if ((os as any).windows !== undefined) return 'windows';
+    if ((os as any).macos !== undefined) return 'macos';
+    return 'linux';
   }
 
   function extLooksVideo(u: string) {
@@ -323,22 +300,18 @@ export default function UpdateApp() {
     const relNs = unwrapOpt<bigint>((a as any).releaseDate);
 
     // --- general
-    setTitle(a.title ?? "");
-    setDescription(a.description ?? "");
-    setCoverImage(cover ?? "");
-    setBannerImage(banner ?? "");
+    setTitle(a.title ?? '');
+    setDescription(a.description ?? '');
+    setCoverImage(cover ?? '');
+    setBannerImage(banner ?? '');
 
-    setPriceStr(
-      a.price ? String((Number(a.price) / 1e8) as unknown as bigint) : ""
-    );
-    setRequiredAgeStr(
-      a.requiredAge ? String(a.requiredAge as unknown as bigint) : ""
-    );
-    setReleaseDateStr(relNs ? nsToDateStr(relNs as any) : "");
+    setPriceStr(a.price ? String((Number(a.price) / 1e8) as unknown as bigint) : '');
+    setRequiredAgeStr(a.requiredAge ? String(a.requiredAge as unknown as bigint) : '');
+    setReleaseDateStr(relNs ? nsToDateStr(relNs as any) : '');
 
     // status
     const st = (a.status || {}) as any;
-    setStatusCode(st.publish !== undefined ? "publish" : "notPublish");
+    setStatusCode(st.publish !== undefined ? 'publish' : 'notPublish');
 
     // categories -> cocokkan ke options by label
     const selected = categoryOptions.filter((o) => cats.includes(o.label));
@@ -354,12 +327,12 @@ export default function UpdateApp() {
         return {
           kind:
             p.kind && (p.kind as any).video !== undefined
-              ? "video"
+              ? 'video'
               : extLooksVideo(url)
-              ? "video"
-              : "image",
+                ? 'video'
+                : 'image',
           src: url,
-          alt: "preview",
+          alt: 'preview',
         } as MediaItem;
       })
       .filter(Boolean) as MediaItem[];
@@ -373,19 +346,19 @@ export default function UpdateApp() {
       linux: [],
     };
 
-    let _web = "";
+    let _web = '';
     let hw = {
-      processor: "",
-      memory: "0",
-      storage: "0",
-      graphics: "",
-      notes: "",
+      processor: '',
+      memory: '0',
+      storage: '0',
+      graphics: '',
+      notes: '',
     };
 
     dists.forEach((d) => {
       if ((d as any).web) {
-        opts.push({ value: "web", label: "Web" });
-        _web = (d as any).web.url || "";
+        opts.push({ value: 'web', label: 'Web' });
+        _web = (d as any).web.url || '';
         return;
       }
       if ((d as any).native) {
@@ -394,10 +367,7 @@ export default function UpdateApp() {
         if (!opts.find((o) => o.value === osKey)) {
           opts.push({
             value: osKey,
-            label:
-              osKey === "macos"
-                ? "MacOS"
-                : osKey.charAt(0).toUpperCase() + osKey.slice(1),
+            label: osKey === 'macos' ? 'MacOS' : osKey.charAt(0).toUpperCase() + osKey.slice(1),
           });
         }
         nextManifests[osKey] = (n.manifests || []) as ManifestInterface[];
@@ -414,8 +384,8 @@ export default function UpdateApp() {
     setWebUrl(_web);
 
     setProcessor(hw.processor);
-    setMemoryStr(hw.memory || "");
-    setStorageStr(hw.storage || "");
+    setMemoryStr(hw.memory || '');
+    setStorageStr(hw.storage || '');
     setGraphics(hw.graphics);
     setNotes(hw.notes);
   }
@@ -442,15 +412,13 @@ export default function UpdateApp() {
       const apiUrl = `${import.meta.env.VITE_API_BASE}/files/${key}`;
       setCoverImage(apiUrl);
     } catch (err) {
-      console.error("upload cover failed:", err);
+      console.error('upload cover failed:', err);
     } finally {
-      e.target.value = "";
+      e.target.value = '';
     }
   }
 
-  async function handleAnnouncementCoverChange(
-    e: React.ChangeEvent<HTMLInputElement>
-  ) {
+  async function handleAnnouncementCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !storage) return;
 
@@ -465,9 +433,9 @@ export default function UpdateApp() {
       const apiUrl = `${import.meta.env.VITE_API_BASE}/files/${key}`;
       setAnnouncementCoverImage(apiUrl);
     } catch (err) {
-      console.error("Upload announcement cover failed:", err);
+      console.error('Upload announcement cover failed:', err);
     } finally {
-      e.target.value = "";
+      e.target.value = '';
     }
   }
 
@@ -484,14 +452,13 @@ export default function UpdateApp() {
       const apiUrl = `${import.meta.env.VITE_API_BASE}/files/${key}`;
       setBannerImage(apiUrl);
     } catch (err) {
-      console.error("upload banner failed:", err);
+      console.error('upload banner failed:', err);
     } finally {
-      e.target.value = "";
+      e.target.value = '';
     }
   }
 
-  const toOptVec = <T,>(arr?: T[] | null): Opt<T[]> =>
-    arr && arr.length ? [arr] : [];
+  const toOptVec = <T,>(arr?: T[] | null): Opt<T[]> => (arr && arr.length ? [arr] : []);
 
   function toWireFromUI(ui: {
     title: string;
@@ -534,22 +501,17 @@ export default function UpdateApp() {
         file,
         prefix: storage.prefixes.previews,
         fileName: safeFileName(file.name),
-        contentType: file.type || "application/octet-stream",
+        contentType: file.type || 'application/octet-stream',
       });
 
       const apiUrl = `${import.meta.env.VITE_API_BASE}/files/${key}`;
-      const kind: MediaItem["kind"] = file.type.startsWith("video/")
-        ? "video"
-        : "image";
+      const kind: MediaItem['kind'] = file.type.startsWith('video/') ? 'video' : 'image';
 
-      setPreviewItems((prev) => [
-        ...prev,
-        { kind, src: apiUrl, alt: file.name },
-      ]);
+      setPreviewItems((prev) => [...prev, { kind, src: apiUrl, alt: file.name }]);
     } catch (err) {
-      console.error("upload preview failed:", err);
+      console.error('upload preview failed:', err);
     } finally {
-      e.target.value = "";
+      e.target.value = '';
     }
   }
 
@@ -557,17 +519,15 @@ export default function UpdateApp() {
   // REPLACE seluruh fungsi uploadBuildForManifest dengan ini
   async function uploadBuildForManifest(osKey: OSKey, idx: number, file: File) {
     try {
-      if (!storage) throw new Error("Storage belum siap. Coba lagi.");
+      if (!storage) throw new Error('Storage belum siap. Coba lagi.');
       const m = manifestsByOS[osKey][idx];
-      const version = (m.version || "").trim();
-      if (!version)
-        throw new Error("Isi field Version dulu sebelum upload build.");
+      const version = (m.version || '').trim();
+      if (!version) throw new Error('Isi field Version dulu sebelum upload build.');
 
       const filename = safeFileName(file.name);
 
-      type BuildPrefixKey = "builds/windows" | "builds/macos" | "builds/linux";
-      const baseBuildPrefix =
-        storage.prefixes[`builds/${osKey}` as BuildPrefixKey];
+      type BuildPrefixKey = 'builds/windows' | 'builds/macos' | 'builds/linux';
+      const baseBuildPrefix = storage.prefixes[`builds/${osKey}` as BuildPrefixKey];
       const versionPrefix = `${baseBuildPrefix}${version}/`;
 
       // 1) Upload artifact utama (zip/exe/dmg/…)
@@ -591,16 +551,16 @@ export default function UpdateApp() {
           totalBytes: sizeBytes,
         },
         null,
-        2
+        2,
       );
 
       await uploadToPrefix({
-        file: new File([contentJson], "content.json", {
-          type: "application/json",
+        file: new File([contentJson], 'content.json', {
+          type: 'application/json',
         }),
         prefix: versionPrefix,
-        fileName: "content.json",
-        contentType: "application/json",
+        fileName: 'content.json',
+        contentType: 'application/json',
       });
 
       // 4) Update state manifest (AUTO-FILL)
@@ -613,11 +573,11 @@ export default function UpdateApp() {
                 bucket: storage.bucket,
                 basePath: versionPrefix, // contoh: apps/<id>/builds/windows/1.0.0/
                 checksum,
-                content: "content.json", // atau pakai filename; pilih salah satu, konsisten!
+                content: 'content.json', // atau pakai filename; pilih salah satu, konsisten!
                 size: sizeMB, // UI saja (backend disarankan bytes nantinya)
                 createdAt: nowNs(),
               }
-            : mm
+            : mm,
         ),
       }));
 
@@ -634,25 +594,25 @@ export default function UpdateApp() {
   function distributionsToPayload(): Distribution[] {
     const list: Distribution[] = [];
 
-    if (hasDist(selectedDistribution, "web")) {
+    if (hasDist(selectedDistribution, 'web')) {
       list.push({ web: { url: webUrl } } as any);
     }
 
-    (["windows", "macos", "linux"] as OSKey[]).forEach((osk) => {
+    (['windows', 'macos', 'linux'] as OSKey[]).forEach((osk) => {
       if (!hasDist(selectedDistribution, osk)) return;
       const osVariant: OS =
-        osk === "windows"
+        osk === 'windows'
           ? ({ windows: null } as any)
-          : osk === "macos"
-          ? ({ macos: null } as any)
-          : ({ linux: null } as any);
+          : osk === 'macos'
+            ? ({ macos: null } as any)
+            : ({ linux: null } as any);
       list.push({
         native: {
           os: osVariant,
           manifests: manifestsByOS[osk],
           processor,
-          memory: BigInt(memoryStr || "0"),
-          storage: BigInt(storageStr || "0"),
+          memory: BigInt(memoryStr || '0'),
+          storage: BigInt(storageStr || '0'),
           graphics,
           additionalNotes: notes ? notes : null,
         },
@@ -663,15 +623,13 @@ export default function UpdateApp() {
   }
 
   function mapStatusToBackend(code: string): AppStatus {
-    if (code === "publish") return { publish: null } as unknown as AppStatus;
+    if (code === 'publish') return { publish: null } as unknown as AppStatus;
     return { notPublish: null } as unknown as AppStatus;
   }
 
   function mapAnnouncementStatusToBackend(code: string): AnnouncementStatus {
-    if (code === "draft")
-      return { draft: null } as unknown as AnnouncementStatus;
-    if (code === "published")
-      return { published: null } as unknown as AnnouncementStatus;
+    if (code === 'draft') return { draft: null } as unknown as AnnouncementStatus;
+    if (code === 'published') return { published: null } as unknown as AnnouncementStatus;
     return { archived: null } as unknown as AnnouncementStatus;
   }
 
@@ -684,11 +642,10 @@ export default function UpdateApp() {
 
       const categoriesText: string[] = selectedCategories.map((c) => c.label);
       if (categoriesText.length === 0 || categoriesText.length > 3) {
-        throw new Error("Please choose 1 up to 3 categories.");
+        throw new Error('Please choose 1 up to 3 categories.');
       }
-      if (!coverImage) throw new Error("Cover image is required.");
-      if (previewItems.length === 0)
-        throw new Error("Please upload at least one preview.");
+      if (!coverImage) throw new Error('Cover image is required.');
+      if (previewItems.length === 0) throw new Error('Please upload at least one preview.');
 
       const payload = {
         title,
@@ -708,13 +665,12 @@ export default function UpdateApp() {
         })(),
       } as any;
 
-      if (!wallet || !appId)
-        throw new Error("Wallet atau AppId tidak tersedia.");
+      if (!wallet || !appId) throw new Error('Wallet atau AppId tidak tersedia.');
 
       const wire = toWireFromUI(payload);
       await updateApp({ updateAppTypes: wire, appId: Number(appId), wallet });
 
-      setToast({ ok: "App updated successfully 🎉" });
+      setToast({ ok: 'App updated successfully 🎉' });
     } catch (err: any) {
       console.error(err);
       setToast({ err: err?.message ?? String(err) });
@@ -724,18 +680,14 @@ export default function UpdateApp() {
   }
 
   // ===== submit announcement =====
-  const [
-    isCreateAnnouncementFormDisplayed,
-    setIsCreateAnnouncementFormDisplayed,
-  ] = useState(false);
+  const [isCreateAnnouncementFormDisplayed, setIsCreateAnnouncementFormDisplayed] = useState(false);
   async function onAnnouncementSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
       setBusy(true);
       setToast({});
 
-      if (!announcementCoverImage)
-        throw new Error("Announcement cover image is required.");
+      if (!announcementCoverImage) throw new Error('Announcement cover image is required.');
 
       const createData: CreateAnnouncementInterface = {
         headline: headline,
@@ -772,12 +724,12 @@ export default function UpdateApp() {
       }
 
       setIsCreateAnnouncementFormDisplayed(false);
-      setHeadline("");
-      setContent("");
-      setAnnouncementCoverImage("");
+      setHeadline('');
+      setContent('');
+      setAnnouncementCoverImage('');
       setIsAnnouncementPinned(false);
-      setAnnouncementStatus("");
-      setToast({ ok: "Announcement created successfully 🎉" });
+      setAnnouncementStatus('');
+      setToast({ ok: 'Announcement created successfully 🎉' });
     } catch (err: any) {
       console.error(err);
       setToast({ err: err?.message ?? String(err) });
@@ -792,7 +744,7 @@ export default function UpdateApp() {
     if (!t) return;
     if (appTags.includes(t)) return;
     setAppTags((p) => [...p, t]);
-    setTagInput("");
+    setTagInput('');
   };
   const removeTag = (t: string) => setAppTags((p) => p.filter((x) => x !== t));
 
@@ -804,13 +756,9 @@ export default function UpdateApp() {
 
   return (
     <div className="w-full flex flex-col justify-center px-8 pt-8 pb-32">
-      <Box sx={{ width: "100%" }}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            aria-label="basic tabs example"
-          >
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="Announcements" {...a11yProps(0)} />
             <Tab label="Settings" {...a11yProps(1)} />
           </Tabs>
@@ -834,26 +782,20 @@ export default function UpdateApp() {
                 disabled={busy}
                 className={
                   isCreateAnnouncementFormDisplayed
-                    ? "shadow-flat-sm my-6 px-6 py-3 rounded-md bg-red-500/20"
-                    : "shadow-flat-sm my-6 px-6 py-3 rounded-md bg-green-500/20"
+                    ? 'shadow-flat-sm my-6 px-6 py-3 rounded-md bg-red-500/20'
+                    : 'shadow-flat-sm my-6 px-6 py-3 rounded-md bg-green-500/20'
                 }
                 onClick={() =>
-                  setIsCreateAnnouncementFormDisplayed(
-                    !isCreateAnnouncementFormDisplayed
-                  )
+                  setIsCreateAnnouncementFormDisplayed(!isCreateAnnouncementFormDisplayed)
                 }
               >
-                {isCreateAnnouncementFormDisplayed
-                  ? "Cancel"
-                  : "Create New Announcement"}
+                {isCreateAnnouncementFormDisplayed ? 'Cancel' : 'Create New Announcement'}
               </button>
             </div>
             <form
               onSubmit={onAnnouncementSubmit}
               className={
-                isCreateAnnouncementFormDisplayed
-                  ? "container flex flex-col gap-8"
-                  : "hidden"
+                isCreateAnnouncementFormDisplayed ? 'container flex flex-col gap-8' : 'hidden'
               }
             >
               <h1 className="text-3xl pb-4">Announcements</h1>
@@ -864,9 +806,7 @@ export default function UpdateApp() {
                 type="text"
                 placeholder="Headline"
                 value={headline}
-                onChange={(e) =>
-                  setHeadline((e.target as HTMLInputElement).value)
-                }
+                onChange={(e) => setHeadline((e.target as HTMLInputElement).value)}
               />
               <InputFieldComponent
                 name="Content"
@@ -874,9 +814,7 @@ export default function UpdateApp() {
                 type="text"
                 placeholder="Content"
                 value={content}
-                onChange={(e) =>
-                  setContent((e.target as HTMLInputElement).value)
-                }
+                onChange={(e) => setContent((e.target as HTMLInputElement).value)}
               />
               <PhotoFieldComponent
                 title="Cover Image"
@@ -894,9 +832,7 @@ export default function UpdateApp() {
                   name: s.name,
                 }))}
                 onChange={(e) =>
-                  setAnnouncementStatus(
-                    (e.target as HTMLSelectElement).value as keyof AppStatus
-                  )
+                  setAnnouncementStatus((e.target as HTMLSelectElement).value as keyof AppStatus)
                 }
               />
               <div className="flex items-center gap-2">
@@ -906,10 +842,7 @@ export default function UpdateApp() {
                   checked={isAnnouncementPinned}
                   onChange={(e) => setIsAnnouncementPinned(e.target.checked)}
                 />
-                <label
-                  htmlFor="pin-announcement"
-                  className="cursor-pointer select-none"
-                >
+                <label htmlFor="pin-announcement" className="cursor-pointer select-none">
                   Pin Announcement
                 </label>
               </div>
@@ -919,58 +852,16 @@ export default function UpdateApp() {
                   type="submit"
                   disabled={busy}
                   className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
-                    busy ? "opacity-60 cursor-not-allowed" : ""
+                    busy ? 'opacity-60 cursor-not-allowed' : ''
                   }`}
                 >
-                  {busy ? "Creating..." : "Create Announcement"}
+                  {busy ? 'Creating...' : 'Create Announcement'}
                 </button>
               </div>
             </form>
             <div className="flex flex-col gap-6">
               {announcements?.map((item, index) => (
-                <div
-                  key={index}
-                  className={
-                    item.pinned
-                      ? "bg-green-500/20 p-6 flex justify-between"
-                      : "bg-gray-600 p-6 flex justify-between"
-                  }
-                >
-                  <div>
-                    <div className="flex content-center mb-8">
-                      {item.pinned ? (
-                        <FontAwesomeIcon icon={faThumbTack} className="mr-4" />
-                      ) : (
-                        ""
-                      )}
-                      <p className="text-xl capitalize mr-4">
-                        {item.status && typeof item.status === "object"
-                          ? Object.keys(item.status)[0]
-                          : ""}
-                      </p>
-                      <p>
-                        {item.createdAt
-                          ? new Date(
-                              Number(item.createdAt) / 1_000_000
-                            ).toLocaleDateString()
-                          : ""}
-                      </p>
-                    </div>
-                    <div className="mb-4">
-                      <p className="text-3xl font-bold">{item.headline}</p>
-                    </div>
-                    <div>
-                      <p className="text-lg">{item.content}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <img
-                      src={item.coverImage}
-                      className="w-64 h-72 object-cover"
-                      alt="preview"
-                    />
-                  </div>
-                </div>
+                <AnnouncementContainer item={item} key={index} />
               ))}
             </div>
           </div>
@@ -1002,9 +893,7 @@ export default function UpdateApp() {
                     type="text"
                     placeholder="Title"
                     value={title}
-                    onChange={(e) =>
-                      setTitle((e.target as HTMLInputElement).value)
-                    }
+                    onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
                   />
                   <InputFieldComponent
                     name="description"
@@ -1012,9 +901,7 @@ export default function UpdateApp() {
                     type="text"
                     placeholder="Description"
                     value={description}
-                    onChange={(e) =>
-                      setDescription((e.target as HTMLInputElement).value)
-                    }
+                    onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <InputFieldComponent
@@ -1023,9 +910,7 @@ export default function UpdateApp() {
                       type="number"
                       placeholder="Price (Nat)"
                       value={priceStr}
-                      onChange={(e) =>
-                        setPriceStr((e.target as HTMLInputElement).value)
-                      }
+                      onChange={(e) => setPriceStr((e.target as HTMLInputElement).value)}
                     />
                     <InputFieldComponent
                       name="requiredAge"
@@ -1033,9 +918,7 @@ export default function UpdateApp() {
                       type="number"
                       placeholder="Required Age (Nat)"
                       value={requiredAgeStr}
-                      onChange={(e) =>
-                        setRequiredAgeStr((e.target as HTMLInputElement).value)
-                      }
+                      onChange={(e) => setRequiredAgeStr((e.target as HTMLInputElement).value)}
                     />
                   </div>
 
@@ -1045,9 +928,7 @@ export default function UpdateApp() {
                     type="date"
                     placeholder="Release Date"
                     value={releaseDateStr}
-                    onChange={(e) =>
-                      setReleaseDateStr((e.target as HTMLInputElement).value)
-                    }
+                    onChange={(e) => setReleaseDateStr((e.target as HTMLInputElement).value)}
                   />
 
                   <div className="grid grid-cols-2 gap-4">
@@ -1062,10 +943,7 @@ export default function UpdateApp() {
                         name: s.name,
                       }))}
                       onChange={(e) =>
-                        setStatusCode(
-                          (e.target as HTMLSelectElement)
-                            .value as keyof AppStatus
-                        )
+                        setStatusCode((e.target as HTMLSelectElement).value as keyof AppStatus)
                       }
                     />
                     <MultiSelectComponent
@@ -1096,11 +974,8 @@ export default function UpdateApp() {
                   {appTags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {appTags.map((t) => (
-                        <span
-                          key={t}
-                          className="px-2 py-1 rounded-full border text-xs"
-                        >
-                          {t}{" "}
+                        <span key={t} className="px-2 py-1 rounded-full border text-xs">
+                          {t}{' '}
                           <button
                             type="button"
                             className="ml-1 text-danger"
@@ -1163,17 +1038,17 @@ export default function UpdateApp() {
                 placeholder="Select your Distribution"
                 selected={selectedDistribution}
                 options={[
-                  { value: "web", label: "Web" },
-                  { value: "windows", label: "Windows" },
-                  { value: "macos", label: "MacOS" },
-                  { value: "linux", label: "Linux" },
+                  { value: 'web', label: 'Web' },
+                  { value: 'windows', label: 'Windows' },
+                  { value: 'macos', label: 'MacOS' },
+                  { value: 'linux', label: 'Linux' },
                 ]}
                 onChange={setSelectedDistribution}
               />
             </section>
 
             {/* Web build */}
-            {hasDist(selectedDistribution, "web") && (
+            {hasDist(selectedDistribution, 'web') && (
               <section className="flex flex-col gap-4">
                 <hr className="border-t border-background_disabled" />
                 <h2 className="text-2xl font-semibold pb-2">Web Build</h2>
@@ -1183,21 +1058,17 @@ export default function UpdateApp() {
                   type="text"
                   placeholder="https://your-app.example/play"
                   value={webUrl}
-                  onChange={(e) =>
-                    setWebUrl((e.target as HTMLInputElement).value)
-                  }
+                  onChange={(e) => setWebUrl((e.target as HTMLInputElement).value)}
                 />
               </section>
             )}
 
             {/* Native per-OS */}
-            {(["windows", "macos", "linux"] as OSKey[]).map((osKey) =>
+            {(['windows', 'macos', 'linux'] as OSKey[]).map((osKey) =>
               hasDist(selectedDistribution, osKey) ? (
                 <section key={osKey} className="flex flex-col gap-4">
                   <hr className="border-t border-background_disabled" />
-                  <h2 className="text-2xl font-semibold pb-2 capitalize">
-                    {osKey} Manifests
-                  </h2>
+                  <h2 className="text-2xl font-semibold pb-2 capitalize">{osKey} Manifests</h2>
 
                   <ManifestList
                     osKey={osKey}
@@ -1221,27 +1092,22 @@ export default function UpdateApp() {
                           i === idx
                             ? {
                                 ...m,
-                                [field]:
-                                  field === "size"
-                                    ? Number(value || "0")
-                                    : (value as any),
+                                [field]: field === 'size' ? Number(value || '0') : (value as any),
                               }
-                            : m
+                            : m,
                         ),
                       }))
                     }
-                    onUploadFile={(idx, file) =>
-                      uploadBuildForManifest(osKey, idx, file)
-                    }
+                    onUploadFile={(idx, file) => uploadBuildForManifest(osKey, idx, file)}
                   />
                 </section>
-              ) : null
+              ) : null,
             )}
 
             {/* Native shared hardware */}
-            {(hasDist(selectedDistribution, "windows") ||
-              hasDist(selectedDistribution, "macos") ||
-              hasDist(selectedDistribution, "linux")) && (
+            {(hasDist(selectedDistribution, 'windows') ||
+              hasDist(selectedDistribution, 'macos') ||
+              hasDist(selectedDistribution, 'linux')) && (
               <section className="flex flex-col gap-4">
                 <h3 className="text-xl font-semibold pt-2">Native Hardware</h3>
                 <div className="grid grid-cols-2 gap-4">
@@ -1251,9 +1117,7 @@ export default function UpdateApp() {
                     type="text"
                     placeholder="Processor"
                     value={processor}
-                    onChange={(e) =>
-                      setProcessor((e.target as HTMLInputElement).value)
-                    }
+                    onChange={(e) => setProcessor((e.target as HTMLInputElement).value)}
                   />
                   <InputFieldComponent
                     name="memory"
@@ -1261,9 +1125,7 @@ export default function UpdateApp() {
                     type="number"
                     placeholder="Memory (Nat)"
                     value={memoryStr}
-                    onChange={(e) =>
-                      setMemoryStr((e.target as HTMLInputElement).value)
-                    }
+                    onChange={(e) => setMemoryStr((e.target as HTMLInputElement).value)}
                   />
                   <InputFieldComponent
                     name="storage"
@@ -1271,9 +1133,7 @@ export default function UpdateApp() {
                     type="number"
                     placeholder="Storage (Nat)"
                     value={storageStr}
-                    onChange={(e) =>
-                      setStorageStr((e.target as HTMLInputElement).value)
-                    }
+                    onChange={(e) => setStorageStr((e.target as HTMLInputElement).value)}
                   />
                   <InputFieldComponent
                     name="graphics"
@@ -1281,9 +1141,7 @@ export default function UpdateApp() {
                     type="text"
                     placeholder="Graphics"
                     value={graphics}
-                    onChange={(e) =>
-                      setGraphics((e.target as HTMLInputElement).value)
-                    }
+                    onChange={(e) => setGraphics((e.target as HTMLInputElement).value)}
                   />
                 </div>
                 <InputFieldComponent
@@ -1292,9 +1150,7 @@ export default function UpdateApp() {
                   type="text"
                   placeholder="Additional Notes"
                   value={notes}
-                  onChange={(e) =>
-                    setNotes((e.target as HTMLInputElement).value)
-                  }
+                  onChange={(e) => setNotes((e.target as HTMLInputElement).value)}
                 />
               </section>
             )}
@@ -1305,10 +1161,10 @@ export default function UpdateApp() {
                 type="submit"
                 disabled={busy}
                 className={`shadow-flat-sm my-6 px-6 py-3 rounded-md ${
-                  busy ? "opacity-60 cursor-not-allowed" : ""
+                  busy ? 'opacity-60 cursor-not-allowed' : ''
                 }`}
               >
-                {busy ? "Updating..." : "Update App"}
+                {busy ? 'Updating...' : 'Update App'}
               </button>
             </div>
           </form>
@@ -1328,11 +1184,7 @@ function ManifestList({
 }: {
   osKey: OSKey;
   items: ManifestInterface[];
-  onChange: (
-    idx: number,
-    field: keyof ManifestInterface,
-    value: string
-  ) => void;
+  onChange: (idx: number, field: keyof ManifestInterface, value: string) => void;
   onAdd: () => void;
   onRemove: (idx: number) => void;
   onUploadFile: (idx: number, file: File) => void;
@@ -1350,7 +1202,7 @@ function ManifestList({
             className="shadow-sunken-sm rounded-lg px-3 py-2 bg-transparent"
             placeholder="Version (e.g. 1.0.0)"
             value={m.version}
-            onChange={(e) => onChange(i, "version", e.target.value)}
+            onChange={(e) => onChange(i, 'version', e.target.value)}
           />
           <div className="flex items-center gap-2">
             <button
@@ -1361,10 +1213,7 @@ function ManifestList({
               <span>Upload Build</span>
               <i className="text-sm">
                 <svg viewBox="0 0 24 24" className="w-4 h-4">
-                  <path
-                    fill="currentColor"
-                    d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7Z"
-                  />
+                  <path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7Z" />
                 </svg>
               </i>
             </button>
@@ -1375,7 +1224,7 @@ function ManifestList({
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) onUploadFile(i, f);
-                e.currentTarget.value = "";
+                e.currentTarget.value = '';
               }}
             />
           </div>

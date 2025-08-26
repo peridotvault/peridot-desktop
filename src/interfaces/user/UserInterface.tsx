@@ -7,8 +7,8 @@ import type {
   Country,
   ApiResponse,
   Opt,
-} from "./../CoreInterface";
-import { DeveloperInferface } from "./DeveloperInterface";
+} from './../CoreInterface';
+import { DeveloperInferface } from './DeveloperInterface';
 // SESUAIKAN path ini dengan lokasi definisi Developer kamu
 
 /** ===== Aliases ===== */

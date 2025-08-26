@@ -1,11 +1,4 @@
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 /**
  * Steam-like media carousel (screenshots/videos) with thumbnails.
@@ -18,9 +11,9 @@ import React, {
 export type Subaccount = [] | [Uint8Array]; // kept for parity with your codebase style (not used here)
 
 export type MediaItem =
-  | { kind: "image"; src: string; alt?: string; storageKey?: string }
+  | { kind: 'image'; src: string; alt?: string; storageKey?: string }
   | {
-      kind: "video";
+      kind: 'video';
       src: string;
       poster?: string;
       alt?: string;
@@ -37,18 +30,12 @@ export interface CarouselPreviewProps {
   onIndexChange?: (i: number) => void;
 }
 
-const Chevron = ({ dir = "left" }: { dir?: "left" | "right" }) => (
+const Chevron = ({ dir = 'left' }: { dir?: 'left' | 'right' }) => (
   <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-    {dir === "left" ? (
-      <path
-        fill="currentColor"
-        d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"
-      />
+    {dir === 'left' ? (
+      <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
     ) : (
-      <path
-        fill="currentColor"
-        d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L12.17 12z"
-      />
+      <path fill="currentColor" d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L12.17 12z" />
     )}
   </svg>
 );
@@ -63,7 +50,7 @@ export default function CarouselPreview({
   onIndexChange,
 }: CarouselPreviewProps) {
   const [index, setIndex] = useState(() =>
-    Math.min(Math.max(0, initialIndex), Math.max(0, items.length - 1))
+    Math.min(Math.max(0, initialIndex), Math.max(0, items.length - 1)),
   );
   const [isPlaying, setIsPlaying] = useState(autoPlay);
 
@@ -84,8 +71,8 @@ export default function CarouselPreview({
     function onVisibility() {
       if (document.hidden) setIsPlaying(false);
     }
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => document.removeEventListener("visibilitychange", onVisibility);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
   }, []);
 
   const goTo = useCallback(
@@ -95,7 +82,7 @@ export default function CarouselPreview({
       const next = ((i % n) + n) % n; // safe modulo
       setIndex(next);
     },
-    [items.length, canNavigate]
+    [items.length, canNavigate],
   );
 
   const goPrev = useCallback(() => goTo(index - 1), [goTo, index]);
@@ -104,13 +91,13 @@ export default function CarouselPreview({
   // Keyboard controls when focused
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (!canNavigate) return;
-    if (e.key === "ArrowLeft") {
+    if (e.key === 'ArrowLeft') {
       e.preventDefault();
       goPrev();
-    } else if (e.key === "ArrowRight") {
+    } else if (e.key === 'ArrowRight') {
       e.preventDefault();
       goNext();
-    } else if (e.code === "Space") {
+    } else if (e.code === 'Space') {
       e.preventDefault();
       setIsPlaying((s) => !s);
     }
@@ -129,9 +116,7 @@ export default function CarouselPreview({
     dragDX.current = dx;
     const width = wrap.current.clientWidth || 1;
     const pct = (dx / width) * 100;
-    track.current.style.transform = `translateX(calc(${
-      -index * 100
-    }% + ${pct}%))`;
+    track.current.style.transform = `translateX(calc(${-index * 100}% + ${pct}%))`;
   };
   const onPointerUp = (_: React.PointerEvent) => {
     if (!wrap.current || !track.current) return;
@@ -154,10 +139,10 @@ export default function CarouselPreview({
           className="relative shrink-0 grow-0 basis-full h-full select-none"
           aria-hidden={i !== index}
         >
-          {it.kind === "image" ? (
+          {it.kind === 'image' ? (
             <img
               src={it.src}
-              alt={it.alt ?? "screenshot"}
+              alt={it.alt ?? 'screenshot'}
               className="h-full w-full object-cover"
               draggable={false}
             />
@@ -175,11 +160,11 @@ export default function CarouselPreview({
           )}
         </div>
       )),
-    [items, index]
+    [items, index],
   );
 
   return (
-    <div className={["relative w-full", "", className ?? ""].join(" ")}>
+    <div className={['relative w-full', '', className ?? ''].join(' ')}>
       {/* Media viewport */}
       <div
         ref={wrap}
@@ -203,17 +188,17 @@ export default function CarouselPreview({
 
         {/* Overlay counters & controls */}
         <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md px-2 py-1 text-xs text-white shadow-flat-sm bg-background_primary">
-          {items.length ? `${index + 1} / ${items.length}` : "0 / 0"}
+          {items.length ? `${index + 1} / ${items.length}` : '0 / 0'}
         </div>
 
         {/* Play/Pause autoplay */}
         <button
           type="button"
           onClick={() => setIsPlaying((s) => !s)}
-          aria-label={isPlaying ? "Pause autoplay" : "Play autoplay"}
+          aria-label={isPlaying ? 'Pause autoplay' : 'Play autoplay'}
           className="absolute right-3 top-3 z-10 rounded-md px-2 py-1 text-xs text-white hover:bg-black/70"
         >
-          {isPlaying ? "Pause" : "Play"}
+          {isPlaying ? 'Pause' : 'Play'}
         </button>
 
         {/* Prev/Next */}
@@ -259,12 +244,12 @@ export default function CarouselPreview({
               type="button"
               onClick={() => goTo(i)}
               className={[
-                "relative h-20 aspect-video shrink-0 overflow-hidden rounded-md duration-300 ",
-                i === index ? "border" : "opacity-60",
-              ].join(" ")}
+                'relative h-20 aspect-video shrink-0 overflow-hidden rounded-md duration-300 ',
+                i === index ? 'border' : 'opacity-60',
+              ].join(' ')}
               aria-label={`Go to media ${i + 1}`}
             >
-              {it.kind === "image" ? (
+              {it.kind === 'image' ? (
                 <img
                   src={it.src}
                   alt={it.alt ?? `thumb ${i + 1}`}

@@ -1,7 +1,7 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { useWallet } from "../../contexts/WalletContext";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useWallet } from '../../contexts/WalletContext';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login() {
   const { wallet } = useWallet();
@@ -15,7 +15,7 @@ export default function Login() {
         wallet.encryptedPrivateKey &&
         wallet.verificationData
       ) {
-        navigate("/");
+        navigate('/');
       }
     }
 

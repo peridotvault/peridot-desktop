@@ -1,5 +1,5 @@
 // @ts-ignore
-import React from "react";
+import React from 'react';
 
 export const ButtonTransaction = ({
   text,
@@ -14,7 +14,7 @@ export const ButtonTransaction = ({
     <button
       onClick={onClick}
       className={`w-full text-lg rounded-lg font bg-gradient-to-tr from-accent_primary to-accent_secondary p-2  duration-300 font-bold ${
-        disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
+        disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
       }`}
       disabled={disabled}
     >

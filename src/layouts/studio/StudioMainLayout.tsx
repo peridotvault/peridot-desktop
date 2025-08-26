@@ -1,20 +1,20 @@
 // @ts-ignore
-import React, { useState } from "react";
-import { Outlet } from "react-router-dom";
-import { StudioSidebar } from "./StudioSidebar";
-import Stepper, { Step } from "../../components/atoms/Stepper";
-import { InputFieldComponent } from "../../components/atoms/InputFieldComponent";
-import { faHeader } from "@fortawesome/free-solid-svg-icons";
-import { createApp } from "../../blockchain/icp/app/services/ICPAppService";
-import { CreateAppInterface } from "../../interfaces/app/AppInterface";
-import { useWallet } from "../../contexts/WalletContext";
-import { initAppStorage } from "../../api/wasabiClient";
+import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import { StudioSidebar } from './StudioSidebar';
+import Stepper, { Step } from '../../components/atoms/Stepper';
+import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
+import { faHeader } from '@fortawesome/free-solid-svg-icons';
+import { createApp } from '../../blockchain/icp/app/services/ICPAppService';
+import { CreateAppInterface } from '../../interfaces/app/AppInterface';
+import { useWallet } from '../../contexts/WalletContext';
+import { initAppStorage } from '../../api/wasabiClient';
 
 export const StudioMainLayout = () => {
   const { wallet } = useWallet();
   const [isCreateAppModal, setIsCreateAppModal] = useState<Boolean>(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
 
   const handleCreateApp = async () => {
     try {
@@ -36,11 +36,11 @@ export const StudioMainLayout = () => {
 
   const validateStep = (step: number): string | null => {
     if (step === 2) {
-      if (!title.trim()) return "fill this form";
+      if (!title.trim()) return 'fill this form';
       // if (title.trim().length < 3) return "Judul minimal 3 karakter.";
     }
     if (step === 3) {
-      if (!description.trim()) return "fill this form";
+      if (!description.trim()) return 'fill this form';
       // if (description.trim().length < 3)
       // return "Deskripsi minimal 10 karakter.";
     }

@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent } from 'react';
 
 export const BannerFieldComponent = ({
   title,

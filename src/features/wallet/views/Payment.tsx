@@ -1,16 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useWallet } from "../../../contexts/WalletContext";
-import { motion } from "framer-motion";
-import { ButtonTransaction } from "../../../components/atoms/ButtonTransaction";
-import { ICRC1Coin } from "../components/ICRC1Coin";
-import { AlertMessage } from "../components/AlertMessage";
-import { walletService } from "../services/WalletService";
-import { hexToArrayBuffer } from "../../../utils/crypto";
-import { Actor, ActorSubclass, HttpAgent } from "@dfinity/agent";
-import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
-import { ICPLedgerFactory } from "../blockchain/icp/ICPLedgerFactory";
-import { Principal } from "@dfinity/principal";
-import { ICRCLedgerActor } from "../blockchain/icp/ICRCLedgerFactory";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useWallet } from '../../../contexts/WalletContext';
+import { motion } from 'framer-motion';
+import { ButtonTransaction } from '../../../components/atoms/ButtonTransaction';
+import { ICRC1Coin } from '../components/ICRC1Coin';
+import { AlertMessage } from '../components/AlertMessage';
+import { walletService } from '../services/WalletService';
+import { hexToArrayBuffer } from '../../../utils/crypto';
+import { Actor, ActorSubclass, HttpAgent } from '@dfinity/agent';
+import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
+import { ICPLedgerFactory } from '../blockchain/icp/ICPLedgerFactory';
+import { Principal } from '@dfinity/principal';
+import { ICRCLedgerActor } from '../blockchain/icp/ICRCLedgerFactory';
 
 const PERIDOT_TOKEN_CANISTER = import.meta.env.VITE_PERIDOT_TOKEN_CANISTER;
 
@@ -26,17 +26,10 @@ interface AlertInterface {
   msg: string;
 }
 
-export const AppPayment: React.FC<Props> = ({
-  onClose,
-  price,
-  onExecute,
-  SPENDER,
-}) => {
+export const AppPayment: React.FC<Props> = ({ onClose, price, onExecute, SPENDER }) => {
   const { wallet } = useWallet();
   const spenderPrincipal = Principal.fromText(SPENDER);
-  const [_tokenBalances, setTokenBalances] = useState<{ [id: string]: number }>(
-    {}
-  );
+  const [_tokenBalances, setTokenBalances] = useState<{ [id: string]: number }>({});
   const [myBalance, setMyBalance] = useState(0);
   // const [fee, setFee] = useState<bigint>(0n);
 
@@ -48,14 +41,11 @@ export const AppPayment: React.FC<Props> = ({
   const [busy, setBusy] = useState(false);
   const [alertData, setAlertData] = useState<AlertInterface>({
     isSuccess: null,
-    msg: "",
+    msg: '',
   });
 
   const humanPriceStr = String(price);
-  const balanceLeft = useMemo(
-    () => myBalance - Number(humanPriceStr),
-    [myBalance, humanPriceStr]
-  );
+  const balanceLeft = useMemo(() => myBalance - Number(humanPriceStr), [myBalance, humanPriceStr]);
 
   const updateTokenBalance = useCallback(
     (canisterId: string, _balanceUsd: number, balanceToken: number) => {
@@ -66,14 +56,12 @@ export const AppPayment: React.FC<Props> = ({
         return next;
       });
     },
-    []
+    [],
   );
 
   // setup agent+actor ledger
   async function makeLedgerActor() {
-    const privateKey = await walletService.decryptWalletData(
-      wallet.encryptedPrivateKey!
-    );
+    const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey!);
     const secretKey = hexToArrayBuffer(privateKey);
 
     const agent = new HttpAgent({
@@ -82,24 +70,21 @@ export const AppPayment: React.FC<Props> = ({
     });
     // if (import.meta.env.DEV) await agent.fetchRootKey();
 
-    const actor: ActorSubclass<ICRCLedgerActor> = Actor.createActor(
-      ICPLedgerFactory,
-      {
-        agent,
-        canisterId: PERIDOT_TOKEN_CANISTER,
-      }
-    );
+    const actor: ActorSubclass<ICRCLedgerActor> = Actor.createActor(ICPLedgerFactory, {
+      agent,
+      canisterId: PERIDOT_TOKEN_CANISTER,
+    });
 
     return { actor, agent };
   }
 
   function toSubunits(amount: string, dec: number): bigint {
-    if (!/^\d+(\.\d+)?$/.test(amount)) throw new Error("Invalid amount format");
-    const [i, f = ""] = amount.split(".");
-    const fpad = (f + "0".repeat(dec)).slice(0, dec);
+    if (!/^\d+(\.\d+)?$/.test(amount)) throw new Error('Invalid amount format');
+    const [i, f = ''] = amount.split('.');
+    const fpad = (f + '0'.repeat(dec)).slice(0, dec);
     // hindari 10**dec overflow ke number: pakai BigInt string builder
-    const base = BigInt("1" + "0".repeat(dec));
-    return BigInt(i) * base + BigInt(fpad || "0");
+    const base = BigInt('1' + '0'.repeat(dec));
+    return BigInt(i) * base + BigInt(fpad || '0');
   }
 
   // load decimals + allowance saat modal dibuka
@@ -166,9 +151,9 @@ export const AppPayment: React.FC<Props> = ({
         memo: [],
         created_at_time: ToOpt(uniqueCreatedAtNs()),
       });
-      if ("Err" in clearRes) {
+      if ('Err' in clearRes) {
         // Duplicate di step ini boleh dianggap ok (idempotent)
-        if (!("Duplicate" in clearRes.Err)) {
+        if (!('Duplicate' in clearRes.Err)) {
           const k = Object.keys(clearRes.Err)[0];
           throw new Error(`Approve(clear->0) failed: ${k}`);
         }
@@ -187,9 +172,9 @@ export const AppPayment: React.FC<Props> = ({
       created_at_time: ToOpt(uniqueCreatedAtNs()), // ← HARUS beda
     });
 
-    if ("Err" in setRes) {
+    if ('Err' in setRes) {
       // Jika Duplicate, verifikasi hasil akhirnya
-      if ("Duplicate" in setRes.Err) {
+      if ('Duplicate' in setRes.Err) {
         const { allowance: after } = await actor.icrc2_allowance({
           account,
           spender,
@@ -204,7 +189,7 @@ export const AppPayment: React.FC<Props> = ({
   async function handlePayment() {
     try {
       setBusy(true);
-      setAlertData({ isSuccess: null, msg: "" });
+      setAlertData({ isSuccess: null, msg: '' });
 
       if (Number(price) <= 0) {
       } else {
@@ -239,22 +224,20 @@ export const AppPayment: React.FC<Props> = ({
           spender,
         });
         if (newAlw < need) {
-          throw new Error(
-            `Allowance insufficient after approve: ${newAlw} < ${need}`
-          );
+          throw new Error(`Allowance insufficient after approve: ${newAlw} < ${need}`);
         }
       }
 
       // 7) jalankan pembayaran di backend (akan panggil transfer_from)
       await onExecute();
 
-      setAlertData({ isSuccess: true, msg: "Payment succeeded 🎉" });
+      setAlertData({ isSuccess: true, msg: 'Payment succeeded 🎉' });
       setTimeout(() => onClose(), 800);
     } catch (error: any) {
-      console.error("Payment error:", error);
+      console.error('Payment error:', error);
       setAlertData({
         isSuccess: false,
-        msg: error?.message ? `Error: ${error.message}` : "Payment failed",
+        msg: error?.message ? `Error: ${error.message}` : 'Payment failed',
       });
     } finally {
       setBusy(false);
@@ -274,7 +257,7 @@ export const AppPayment: React.FC<Props> = ({
         initial={{ x: 400 }}
         animate={{ x: 0 }}
         exit={{ x: 400 }}
-        transition={{ type: "tween", duration: 0.2 }}
+        transition={{ type: 'tween', duration: 0.2 }}
       >
         {alertData.isSuccess !== null && (
           <AlertMessage msg={alertData.msg} isSuccess={alertData.isSuccess} />
@@ -288,10 +271,7 @@ export const AppPayment: React.FC<Props> = ({
             {/* my balance  */}
             <div className="flex flex-col gap-4">
               <h2>My Balance</h2>
-              <ICRC1Coin
-                canisterId={PERIDOT_TOKEN_CANISTER}
-                onBalanceUpdate={updateTokenBalance}
-              />
+              <ICRC1Coin canisterId={PERIDOT_TOKEN_CANISTER} onBalanceUpdate={updateTokenBalance} />
             </div>
 
             {/* my  */}
@@ -299,13 +279,9 @@ export const AppPayment: React.FC<Props> = ({
               <h2>You Need to Pay</h2>
               <div className="flex gap-2 items-center">
                 <div className="w-12 h-12 shadow-arise-sm rounded-full flex justify-center items-center overflow-hidden">
-                  <img
-                    src="./assets/logo-peridot.svg"
-                    alt=""
-                    className={`w-full p-4`}
-                  />
+                  <img src="./assets/logo-peridot.svg" alt="" className={`w-full p-4`} />
                 </div>
-                <span className="text-danger">{price + " PER"}</span>
+                <span className="text-danger">{price + ' PER'}</span>
               </div>
             </div>
           </div>
@@ -319,7 +295,7 @@ export const AppPayment: React.FC<Props> = ({
         {/* content  */}
         <section className="flex flex-col gap-6">
           <ButtonTransaction
-            text={busy ? "Processing..." : "Pay Now"}
+            text={busy ? 'Processing...' : 'Pay Now'}
             onClick={handlePayment}
             disabled={busy || balanceLeft < 0}
           />

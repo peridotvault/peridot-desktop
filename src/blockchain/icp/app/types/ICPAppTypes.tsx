@@ -1,4 +1,4 @@
-import { IDL as IDLNS } from "@dfinity/candid";
+import { IDL as IDLNS } from '@dfinity/candid';
 import {
   ICPAppId,
   ICPAppStatus,
@@ -7,7 +7,7 @@ import {
   ICPDeveloperId,
   ICPTimestamp,
   ICPUserId,
-} from "../../utils/ICPTypesCore";
+} from '../../utils/ICPTypesCore';
 type CandidIDL = typeof IDLNS;
 
 export const ICPAppTypes = (IDL: CandidIDL) => {

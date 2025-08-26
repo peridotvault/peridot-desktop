@@ -1,7 +1,7 @@
 // @ts-ignore
-import React, { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
-import { Sidebar } from "./LibrarySidebar";
+import React, { useEffect, useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import { Sidebar } from './LibrarySidebar';
 
 export default function LibraryMainLayout() {
   return (

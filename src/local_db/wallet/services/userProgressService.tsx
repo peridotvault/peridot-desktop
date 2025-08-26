@@ -1,14 +1,9 @@
-import { dbWallet } from "../database";
-import { UserProgress } from "../models/UserProgress";
+import { dbWallet } from '../database';
+import { UserProgress } from '../models/UserProgress';
 
 export const UserProgressService = {
-  async get(
-    principalId: string,
-    coinAddress: string
-  ): Promise<UserProgress | undefined> {
-    return await dbWallet.user_progress
-      .where({ principalId, coinAddress })
-      .first();
+  async get(principalId: string, coinAddress: string): Promise<UserProgress | undefined> {
+    return await dbWallet.user_progress.where({ principalId, coinAddress }).first();
   },
 
   async saveOrUpdate({

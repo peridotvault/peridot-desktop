@@ -1,1 +1,1 @@
-export const urlRosetta = "https://rosetta-api.internetcomputer.org";
+export const urlRosetta = 'https://rosetta-api.internetcomputer.org';

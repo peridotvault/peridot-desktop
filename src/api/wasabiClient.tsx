@@ -1,5 +1,5 @@
 // src/api/wasabiClient.ts
-export type OSKey = "windows" | "macos" | "linux";
+export type OSKey = 'windows' | 'macos' | 'linux';
 
 export interface InitResp {
   bucket: string;
@@ -10,17 +10,17 @@ export interface InitResp {
     announcements: string; // "icp/apps/<appId>/announcements/"
     previews: string; // "icp/apps/<appId>/previews/"
     metadata: string; // "icp/apps/<appId>/metadata/"
-    "builds/web": string; // "icp/apps/<appId>/builds/web/"
-    "builds/windows": string;
-    "builds/macos": string;
-    "builds/linux": string;
+    'builds/web': string; // "icp/apps/<appId>/builds/web/"
+    'builds/windows': string;
+    'builds/macos': string;
+    'builds/linux': string;
   };
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:4000";
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
 function ensureTrailingSlash(x: string) {
-  return x.endsWith("/") ? x : x + "/";
+  return x.endsWith('/') ? x : x + '/';
 }
 
 async function json<T>(res: Response): Promise<T> {
@@ -29,9 +29,9 @@ async function json<T>(res: Response): Promise<T> {
 }
 
 export function safeFileName(name: string) {
-  const [base, ext = ""] = name.split(/\.(?=[^.]+$)/);
-  const cleanBase = base.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80);
-  const cleanExt = ext.replace(/[^a-zA-Z0-9]+/g, "").slice(0, 16);
+  const [base, ext = ''] = name.split(/\.(?=[^.]+$)/);
+  const cleanBase = base.replace(/[^a-zA-Z0-9._-]+/g, '_').slice(0, 80);
+  const cleanExt = ext.replace(/[^a-zA-Z0-9]+/g, '').slice(0, 16);
   return cleanExt ? `${cleanBase}.${cleanExt}` : cleanBase;
 }
 
@@ -39,10 +39,10 @@ export function safeFileName(name: string) {
 export async function initAppStorage(appId: string) {
   return json<InitResp>(
     await fetch(`${API_BASE}/apps/${encodeURIComponent(appId)}/init`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ appId }),
-    })
+    }),
   );
 }
 
@@ -54,10 +54,10 @@ export async function presignUpload(args: {
 }) {
   return json<{ url: string; key: string; publicUrl?: string }>(
     await fetch(`${API_BASE}/wasabi/sign`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(args),
-    })
+    }),
   );
 }
 
@@ -65,22 +65,18 @@ export async function presignUpload(args: {
 export async function presignRead(key: string) {
   return json<{ url: string }>(
     await fetch(`${API_BASE}/wasabi/sign`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key }),
-    })
+    }),
   );
 }
 
 /** PUT ke presigned URL (fungsi internal, dipanggil oleh uploadToPrefix) */
-export async function uploadWithPresignedURL(
-  url: string,
-  fileOrBlob: Blob,
-  contentType: string
-) {
+export async function uploadWithPresignedURL(url: string, fileOrBlob: Blob, contentType: string) {
   const res = await fetch(url, {
-    method: "PUT",
-    headers: { "Content-Type": contentType },
+    method: 'PUT',
+    headers: { 'Content-Type': contentType },
     body: fileOrBlob,
   });
   if (!res.ok) {

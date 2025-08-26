@@ -1,12 +1,9 @@
 // @ts-ignore
-import React from "react";
-import { shortenAddress } from "../../../utils/Additional";
-import { TrainedDataInterface } from "../interfaces/History";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCircleCheck,
-  faCircleExclamation,
-} from "@fortawesome/free-solid-svg-icons";
+import React from 'react';
+import { shortenAddress } from '../../../utils/Additional';
+import { TrainedDataInterface } from '../interfaces/History';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleCheck, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 
 export const HistoryComponent = ({
   user_address,
@@ -20,13 +17,9 @@ export const HistoryComponent = ({
   const E8S_PER_TOKEN = 100000000;
   const isUserSender = transaction_data.sender === user_address ? true : false;
   const label =
-    transaction_data.label == "approve"
-      ? "Approve"
-      : isUserSender
-      ? "Transfer"
-      : "Receive";
+    transaction_data.label == 'approve' ? 'Approve' : isUserSender ? 'Transfer' : 'Receive';
 
-  if (label == "Approve") return;
+  if (label == 'Approve') return;
   return (
     <button
       className="flex flex-col gap-4 items-center hover:scale-105 duration-300 group"
@@ -45,38 +38,27 @@ export const HistoryComponent = ({
               <label className="">{label}</label>
               <span
                 className={`text-end w-full text-xs max-w-0 overflow-hidden group-hover:max-w-20 duration-500 ${
-                  transaction_data.is_suspicious
-                    ? "text-danger"
-                    : "text-success"
+                  transaction_data.is_suspicious ? 'text-danger' : 'text-success'
                 }`}
               >
                 <FontAwesomeIcon
-                  icon={
-                    transaction_data.is_suspicious
-                      ? faCircleExclamation
-                      : faCircleCheck
-                  }
+                  icon={transaction_data.is_suspicious ? faCircleExclamation : faCircleCheck}
                 />
               </span>
             </div>
             <span className="text-sm text-text_disabled">
               {isUserSender
-                ? "To : " + shortenAddress(transaction_data.receiver, 10, 5)
-                : "From : " + shortenAddress(transaction_data.sender, 10, 5)}
+                ? 'To : ' + shortenAddress(transaction_data.receiver, 10, 5)
+                : 'From : ' + shortenAddress(transaction_data.sender, 10, 5)}
             </span>
           </div>
         </div>
 
         {/* Transaction  */}
         <div className="flex ">
-          <p
-            className={`${
-              isUserSender ? "text-danger" : "text-success"
-            }  text-lg`}
-          >
-            {((isUserSender ? -1 : 1) * transaction_data.value) /
-              E8S_PER_TOKEN +
-              " " +
+          <p className={`${isUserSender ? 'text-danger' : 'text-success'}  text-lg`}>
+            {((isUserSender ? -1 : 1) * transaction_data.value) / E8S_PER_TOKEN +
+              ' ' +
               transaction_data.currency}
           </p>
           {/* <span

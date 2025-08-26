@@ -1,5 +1,5 @@
-import { dbWallet } from "../database";
-import { Block } from "../models/Block";
+import { dbWallet } from '../database';
+import { Block } from '../models/Block';
 
 export const BlockService = {
   async add(block: Block) {
@@ -22,15 +22,12 @@ export const BlockService = {
   },
 
   async getByCoin(coinArchiveAddress: string): Promise<Block[]> {
-    return await dbWallet.blocks
-      .where("coinArchiveAddress")
-      .equals(coinArchiveAddress)
-      .toArray();
+    return await dbWallet.blocks.where('coinArchiveAddress').equals(coinArchiveAddress).toArray();
   },
 
   async getByBlockId(coinArchiveAddress: string, blockId: bigint) {
     return await dbWallet.blocks
-      .where("[coinArchiveAddress+blockId]")
+      .where('[coinArchiveAddress+blockId]')
       .equals([coinArchiveAddress + blockId])
       .first();
   },
@@ -41,17 +38,15 @@ export const BlockService = {
 
   async getByPrincipal(principalId: string) {
     const allBlocks = await dbWallet.blocks.toArray();
-    return allBlocks.filter(
-      (block) => block.to === principalId || block.from === principalId
-    );
+    return allBlocks.filter((block) => block.to === principalId || block.from === principalId);
   },
 
   async getLatestBlockId(coinArchiveAddress: string): Promise<number | null> {
     const last = await dbWallet.blocks
-      .where("coinArchiveAddress")
+      .where('coinArchiveAddress')
       .equals(coinArchiveAddress)
       .reverse()
-      .sortBy("blockId");
+      .sortBy('blockId');
     return last.length > 0 ? last[0].blockId : null;
   },
 };
