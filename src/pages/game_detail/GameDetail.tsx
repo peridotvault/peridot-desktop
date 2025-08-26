@@ -17,6 +17,7 @@ import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
 import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId, getAnnouncementsByAnnouncementId, commentByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 import Modal from "@mui/material/Modal";
+import { AnnouncementContainer } from "../../components/atoms/AnnouncementContainer";
 
 export default function GameDetail() {
     const { appId } = useParams();
@@ -195,6 +196,7 @@ export default function GameDetail() {
                             </form>
                         </div>
                     </div>
+                    <div></div>
                 </div>
             </Modal>
 
@@ -263,42 +265,10 @@ export default function GameDetail() {
 
                 {/* Announcement */}
                 <section className="px-12 py-6">
-                    <h1 className="text-3xl pb-4">Announcements</h1>
+                    <h1 className="text-3xl font-bold pb-4">Announcements</h1>
                     <div className="flex flex-col gap-6">
                         {announcements?.map((item, index) => (
-                            <div
-                                key={index}
-                                className={item.pinned ? "bg-green-500/20 p-6 flex justify-between cursor-pointer" : "bg-gray-600 p-6 flex justify-between cursor-pointer"}
-                                onClick={() => {
-                                    fetchAnnouncementByAnnouncementId(item.announcementId);
-                                }}
-                            >
-                                <div className="flex flex-col justify-between">
-                                    <div>
-                                        <div className="flex content-center mb-8">
-                                            {item.pinned ? <FontAwesomeIcon icon={faThumbTack} className="mr-4" /> : ""}
-                                            <p>{item.createdAt ? new Date(Number(item.createdAt) / 1_000_000).toLocaleDateString() : ""}</p>
-                                        </div>
-                                        <div className="mb-4">
-                                            <p className="text-3xl font-bold">{item.headline}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-lg">{item.content}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <button type="button">
-                                            <FontAwesomeIcon icon={faThumbsUp} onClick={() => likeByAnnouncementIdHandler(item.announcementId)} className="mr-4" />
-                                        </button>
-                                        <button>
-                                            <FontAwesomeIcon icon={faThumbsDown} onClick={() => dislikeByAnnouncementIdHandler(item.announcementId)} className="mr-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <img src={item.coverImage} className="w-64 h-72 object-cover" alt="preview" />
-                                </div>
-                            </div>
+                            <AnnouncementContainer item={item} key={index} onClick={() => fetchAnnouncementByAnnouncementId(item.announcementId)} />
                         ))}
                     </div>
                 </section>
