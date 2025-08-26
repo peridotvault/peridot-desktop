@@ -12,6 +12,11 @@ export const ICPAppStatus = IDL.Variant({
   notPublish: IDL.Null,
 });
 
+export const ICPAnnouncementInteraction = IDL.Variant({
+  like: IDL.Null,
+  dislike: IDL.Null,
+});
+
 export const ICPAnnouncementStatus = IDL.Variant({
   draft: IDL.Null,
   published: IDL.Null,

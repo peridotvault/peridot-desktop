@@ -4,9 +4,19 @@ import { AnnouncementInterface } from '../../interfaces/announcement/Announcemen
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbTack } from '@fortawesome/free-solid-svg-icons';
 
-export const AnnouncementContainer = ({ item }: { item: AnnouncementInterface }) => {
+interface AnnouncementContainerProps {
+  item: AnnouncementInterface;
+  onClick?: () => void; // Add an optional onClick function prop
+}
+
+export const AnnouncementContainer = ({ item, onClick }: AnnouncementContainerProps) => {
   return (
-    <section className="p-6 shadow-arise-sm hover:shadow-sunken-sm rounded-2xl flex gap-6">
+    <section
+      // Attach the onClick handler here
+      onClick={onClick}
+      // Add cursor-pointer for better UX to show it's clickable
+      className="p-6 shadow-arise-sm hover:shadow-sunken-sm rounded-2xl flex gap-6 cursor-pointer transition-shadow"
+    >
       <img
         src={item.coverImage}
         alt=""

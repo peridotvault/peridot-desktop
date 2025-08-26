@@ -4,7 +4,9 @@ import {
   ICPAnnouncementStatus,
   ICPAppId,
   ICPDeveloperId,
+  ICPUserId,
   ICPTimestamp,
+  ICPAnnouncementInteraction,
 } from '../../utils/ICPTypesCore';
 
 type CandidIDL = typeof IDLNS;
@@ -31,22 +33,13 @@ export const ICPAnnouncementTypes = (IDL: CandidIDL) => {
     updatedAt: IDL.Opt(ICPTimestamp),
   });
 
-  const CreateAnnouncementInteraction = IDL.Record({
-    interactionType: IDL.Text,
-    comment: IDL.Text,
-  });
-
-  const AnnouncementInteraction = IDL.Record({
+  const AnnouncementInteractionInterface = IDL.Record({
     announcementId: ICPAnnouncementId,
-    interactionType: IDL.Text,
-    comment: IDL.Text,
+    userId: ICPUserId,
+    interactionType: IDL.Opt(ICPAnnouncementInteraction),
+    comment: IDL.Opt(IDL.Text),
     createdAt: ICPTimestamp,
   });
 
-  return {
-    DTOAppAnnouncement,
-    AppAnnouncement,
-    CreateAnnouncementInteraction,
-    AnnouncementInteraction,
-  };
+  return { DTOAppAnnouncement, AppAnnouncement, AnnouncementInteractionInterface };
 };
