@@ -4,10 +4,7 @@ import { VerticalCard } from "../components/cards/VerticalCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { AppInterface } from "../interfaces/app/AppInterface";
-import {
-  getAllApps,
-  getAllPublishApps,
-} from "../blockchain/icp/app/services/ICPAppService";
+import { getAllPublishApps } from "../blockchain/icp/app/services/ICPAppService";
 
 export default function VaultPage() {
   const [activeIndex, setActiveIndex] = useState<number>(0);

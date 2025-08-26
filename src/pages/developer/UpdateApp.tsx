@@ -571,12 +571,12 @@ export default function UpdateApp() {
       const versionPrefix = `${baseBuildPrefix}${version}/`;
 
       // 1) Upload artifact utama (zip/exe/dmg/…)
-      const { key: artifactKey } = await uploadToPrefix({
-        file,
-        prefix: versionPrefix,
-        fileName: filename,
-        contentType: file.type || "application/octet-stream",
-      });
+      // const { key: artifactKey } = await uploadToPrefix({
+      //   file,
+      //   prefix: versionPrefix,
+      //   fileName: filename,
+      //   contentType: file.type || "application/octet-stream",
+      // });
 
       // 2) Hitung checksum + size
       const checksum = await sha256Hex(file); // sha256 hex
@@ -745,7 +745,7 @@ export default function UpdateApp() {
         status: mapAnnouncementStatusToBackend(announcementStatus),
       };
 
-      const announcementCreated = await createAnnouncement({
+      await createAnnouncement({
         createAnnouncementTypes: createData,
         wallet: wallet,
         appId: BigInt(Number(appId)),
@@ -798,7 +798,7 @@ export default function UpdateApp() {
 
   const [value, setValue] = React.useState(0);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 

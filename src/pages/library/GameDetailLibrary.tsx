@@ -2,9 +2,6 @@
 import React, { useEffect, useState } from "react";
 import {
   faClock,
-  faCode,
-  faHandFist,
-  faHardDrive,
   faPlay,
   faRocket,
   faStore,
@@ -28,34 +25,6 @@ export default function GameDetailLibrary() {
   const [announcements, setAnnouncements] = useState<
     AnnouncementInterface[] | null
   >(null);
-
-  const [list_announcement] = useState([
-    {
-      date: "Dec 24, 2024",
-      announcements: [
-        {
-          img_url:
-            "https://img.gamepix.com/games/cubetopia-parkour/cover/cubetopia-parkour.png?w=400&ar=16:10",
-          type: "In-Game Event",
-          title: "Parkour Update",
-          description:
-            "As ISEUL-T’s generous sponsorship comes to an end they want to see your flashiest moves! This week, your team will be rewarded with some extra cash for showing off by emoting near a cashout that your team starts, steals, or completes! A dance floor appears whenever a player opens a vault, starts a cashout, steals a cashout or completes a cashout. When the dance floor appears you have 5 seconds to strike a pose, and hold that pose for at least 2 seconds - doing so awards your team with $1000. Everyone in your team can do it - so make sure to coordinate your best moves and maximize that cash!",
-        },
-      ],
-    },
-    {
-      date: "Dec 23, 2024",
-      announcements: [
-        {
-          img_url: "https://i.ytimg.com/vi/3TYtDN9612M/sddefault.jpg",
-          type: "Regular Update",
-          title: "Update 0.5",
-          description:
-            "The power levels are at an all-time high in The Arena this week as DISSUN unveils its newest advertisement in preparation for its takeover of the World Tour starting tomorrow. The fuel company has a lot in store for you, so get ready to celebrate Lunar New Year in a powerful way, as a brand-new throwable takes center stage in the festively decorated Arena!",
-        },
-      ],
-    },
-  ]);
 
   const [theApp, setTheApp] = useState<AppInterface | null>();
 
