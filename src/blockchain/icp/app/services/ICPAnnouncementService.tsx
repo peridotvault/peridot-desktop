@@ -36,6 +36,35 @@ export async function createAnnouncement({ createAnnouncementTypes, wallet, appI
     }
 }
 
+export async function commentByAnnouncementId({ appId, wallet, comment }: { appId: any; wallet: any; comment: string }): Promise<AnnouncementInteractionInterface> {
+    const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
+    const secretKey = hexToArrayBuffer(privateKey);
+
+    try {
+        const agent = new HttpAgent({
+            host: import.meta.env.VITE_HOST,
+            identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+        });
+
+        const actor = Actor.createActor(ICPAnnouncementFactory, {
+            agent,
+            canisterId: appCanister,
+        });
+
+        const result = (await actor.commentByAnnouncementId(appId, comment)) as ApiResponse<AnnouncementInteractionInterface>;
+        if ("err" in result) {
+            const [k, v] = Object.entries(result.err)[0] as [string, string];
+            throw new Error(`createAnnouncement failed: ${k} - ${v}`);
+        }
+
+        console.log("Announcement: " + result);
+
+        return result.ok;
+    } catch (error) {
+        throw new Error("Error Service Comment by Announcement Id: " + error);
+    }
+}
+
 export async function getAllAnnouncementsByAppId({ appId, wallet }: { appId: any; wallet: any }): Promise<AnnouncementInterface[] | null> {
     const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
     const secretKey = hexToArrayBuffer(privateKey);

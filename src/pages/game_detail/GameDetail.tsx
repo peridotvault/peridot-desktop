@@ -15,7 +15,7 @@ import { PurchaseInterface } from "../../interfaces/app/PurchaseInterface";
 import CarouselPreview, { MediaItem } from "../../components/organisms/CarouselPreview";
 import { VerticalCard } from "../../components/cards/VerticalCard";
 import { AnnouncementInterface } from "../../interfaces/announcement/AnnouncementInterface";
-import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId, getAnnouncementsByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
+import { getAllAnnouncementsByAppId, likeByAnnouncementId, dislikeByAnnouncementId, getAnnouncementsByAnnouncementId, commentByAnnouncementId } from "../../blockchain/icp/app/services/ICPAnnouncementService";
 import Modal from "@mui/material/Modal";
 
 export default function GameDetail() {
@@ -151,6 +151,8 @@ export default function GameDetail() {
     async function onCommentSubmit(e: React.FormEvent) {
         e.preventDefault();
         try {
+            const result = await commentByAnnouncementId({ appId: BigInt(Number(selectedAnnouncement?.announcementId)), wallet, comment });
+            console.log(result?.comment);
         } catch (err) {
             console.error(err);
         }
@@ -171,7 +173,7 @@ export default function GameDetail() {
                                 <p className="text-4xl">{selectedAnnouncement?.headline}</p>
                             </div>
                             <div>
-                                <p className="text-gray-500">PUBLISHED 25, August 2025</p>
+                                <p className="text-gray-500">PUBLISHED {selectedAnnouncement?.createdAt !== undefined ? new Date(Number(selectedAnnouncement.createdAt) / 1_000_000).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" }) : ""}</p>
                             </div>
                         </div>
                         <div>
