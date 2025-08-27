@@ -11,7 +11,6 @@ import {
   faMoneyBill1Wave,
   faPersonCane,
   faCalendarDays,
-  faThumbTack,
 } from '@fortawesome/free-solid-svg-icons';
 import { PhotoFieldComponent } from '../../components/atoms/PhotoFieldComponent';
 import { DropDownComponent } from '../../components/atoms/DropDownComponent';
@@ -54,7 +53,6 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
 interface TabPanelProps {
   children?: React.ReactNode;
