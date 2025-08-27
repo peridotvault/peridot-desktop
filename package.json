@@ -8,7 +8,7 @@
     "build": "rimraf release dist dist-electron && tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "build-win": "build -- -w"
+    "build-win": "electron-builder --win nsis --x64"
   },
   "dependencies": {
     "@antigane/encryption": "^0.1.4",
@@ -76,7 +76,7 @@
   "main": "dist-electron/main.js",
   "build": {
     "appId": "com.example.peridotvault",
-    "productName": "Peridot",
+    "productName": "PeridotVault",
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
