@@ -1,4 +1,3 @@
-// src/api/wasabiClient.ts
 export type OSKey = 'windows' | 'macos' | 'linux';
 
 export interface InitResp {

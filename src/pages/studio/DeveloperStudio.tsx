@@ -57,7 +57,13 @@ export const DeveloperStudio = () => {
         >
           <div className="flex gap-6 items-start">
             <div className="w-12 aspect-[3/4]">
-              <img src={item.coverImage} alt={item.title} className="w-full h-full object-cover" />
+              <img
+                src={
+                  item.coverImage === null ? item.coverImage : './assets/img/cover2_not_found.png'
+                }
+                alt={item.title}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="">
               <p className="">{item.title}</p>

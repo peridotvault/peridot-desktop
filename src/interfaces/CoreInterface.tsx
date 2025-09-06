@@ -35,6 +35,7 @@ export function GetOpt<T>(o: Opt<T> | undefined | null): T | undefined {
 export function ToOpt<T>(v: T | null | undefined): Opt<T> {
   return v == null ? [] : [v];
 }
+export const toOptVec = <T,>(arr?: T[] | null): Opt<T[]> => (arr && arr.length ? [arr] : []);
 
 export type DistKey = 'web' | 'windows' | 'macos' | 'linux';
 export type OSKey = Extract<DistKey, 'windows' | 'macos' | 'linux'>;

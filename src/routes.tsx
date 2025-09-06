@@ -17,11 +17,11 @@ import { CreateProfile } from './pages/profile/CreateProfile';
 import { UpdateProfile } from './pages/profile/UpdateProfile';
 import { ProfileUser } from './pages/profile/ProfileUser';
 import { ProfileDeveloper } from './pages/profile/ProfileDeveloper';
-import { CreateDeveloper } from './pages/developer/CreateDeveloper';
+import { CreateDeveloper } from './pages/studio/CreateDeveloper';
 import { StudioMainLayout } from './layouts/studio/StudioMainLayout';
 import { NotFound } from './pages/NotFound';
-import { DeveloperStudio } from './pages/developer/DeveloperStudio';
-import UpdateApp from './pages/developer/UpdateApp';
+import { DeveloperStudio } from './pages/studio/DeveloperStudio';
+import UpdateApp from './pages/studio/UpdateApp';
 
 // import React, { lazy, Suspense } from "react";
 // const Login = lazy(() => import("./pages/signin/Login"));

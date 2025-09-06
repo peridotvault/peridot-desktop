@@ -1,4 +1,6 @@
-import { AppId, Opt, Timestamp, UserId } from '../CoreInterface';
+import { MediaItem } from '../../components/organisms/CarouselPreview';
+import { Option } from '../Additional';
+import { AppId, Opt, OSKey, Timestamp, UserId } from '../CoreInterface';
 
 /** Jika kamu punya enum/variant final, impor dari file lain */
 export type AppStatus = { publish: null } | { notPublish: null };
@@ -110,6 +112,36 @@ export interface AppInterface {
   distributions: Distribution[];
   appRatings?: AppRating[] | null;
 }
+
+export type HydratedAppInterface = {
+  title: string;
+  description: string;
+  coverImage: string;
+  bannerImage: string;
+  priceStr: string;
+  requiredAgeStr: string;
+  releaseDateStr: string;
+  statusCode: 'publish' | 'notPublish';
+  selectedCategories: Option[];
+  appTags: string[];
+  previewItems: MediaItem[];
+  selectedDistribution: Option[];
+  manifestsByOS: Record<OSKey, ManifestInterface[]>;
+  webUrl: string;
+  processor: string;
+  memory: string;
+  storage: string;
+  graphics: string;
+  notes: string;
+};
+
+export type HardwareSpec = {
+  processor: string;
+  memory: string; // string angka, nanti di-convert ke BigInt
+  storage: string; // string angka, nanti di-convert ke BigInt
+  graphics: string;
+  notes: string;
+};
 
 /** =========================
  *  Type Guards

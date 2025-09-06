@@ -5,6 +5,7 @@ import { ButtonTransaction } from '../../components/atoms/ButtonTransaction';
 import { useWallet } from '../../contexts/WalletContext';
 import { createDeveloperProfile } from '../../blockchain/icp/user/services/ICPUserService';
 import { AppPayment } from '../../features/wallet/views/Payment';
+import { useNavigate } from 'react-router-dom';
 
 export const CreateDeveloper = () => {
   const { wallet } = useWallet();
@@ -12,14 +13,20 @@ export const CreateDeveloper = () => {
   const [bio, setBio] = useState('');
   const [isOnPayment, setIsOnPayment] = useState(false);
   const priceUpgradeToDeveloperAccount = 10;
+  const navigate = useNavigate();
 
   async function handlePayment() {
-    const result = await createDeveloperProfile({
-      wallet: wallet,
-      websiteUrl: websiteUrl,
-      bio: bio,
-    });
-    console.log(result);
+    try {
+      const result = await createDeveloperProfile({
+        wallet: wallet,
+        websiteUrl: websiteUrl,
+        bio: bio,
+      });
+      console.log(result);
+      navigate('/studio');
+    } catch (error) {
+      throw error;
+    }
   }
   return (
     <div className="pt-20 w-full min-h-dvh flex justify-center items-center relative overflow-hidden">
