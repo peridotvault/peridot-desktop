@@ -1,21 +1,99 @@
 // @ts-ignore
-import React, { useEffect, useState } from 'react';
-import { faClock, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
+import React, { useEffect, useMemo, useState } from 'react';
+import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AppInterface, Distribution, isWeb } from '../../interfaces/app/AppInterface';
+import { AppInterface, Distribution, isNative, isWeb } from '../../interfaces/app/AppInterface';
 import { getAppById } from '../../blockchain/icp/app/services/ICPAppService';
 import { useParams } from 'react-router-dom';
 import { getAllAnnouncementsByAppId } from '../../blockchain/icp/app/services/ICPAnnouncementService';
 import { useWallet } from '../../contexts/WalletContext';
 import { AnnouncementInterface } from '../../interfaces/announcement/AnnouncementInterface';
 import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
+import { useInstalled } from '../../hooks/useInstalled';
+import { getInstalledRecord } from '../../utils/installedStorage';
+import { useDownloadManager } from '../../components/molecules/DownloadManager';
+
+// helper deteksi OSKey
+function detectOSKey(): 'windows' | 'macos' | 'linux' {
+  const p = (navigator.platform || '').toLowerCase();
+  const ua = (navigator.userAgent || '').toLowerCase();
+  if (p.includes('win') || ua.includes('windows')) return 'windows';
+  if (p.includes('mac') || ua.includes('mac') || ua.includes('darwin')) return 'macos';
+  return 'linux';
+}
 
 export default function GameDetailLibrary() {
   const { appId } = useParams();
+  const { openInstallModal } = useDownloadManager();
   const { wallet } = useWallet();
   const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
 
   const [theApp, setTheApp] = useState<AppInterface | null>();
+
+  // normalize appId untuk localStorage key
+  const appIdKey = useMemo(() => {
+    try {
+      return appId ? String(BigInt(appId)) : undefined;
+    } catch {
+      return appId;
+    }
+  }, [appId]);
+
+  const installHere = () => {
+    if (!theApp) return;
+    openInstallModal(theApp);
+  };
+
+  // pilih OS aktif (untuk native)
+  const osKey = useMemo(() => detectOSKey(), []);
+  const { installed, latest } = useInstalled(appIdKey!, osKey); // status ter-install untuk OS ini
+
+  // apakah ada web dist?
+  const hasWeb = useMemo(() => {
+    const dists = unwrapOptVec<Distribution>(theApp?.distributions as any);
+    return dists.some(isWeb);
+  }, [theApp]);
+
+  // apakah ada native dist utk OS ini?
+  const hasNativeForOS = useMemo(() => {
+    const dists = unwrapOptVec<Distribution>(theApp?.distributions as any);
+    return dists.some(
+      (d) =>
+        isNative(d) &&
+        (('windows' in d.native.os && osKey === 'windows') ||
+          ('macos' in d.native.os && osKey === 'macos') ||
+          ('linux' in d.native.os && osKey === 'linux')),
+    );
+  }, [theApp, osKey]);
+
+  const onLaunch = async () => {
+    if (hasWeb) return openWebApp();
+
+    const rec = appIdKey ? getInstalledRecord(appIdKey) : null;
+    const entry = latest || rec?.entries[0];
+    if (!entry) {
+      alert('App belum terpasang.');
+      return;
+    }
+
+    const candidate = entry.launchPath || entry.filePath || entry.installDir;
+    if (!candidate) {
+      alert('Lokasi aplikasi tidak ditemukan. Silakan install ulang.');
+      return;
+    }
+
+    if ((window as any).electronAPI?.launchApp) {
+      const res = await (window as any).electronAPI.launchApp(candidate);
+      if (!res?.ok) alert('Gagal menjalankan aplikasi: ' + (res?.error || 'unknown'));
+    } else {
+      // Fallback: buka folder (browser)
+      if (entry.installDir) {
+        alert('Tidak berjalan di Electron. Buka folder: ' + entry.installDir);
+      } else {
+        alert('Tidak berjalan di Electron.');
+      }
+    }
+  };
 
   useEffect(() => {
     // scroll ke atas tiap ganti game (opsional)
@@ -34,6 +112,7 @@ export default function GameDetailLibrary() {
       try {
         setTheApp(null); // reset agar tidak menampilkan data lama
         const res = await getAppById({ appId: idNum });
+        console.log(res);
         if (!cancelled) setTheApp(res);
 
         let listAnnouncement =
@@ -128,126 +207,64 @@ export default function GameDetailLibrary() {
           </section>
 
           {/* Announcements  */}
-          {/* {list_announcement.map((item, index) => (
-            <div key={index} className="flex flex-col gap-5">
-              <div className="flex items-center">
-                <p className="text-xl w-[150px]">{item.date}</p>
-                <hr className="border-background_disabled w-full" />
-              </div> */}
           {announcements?.map((item, index) => (
             <AnnouncementContainer key={index} item={item} />
           ))}
-          {/* </div>
-          ))} */}
         </div>
         {/* right column ========================================== */}
         <div className="w-1/3 min-w-[300px] flex flex-col gap-8">
-          {/* price  */}
           <section className="bg-background_primary shadow-flat-sm w-full p-6 rounded-2xl flex flex-col gap-6">
+            {/* price */}
             <div className="flex flex-col gap-2">
               <p>current price</p>
               <p className="text-3xl font-bold">
-                {Number(theApp?.price) > 0 ? theApp?.price + ' PER' : 'FREE'}
+                {Number(theApp?.price) > 0 ? String(theApp?.price) + ' PER' : 'FREE'}
               </p>
             </div>
-            {/* button  */}
+
+            {/* CTAs */}
             <div className="flex flex-col gap-4">
-              <button
-                onClick={openWebApp}
-                className="bg-accent_secondary px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
-              >
-                <FontAwesomeIcon icon={faPlay} />
-                Launch
-              </button>
+              {installed || hasWeb ? (
+                <button
+                  onClick={onLaunch}
+                  className="bg-accent_secondary px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
+                >
+                  <FontAwesomeIcon icon={faPlay} />
+                  {hasWeb && !installed ? 'Play (Web)' : 'Launch'}
+                </button>
+              ) : null}
+
+              {!installed && hasNativeForOS && (
+                <button
+                  onClick={installHere}
+                  className="border border-white/20 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
+                >
+                  <FontAwesomeIcon icon={faDownload} />
+                  Install for {osKey === 'macos' ? 'macOS' : osKey}
+                </button>
+              )}
+
               <button className="border border-white/20 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
                 <FontAwesomeIcon icon={faStore} />
                 Item Market
               </button>
             </div>
-            {/* Details  */}
-            {/* <div className="flex flex-col gap-2"> */}
-            {/* <div className="flex items-center gap-2">
-                <div className="bg-background_primary w-7 h-7 flex justify-center items-center rounded-full ">
-                  <FontAwesomeIcon
-                    icon={faCode}
-                    className="text-accent_primary size-3"
-                  />
-                </div>
-                <p>Created by Antigane Studio</p>
-              </div> */}
-            {/* <div className="flex items-center gap-2">
-                <div className="bg-background_primary w-7 h-7 flex justify-center items-center rounded-full ">
-                  <FontAwesomeIcon
-                    icon={faHardDrive}
-                    className="text-accent_primary size-3"
-                  />
-                </div>
-                <p>Storage 256GB</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-background_primary w-7 h-7 flex justify-center items-center rounded-full ">
-                  <FontAwesomeIcon
-                    icon={faHandFist}
-                    className="text-accent_primary size-3"
-                  />
-                </div>
-                <p>for Everyone</p>
-              </div> */}
-            {/* </div> */}
+
+            {/* detail kecil status */}
+            <div className="text-sm opacity-70">
+              {installed ? (
+                <>Installed {latest?.version ? <>v{latest.version}</> : null}</>
+              ) : hasWeb ? (
+                'Playable via Web'
+              ) : hasNativeForOS ? (
+                'Not installed'
+              ) : (
+                'No build for this OS'
+              )}
+            </div>
           </section>
 
-          {/* friend list  */}
-          {/* <section className="flex flex-col gap-4">
-            <p className="text-xl font-medium">Friends who play</p>
-            <div className="flex flex-wrap gap-4">
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"
-                className="w-10 h-10 rounded-lg object-cover"
-                alt=""
-              />
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"
-                className="w-10 h-10 rounded-lg object-cover"
-                alt=""
-              />
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"
-                className="w-10 h-10 rounded-lg object-cover"
-                alt=""
-              />
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"
-                className="w-10 h-10 rounded-lg object-cover"
-                alt=""
-              />
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"
-                className="w-10 h-10 rounded-lg object-cover"
-                alt=""
-              />
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"
-                className="w-10 h-10 rounded-lg object-cover"
-                alt=""
-              />
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"
-                className="w-10 h-10 rounded-lg object-cover"
-                alt=""
-              />
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"
-                className="w-10 h-10 rounded-lg object-cover"
-                alt=""
-              />
-              <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJalEtY1wqHyc-P1vMV86iSQI6HJTuXyCWYQ&s"
-                className="w-10 h-10 rounded-lg object-cover"
-                alt=""
-              />
-            </div>
-          </section> */}
-          <div className="my-32"></div>
+          <div className="my-32" />
         </div>
       </div>
     </main>

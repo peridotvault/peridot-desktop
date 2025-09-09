@@ -36,6 +36,7 @@
     "dexie": "^4.0.11",
     "dexie-react-hooks": "^1.1.7",
     "electron-store": "^10.0.0",
+    "extract-zip": "^2.0.1",
     "framer-motion": "^11.13.1",
     "lenis": "^1.1.18",
     "localforage": "^1.10.0",

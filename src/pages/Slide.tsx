@@ -3,7 +3,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDesktop, faUpLong, faUser, faUserGear } from '@fortawesome/free-solid-svg-icons';
+import {
+  faDesktop,
+  faDownload,
+  faUpLong,
+  faUser,
+  faUserGear,
+} from '@fortawesome/free-solid-svg-icons';
 import { useWallet } from '../contexts/WalletContext';
 import { getAmIDeveloper } from '../blockchain/icp/user/services/ICPDeveloperService';
 
@@ -77,12 +83,12 @@ export const Slide: React.FC<SlideProps> = ({ onClose }) => {
             icon: faUserGear,
             show: 'always',
           },
-          // {
-          //   label: "Downloads",
-          //   url: "/downloads",
-          //   icon: faDownload,
-          //   show: "always",
-          // },
+          {
+            label: 'Download',
+            url: '/download',
+            icon: faDownload,
+            show: 'always',
+          },
         ],
       },
       {

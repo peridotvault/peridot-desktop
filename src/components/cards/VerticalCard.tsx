@@ -22,7 +22,7 @@ export const VerticalCard = ({
   return (
     <Link
       to={`/${formatTitle(title)}/${Number(appId)}`}
-      className="w-full max-w-[300px] flex flex-col gap-3 group"
+      className="w-full max-w-[250px] flex flex-col gap-3 group"
     >
       <div className="w-full aspect-[3/4] overflow-hidden bg-white rounded-xl duration-300">
         <img

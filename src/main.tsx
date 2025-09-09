@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router-dom';
 import router from './routes';
 import { WalletProvider } from './contexts/WalletContext';
 import { Buffer } from 'buffer';
+import { DownloadProvider } from './components/molecules/DownloadManager';
 
 if (typeof window !== 'undefined') {
   window.Buffer = Buffer;
@@ -18,12 +19,9 @@ const Root = () => {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <WalletProvider>
-      <Root />
+      <DownloadProvider>
+        <Root />
+      </DownloadProvider>
     </WalletProvider>
   </React.StrictMode>,
 );
-
-// Use contextBridge
-// window.ipcRenderer.on("main-process-message", (_event, message) => {
-//   console.log(message);
-// });

@@ -4,6 +4,15 @@ import type { WalletData } from './features/wallet/services/WalletService';
 declare global {
   interface Window {
     electronAPI: {
+      showSaveDialog: (
+        defaultName?: string
+      ) => Promise<{ canceled: boolean; filePath?: string }>;
+      showOpenDirDialog?: () => Promise<{ canceled: boolean; filePath?: string }>;
+      downloadToPath: (url: string, filePath: string) => Promise<void>;
+      downloadAndExtractZip?: (url: string, destDir: string) => Promise<{ ok: true }>;
+      onDownloadProgress: (cb: (pct: number) => void) => () => void;
+      findLaunchableInDir: (dirPath: string) => Promise<{ path: string | null }>;
+      launchApp: (targetPath: string) => Promise<{ ok: boolean; error?: string }>;
       goBack: () => void;
       goForward: () => void;
       saveWallet: (

@@ -1,5 +1,5 @@
 // preload.ts
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, IpcRendererEvent } from 'electron';
 import type { WalletData } from '../src/features/wallet/services/WalletService';
 import { EncryptedData } from '@antigane/encryption';
 
@@ -10,8 +10,55 @@ interface SerializedWalletData {
   encryptedPrivateKey: EncryptedData | null;
   password: string | null;
 }
+
+function normalizeSaveDialogResult(raw: any): { canceled: boolean; filePath?: string } {
+  // Jika main mengembalikan string path langsung
+  if (typeof raw === 'string') {
+    return raw.trim()
+      ? { canceled: false, filePath: raw }
+      : { canceled: true };
+  }
+  // Jika main mengembalikan object resmi dialog Electron
+  if (raw && typeof raw === 'object') {
+    const canceled = !!raw.canceled;
+    const filePath =
+      typeof raw.filePath === 'string' && raw.filePath.trim()
+        ? raw.filePath
+        : Array.isArray(raw.filePaths) && raw.filePaths.length > 0
+          ? raw.filePaths[0]
+          : undefined;
+    return { canceled, filePath };
+  }
+  return { canceled: true };
+}
 // Attach electronAPI methods with types matching types.d.ts
 window.electronAPI = {
+  showSaveDialog: async (defaultName?: string) => {
+    const raw = await ipcRenderer.invoke('show-save-dialog', defaultName);
+    return normalizeSaveDialogResult(raw);
+  },
+  showOpenDirDialog: () =>
+    ipcRenderer.invoke('show-open-dir-dialog'),
+
+  downloadToPath: (url: string, filePath: string) =>
+    ipcRenderer.invoke('download-to-path', { url, filePath }),
+  downloadAndExtractZip: (url: string, destDir: string) =>
+    ipcRenderer.invoke('download-and-extract-zip', { url, destDir }),
+
+  onDownloadProgress: (cb: (pct: number) => void) => {
+    const handler = (_e: IpcRendererEvent, pct: number) => cb(pct);
+    ipcRenderer.on('download-progress', handler);
+    return () => ipcRenderer.off('download-progress', handler);
+  },
+
+  findLaunchableInDir: (dirPath: string) =>
+    ipcRenderer.invoke('find-launchable-in-dir', dirPath) as Promise<{ path: string | null }>,
+
+  launchApp: (targetPath: string) =>
+    ipcRenderer.invoke('launch-app', targetPath) as Promise<{ ok: boolean; error?: string }>,
+
+
+
   goBack: (): void => {
     ipcRenderer.send('go-back');
   },

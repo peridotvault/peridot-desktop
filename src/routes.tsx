@@ -22,6 +22,7 @@ import { StudioMainLayout } from './layouts/studio/StudioMainLayout';
 import { NotFound } from './pages/NotFound';
 import { DeveloperStudio } from './pages/studio/DeveloperStudio';
 import UpdateApp from './pages/studio/UpdateApp';
+import { DownloadPage } from './pages/DownloadPage';
 
 // import React, { lazy, Suspense } from "react";
 // const Login = lazy(() => import("./pages/signin/Login"));
@@ -59,6 +60,10 @@ const router = createHashRouter([
       {
         path: 'market',
         element: <Market />,
+      },
+      {
+        path: 'download',
+        element: <DownloadPage />,
       },
       {
         path: ':app_name/:appId',
