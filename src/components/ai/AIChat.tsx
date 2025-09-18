@@ -40,7 +40,7 @@ export default function AIChat() {
       const aiMsg: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        text: 'Maaf, terjadi kesalahan.',
+        text: 'Sorry, Something went wrong, please contact support.',
       };
       setMsgs((m) => [...m, aiMsg]);
       console.error(e);
