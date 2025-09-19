@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import { AppInterface } from '../interfaces/app/AppInterface';
 import { getAllPublishApps } from '../blockchain/icp/app/services/ICPAppService';
+import AIChat from '../components/ai/AIChat';
 
 export default function VaultPage() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -56,6 +57,9 @@ export default function VaultPage() {
 
   return (
     <main className="flex flex-col gap-3">
+      {/* AI Chat */}
+      <AIChat />
+
       {/* section 1  */}
       <section className="w-full h-[30rem] pt-20 mb-4 relative">
         <img src="https://i.imgur.com/ZlbIhY2.gif" alt="" className="w-full h-full object-cover" />
