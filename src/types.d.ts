@@ -21,6 +21,14 @@ declare global {
       getWallet: () => Promise<{ success: boolean; data?: SerializedWalletData; error?: string }>;
       clearWallet: () => Promise<{ success: boolean; error?: string }>;
       openWebGame: (url: string) => void;
+
+      // updater
+      onStatus: (cb: (p: any) => void) => void;
+      onProgress: (cb: (p: any) => void) => void;
+      onDownloaded: (cb: (p: any) => void) => void;
+      startDownload: () => void;
+      installNow: () => void;
+      skip: () => void;
     };
   }
 }

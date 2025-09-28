@@ -2,6 +2,7 @@
 import { ipcRenderer, IpcRendererEvent } from 'electron';
 import type { WalletData } from '../src/features/wallet/services/WalletService';
 import { EncryptedData } from '@antigane/encryption';
+import { IPC_UPDATER } from './ipc/updaterChannels';
 
 interface SerializedWalletData {
   encryptedSeedPhrase: EncryptedData | null;
@@ -57,8 +58,6 @@ window.electronAPI = {
   launchApp: (targetPath: string) =>
     ipcRenderer.invoke('launch-app', targetPath) as Promise<{ ok: boolean; error?: string }>,
 
-
-
   goBack: (): void => {
     ipcRenderer.send('go-back');
   },
@@ -80,4 +79,26 @@ window.electronAPI = {
   openWebGame: (url: string): void => {
     ipcRenderer.send('open-web-game', url);
   },
+
+  // updater 
+  // updater 
+  onStatus: (cb: (p: any) => void) => {
+    const handler = (_e: IpcRendererEvent, p: any) => cb(p);
+    ipcRenderer.on(IPC_UPDATER.STATUS, handler);
+    return () => ipcRenderer.off(IPC_UPDATER.STATUS, handler);
+  },
+  onProgress: (cb: (p: any) => void) => {
+    const handler = (_e: IpcRendererEvent, p: any) => cb(p);
+    ipcRenderer.on(IPC_UPDATER.PROGRESS, handler);
+    return () => ipcRenderer.off(IPC_UPDATER.PROGRESS, handler);
+  },
+  onDownloaded: (cb: (p: any) => void) => {
+    const handler = (_e: IpcRendererEvent, p: any) => cb(p);
+    ipcRenderer.on(IPC_UPDATER.DOWNLOADED, handler);
+    return () => ipcRenderer.off(IPC_UPDATER.DOWNLOADED, handler);
+  },
+
+  startDownload: () => ipcRenderer.send(IPC_UPDATER.START_DOWNLOAD),
+  installNow: () => ipcRenderer.send(IPC_UPDATER.INSTALL_NOW),
+  skip: () => ipcRenderer.send(IPC_UPDATER.SKIP),
 };

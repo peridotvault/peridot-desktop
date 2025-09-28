@@ -1,7 +1,15 @@
 {
   "name": "peridotvault-desktop",
-  "private": true,
-  "version": "0.0.1",
+  "description": "Intelligent Decentralized Gaming",
+  "keywords": [
+    "game",
+    "decentralized",
+    "web3",
+    "blockchain",
+    "artificial",
+    "intelligent"
+  ],
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +18,19 @@
     "preview": "vite preview",
     "build-win": "electron-builder --win nsis --x64"
   },
+  "repository": "https://github.com/peridotvault/peridotvault-macos",
+  "publish": {
+    "provider": "github",
+    "releaseType": "release"
+  },
+  "author": "Antigane",
+  "contributors": [
+    {
+      "name": "Ranaufal Muha",
+      "email": "ifal.muha@gmail.com",
+      "url": "https://github.com/ranaufalmuha"
+    }
+  ],
   "dependencies": {
     "@antigane/encryption": "^0.1.4",
     "@aws-sdk/client-s3": "^3.850.0",
@@ -35,6 +56,7 @@
     "decision-tree": "^0.3.7",
     "dexie": "^4.0.11",
     "dexie-react-hooks": "^1.1.7",
+    "electron-log": "^5.4.3",
     "electron-store": "^10.0.0",
     "extract-zip": "^2.0.1",
     "framer-motion": "^11.13.1",
@@ -63,6 +85,7 @@
     "autoprefixer": "^10.4.20",
     "electron": "^30.0.1",
     "electron-builder": "^24.13.3",
+    "electron-updater": "^6.6.2",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
@@ -76,8 +99,9 @@
   },
   "main": "dist-electron/main.js",
   "build": {
-    "appId": "com.example.peridotvault",
+    "appId": "com.peridotvault.desktop",
     "productName": "PeridotVault",
+    "asar": true,
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
@@ -95,17 +119,26 @@
             "x64",
             "arm64"
           ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
-      "identity": null,
-      "hardenedRuntime": false,
+      "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "icon": "public/assets/coin-peridot.png",
-      "category": "public.app-category.game"
+      "type": "distribution",
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "icon": "build/icon/icon.icns",
+      "category": "public.app-category.utilities",
+      "notarize": false
     },
     "dmg": {
-      "background": "public/assets/coin-peridot.png",
-      "icon": "public/assets/coin-peridot.png",
+      "icon": "build/icon/icon.icns",
       "iconSize": 80,
       "window": {
         "width": 544,

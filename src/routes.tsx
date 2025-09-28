@@ -19,10 +19,11 @@ import { ProfileUser } from './pages/profile/ProfileUser';
 import { ProfileDeveloper } from './pages/profile/ProfileDeveloper';
 import { CreateDeveloper } from './pages/studio/CreateDeveloper';
 import { StudioMainLayout } from './layouts/studio/StudioMainLayout';
-import { NotFound } from './pages/NotFound';
+import { NotFound } from './pages/additional/NotFound';
 import { DeveloperStudio } from './pages/studio/DeveloperStudio';
 import UpdateApp from './pages/studio/UpdateApp';
 import { DownloadPage } from './pages/DownloadPage';
+import UpdaterPage from './pages/additional/UpdaterPage';
 
 // import React, { lazy, Suspense } from "react";
 // const Login = lazy(() => import("./pages/signin/Login"));
@@ -34,6 +35,11 @@ import { DownloadPage } from './pages/DownloadPage';
 // const GameDetail = lazy(() => import("./pages/game_detail/GameDetail"));
 
 const router = createHashRouter([
+  {
+    path: '/updater',
+    element: <UpdaterPage />,
+  },
+
   // home
   {
     path: '/',
