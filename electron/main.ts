@@ -8,7 +8,7 @@ import { createUpdaterWindow, getUpdaterWindow } from './windows/updaterWindow';
 import { registerUpdaterIpc } from './ipc/registerUpdaterIpc';
 
 let mainWin: BrowserWindow | null = null;
-// const isDev = !app.isPackaged;
+const isDev = !app.isPackaged;
 
 function openMainAndCloseUpdater() {
   if (!mainWin) mainWin = createMainWindow();
@@ -19,11 +19,11 @@ app.whenReady().then(() => {
   setupStoreHandlers();
   setupIpcHandlers();
 
-  // if (isDev) {
-  //   // Dev: langsung ke main (biar cepat dev loop)
-  //   mainWin = createMainWindow();
-  //   return;
-  // }
+  if (isDev) {
+    // Dev: langsung ke main (biar cepat dev loop)
+    mainWin = createMainWindow();
+    return;
+  }
 
   const upWin = createUpdaterWindow();
   const updater = new AppUpdater(() => getUpdaterWindow());

@@ -94,7 +94,7 @@ export const SeedPhraseInput = ({ onContinue, seedPhrase }: SeedPhraseInputProps
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-md mx-auto rounded-lg shadow-md flex flex-col gap-8"
+      className="max-w-md mx-auto rounded-lg shadow-md flex flex-col gap-6"
     >
       <div className="grid grid-cols-3 gap-4">
         {words.map((word, index) => (
@@ -112,33 +112,35 @@ export const SeedPhraseInput = ({ onContinue, seedPhrase }: SeedPhraseInputProps
         ))}
       </div>
 
-      {seedPhrase ? (
-        <button
-          className="w-full flex gap-2 items-center justify-center duration-300 hover:scale-105"
-          onClick={() => copyToClipboard(seedPhrase)}
-        >
-          <FontAwesomeIcon icon={faClone} />
-          Copy to Clipboard
-        </button>
-      ) : (
-        ''
-      )}
+      <div className="flex">
+        {seedPhrase ? (
+          <button
+            className="w-full text-sm flex gap-2 items-center duration-300 hover:scale-105"
+            onClick={() => copyToClipboard(seedPhrase)}
+          >
+            <FontAwesomeIcon icon={faClone} />
+            Copy to Clipboard
+          </button>
+        ) : (
+          ''
+        )}
 
-      <button
-        type="submit"
-        onClick={() => {
-          if (isValid()) {
-            const phrase = words.join(' ').trim();
-            onContinue(phrase);
-          }
-        }}
-        className={`w-full bg-gradient-to-tr from-accent_primary to-accent_secondary text-white font-bold p-3 rounded-xl ${
-          isValid() ? '' : 'opacity-30 cursor-not-allowed'
-        }`}
-        disabled={!isValid()}
-      >
-        Continue
-      </button>
+        <button
+          type="submit"
+          onClick={() => {
+            if (isValid()) {
+              const phrase = words.join(' ').trim();
+              onContinue(phrase);
+            }
+          }}
+          className={`w-full bg-gradient-to-tr from-accent_primary to-accent_secondary text-white font-bold p-3 rounded-xl ${
+            isValid() ? '' : 'opacity-30 cursor-not-allowed'
+          }`}
+          disabled={!isValid()}
+        >
+          Continue
+        </button>
+      </div>
     </form>
   );
 };

@@ -31,7 +31,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         ref={ref}
         type={type}
         name={name}
-        className={`border border-white/10 focus:shadow-arise-sm p-3 w-full duration-300 rounded-lg bg-background_primary outline-none ${
+        className={`border border-white/10 focus:shadow-arise-sm px-3 py-2 w-full duration-300 rounded-lg bg-background_primary outline-none ${
           disabled ? 'text-text_disabled shadow-flat-sm' : 'shadow-sunken-sm '
         }`}
         placeholder={placeholder}

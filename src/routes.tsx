@@ -4,8 +4,6 @@ import React from 'react';
 import { createHashRouter } from 'react-router-dom';
 
 import Login from './pages/signin/Login';
-import CreateWallet from './pages/signin/CreateWallet';
-import ImportWallet from './pages/signin/ImportWallet';
 import VaultPage from './pages/VaultPage';
 import MainLayout from './layouts/MainLayout';
 import GameDetailLibrary from './pages/library/GameDetailLibrary';
@@ -114,14 +112,6 @@ const router = createHashRouter([
   {
     path: '/login',
     element: <Login />,
-  },
-  {
-    path: '/create_wallet',
-    element: <CreateWallet />,
-  },
-  {
-    path: '/import_wallet',
-    element: <ImportWallet />,
   },
   {
     path: '/create_profile',

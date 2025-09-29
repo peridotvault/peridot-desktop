@@ -10,7 +10,11 @@ import { clearWalletData } from '../../utils/StoreService';
 import { SeedPhraseInput } from '../../features/wallet/components/SeedPhraseInput';
 import { getUserData } from '../../blockchain/icp/user/services/ICPUserService';
 
-export default function CreateWallet() {
+interface CreateWalletProps {
+  setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const CreateWallet = ({ setIsImportWallet }: CreateWalletProps) => {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } = useWallet();
 
   const navigate = useNavigate();
@@ -84,39 +88,48 @@ export default function CreateWallet() {
   if (!wallet.encryptedPrivateKey) {
     if (!isGeneratedSeedPhrase) {
       return (
-        <main className="flex justify-center items-center h-screen p-6 flex-col gap-6">
-          <header className="fixed left-0 top-0 flex items-center justify-between w-full p-5">
+        <div className="flex flex-col gap-4 items-center">
+          <div className="flex items-center justify-between w-full">
             <button
-              className="w-6"
+              className="flex items-center gap-2 border px-6 py-3 rounded-xl border-white/20"
               onClick={() => {
                 clearSeedPhrase();
-                navigate('/login');
+                setIsImportWallet(true);
               }}
             >
               <FontAwesomeIcon icon={faChevronLeft} />
-            </button>
-            <h1 className="text-lg">Create Your Wallet</h1>
-            <div className="w-6"></div>
-          </header>
-          {/* button  */}
-          <div className="flex w-full max-w-md justify-end gap-4">
-            <button
-              className="rounded-xl text-center shadow-sunken-sm hover:shadow-flat-lg hover:bg-white/5 duration-300 border border-white/10 hover:border-white/5 py-3 px-4 text-lg flex gap-2 w-full items-center justify-center"
-              onClick={generateSeedPhrase}
-            >
-              <FontAwesomeIcon icon={faDice} />
-              <p className="text-base">Generate another seed phrase</p>
+              <span>Back</span>
             </button>
           </div>
-          <SeedPhraseInput
-            seedPhrase={newSeedPhrase}
-            onContinue={() => {
-              if (newSeedPhrase !== '') {
-                setIsGeneratedSeedPhrase(true);
-              }
-            }}
-          />
-        </main>
+
+          <div className="border border-white/20 rounded-3xl flex justify-center items-center px-8 py-6 flex-col gap-6">
+            <div className="flex flex-col w-full gap-4">
+              <h2 className="text-2xl font-bold">Create Your Wallet</h2>
+              <hr className="border-t border-white/20" />
+              <p className="text-sm">Choose your Seed Phrase Combination</p>
+            </div>
+
+            {/* Generate another Seed Phrase  */}
+            <div className="flex w-full max-w-md justify-end gap-4">
+              <button
+                className="rounded-xl text-center shadow-sunken-sm hover:shadow-flat-lg hover:bg-white/5 duration-300 border border-white/10 hover:border-white/5 py-3 px-4 text-lg flex gap-2 w-full items-center justify-center"
+                onClick={generateSeedPhrase}
+              >
+                <FontAwesomeIcon icon={faDice} />
+                <p className="text-base">Generate another seed phrase</p>
+              </button>
+            </div>
+
+            <SeedPhraseInput
+              seedPhrase={newSeedPhrase}
+              onContinue={() => {
+                if (newSeedPhrase !== '') {
+                  setIsGeneratedSeedPhrase(true);
+                }
+              }}
+            />
+          </div>
+        </div>
       );
     }
 
@@ -124,4 +137,4 @@ export default function CreateWallet() {
   }
 
   return <div className="flex justify-center items-center">Redirecting...</div>;
-}
+};

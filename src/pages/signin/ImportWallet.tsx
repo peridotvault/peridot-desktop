@@ -4,13 +4,15 @@ import { useWallet } from '../../contexts/WalletContext';
 import { walletService } from '../../features/wallet/services/WalletService';
 import { useNavigate } from 'react-router-dom';
 import { PasswordPage } from './PasswordPage';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft } from '@fortawesome/free-solid-svg-icons/faChevronLeft';
 import { clearWalletData } from '../../utils/StoreService';
 import { SeedPhraseInput } from '../../features/wallet/components/SeedPhraseInput';
 import { getUserData } from '../../blockchain/icp/user/services/ICPUserService';
 
-export default function ImportWallet() {
+interface ImportWalletProps {
+  setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } = useWallet();
 
   const navigate = useNavigate();
@@ -76,27 +78,30 @@ export default function ImportWallet() {
   if (!wallet.encryptedPrivateKey) {
     if (!isGeneratedSeedPhrase) {
       return (
-        <main className="flex justify-center items-center h-screen p-6 flex-col gap-6">
-          <header className="fixed left-0 top-0 flex items-center justify-between w-full p-5">
-            <button
-              className="w-6"
-              onClick={() => {
-                clearSeedPhrase();
-                navigate('/login');
+        <div className="flex flex-col gap-4 items-center">
+          <div className="border border-white/20 rounded-3xl flex justify-center items-center px-8 py-6 flex-col gap-6">
+            <div className="flex flex-col w-full gap-4">
+              <h2 className="text-2xl font-bold">Import Your Wallet</h2>
+              <hr className="border-t border-white/20" />
+              <p className="text-sm">Enter your 12-words Seed Phrase</p>
+            </div>
+            <SeedPhraseInput
+              onContinue={(seedPhrase) => {
+                setTempSeedPhrase(seedPhrase);
+                setIsGeneratedSeedPhrase(true);
               }}
+            />
+          </div>
+          <div className="flex gap-2">
+            <span>Don't have Web3 Wallet?</span>
+            <button
+              onClick={() => setIsImportWallet(false)}
+              className="text-accent_primary font-bold"
             >
-              <FontAwesomeIcon icon={faChevronLeft} />
+              Create Wallet
             </button>
-            <h1 className="text-lg">Import Your Wallet</h1>
-            <div className="w-6"></div>
-          </header>
-          <SeedPhraseInput
-            onContinue={(seedPhrase) => {
-              setTempSeedPhrase(seedPhrase);
-              setIsGeneratedSeedPhrase(true);
-            }}
-          />
-        </main>
+          </div>
+        </div>
       );
     }
 
@@ -111,4 +116,4 @@ export default function ImportWallet() {
   }
 
   return <div className="flex justify-center items-center">Redirecting...</div>;
-}
+};
