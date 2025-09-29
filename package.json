@@ -9,7 +9,7 @@
     "artificial",
     "intelligent"
   ],
-  "version": "0.0.3",
+  "version": "0.0.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -133,12 +133,12 @@
       "type": "distribution",
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
-      "icon": "build/icon/icon.icns",
+      "icon": "build/icons/icon.icns",
       "category": "public.app-category.utilities",
       "notarize": false
     },
     "dmg": {
-      "icon": "build/icon/icon.icns",
+      "icon": "build/icons/icon.icns",
       "iconSize": 80,
       "window": {
         "width": 544,
