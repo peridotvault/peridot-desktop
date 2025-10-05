@@ -313,7 +313,7 @@ export default function EditAppPage() {
   const removeTag = (t: string) => setAppTags((p) => p.filter((x) => x !== t));
 
   return (
-    <form onSubmit={onSubmit} className="container flex flex-col gap-8">
+    <form onSubmit={onSubmit} className="w-full max-w-[1400px] flex flex-col gap-8">
       <h1 className="text-3xl pb-4">Update App</h1>
 
       {toast.ok && (
@@ -325,7 +325,7 @@ export default function EditAppPage() {
 
       <div className="flex gap-12">
         {/* left */}
-        <div className="flex flex-col gap-8 w-2/3">
+        <div className="flex flex-col gap-8 w-full">
           <section className="flex flex-col gap-4">
             <h2 className="text-2xl font-semibold pb-2">General</h2>
 
