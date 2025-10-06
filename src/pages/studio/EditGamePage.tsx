@@ -1,4 +1,4 @@
-// UpdateApp.tsx (replaces your old CreateApp.tsx for edit flow)
+// UpdateApp.tsx
 // @ts-ignore
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
@@ -18,47 +18,67 @@ import { DropDownComponent } from '../../components/atoms/DropDownComponent';
 import { MultiSelectComponent } from '../../components/atoms/MultiSelectComponent';
 import { Option } from '../../interfaces/Additional';
 import CarouselPreview, { MediaItem } from '../../components/organisms/CarouselPreview';
-import { AppStatus, ManifestInterface, AppInterface } from '../../interfaces/app/AppInterface';
 import allCategories from '../../assets/json/app/categories.json';
 import { useWallet } from '../../contexts/WalletContext';
-import { getAppByDeveloperId } from '../../blockchain/icp/app/services/ICPAppService';
 import { BannerFieldComponent } from '../../components/atoms/BannerFieldComponent';
 import { OSKey } from '../../interfaces/CoreInterface';
-import { dateStrToNs, hasDist, nowNs, nsToDateStr, toOSKey } from '../../utils/Additional';
+import { hasDist, nowNs, nsToDateStr, toOSKey } from '../../utils/Additional';
 import { useParams } from 'react-router-dom';
-import { EditAppService as EditService } from '../../services/studio/EditAppService';
+import { EditGameService as EditService } from '../../services/studio/EditGameService';
+import { getGameByDeveloperId } from '../../blockchain/icp/vault/services/ICPGameService';
+import { Manifest, PGLMeta, StorageRef } from '../../blockchain/icp/vault/service.did.d';
+import { HydratedAppInterface } from '../../interfaces/app/AppInterface';
 
-export default function EditAppPage() {
+function storageRefLabel(sr: StorageRef): string {
+  if ('url' in sr) return sr.url.url ?? '';
+  if ('s3' in sr) return `${sr.s3.bucket}/${sr.s3.basePath}`;
+  if ('ipfs' in sr) return `${sr.ipfs.cid}${sr.ipfs.path?.[0] ? `/${sr.ipfs.path[0]}` : ''}`;
+  return '';
+}
+
+function isUploaded(m: Manifest): boolean {
+  return Boolean(m.checksum && storageRefLabel(m.storageRef));
+}
+
+export default function EditGamePage() {
   const { wallet } = useWallet();
-  /** ======================
-   *  Storage App ID (folder)
-   *  ====================== */
-  const { appId } = useParams();
-  const [apps, setApps] = useState<AppInterface[] | null>(null);
-  const [loadedApp, setLoadedApp] = useState<AppInterface | null>(null);
-  const EditAppService = useMemo(
-    () => new EditService({ wallet, appId: Number(appId) }),
-    [wallet, appId],
+
+  // ===== URL param =====
+  const { gameAddress } = useParams(); // NOTE: diasumsikan ini CANISTER ID untuk submitUpdate
+
+  // ===== State data dari chain =====
+  const [games, setGames] = useState<PGLMeta[] | null>(null);
+  const [loadedGame, setLoadedGame] = useState<PGLMeta | null>(null);
+
+  // ===== Service =====
+  const EditGameService = useMemo(
+    () => new EditService({ wallet, gameAddress: gameAddress! }),
+    [wallet, gameAddress],
   );
 
+  // init storage (Wasabi)
   useEffect(() => {
     (async () => {
       try {
-        await EditAppService.prepareStorage();
+        await EditGameService.prepareStorage();
       } catch (e) {
         console.error('prepareStorage failed:', e);
       }
     })();
-  }, [EditAppService]);
+  }, [EditGameService]);
 
-  // fetch all dev apps (so we can hydrate by appId)
+  // fetch all dev games
   useEffect(() => {
     let isMounted = true;
     (async () => {
       try {
         if (!wallet) return;
-        const listApp = await getAppByDeveloperId({ wallet });
-        if (isMounted) setApps(listApp);
+        const listGames = await getGameByDeveloperId({
+          dev: wallet.principalId!,
+          start: 0,
+          limit: 200,
+        });
+        if (isMounted) setGames(listGames);
       } catch (e) {
         console.error(e);
       }
@@ -68,12 +88,12 @@ export default function EditAppPage() {
     };
   }, [wallet]);
 
-  // find current app by appId once apps are loaded
+  // find current game by gameAddress
   useEffect(() => {
-    if (!apps || !appId) return;
-    const found = apps.find((a) => String(a.appId) === String(appId));
-    if (found) setLoadedApp(found);
-  }, [apps, appId]);
+    if (!games || !gameAddress) return;
+    const found = games.find((a) => String(a.pgl1_game_id) === String(gameAddress));
+    if (found) setLoadedGame(found);
+  }, [games, gameAddress]);
 
   // ===== General form =====
   const [title, setTitle] = useState('');
@@ -81,45 +101,47 @@ export default function EditAppPage() {
   const [coverImage, setCoverImage] = useState<string>('');
   const [bannerImage, setBannerImage] = useState<string>('');
 
-  const [priceStr, setPriceStr] = useState(''); // bigint
-  const [requiredAgeStr, setRequiredAgeStr] = useState(''); // bigint
+  const [priceStr, setPriceStr] = useState(''); // bigint as string
+  const [requiredAgeStr, setRequiredAgeStr] = useState(''); // bigint as string
   const [releaseDateStr, setReleaseDateStr] = useState(nsToDateStr(nowNs())); // YYYY-MM-DD
   const [selectedCategories, setSelectedCategories] = useState<Option[]>([]);
   const statusOptions = [
     { code: 'publish', name: 'Publish' },
     { code: 'notPublish', name: 'Not Publish' },
-  ];
-  const [statusCode, setStatusCode] = useState('publish');
+  ] as const;
+  const [statusCode, setStatusCode] = useState<'publish' | 'notPublish'>('publish');
 
-  // Tags (string array)
+  // Tags
   const [tagInput, setTagInput] = useState('');
   const [appTags, setAppTags] = useState<string[]>([]);
 
-  // Previews (URL public Wasabi)
+  // Previews
   const [previewItems, setPreviewItems] = useState<MediaItem[]>([]);
 
   // Distribusi/OS
   const [selectedDistribution, setSelectedDistribution] = useState<Option[]>([]);
 
-  const [uploadedMeta, setUploadedMeta] = useState<
-    Record<OSKey, { name?: string; key?: string }[]>
-  >({
+  // per-OS manifests
+  const blankManifest = (): Manifest => ({
+    version: '',
+    listing: '',
+    checksum: '',
+    size_bytes: 0n,
+    createdAt: 0n,
+    // default ke varian URL biar simple
+    storageRef: { url: { url: '' } },
+  });
+
+  const [manifestsByOS, setManifestsByOS] = useState<Record<OSKey, Manifest[]>>({
     windows: [],
     macos: [],
     linux: [],
   });
 
-  // per-OS manifests
-  const blankManifest = (): ManifestInterface => ({
-    version: '',
-    size: 0,
-    bucket: '',
-    basePath: '',
-    checksum: '',
-    content: '',
-    createdAt: 0n,
-  });
-  const [manifestsByOS, setManifestsByOS] = useState<Record<OSKey, ManifestInterface[]>>({
+  // meta upload per manifest (nama file & key upload)
+  const [uploadedMeta, setUploadedMeta] = useState<
+    Record<OSKey, { name?: string; key?: string }[]>
+  >({
     windows: [],
     macos: [],
     linux: [],
@@ -139,15 +161,18 @@ export default function EditAppPage() {
 
   // native shared hw
   const [processor, setProcessor] = useState('');
-  const [memoryStr, setMemoryStr] = useState(''); // bigint
-  const [storageStr, setStorageStr] = useState(''); // bigint
+  const [memoryStr, setMemoryStr] = useState(''); // bigint as string
+  const [storageStr, setStorageStr] = useState(''); // bigint as string
   const [graphics, setGraphics] = useState('');
   const [notes, setNotes] = useState('');
+
+  // categories
   const categoryOptions = allCategories.categories.map((tag: any) => ({
     value: tag.id,
     label: tag.name,
   }));
-  // web build (URL app web public)
+
+  // web build
   const [webUrl, setWebUrl] = useState('');
 
   // UI
@@ -173,11 +198,11 @@ export default function EditAppPage() {
   }, [selectedDistribution]);
 
   /** ======================
-   *  HYDRATE FROM EXISTING APP
+   *  HYDRATE FROM EXISTING GAME
    *  ====================== */
   useEffect(() => {
-    if (loadedApp) {
-      const h = EditAppService.hydrateFromApp(loadedApp, categoryOptions);
+    if (loadedGame) {
+      const h = EditGameService.hydrateFromGame(loadedGame, categoryOptions);
       setTitle(h.title);
       setDescription(h.description);
       setCoverImage(h.coverImage);
@@ -198,18 +223,21 @@ export default function EditAppPage() {
       setGraphics(h.graphics);
       setNotes(h.notes);
     }
-  }, [loadedApp]);
+  }, [loadedGame, EditGameService, categoryOptions]);
 
   /** ======================
    *  UPLOAD HELPERS (Wasabi)
    *  ====================== */
-  async function handleAssetChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const apiUrl = (await EditAppService.handleAssetChange({ e })) || '';
+  async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const apiUrl = (await EditGameService.handleAssetChange({ e })) || '';
     setCoverImage(apiUrl);
   }
-
+  async function handleBannerChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const apiUrl = (await EditGameService.handleAssetChange({ e })) || '';
+    setBannerImage(apiUrl);
+  }
   async function handlePreviewUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const item = await EditAppService.handlePreviewUpload(e);
+    const item = await EditGameService.handlePreviewUpload(e);
     if (!item) return;
     setPreviewItems((prev) => [...prev, item]);
   }
@@ -217,21 +245,20 @@ export default function EditAppPage() {
   // Build file upload per manifest
   async function uploadBuildForManifest(osKey: OSKey, idx: number, file: File) {
     try {
-      // tampilkan nama sementara (sebelum await, biar langsung kelihatan)
+      // tampilkan nama sementara
       setUploadedMeta((prev) => {
         const copy = { ...prev };
         const list = (copy[osKey] ?? []).slice();
-        list[idx] = { ...(list[idx] || {}), name: file.name }; // temp
+        list[idx] = { ...(list[idx] || {}), name: file.name };
         copy[osKey] = list;
         return copy;
       });
 
-      // ⚠️ get "meta" from service!
       const {
         manifestsByOS: next,
         message,
         meta,
-      } = await EditAppService.uploadBuildForManifest(osKey, idx, file, manifestsByOS, {
+      } = await EditGameService.uploadBuildForManifest(osKey, idx, file, manifestsByOS, {
         uploadArtifact: true,
         validateSemver: false,
       });
@@ -240,7 +267,7 @@ export default function EditAppPage() {
       setUploadedMeta((prev) => {
         const copy = { ...prev };
         const list = (copy[osKey] ?? []).slice();
-        list[idx] = { name: meta.filename, key: meta.artifactKey }; // final
+        list[idx] = { name: meta.filename, key: meta.artifactKey };
         copy[osKey] = list;
         return copy;
       });
@@ -252,47 +279,41 @@ export default function EditAppPage() {
   }
 
   /** ======================
-   *  Payload ke canister
+   *  SUBMIT
    *  ====================== */
-
-  // ====== submit ======
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
       setBusy(true);
       setToast({});
 
-      if (!EditAppService) throw new Error('Wallet atau AppId tidak tersedia.');
+      if (!EditGameService) throw new Error('Wallet atau AppId tidak tersedia.');
+      if (!gameAddress) throw new Error('Game Canister ID tidak ditemukan dari URL.');
 
-      await EditAppService.submitUpdate({
-        // === General ===
+      // bentuk object sesuai HydratedAppInterface
+      const form: HydratedAppInterface = {
         title,
         description,
-        bannerImage,
         coverImage,
+        bannerImage,
         priceStr,
         requiredAgeStr,
-        releaseDateNs: releaseDateStr ? dateStrToNs(releaseDateStr) : undefined,
-        statusCode: statusCode as 'publish' | 'notPublish',
+        releaseDateStr, // (opsional: kamu juga punya releaseDateNs dari dateStrToNs jika mau)
+        statusCode,
         selectedCategories,
         appTags,
-
-        // === Previews ===
         previewItems,
-
-        // === Distributions & manifests ===
         selectedDistribution,
         manifestsByOS,
         webUrl,
-
-        // === Hardware (shared untuk semua OS yang dipilih) ===
         processor,
-        memoryStr,
-        storageStr,
+        memory: memoryStr, // penting: service butuh "memory" bukan "memoryStr"
+        storage: storageStr, // penting: service butuh "storage" bukan "storageStr"
         graphics,
         notes,
-      });
+      } as any;
 
+      await EditGameService.submitUpdate(form, String(gameAddress)); // diasumsikan gameAddress = CANISTER ID
       setToast({ ok: 'App updated successfully 🎉' });
     } catch (err: any) {
       console.error('Error Service Update App :', err);
@@ -305,8 +326,7 @@ export default function EditAppPage() {
   // tag add/remove
   const addTag = () => {
     const t = tagInput.trim();
-    if (!t) return;
-    if (appTags.includes(t)) return;
+    if (!t || appTags.includes(t)) return;
     setAppTags((p) => [...p, t]);
     setTagInput('');
   };
@@ -380,12 +400,9 @@ export default function EditAppPage() {
                 placeholder="Status"
                 className=""
                 value={statusCode}
-                options={statusOptions.map((s) => ({
-                  code: s.code,
-                  name: s.name,
-                }))}
+                options={statusOptions.map((s) => ({ code: s.code, name: s.name }))}
                 onChange={(e) =>
-                  setStatusCode((e.target as HTMLSelectElement).value as keyof AppStatus)
+                  setStatusCode((e.target as HTMLSelectElement).value as 'publish' | 'notPublish')
                 }
               />
               <MultiSelectComponent
@@ -434,11 +451,10 @@ export default function EditAppPage() {
         <hr className="border-t border-background_disabled" />
         <h2 className="text-2xl font-semibold pb-2">Designs</h2>
 
-        {/* Banner & Cover: setImageUrl DI-INTERCEPT untuk upload */}
         <BannerFieldComponent
           title="Banner Image"
           imageUrl={bannerImage}
-          onChange={handleAssetChange}
+          onChange={handleBannerChange}
         />
 
         <div className="w-full flex gap-4 justify-evenly">
@@ -461,7 +477,7 @@ export default function EditAppPage() {
             <PhotoFieldComponent
               title="Cover Image"
               imageUrl={coverImage}
-              onChange={handleAssetChange}
+              onChange={handleCoverChange}
             />
           </div>
         </div>
@@ -523,17 +539,10 @@ export default function EditAppPage() {
                   [osKey]: prev[osKey].filter((_, i) => i !== idx),
                 }))
               }
-              onChange={(idx, field, value) =>
+              onChange={(idx, _field, value) =>
                 setManifestsByOS((prev) => ({
                   ...prev,
-                  [osKey]: prev[osKey].map((m, i) =>
-                    i === idx
-                      ? {
-                          ...m,
-                          [field]: field === 'size' ? Number(value || '0') : (value as any),
-                        }
-                      : m,
-                  ),
+                  [osKey]: prev[osKey].map((m, i) => (i === idx ? { ...m, version: value } : m)),
                 }))
               }
               onUploadFile={(idx, file) => uploadBuildForManifest(osKey, idx, file)}
@@ -620,8 +629,8 @@ function ManifestList({
   metaList = [],
 }: {
   osKey: OSKey;
-  items: ManifestInterface[];
-  onChange: (idx: number, field: keyof ManifestInterface, value: string) => void;
+  items: Manifest[]; // <= ganti ke Manifest dari .did
+  onChange: (idx: number, field: 'version', value: string) => void; // kita cuma edit 'version'
   onAdd: () => void;
   onRemove: (idx: number) => void;
   onUploadFile: (idx: number, file: File) => void;
@@ -646,9 +655,12 @@ function ManifestList({
     <div className="space-y-4">
       {items.map((m, i) => {
         const meta = metaList[i] || {};
-        const uploaded = Boolean(m.checksum && m.basePath); // sudah tersimpan di manifest
-        const hasName = Boolean(meta.name);
-        const sizeMB = typeof m.size === 'number' && m.size > 0 ? `${m.size} MB` : '';
+        const uploaded = isUploaded(m); // <= pakai helper baru
+
+        const sizeMB =
+          typeof m.size_bytes === 'bigint' && m.size_bytes > 0n
+            ? `${(Number(m.size_bytes) / (1024 * 1024)).toFixed(2)} MB`
+            : '';
 
         return (
           <div
@@ -708,7 +720,7 @@ function ManifestList({
                 <span className="px-2 py-1 rounded-md border border-emerald-500/40 text-emerald-400">
                   Uploaded ✓
                 </span>
-              ) : hasName ? (
+              ) : meta.name ? (
                 <span className="px-2 py-1 rounded-md border border-white/15">
                   File dipilih: <span className="opacity-80">{meta.name}</span>
                 </span>
@@ -718,7 +730,6 @@ function ManifestList({
                 </span>
               )}
 
-              {/* info tambahan yang sudah tersedia dari manifest */}
               {uploaded && meta.name && <span className="opacity-60">{meta.name}</span>}
               {uploaded && sizeMB && <span className="opacity-60">{sizeMB}</span>}
             </div>

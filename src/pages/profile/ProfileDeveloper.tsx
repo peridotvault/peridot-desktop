@@ -14,7 +14,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Slide } from '../Slide';
 import { useWallet } from '../../contexts/WalletContext';
 import { LoadingScreen } from '../../components/organisms/LoadingScreen';
-import { getUserData } from '../../blockchain/icp/user/services/ICPUserService';
+import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
 import { UserInterface } from '../../interfaces/user/UserInterface';
 import { GetOpt } from '../../interfaces/CoreInterface';
 

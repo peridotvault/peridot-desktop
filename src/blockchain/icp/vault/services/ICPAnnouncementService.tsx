@@ -1,44 +1,46 @@
-import { Actor, HttpAgent } from '@dfinity/agent';
-import {
-  AnnouncementInteractionInterface,
-  AnnouncementInterface,
-  CreateAnnouncementInterface,
-} from '../../../../interfaces/announcement/AnnouncementInterface';
+import { HttpAgent } from '@dfinity/agent';
 import { walletService } from '../../../../features/wallet/services/WalletService';
 import { hexToArrayBuffer } from '../../../../utils/crypto';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
-import { ICPAnnouncementFactory } from '../ICPAppFactory';
-import { ApiResponse } from '../../../../interfaces/CoreInterface';
+import {
+  GameAnnouncementType,
+  GameId,
+  DTOGameAnnouncement,
+  AnnouncementId,
+  GameAnnouncementInteractionType,
+  ApiResponse_2,
+  ApiResponse_1,
+  ApiResponse_3,
+} from '../service.did.d';
+import { createActorVault } from '../../idlFactories';
+import { hostICP } from '../../../../constants/lib.const';
 
-const appCanister = import.meta.env.VITE_PERIDOT_CANISTER_APP_BACKEND;
+const vaultCanister = import.meta.env.VITE_PERIDOT_CANISTER_VAULT_BACKEND;
 
 export async function createAnnouncement({
   createAnnouncementTypes,
   wallet,
-  appId,
+  gameId,
 }: {
-  createAnnouncementTypes: CreateAnnouncementInterface;
+  createAnnouncementTypes: DTOGameAnnouncement;
   wallet: any;
-  appId: any;
-}): Promise<AnnouncementInterface> {
+  gameId: GameId;
+}): Promise<GameAnnouncementType> {
   const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPAnnouncementFactory, {
-      agent,
-      canisterId: appCanister,
-    });
+    const actor = createActorVault(vaultCanister, { agent });
 
     const result = (await actor.createAnnouncement(
-      appId,
+      gameId,
       createAnnouncementTypes,
-    )) as ApiResponse<AnnouncementInterface>;
+    )) as ApiResponse_1;
 
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
@@ -52,32 +54,26 @@ export async function createAnnouncement({
 }
 
 export async function commentByAnnouncementId({
-  appId,
+  annId,
   wallet,
   comment,
 }: {
-  appId: any;
+  annId: AnnouncementId;
   wallet: any;
   comment: string;
-}): Promise<AnnouncementInteractionInterface> {
+}): Promise<GameAnnouncementInteractionType> {
   const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPAnnouncementFactory, {
-      agent,
-      canisterId: appCanister,
-    });
+    const actor = createActorVault(vaultCanister, { agent });
 
-    const result = (await actor.commentByAnnouncementId(
-      appId,
-      comment,
-    )) as ApiResponse<AnnouncementInteractionInterface>;
+    const result = (await actor.commentByAnnouncementId(annId, comment)) as ApiResponse_2;
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`createAnnouncement failed: ${k} - ${v}`);
@@ -91,30 +87,25 @@ export async function commentByAnnouncementId({
   }
 }
 
-export async function getAllAnnouncementsByAppId({
-  appId,
+export async function getAllAnnouncementsByGameId({
+  gameId,
   wallet,
 }: {
-  appId: any;
+  gameId: GameId;
   wallet: any;
-}): Promise<AnnouncementInterface[] | null> {
+}): Promise<GameAnnouncementType[] | null> {
   const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPAnnouncementFactory, {
-      agent,
-      canisterId: appCanister,
-    });
+    const actor = createActorVault(vaultCanister, { agent });
 
-    const result = (await actor.getAllAnnouncementsByAppId(appId)) as ApiResponse<
-      AnnouncementInterface[]
-    >;
+    const result = (await actor.getAllAnnouncementsByGameId(gameId)) as ApiResponse_3;
     console.log('Announcements: ' + result);
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
@@ -131,29 +122,24 @@ export async function getAnnouncementsByAnnouncementId({
   announcementId,
   wallet,
 }: {
-  announcementId: any;
+  announcementId: AnnouncementId;
   wallet: any;
-}): Promise<AnnouncementInterface> {
+}): Promise<GameAnnouncementType> {
   const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPAnnouncementFactory, {
-      agent,
-      canisterId: appCanister,
-    });
+    const actor = createActorVault(vaultCanister, { agent });
 
-    const result = (await actor.getAnnouncementsByAnnouncementId(
-      announcementId,
-    )) as ApiResponse<AnnouncementInterface>;
+    const result = (await actor.getAnnouncementsByAnnouncementId(announcementId)) as ApiResponse_1;
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
-      throw new Error(`likeByAnnouncementId failed: ${k} - ${v}`);
+      throw new Error(`getAnnouncementsByAnnouncementId failed: ${k} - ${v}`);
     }
 
     return result.ok;
@@ -166,26 +152,21 @@ export async function likeByAnnouncementId({
   announcementId,
   wallet,
 }: {
-  announcementId: any;
+  announcementId: AnnouncementId;
   wallet: any;
-}) {
+}): Promise<GameAnnouncementInteractionType> {
   const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPAnnouncementFactory, {
-      agent,
-      canisterId: appCanister,
-    });
+    const actor = createActorVault(vaultCanister, { agent });
 
-    const result = (await actor.likeByAnnouncementId(
-      announcementId,
-    )) as ApiResponse<AnnouncementInterface>;
+    const result = (await actor.likeByAnnouncementId(announcementId)) as ApiResponse_2;
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`getAllApps failed: ${k} - ${v}`);
@@ -201,26 +182,21 @@ export async function dislikeByAnnouncementId({
   announcementId,
   wallet,
 }: {
-  announcementId: any;
+  announcementId: AnnouncementId;
   wallet: any;
-}) {
+}): Promise<GameAnnouncementInteractionType> {
   const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
 
   try {
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPAnnouncementFactory, {
-      agent,
-      canisterId: appCanister,
-    });
+    const actor = createActorVault(vaultCanister, { agent });
 
-    const result = (await actor.dislikeByAnnouncementId(announcementId)) as ApiResponse<
-      AnnouncementInteractionInterface[]
-    >;
+    const result = (await actor.dislikeByAnnouncementId(announcementId)) as ApiResponse_2;
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`dislikeByAnnouncementId failed: ${k} - ${v}`);

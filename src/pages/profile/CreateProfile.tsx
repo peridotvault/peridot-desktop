@@ -19,7 +19,7 @@ import { CreateUserInterface, Gender } from '../../interfaces/user/UserInterface
 import {
   createAccount,
   getIsUsernameValid,
-} from '../../blockchain/icp/user/services/ICPUserService';
+} from '../../blockchain/icp/directory/services/ICPUserService';
 import { ApiResponse } from '../../interfaces/CoreInterface';
 
 interface CountryOption {

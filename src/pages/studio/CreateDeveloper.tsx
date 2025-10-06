@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { InputField } from '../../components/atoms/InputField';
 import { ButtonTransaction } from '../../components/atoms/ButtonTransaction';
 import { useWallet } from '../../contexts/WalletContext';
-import { createDeveloperProfile } from '../../blockchain/icp/user/services/ICPUserService';
+import { createDeveloperProfile } from '../../blockchain/icp/directory/services/ICPUserService';
 import { AppPayment } from '../../features/wallet/views/Payment';
 import { useNavigate } from 'react-router-dom';
 
@@ -59,7 +59,7 @@ export const CreateDeveloper = () => {
         {isOnPayment && (
           <AppPayment
             price={Number(priceUpgradeToDeveloperAccount)}
-            SPENDER={import.meta.env.VITE_PERIDOT_CANISTER_USER_BACKEND}
+            SPENDER={import.meta.env.VITE_PERIDOT_CANISTER_DIRECTORY_BACKEND}
             onClose={() => setIsOnPayment(false)}
             onExecute={handlePayment}
           />

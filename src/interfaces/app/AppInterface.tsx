@@ -1,6 +1,12 @@
+import {
+  Distribution,
+  Manifest,
+  NativeBuild,
+  WebBuild,
+} from '../../blockchain/icp/vault/service.did.d';
 import { MediaItem } from '../../components/organisms/CarouselPreview';
 import { Option } from '../Additional';
-import { AppId, Opt, OSKey, Timestamp, UserId } from '../CoreInterface';
+import { AppId, OSKey, Timestamp, UserId } from '../CoreInterface';
 
 /** Jika kamu punya enum/variant final, impor dari file lain */
 export type AppStatus = { publish: null } | { notPublish: null };
@@ -37,28 +43,6 @@ export interface ManifestInterface {
 }
 
 /** =========================
- *  Web & Native Build
- *  ========================= */
-export interface WebBuild {
-  url: string; // ex: https://game.example/play
-}
-
-export interface NativeBuild {
-  os: OS; // #windows | #macos | #linux
-  manifests: ManifestInterface[];
-  processor: string;
-  memory: bigint; // in MB/GB (Nat)
-  storage: bigint; // in MB/GB (Nat)
-  graphics: string;
-  additionalNotes?: string | null;
-}
-
-/** =========================
- *  Distribution (variant)
- *  ========================= */
-export type Distribution = { web: WebBuild } | { native: NativeBuild };
-
-/** =========================
  *  App Rating
  *  ========================= */
 export interface AppRating {
@@ -66,24 +50,6 @@ export interface AppRating {
   rating: bigint; // Nat
   comment: string;
   createdAt: Timestamp;
-}
-
-/** =========================
- *  Create DTO
- *  ========================= */
-export interface UpdateAppInterface {
-  title: string;
-  description: string;
-  bannerImage: Opt<string>;
-  coverImage: Opt<string>;
-  previews: Opt<Preview[]>;
-  price: Opt<bigint>;
-  requiredAge: Opt<bigint>;
-  releaseDate: Opt<Timestamp>;
-  status: AppStatus;
-  category: Opt<Category[]>;
-  appTags: Opt<Tag[]>;
-  distributions: Opt<Distribution[]>;
 }
 
 export interface CreateAppInterface {
@@ -113,27 +79,35 @@ export interface AppInterface {
   appRatings?: AppRating[] | null;
 }
 
-export type HydratedAppInterface = {
-  title: string;
-  description: string;
-  coverImage: string;
-  bannerImage: string;
-  priceStr: string;
-  requiredAgeStr: string;
-  releaseDateStr: string;
-  statusCode: 'publish' | 'notPublish';
-  selectedCategories: Option[];
-  appTags: string[];
-  previewItems: MediaItem[];
-  selectedDistribution: Option[];
-  manifestsByOS: Record<OSKey, ManifestInterface[]>;
-  webUrl: string;
+export type GameStatusCode = 'publish' | 'notPublish';
+export type ManifestsByOS = Record<OSKey, Manifest[]>;
+
+export interface HydratedAppInterface {
+  // general
+  title: string; // <= pgl1_name
+  description: string; // <= pgl1_description
+  coverImage: string; // <= pgl1_cover_image
+  bannerImage: string; // <= metadata.pgl1_banner_image
+  priceStr: string; // <= String(pgl1_price?)
+  requiredAgeStr: string; // <= String(pgl1_required_age?)
+  releaseDateStr: string; // (opsional: jika kamu simpan di metadata release_date_ns)
+  statusCode: GameStatusCode; // <= metadata.pgl1_status -> "publish"/"notPublish"
+  selectedCategories: Option[]; // <= metadata.pgl1_category
+  appTags: string[]; // <= metadata.pgl1_tags
+  previewItems: MediaItem[]; // <= metadata.pgl1_previews
+
+  // distribution
+  selectedDistribution: Option[]; // dari pgl1_distribution
+  manifestsByOS: ManifestsByOS; // dari native.manifests
+  webUrl: string; // dari web.url
+
+  // hardware (di-share dari first native)
   processor: string;
   memory: string;
   storage: string;
   graphics: string;
   notes: string;
-};
+}
 
 export type HardwareSpec = {
   processor: string;

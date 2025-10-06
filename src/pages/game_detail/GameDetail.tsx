@@ -4,39 +4,44 @@ import { StarComponent } from '../../components/atoms/StarComponent';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { AppPayment } from '../../features/wallet/views/Payment';
-import { AppInterface, Preview } from '../../interfaces/app/AppInterface';
 import { useParams } from 'react-router-dom';
-import { nsToDateStr } from '../../utils/Additional';
-import { getAllPublishApps, getAppById } from '../../blockchain/icp/app/services/ICPAppService';
 import { useWallet } from '../../contexts/WalletContext';
-import { buyApp } from '../../blockchain/icp/app/services/ICPPurchaseService';
-import { PurchaseInterface } from '../../interfaces/app/PurchaseInterface';
 import CarouselPreview, { MediaItem } from '../../components/organisms/CarouselPreview';
 import { VerticalCard } from '../../components/cards/VerticalCard';
-import { AnnouncementInterface } from '../../interfaces/announcement/AnnouncementInterface';
-import {
-  commentByAnnouncementId,
-  getAllAnnouncementsByAppId,
-  getAnnouncementsByAnnouncementId,
-} from '../../blockchain/icp/app/services/ICPAnnouncementService';
 import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
-import { getUserByPrincipalId } from '../../blockchain/icp/user/services/ICPUserService';
-import { UserInterface } from '../../interfaces/user/UserInterface';
+// import { getUserByPrincipalId } from '../../blockchain/icp/directory/services/ICPUserService';
+// import { UserInterface } from '../../interfaces/user/UserInterface';
 import Modal from '@mui/material/Modal';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
+import { getAllGames, getGamesByGameId } from '../../blockchain/icp/vault/services/ICPGameService';
+import {
+  GameAnnouncementType,
+  Metadata,
+  PGLMeta,
+  PurchaseType,
+  Value,
+} from '../../blockchain/icp/vault/service.did.d';
+import {
+  commentByAnnouncementId,
+  getAllAnnouncementsByGameId,
+  getAnnouncementsByAnnouncementId,
+} from '../../blockchain/icp/vault/services/ICPAnnouncementService';
+import { asMap, asText, mdGet, optGetOr } from '../../interfaces/helpers/icp.helpers';
+import { ImageLoading } from '../../constants/lib.const';
+import { buyGame } from '../../blockchain/icp/vault/services/ICPPurchaseService';
 
 export default function GameDetail() {
-  const { appId } = useParams();
+  const { gameId } = useParams();
   const { wallet } = useWallet();
   const [isOnPayment, setIsOnPayment] = useState(false);
-  const [detailGame, setDetailGame] = useState<AppInterface | null>();
-  const [developerData, setDeveloperData] = useState<UserInterface | null>();
-  const [allGames, setAllGames] = useState<AppInterface[] | null>();
+  const [detailGame, setDetailGame] = useState<PGLMeta | null>();
+  // const [developerData, setDeveloperData] = useState<UserInterface | null>();
+  const [allGames, setAllGames] = useState<PGLMeta[] | null>();
   const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
-  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
+  const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
   const [isAnnouncementModalShowed, setIsAnnouncementModalShowed] = useState(false);
   const [comment, setComment] = useState('');
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementInterface | null>(
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<GameAnnouncementType | null>(
     null,
   );
 
@@ -44,17 +49,17 @@ export default function GameDetail() {
     async function fetchData() {
       window.scrollTo(0, 0);
 
-      const resDetailGame = (await getAppById({
-        appId: Number(appId),
-      })) as AppInterface;
-      const developer = await getUserByPrincipalId({
-        userId: resDetailGame.developerId,
-      });
+      const resDetailGame = (await getGamesByGameId({
+        gameId: gameId!,
+      })) as PGLMeta;
+      // const developer = await getUserByPrincipalId({
+      //   userId: resDetailGame.,
+      // });
       console.log(resDetailGame);
       setDetailGame(resDetailGame);
-      setDeveloperData(developer);
-      setHumanPriceStr(Number(resDetailGame?.price) / 1e8);
-      const resAllGames = await getAllPublishApps();
+      // setDeveloperData(developer);
+      setHumanPriceStr(Number(resDetailGame?.pgl1_price) / 1e8);
+      const resAllGames = await getAllGames({ start: 0, limit: 200 });
       setAllGames(resAllGames);
     }
 
@@ -68,8 +73,8 @@ export default function GameDetail() {
       try {
         if (!wallet) return;
         let listAnnouncement =
-          (await getAllAnnouncementsByAppId({
-            appId: Number(appId),
+          (await getAllAnnouncementsByGameId({
+            gameId: gameId!,
             wallet,
           })) ?? [];
         // Sort: pinned first, then by createdAt descending
@@ -100,37 +105,32 @@ export default function GameDetail() {
     return () => {
       isMounted = false;
     };
-  }, [appId, wallet]);
-
-  function isOptVecShape(v: any): v is [any[]] {
-    return Array.isArray(v) && v.length === 1 && Array.isArray(v[0]);
-  }
+  }, [gameId, wallet]);
 
   function extLooksVideo(url = ''): boolean {
     return /\.(mp4|webm|mov|m4v)$/i.test(url);
   }
 
-  function previewsToMediaItems(previewsAny?: Preview[] | [Preview[]] | null): MediaItem[] {
-    // 1) unwrap opt vec: [] => [], [ [..] ] => [..]
-    const arr: any[] = !previewsAny
-      ? []
-      : isOptVecShape(previewsAny)
-        ? previewsAny[0]
-        : (previewsAny as any[]);
+  function previewsFromMetadata(md?: [] | [Metadata] | null): MediaItem[] {
+    // Ambil Value untuk key "pgl1_previews"
+    const pvVal: Value | undefined = mdGet(md!, 'pgl1_previews');
+    // Value bisa {array: Value[]} atau undefined
+    const list = (pvVal && (pvVal as any).array) as Value[] | undefined;
+    if (!Array.isArray(list)) return [];
 
-    // 2) map aman + fallback deteksi video dari ekstensi
-    return arr
-      .filter((p) => p && typeof p === 'object')
-      .map((p) => {
-        const url = p.url ?? p.src ?? '';
-        const kindObj = p.kind ?? {};
-        const isVideo = (typeof kindObj === 'object' && 'video' in kindObj) || extLooksVideo(url);
-        return {
-          kind: isVideo ? 'video' : 'image',
-          src: url,
-          alt: p.alt ?? 'preview',
-        } as MediaItem;
-      });
+    return list
+      .map((v) => {
+        // v diharapkan { map: [ ["kind",{text}], ["url",{text}] ] }
+        const m = asMap(v);
+        if (!m) return null;
+        const kindTxt = asText(m.find(([k]) => k === 'kind')?.[1]) ?? '';
+        const url = asText(m.find(([k]) => k === 'url')?.[1]) ?? '';
+        if (!url) return null;
+
+        const isVideo = kindTxt === 'video' || extLooksVideo(url);
+        return { kind: isVideo ? 'video' : 'image', src: url, alt: 'preview' } as MediaItem;
+      })
+      .filter(Boolean) as MediaItem[];
   }
 
   async function fetchAnnouncementByAnnouncementId(announcementId: any) {
@@ -153,7 +153,7 @@ export default function GameDetail() {
     e.preventDefault();
     try {
       const result = await commentByAnnouncementId({
-        appId: BigInt(Number(selectedAnnouncement?.announcementId)),
+        annId: BigInt(Number(selectedAnnouncement?.announcementId)),
         wallet,
         comment,
       });
@@ -234,7 +234,7 @@ export default function GameDetail() {
         {/* title */}
         <div className="px-12 pt-6 flex flex-col gap-3">
           <h1 className="text-3xl font-bold">
-            {detailGame?.title ? detailGame?.title : 'PeridotVault Game'}
+            {detailGame?.pgl1_name ? detailGame?.pgl1_name : 'PeridotVault Game'}
           </h1>
           <StarComponent rate={4} />
         </div>
@@ -244,13 +244,13 @@ export default function GameDetail() {
           <div className="w-3/4 flex flex-col gap-12 text-lg">
             {/* overview */}
             <CarouselPreview
-              items={previewsToMediaItems(detailGame?.previews)}
+              items={previewsFromMetadata(detailGame?.pgl1_metadata)}
               initialIndex={0}
               autoPlay
               showThumbnails
             />
             {/* section 1 */}
-            <p>{detailGame?.description}</p>
+            <p>{detailGame?.pgl1_description}</p>
 
             {/* Announcement */}
             <div className="flex flex-col gap-6">
@@ -276,7 +276,7 @@ export default function GameDetail() {
             <div className="flex items-center justify-center ">
               <div className="w-full aspect-[3/4] relative overflow-hidden shadow-arise-sm rounded-xl">
                 <img
-                  src={detailGame?.coverImage ? detailGame.coverImage : '/assets/cover1.png'}
+                  src={optGetOr(detailGame!.pgl1_cover_image, ImageLoading)}
                   className="w-full h-full object-cover"
                   alt=""
                 />
@@ -300,12 +300,12 @@ export default function GameDetail() {
             </div>
             {/* details game  */}
             <div className="flex flex-col">
-              <GameTypes title="Developer" content={developerData?.displayName!} />
+              {/* <GameTypes title="Developer" content={developerData?.displayName!} /> */}
               {/* <GameTypes title="Publisher" content="Antigane Inc." /> */}
-              <GameTypes
+              {/* <GameTypes
                 title="Release Date"
                 content={nsToDateStr(detailGame?.releaseDate.toString()) || ''}
-              />
+              /> */}
               <GameTypes title="Requirement" content="RAM 8GB" />
               <GameTypes title="Platform" content="Web" />
             </div>
@@ -352,13 +352,13 @@ export default function GameDetail() {
 
             {/* contents  */}
             <div className="flex gap-6">
-              {allGames?.slice(0, 5).map((item) => (
+              {allGames?.slice(0, 5).map((item, idx) => (
                 <VerticalCard
-                  key={item.appId}
-                  appId={item.appId}
-                  imgUrl={item.coverImage}
-                  title={item.title}
-                  price={item.price}
+                  key={idx}
+                  gameId={item.pgl1_game_id}
+                  gameName={item.pgl1_name}
+                  imgUrl={optGetOr(item.pgl1_cover_image, ImageLoading)}
+                  price={Number(item.pgl1_price)}
                 />
               ))}
             </div>
@@ -370,8 +370,8 @@ export default function GameDetail() {
             onClose={() => setIsOnPayment(false)}
             SPENDER={import.meta.env.VITE_PERIDOT_CANISTER_APP_BACKEND}
             onExecute={async () => {
-              const res: PurchaseInterface = await buyApp({
-                appId: Number(appId),
+              const res: PurchaseType = await buyGame({
+                gameId: gameId!,
                 wallet: wallet,
               });
 

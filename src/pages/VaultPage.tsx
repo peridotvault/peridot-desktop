@@ -3,15 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { VerticalCard } from '../components/cards/VerticalCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
-import { AppInterface } from '../interfaces/app/AppInterface';
-import { getAllPublishApps } from '../blockchain/icp/app/services/ICPAppService';
 import AIChat from '../components/ai/AIChat';
+import { getAllGames } from '../blockchain/icp/vault/services/ICPGameService';
+import { PGLMeta } from '../blockchain/icp/vault/service.did.d';
+import { optGetOr } from '../interfaces/helpers/icp.helpers';
+import { ImageLoading } from '../constants/lib.const';
 
 export default function VaultPage() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [isHoverComponent, setIsHoverComponent] = useState(false);
-  const [allApps, setAllApps] = useState<AppInterface[] | null>();
+  const [allGames, setAllGames] = useState<PGLMeta[] | null>();
 
   const images: string[] = [
     './assets/vault/Content1.png',
@@ -23,9 +25,9 @@ export default function VaultPage() {
     async function fetchData() {
       window.scrollTo(0, 0);
 
-      const resAllGames = await getAllPublishApps();
+      const resAllGames = await getAllGames({ start: 0, limit: 200 });
       console.log(resAllGames);
-      setAllApps(resAllGames);
+      setAllGames(resAllGames);
     }
 
     fetchData();
@@ -95,13 +97,13 @@ export default function VaultPage() {
 
           {/* contents  */}
           <div className="flex gap-6">
-            {allApps?.slice(0, 5).map((item) => (
+            {allGames?.slice(0, 5).map((item, idx) => (
               <VerticalCard
-                key={item.appId}
-                appId={BigInt(item.appId)}
-                imgUrl={item.coverImage}
-                title={item.title}
-                price={BigInt(item.price)}
+                key={idx}
+                gameId={item.pgl1_game_id}
+                gameName={item.pgl1_name}
+                imgUrl={optGetOr(item.pgl1_cover_image, ImageLoading)}
+                price={Number(item.pgl1_price)}
               />
             ))}
           </div>
@@ -119,13 +121,13 @@ export default function VaultPage() {
 
           {/* contents  */}
           <div className="flex gap-6">
-            {allApps?.slice(0, 5).map((item) => (
+            {allGames?.slice(0, 5).map((item, idx) => (
               <VerticalCard
-                key={item.appId}
-                appId={BigInt(item.appId)}
-                imgUrl={item.coverImage}
-                title={item.title}
-                price={BigInt(item.price)}
+                key={idx}
+                gameId={item.pgl1_game_id}
+                gameName={item.pgl1_name}
+                imgUrl={optGetOr(item.pgl1_cover_image, ImageLoading)}
+                price={Number(item.pgl1_price)}
               />
             ))}
           </div>

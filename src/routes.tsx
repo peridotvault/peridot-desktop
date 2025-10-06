@@ -19,10 +19,10 @@ import { CreateDeveloper } from './pages/studio/CreateDeveloper';
 import { StudioMainLayout } from './layouts/studio/StudioMainLayout';
 import { NotFound } from './pages/additional/NotFound';
 import { DeveloperStudio } from './pages/studio/DeveloperStudio';
-import UpdateApp from './pages/studio/UpdateApp';
+import UpdateApp from './pages/studio/UpdateGame';
 import { DownloadPage } from './pages/DownloadPage';
 import UpdaterPage from './pages/additional/UpdaterPage';
-import { CreateAppPage } from './pages/studio/CreateAppPage';
+import { CreateGamePage } from './pages/studio/CreateGamePage';
 
 // import React, { lazy, Suspense } from "react";
 // const Login = lazy(() => import("./pages/signin/Login"));
@@ -57,7 +57,7 @@ const router = createHashRouter([
             element: <Library />,
           },
           {
-            path: ':appName/:appId',
+            path: ':appName/:gameId',
             element: <GameDetailLibrary />,
           },
         ],
@@ -71,7 +71,7 @@ const router = createHashRouter([
         element: <DownloadPage />,
       },
       {
-        path: ':app_name/:appId',
+        path: ':app_name/:gameId',
         element: <GameDetail />,
       },
       // profile
@@ -102,10 +102,10 @@ const router = createHashRouter([
           },
           {
             path: 'create',
-            element: <CreateAppPage />,
+            element: <CreateGamePage />,
           },
           {
-            path: 'update/:appId',
+            path: 'update/:gameAddress',
             element: <UpdateApp />,
           },
         ],

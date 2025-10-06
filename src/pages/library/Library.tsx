@@ -1,18 +1,20 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
 import { useWallet } from '../../contexts/WalletContext';
-import { AppInterface } from '../../interfaces/app/AppInterface';
 import { Link } from 'react-router-dom';
-import { getMyApps } from '../../blockchain/icp/app/services/ICPAppService';
+import { getMyGames } from '../../blockchain/icp/vault/services/ICPGameService';
+import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
+import { optGetOr } from '../../interfaces/helpers/icp.helpers';
+import { ImageLoading } from '../../constants/lib.const';
 
 export const Library = () => {
   const { wallet } = useWallet();
-  const [myApps, setMyApps] = useState<AppInterface[] | null>();
+  const [myGames, setMyGames] = useState<PGLMeta[] | null>();
 
   useEffect(() => {
     async function fetchData() {
-      const resAllApps = await getMyApps({ wallet: wallet });
-      setMyApps(resAllApps);
+      const resAllGames = await getMyGames({ wallet: wallet });
+      setMyGames(resAllGames);
     }
 
     fetchData();
@@ -35,16 +37,16 @@ export const Library = () => {
 
         {/* Library  */}
         <section className="px-6 py-4 flex flex-col gap-4">
-          <p className="text-xl font-medium">My Games ({myApps?.length})</p>
+          <p className="text-xl font-medium">My Games ({myGames?.length})</p>
           <div className="flex flex-wrap gap-8">
-            {myApps?.map((item) => (
+            {myGames?.map((item) => (
               <Link
-                to={`/library/${formatTitle(item.title)}/${item.appId}`}
-                key={item.appId}
+                to={`/library/${formatTitle(item.pgl1_name)}/${item.pgl1_game_id}`}
+                key={item.pgl1_game_id}
                 className="w-[170px] aspect-[3/4] bg-background_secondary rounded-xl overflow-hidden"
               >
                 <img
-                  src={item.coverImage}
+                  src={optGetOr(item.pgl1_cover_image, ImageLoading)}
                   alt=""
                   className="w-full h-full object-cover hover:scale-110 duration-300"
                 />

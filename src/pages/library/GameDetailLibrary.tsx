@@ -2,16 +2,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AppInterface, Distribution, isNative, isWeb } from '../../interfaces/app/AppInterface';
-import { getAppById } from '../../blockchain/icp/app/services/ICPAppService';
+import { isNative, isWeb } from '../../interfaces/app/AppInterface';
 import { useParams } from 'react-router-dom';
-import { getAllAnnouncementsByAppId } from '../../blockchain/icp/app/services/ICPAnnouncementService';
 import { useWallet } from '../../contexts/WalletContext';
-import { AnnouncementInterface } from '../../interfaces/announcement/AnnouncementInterface';
 import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
 import { useInstalled } from '../../hooks/useInstalled';
 import { getInstalledRecord } from '../../utils/installedStorage';
 import { useDownloadManager } from '../../components/molecules/DownloadManager';
+import { getGamesByGameId } from '../../blockchain/icp/vault/services/ICPGameService';
+import {
+  Distribution,
+  GameAnnouncementType,
+  PGLMeta,
+} from '../../blockchain/icp/vault/service.did.d';
+import { getAllAnnouncementsByGameId } from '../../blockchain/icp/vault/services/ICPAnnouncementService';
+import { optGetOr } from '../../interfaces/helpers/icp.helpers';
+import { ImageLoading } from '../../constants/lib.const';
 
 // helper deteksi OSKey
 function detectOSKey(): 'windows' | 'macos' | 'linux' {
@@ -23,25 +29,25 @@ function detectOSKey(): 'windows' | 'macos' | 'linux' {
 }
 
 export default function GameDetailLibrary() {
-  const { appId } = useParams();
+  const { gameId } = useParams();
   const { openInstallModal } = useDownloadManager();
   const { wallet } = useWallet();
-  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
+  const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
 
-  const [theApp, setTheApp] = useState<AppInterface | null>();
+  const [theGame, setTheGame] = useState<PGLMeta | null>();
 
   // normalize appId untuk localStorage key
   const appIdKey = useMemo(() => {
     try {
-      return appId ? String(BigInt(appId)) : undefined;
+      return gameId ? gameId : undefined;
     } catch {
-      return appId;
+      return gameId;
     }
-  }, [appId]);
+  }, [gameId]);
 
   const installHere = () => {
-    if (!theApp) return;
-    openInstallModal(theApp);
+    if (!theGame) return;
+    openInstallModal(theGame);
   };
 
   // pilih OS aktif (untuk native)
@@ -50,21 +56,21 @@ export default function GameDetailLibrary() {
 
   // apakah ada web dist?
   const hasWeb = useMemo(() => {
-    const dists = unwrapOptVec<Distribution>(theApp?.distributions as any);
+    const dists = unwrapOptVec<Distribution>(theGame?.pgl1_distribution as any);
     return dists.some(isWeb);
-  }, [theApp]);
+  }, [theGame]);
 
   // apakah ada native dist utk OS ini?
   const hasNativeForOS = useMemo(() => {
-    const dists = unwrapOptVec<Distribution>(theApp?.distributions as any);
+    const dists = unwrapOptVec<Distribution>(theGame?.pgl1_distribution as any);
     return dists.some(
-      (d) =>
-        isNative(d) &&
-        (('windows' in d.native.os && osKey === 'windows') ||
-          ('macos' in d.native.os && osKey === 'macos') ||
-          ('linux' in d.native.os && osKey === 'linux')),
+      (d) => isNative(d),
+      // &&
+      //   (('windows' in d.native.os && osKey === 'windows') ||
+      //     ('macos' in d.native.os && osKey === 'macos') ||
+      //     ('linux' in d.native.os && osKey === 'linux')),
     );
-  }, [theApp, osKey]);
+  }, [theGame, osKey]);
 
   const onLaunch = async () => {
     if (hasWeb) return openWebApp();
@@ -100,9 +106,9 @@ export default function GameDetailLibrary() {
     window.scrollTo(0, 0);
 
     // validasi appId
-    const idNum = Number(appId);
-    if (!appId || Number.isNaN(idNum)) {
-      setTheApp(null);
+    const idNum = gameId;
+    if (!gameId || Number.isNaN(idNum)) {
+      setTheGame(null);
       return;
     }
 
@@ -110,14 +116,14 @@ export default function GameDetailLibrary() {
     async function fetchData() {
       let isMounted = true;
       try {
-        setTheApp(null); // reset agar tidak menampilkan data lama
-        const res = await getAppById({ appId: idNum });
+        setTheGame(null); // reset agar tidak menampilkan data lama
+        const res = await getGamesByGameId({ gameId: gameId! });
         console.log(res);
-        if (!cancelled) setTheApp(res);
+        if (!cancelled) setTheGame(res);
 
         let listAnnouncement =
-          (await getAllAnnouncementsByAppId({
-            appId: Number(appId),
+          (await getAllAnnouncementsByGameId({
+            gameId: gameId!,
             wallet,
           })) ?? [];
         // Sort: pinned first, then by createdAt descending
@@ -141,7 +147,7 @@ export default function GameDetailLibrary() {
 
         if (isMounted) setAnnouncements(listAnnouncement);
       } catch (e) {
-        if (!cancelled) setTheApp(null);
+        if (!cancelled) setTheGame(null);
         // optionally: tampilkan notifikasi error
       }
     }
@@ -150,7 +156,7 @@ export default function GameDetailLibrary() {
     return () => {
       cancelled = true;
     };
-  }, [appId, wallet]);
+  }, [gameId, wallet]);
 
   function unwrapOptVec<T>(v: T[] | [T[]] | null | undefined): T[] {
     if (!v) return [];
@@ -158,15 +164,15 @@ export default function GameDetailLibrary() {
   }
 
   // Ambil url web pertama dari distributions
-  function getWebUrlFromApp(app?: AppInterface | null): string | null {
+  function getWebUrlFromApp(app?: PGLMeta | null): string | null {
     if (!app) return null;
-    const dists = unwrapOptVec<Distribution>(app.distributions as any);
+    const dists = unwrapOptVec<Distribution>(app.pgl1_distribution as any);
     const web = dists.find(isWeb) as { web: { url: string } } | undefined;
     return web?.web?.url ?? null;
   }
 
   const openWebApp = () => {
-    const url = getWebUrlFromApp(theApp);
+    const url = getWebUrlFromApp(theGame);
     if (!url) {
       alert('Web build URL tidak tersedia untuk app ini.');
       return;
@@ -182,7 +188,11 @@ export default function GameDetailLibrary() {
   return (
     <main className="flex flex-col items-center gap-5 mb-32">
       <div className="bg-white w-full h-96 relative">
-        <img src={theApp?.bannerImage} className="object-cover w-full h-[30rem]" alt="" />
+        <img
+          src={optGetOr(theGame!.pgl1_banner_image, ImageLoading)}
+          className="object-cover w-full h-[30rem]"
+          alt=""
+        />
         <div className="bg-gradient-to-t from-background_primary via-background_primary/50 w-full h-[7rem] absolute bottom-0 translate-y-[6.2rem]"></div>
       </div>
 
@@ -192,7 +202,7 @@ export default function GameDetailLibrary() {
         <div className="flex flex-col gap-8 w-2/3">
           {/* Header  */}
           <section className="flex flex-col gap-4">
-            <p className="text-3xl font-medium">{theApp?.title}</p>
+            <p className="text-3xl font-medium">{theGame?.pgl1_name}</p>
             <div className="flex gap-4">
               <p className="flex gap-2 items-center">
                 <FontAwesomeIcon icon={faClock} className="text-text_disabled" />
@@ -218,7 +228,7 @@ export default function GameDetailLibrary() {
             <div className="flex flex-col gap-2">
               <p>current price</p>
               <p className="text-3xl font-bold">
-                {Number(theApp?.price) > 0 ? String(theApp?.price) + ' PER' : 'FREE'}
+                {Number(theGame?.pgl1_price) > 0 ? String(theGame?.pgl1_price) + ' PER' : 'FREE'}
               </p>
             </div>
 

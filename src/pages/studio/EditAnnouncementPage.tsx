@@ -9,17 +9,16 @@ import { AppStatus } from '../../interfaces/app/AppInterface';
 import { useWallet } from '../../contexts/WalletContext';
 import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '../../api/wasabiClient';
 import { useParams } from 'react-router-dom';
-import {
-  AnnouncementInterface,
-  AnnouncementStatus,
-  CreateAnnouncementInterface,
-} from '../../interfaces/announcement/AnnouncementInterface';
+import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
 import {
   createAnnouncement,
-  getAllAnnouncementsByAppId,
-} from '../../blockchain/icp/app/services/ICPAnnouncementService';
-
-import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
+  getAllAnnouncementsByGameId,
+} from '../../blockchain/icp/vault/services/ICPAnnouncementService';
+import {
+  DTOGameAnnouncement,
+  GameAnnouncementType,
+} from '../../blockchain/icp/vault/service.did.d';
+import { AnnouncementStatus } from '../../interfaces/announcement/AnnouncementInterface';
 
 export default function EditAnnouncementPage() {
   const { wallet } = useWallet();
@@ -27,24 +26,24 @@ export default function EditAnnouncementPage() {
   /** ======================
    *  Storage App ID (folder)
    *  ====================== */
-  const { appId } = useParams();
+  const { gameId } = useParams();
   const [storage, setStorage] = useState<InitResp | null>(null);
-  const [announcements, setAnnouncements] = useState<AnnouncementInterface[] | null>(null);
+  const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
 
-  // fetch all dev apps (so we can hydrate by appId)
+  // fetch all dev apps (so we can hydrate by gameId)
 
   // Init Wasabi folder structure (cover/, previews/, builds/..., metadata/)
   useEffect(() => {
     (async () => {
       try {
-        if (!wallet || !appId) return;
-        const s = await initAppStorage(appId!);
+        if (!wallet || !gameId) return;
+        const s = await initAppStorage(gameId!);
         setStorage(s);
       } catch (e) {
         console.error('initAppStorage failed:', e);
       }
     })();
-  }, [appId, wallet]);
+  }, [gameId, wallet]);
 
   // Get all announcements by app id
   useEffect(() => {
@@ -53,8 +52,8 @@ export default function EditAnnouncementPage() {
       try {
         if (!wallet) return;
         let listAnnouncement =
-          (await getAllAnnouncementsByAppId({
-            appId: Number(appId),
+          (await getAllAnnouncementsByGameId({
+            gameId: gameId!,
             wallet,
           })) ?? [];
         // Sort: pinned first, then by createdAt descending
@@ -76,7 +75,7 @@ export default function EditAnnouncementPage() {
     return () => {
       isMounted = false;
     };
-  }, [appId, wallet]);
+  }, [gameId, wallet]);
 
   // ===== Announcements =====
   const [headline, setHeadline] = useState('');
@@ -158,7 +157,7 @@ export default function EditAnnouncementPage() {
 
       if (!announcementCoverImage) throw new Error('Announcement cover image is required.');
 
-      const createData: CreateAnnouncementInterface = {
+      const createData: DTOGameAnnouncement = {
         headline: headline,
         content: content,
         coverImage: announcementCoverImage,
@@ -169,14 +168,14 @@ export default function EditAnnouncementPage() {
       await createAnnouncement({
         createAnnouncementTypes: createData,
         wallet: wallet,
-        appId: BigInt(Number(appId)),
+        gameId: gameId!,
       });
 
       // Refresh announcements list without reloading the page
-      if (wallet && appId) {
+      if (wallet && gameId) {
         let listAnnouncement =
-          (await getAllAnnouncementsByAppId({
-            appId: Number(appId),
+          (await getAllAnnouncementsByGameId({
+            gameId: gameId,
             wallet,
           })) ?? [];
         // Sort: pinned first, then by createdAt descending

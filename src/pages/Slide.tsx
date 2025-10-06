@@ -11,7 +11,7 @@ import {
   faUserGear,
 } from '@fortawesome/free-solid-svg-icons';
 import { useWallet } from '../contexts/WalletContext';
-import { getAmIDeveloper } from '../blockchain/icp/user/services/ICPDeveloperService';
+import { getAmIDeveloper } from '../blockchain/icp/directory/services/ICPDeveloperService';
 
 interface SlideProps {
   onClose: () => void;

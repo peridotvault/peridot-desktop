@@ -1,5 +1,5 @@
 // UserContext.tsx
-import { HttpAgent, Actor } from '@dfinity/agent';
+import { HttpAgent } from '@dfinity/agent';
 
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import {
@@ -9,24 +9,22 @@ import {
 } from '../../../../interfaces/user/UserInterface';
 import { walletService } from '../../../../features/wallet/services/WalletService';
 import { hexToArrayBuffer } from '../../../../utils/crypto';
-import { ICPUserFactory } from '../ICPUserFactory';
 import { ApiResponse, UserId } from '../../../../interfaces/CoreInterface';
+import { createActorDirectory } from '../../idlFactories';
+import { hostICP } from '../../../../constants/lib.const';
 
-const userCanister = import.meta.env.VITE_PERIDOT_CANISTER_USER_BACKEND;
+const directoryCanister = import.meta.env.VITE_PERIDOT_CANISTER_DIRECTORY_BACKEND;
 
 async function createAccount({ metadata, wallet }: { metadata: CreateUserInterface; wallet: any }) {
   const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
   try {
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPUserFactory, {
-      agent,
-      canisterId: userCanister,
-    });
+    const actor = createActorDirectory(directoryCanister, { agent });
 
     const result = await actor.createUser({
       username: metadata.username,
@@ -55,14 +53,11 @@ async function updateUser({
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPUserFactory, {
-      agent,
-      canisterId: userCanister,
-    });
+    const actor = createActorDirectory(directoryCanister, { agent });
 
     const result = (await actor.updateUser(metadataUpdate)) as ApiResponse<UpdateUserInterface>;
     if ('err' in result) {
@@ -79,13 +74,10 @@ async function getIsUsernameValid(username: string): Promise<ApiResponse<Boolean
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
     });
 
-    const actor = Actor.createActor(ICPUserFactory, {
-      agent,
-      canisterId: userCanister,
-    });
+    const actor = createActorDirectory(directoryCanister, { agent });
 
     // Call balance method
     const result = (await actor.getIsUsernameValid(username)) as ApiResponse<Boolean>;
@@ -100,13 +92,10 @@ async function getUserByPrincipalId({ userId }: { userId: UserId }): Promise<Use
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
     });
 
-    const actor = Actor.createActor(ICPUserFactory, {
-      agent,
-      canisterId: userCanister,
-    });
+    const actor = createActorDirectory(directoryCanister, { agent });
 
     const result = (await actor.getUserByPrincipalId(userId)) as ApiResponse<UserInterface>;
     if ('err' in result) {
@@ -125,14 +114,11 @@ async function getUserData({ wallet }: { wallet: any }): Promise<UserInterface> 
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPUserFactory, {
-      agent,
-      canisterId: userCanister,
-    });
+    const actor = createActorDirectory(directoryCanister, { agent });
 
     const result = (await actor.getUserData()) as ApiResponse<UserInterface>;
     if ('err' in result) {
@@ -152,17 +138,14 @@ async function searchUsersByPrefixWithLimit(wallet: any, prefix: string, limit: 
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPUserFactory, {
-      agent,
-      canisterId: userCanister,
-    });
+    const actor = createActorDirectory(directoryCanister, { agent });
 
     // Call balance method
-    const result = await actor.getUsersByPrefixWithLimit(prefix, limit);
+    const result = await actor.getUsersByPrefixWithLimit(prefix, BigInt(limit));
 
     return result;
   } catch (error) {
@@ -178,14 +161,11 @@ async function getFriendRequestList(wallet: any) {
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPUserFactory, {
-      agent,
-      canisterId: userCanister,
-    });
+    const actor = createActorDirectory(directoryCanister, { agent });
 
     // Call balance method
     const result = await actor.getFriendRequestList();
@@ -215,14 +195,11 @@ async function createDeveloperProfile({
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPUserFactory, {
-      agent,
-      canisterId: userCanister,
-    });
+    const actor = createActorDirectory(directoryCanister, { agent });
 
     // Call balance method
     const result = await actor.createDeveloperProfile(websiteUrl, bio);

@@ -1,34 +1,31 @@
-import { Actor, HttpAgent } from '@dfinity/agent';
+import { HttpAgent } from '@dfinity/agent';
 import { walletService } from '../../../../features/wallet/services/WalletService';
 import { hexToArrayBuffer } from '../../../../utils/crypto';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
-import { ICPAppFactory } from '../ICPAppFactory';
-import { ApiResponse } from '../../../../interfaces/CoreInterface';
-import { PurchaseInterface } from '../../../../interfaces/app/PurchaseInterface';
+import { ApiResponse_5, PurchaseType } from '../service.did.d';
+import { createActorVault } from '../../idlFactories';
+import { hostICP } from '../../../../constants/lib.const';
 
-const appCanister = import.meta.env.VITE_PERIDOT_CANISTER_APP_BACKEND;
+const vaultCanister = import.meta.env.VITE_PERIDOT_CANISTER_VAULT_BACKEND;
 
-export async function buyApp({
-  appId,
+export async function buyGame({
+  gameId,
   wallet,
 }: {
-  appId: number;
+  gameId: string;
   wallet: any;
-}): Promise<PurchaseInterface> {
+}): Promise<PurchaseType> {
   const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey);
   const secretKey = hexToArrayBuffer(privateKey);
   try {
     const agent = new HttpAgent({
-      host: import.meta.env.VITE_HOST,
+      host: hostICP,
       identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
     });
 
-    const actor = Actor.createActor(ICPAppFactory, {
-      agent,
-      canisterId: appCanister,
-    });
+    const actor = createActorVault(vaultCanister, { agent });
 
-    const result = (await actor.buyApp(BigInt(appId))) as ApiResponse<PurchaseInterface>;
+    const result = (await actor.buyGame(gameId)) as ApiResponse_5;
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`buyApp failed: ${k} - ${v}`);

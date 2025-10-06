@@ -17,14 +17,14 @@ import { saveUserInfo } from '../../utils/IndexedDb';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
 import { DropDownComponent } from '../../components/atoms/DropDownComponent';
 import { AlertMessage } from '../../features/wallet/components/AlertMessage';
-import { GetOpt, ToOpt } from '../../interfaces/CoreInterface';
 
 import { Gender, UserInterface, UpdateUserInterface } from '../../interfaces/user/UserInterface';
 import {
   getIsUsernameValid,
   getUserData,
   updateUser,
-} from '../../blockchain/icp/user/services/ICPUserService';
+} from '../../blockchain/icp/directory/services/ICPUserService';
+import { optGet, ToOpt } from '../../interfaces/helpers/icp.helpers';
 
 /** Utils — konversi tanggal (ns <-> YYYY-MM-DD UTC) */
 function unixNsToDateStr(ns: bigint): string {
@@ -118,8 +118,8 @@ export const UpdateProfile = () => {
           birthDateStr: unixNsToDateStr(user.userDemographics.birthDate),
           genderCode: genderVariantToCode(user.userDemographics.gender),
           country: user.userDemographics.country,
-          imageUrl: GetOpt(user.imageUrl) ?? null,
-          backgroundImageUrl: GetOpt(user.backgroundImageUrl) ?? null,
+          imageUrl: optGet(user.imageUrl) ?? null,
+          backgroundImageUrl: optGet(user.backgroundImageUrl) ?? null,
         });
       } catch (e) {
         console.error(e);

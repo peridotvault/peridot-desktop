@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import EditAppPage from './EditAppPage';
+import EditAppPage from './EditGamePage';
 import EditAnnouncementPage from './EditAnnouncementPage';
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -34,7 +34,7 @@ function a11yProps(index: number) {
   };
 }
 
-export default function UpdateApp() {
+export default function UpdateGame() {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number) => {

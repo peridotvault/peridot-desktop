@@ -1,11 +1,11 @@
 // @ts-ignore
 import React from 'react';
-import { AnnouncementInterface } from '../../interfaces/announcement/AnnouncementInterface';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbTack } from '@fortawesome/free-solid-svg-icons';
+import { GameAnnouncementType } from '../../blockchain/icp/vault/service.did.d';
 
 interface AnnouncementContainerProps {
-  item: AnnouncementInterface;
+  item: GameAnnouncementType;
   onClick?: () => void; // Add an optional onClick function prop
 }
 

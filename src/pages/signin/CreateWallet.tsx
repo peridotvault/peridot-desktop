@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faDice } from '@fortawesome/free-solid-svg-icons';
 import { clearWalletData } from '../../utils/StoreService';
 import { SeedPhraseInput } from '../../features/wallet/components/SeedPhraseInput';
-import { getUserData } from '../../blockchain/icp/user/services/ICPUserService';
+import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
 
 interface CreateWalletProps {
   setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;

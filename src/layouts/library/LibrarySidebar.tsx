@@ -4,19 +4,21 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLocation, Link } from 'react-router-dom';
 import { useWallet } from '../../contexts/WalletContext';
-import { AppInterface } from '../../interfaces/app/AppInterface';
-import { getMyApps } from '../../blockchain/icp/app/services/ICPAppService';
+import { getMyGames } from '../../blockchain/icp/vault/services/ICPGameService';
+import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
+import { ImageLoading } from '../../constants/lib.const';
+import { optGetOr } from '../../interfaces/helpers/icp.helpers';
 
 export const Sidebar = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
 
   const { wallet } = useWallet();
-  const [myApps, setMyApps] = useState<AppInterface[] | null>();
+  const [myApps, setMyApps] = useState<PGLMeta[] | null>();
 
   useEffect(() => {
     async function fetchData() {
-      const resAllApps = await getMyApps({ wallet: wallet });
+      const resAllApps = await getMyGames({ wallet: wallet });
       setMyApps(resAllApps);
     }
 
@@ -25,7 +27,7 @@ export const Sidebar = () => {
 
   // Filtered games based on searchQuery
   const filteredGames = myApps?.filter((game) =>
-    game.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    game.pgl1_name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const formatTitle = (title: string): string => {
@@ -55,16 +57,20 @@ export const Sidebar = () => {
         <div className="flex flex-col gap-1">
           {filteredGames?.map((item) => {
             const isActive =
-              location.pathname === `/library/${formatTitle(item.title)}/${item.appId}`;
+              location.pathname === `/library/${formatTitle(item.pgl1_name)}/${item.pgl1_game_id}`;
             return (
               <Link
-                key={item.appId}
-                to={`/library/${formatTitle(item.title)}/${item.appId}`}
+                key={item.pgl1_game_id}
+                to={`/library/${formatTitle(item.pgl1_name)}/${item.pgl1_game_id}`}
                 className={`flex gap-3 px-7 py-2 items-center  duration-100
               ${isActive ? 'shadow-flat-sm scale-110' : 'hover:shadow-arise-sm '}`}
               >
-                <img src={item.coverImage} className="w-6 h-6 object-cover rounded-md" alt="" />
-                <p className="truncate text-sm">{item.title}</p>
+                <img
+                  src={optGetOr(item.pgl1_cover_image, ImageLoading)}
+                  className="w-6 h-6 object-cover rounded-md"
+                  alt=""
+                />
+                <p className="truncate text-sm">{item.pgl1_name}</p>
               </Link>
             );
           })}

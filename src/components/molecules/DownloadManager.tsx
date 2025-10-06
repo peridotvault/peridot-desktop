@@ -9,13 +9,9 @@ import React, {
   useState,
 } from 'react';
 import { OSKey } from '../../interfaces/CoreInterface';
-import {
-  AppInterface,
-  Distribution,
-  ManifestInterface,
-  NativeBuild,
-} from '../../interfaces/app/AppInterface';
+import { Distribution, ManifestInterface, NativeBuild } from '../../interfaces/app/AppInterface';
 import { upsertInstalledEntry } from '../../utils/installedStorage';
+import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
 
 type ResolvedBuild = {
   os: OSKey;
@@ -43,7 +39,7 @@ type QueueItem = {
 
 type DownloadContextValue = {
   queue: QueueItem[];
-  openInstallModal: (app: AppInterface) => void;
+  openInstallModal: (app: PGLMeta) => void;
   removeFromQueue: (id: string) => void;
   cancelActive: () => void;
 };
@@ -135,7 +131,7 @@ async function resolveManifest(
   }
 }
 
-async function resolveFromApp(app: AppInterface): Promise<ResolvedBuild[]> {
+async function resolveFromApp(app: PGLMeta): Promise<ResolvedBuild[]> {
   const out: ResolvedBuild[] = [];
 
   // ⬇️ penting: unwrap opsional vector
@@ -249,7 +245,7 @@ export const DownloadProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   /** buka modal dari halaman game */
-  const openInstallModal = useCallback(async (app: AppInterface) => {
+  const openInstallModal = useCallback(async (app: PGLMeta) => {
     const builds = await resolveFromApp(app);
     const latestBuilds = latestPerOS(builds);
     const osPref = detectOS();
@@ -266,7 +262,7 @@ export const DownloadProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         ? coverRaw[0]
         : (coverRaw as string | undefined);
 
-    setModalMeta({ appId: appIdStr, title: app.title, cover });
+    setModalMeta({ appId: appIdStr, title: app.pgl1_name, cover });
     setResolves(latestBuilds); // ⬅️ gunakan latestBuilds
     setSelectedBuild(first || null); // ⬅️ preselect latest utk OS user
     setShow(true);

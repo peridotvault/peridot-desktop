@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { PasswordPage } from './PasswordPage';
 import { clearWalletData } from '../../utils/StoreService';
 import { SeedPhraseInput } from '../../features/wallet/components/SeedPhraseInput';
-import { getUserData } from '../../blockchain/icp/user/services/ICPUserService';
+import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
 
 interface ImportWalletProps {
   setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;
