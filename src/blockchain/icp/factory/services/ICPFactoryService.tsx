@@ -26,7 +26,7 @@ export async function getGameUnRegistered({ wallet }: { wallet: any }): Promise<
     });
 
     const actor = createActorFactory(factoryCanister, { agent });
-    const result = await actor.list_my_pgl1_min([false]);
+    const result = await actor.list_my_pgl1_min([true]);
 
     return result;
   } catch (error) {

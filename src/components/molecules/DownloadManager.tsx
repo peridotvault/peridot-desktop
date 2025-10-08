@@ -9,7 +9,7 @@ import React, {
   useState,
 } from 'react';
 import { OSKey } from '../../interfaces/CoreInterface';
-import { Distribution, ManifestInterface, NativeBuild } from '../../interfaces/app/AppInterface';
+import { Distribution, ManifestInterface, NativeBuild } from '../../interfaces/app/GameInterface';
 import { upsertInstalledEntry } from '../../utils/installedStorage';
 import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
 

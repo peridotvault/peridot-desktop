@@ -1,4 +1,4 @@
-import { AppInterface } from '../../../interfaces/app/AppInterface';
+import { AppInterface } from '../../../interfaces/app/GameInterface';
 import { AppId } from '../../../interfaces/CoreInterface';
 import { dbApp } from '../database';
 

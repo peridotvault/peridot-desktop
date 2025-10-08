@@ -7,12 +7,14 @@ import { idlFactory as directory_idlFactory } from './directory/service';
 import { idlFactory as factory_idlFactory } from './factory/service';
 import { idlFactory as vault_idlFactory } from './vault/service';
 import { idlFactory as registry_idlFactory } from './registry/service';
+import { idlFactory as pgl1_idlFactory } from './pgl1/service';
 
 // ✅ TYPES ONLY -> dari .d.ts (bukan .d.tsx)
 import type { _SERVICE as DirectoryService } from './directory/service.did.d';
 import type { _SERVICE as FactoryService } from './factory/service.did.d';
 import type { _SERVICE as RegistryService } from './registry/service.did.d';
 import type { _SERVICE as VaultService } from './vault/service.did.d';
+import type { _SERVICE as PGL1Service } from './pgl1/service.did.d';
 
 const directoryCanister = import.meta.env.VITE_PERIDOT_CANISTER_DIRECTORY_BACKEND;
 const factoryCanister = import.meta.env.VITE_PERIDOT_CANISTER_FACTORY_BACKEND;
@@ -100,6 +102,26 @@ export const createActorVault = (
   }
 
   return Actor.createActor<VaultService>(vault_idlFactory, {
+    agent,
+    canisterId,
+    ...options.actorOptions,
+  });
+};
+
+export const createActorPGL1 = (
+  canisterId: string | Principal,
+  options: CreateActorOptions = {},
+): ActorSubclass<PGL1Service> => {
+  const agent = options.agent || new HttpAgent({ ...options.agentOptions });
+
+  if (import.meta.env.VITE_DFX_NETWORK !== 'ic') {
+    agent.fetchRootKey().catch((err: Error) => {
+      console.warn('Unable to fetch root key. Is local replica running?');
+      console.error(err);
+    });
+  }
+
+  return Actor.createActor<PGL1Service>(pgl1_idlFactory, {
     agent,
     canisterId,
     ...options.actorOptions,

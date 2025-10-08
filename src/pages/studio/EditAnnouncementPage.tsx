@@ -5,7 +5,7 @@ import { InputFieldComponent } from '../../components/atoms/InputFieldComponent'
 import { faCheck, faHeading, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { PhotoFieldComponent } from '../../components/atoms/PhotoFieldComponent';
 import { DropDownComponent } from '../../components/atoms/DropDownComponent';
-import { AppStatus } from '../../interfaces/app/AppInterface';
+import { AppStatus } from '../../interfaces/app/GameInterface';
 import { useWallet } from '../../contexts/WalletContext';
 import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '../../api/wasabiClient';
 import { useParams } from 'react-router-dom';

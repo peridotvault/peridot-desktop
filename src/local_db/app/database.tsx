@@ -1,6 +1,6 @@
 import Dexie, { Table } from 'dexie';
 import { schema } from './schema';
-import { AppInterface } from '../../interfaces/app/AppInterface';
+import { AppInterface } from '../../interfaces/app/GameInterface';
 import { AppId } from '../../interfaces/CoreInterface';
 
 class AppDatabase extends Dexie {

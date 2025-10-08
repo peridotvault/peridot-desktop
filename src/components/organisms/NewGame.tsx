@@ -60,16 +60,17 @@ async function makeShortSlug(
 }
 
 interface NewGameProps {
-  setIsCreateGameModal: React.Dispatch<React.SetStateAction<boolean>>;
+  onCreated?: () => void;
 }
 
-export const NewGame = ({ setIsCreateGameModal }: NewGameProps) => {
+export const NewGame = ({ onCreated }: NewGameProps) => {
   const { wallet } = useWallet();
 
   const [pgl1_name, set_pgl1_name] = useState('');
   const [pgl1_game_id, set_pgl1_game_id] = useState('');
   const [pgl1_description, set_pgl1_description] = useState('');
   const [seedTs] = useState<number>(() => Date.now());
+  const [busy, setBusy] = useState(false);
 
   // auto-generate stable game_id sekali saat mount
   useEffect(() => {
@@ -82,14 +83,16 @@ export const NewGame = ({ setIsCreateGameModal }: NewGameProps) => {
     return () => {
       cancelled = true;
     };
-  }, [wallet?.principalId, pgl1_name]);
+  }, [wallet?.principalId, pgl1_name, seedTs]);
 
   const handleCreateGame = async () => {
+    if (!wallet) return;
     try {
+      setBusy(true);
       const meta: PGLMeta = {
-        pgl1_name: pgl1_name,
-        pgl1_description: pgl1_description,
-        pgl1_game_id: pgl1_game_id,
+        pgl1_name,
+        pgl1_description,
+        pgl1_game_id, // slug jadi gameId
         pgl1_required_age: [],
         pgl1_cover_image: [],
         pgl1_distribution: [],
@@ -99,16 +102,15 @@ export const NewGame = ({ setIsCreateGameModal }: NewGameProps) => {
         pgl1_price: [],
       };
 
-      await createGame({
-        controllers_extra: [],
-        meta: meta,
-        wallet: wallet,
-      });
+      await createGame({ controllers_extra: [], meta, wallet });
       await initAppStorage(pgl1_game_id);
 
-      setIsCreateGameModal(false);
-    } catch (err: any) {
-      console.error(err?.message);
+      // 👉 kabari parent utk re-fetch
+      onCreated?.();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -148,8 +150,12 @@ export const NewGame = ({ setIsCreateGameModal }: NewGameProps) => {
         />
       </div>
       <div className="flex justify-end mt-8">
-        <button onClick={handleCreateGame} className="bg-accent_secondary px-6 py-2 rounded-lg">
-          Create
+        <button
+          onClick={handleCreateGame}
+          disabled={busy}
+          className="bg-accent_secondary px-6 py-2 rounded-lg"
+        >
+          {busy ? 'Creating…' : 'Create'}
         </button>
       </div>
     </div>

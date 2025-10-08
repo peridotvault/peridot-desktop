@@ -21,7 +21,7 @@ export const idlFactory = ({ IDL }: { IDL: any }) => {
     StorageError: IDL.Text,
     InternalError: IDL.Text,
   });
-  const ApiResponse_4 = IDL.Variant({ ok: PurchaseType, err: ApiError });
+  const ApiResponse_6 = IDL.Variant({ ok: PurchaseType, err: ApiError });
   const AnnouncementId = IDL.Nat;
   const InteractionType = IDL.Variant({
     like: IDL.Null,
@@ -34,7 +34,7 @@ export const idlFactory = ({ IDL }: { IDL: any }) => {
     comment: IDL.Opt(IDL.Text),
     announcementId: AnnouncementId,
   });
-  const ApiResponse_1 = IDL.Variant({
+  const ApiResponse_2 = IDL.Variant({
     ok: GameAnnouncementInteractionType,
     err: ApiError,
   });
@@ -63,12 +63,12 @@ export const idlFactory = ({ IDL }: { IDL: any }) => {
     developerId: DeveloperId,
     announcementId: AnnouncementId,
   });
-  const ApiResponse = IDL.Variant({
+  const ApiResponse_1 = IDL.Variant({
     ok: GameAnnouncementType,
     err: ApiError,
   });
-  const ApiResponse_3 = IDL.Variant({ ok: IDL.Text, err: ApiError });
-  const ApiResponse_2 = IDL.Variant({
+  const ApiResponse_5 = IDL.Variant({ ok: IDL.Text, err: ApiError });
+  const ApiResponse_4 = IDL.Variant({
     ok: IDL.Vec(GameAnnouncementType),
     err: ApiError,
   });
@@ -129,23 +129,29 @@ export const idlFactory = ({ IDL }: { IDL: any }) => {
     pgl1_price: IDL.Opt(IDL.Nat),
     pgl1_game_id: GameId,
   });
+  const ApiResponse_3 = IDL.Variant({
+    ok: IDL.Vec(PGLMeta),
+    err: ApiError,
+  });
+  const ApiResponse = IDL.Variant({ ok: PGLMeta, err: ApiError });
   return IDL.Service({
-    buyGame: IDL.Func([GameId], [ApiResponse_4], []),
-    commentByAnnouncementId: IDL.Func([AnnouncementId, IDL.Text], [ApiResponse_1], []),
-    createAnnouncement: IDL.Func([GameId, DTOGameAnnouncement], [ApiResponse], []),
-    deleteAnnouncement: IDL.Func([AnnouncementId], [ApiResponse_3], []),
-    dislikeByAnnouncementId: IDL.Func([AnnouncementId], [ApiResponse_1], []),
-    getAllAnnouncementsByGameId: IDL.Func([GameId], [ApiResponse_2], ['query']),
+    buyGame: IDL.Func([GameId], [ApiResponse_6], []),
+    commentByAnnouncementId: IDL.Func([AnnouncementId, IDL.Text], [ApiResponse_2], []),
+    createAnnouncement: IDL.Func([GameId, DTOGameAnnouncement], [ApiResponse_1], []),
+    deleteAnnouncement: IDL.Func([AnnouncementId], [ApiResponse_5], []),
+    dislikeByAnnouncementId: IDL.Func([AnnouncementId], [ApiResponse_2], []),
+    getAllAnnouncementsByGameId: IDL.Func([GameId], [ApiResponse_4], ['query']),
     getAllGames: IDL.Func([IDL.Nat, IDL.Nat], [IDL.Vec(PGLMeta)], []),
-    getAnnouncementsByAnnouncementId: IDL.Func([AnnouncementId], [ApiResponse], ['query']),
+    getAnnouncementsByAnnouncementId: IDL.Func([AnnouncementId], [ApiResponse_1], ['query']),
     getGameByDeveloperId: IDL.Func([IDL.Principal, IDL.Nat, IDL.Nat], [IDL.Vec(PGLMeta)], []),
     getGameMetadata: IDL.Func([IDL.Text], [PGLMeta], []),
     getGamesByGameId: IDL.Func([IDL.Text], [IDL.Opt(PGLMeta)], []),
     getMyGames: IDL.Func([], [IDL.Vec(PGLMeta)], []),
-    likeByAnnouncementId: IDL.Func([AnnouncementId], [ApiResponse_1], []),
-    unLikeDislikeByAnnouncementId: IDL.Func([AnnouncementId], [ApiResponse_1], []),
-    updateAnnouncement: IDL.Func([AnnouncementId, DTOGameAnnouncement], [ApiResponse], []),
-    updateGame: IDL.Func([IDL.Text, PGLMeta], [PGLMeta], []),
+    getPublishedGames: IDL.Func([IDL.Nat, IDL.Nat], [ApiResponse_3], []),
+    likeByAnnouncementId: IDL.Func([AnnouncementId], [ApiResponse_2], []),
+    unLikeDislikeByAnnouncementId: IDL.Func([AnnouncementId], [ApiResponse_2], []),
+    updateAnnouncement: IDL.Func([AnnouncementId, DTOGameAnnouncement], [ApiResponse_1], []),
+    updateGame: IDL.Func([GameId, PGLMeta], [ApiResponse], []),
     verify_license: IDL.Func([IDL.Text], [IDL.Bool], []),
   });
 };

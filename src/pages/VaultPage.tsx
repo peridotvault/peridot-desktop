@@ -4,7 +4,7 @@ import { VerticalCard } from '../components/cards/VerticalCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import AIChat from '../components/ai/AIChat';
-import { getAllGames } from '../blockchain/icp/vault/services/ICPGameService';
+import { getPublishedGames } from '../blockchain/icp/vault/services/ICPGameService';
 import { PGLMeta } from '../blockchain/icp/vault/service.did.d';
 import { optGetOr } from '../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../constants/lib.const';
@@ -25,7 +25,7 @@ export default function VaultPage() {
     async function fetchData() {
       window.scrollTo(0, 0);
 
-      const resAllGames = await getAllGames({ start: 0, limit: 200 });
+      const resAllGames = await getPublishedGames({ start: 0, limit: 200 });
       console.log(resAllGames);
       setAllGames(resAllGames);
     }

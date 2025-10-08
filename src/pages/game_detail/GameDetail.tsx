@@ -6,14 +6,15 @@ import { faAngleRight, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { AppPayment } from '../../features/wallet/views/Payment';
 import { useParams } from 'react-router-dom';
 import { useWallet } from '../../contexts/WalletContext';
-import CarouselPreview, { MediaItem } from '../../components/organisms/CarouselPreview';
+import CarouselPreview from '../../components/organisms/CarouselPreview';
 import { VerticalCard } from '../../components/cards/VerticalCard';
 import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
-// import { getUserByPrincipalId } from '../../blockchain/icp/directory/services/ICPUserService';
-// import { UserInterface } from '../../interfaces/user/UserInterface';
 import Modal from '@mui/material/Modal';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
-import { getAllGames, getGamesByGameId } from '../../blockchain/icp/vault/services/ICPGameService';
+import {
+  getPublishedGames,
+  getGamesByGameId,
+} from '../../blockchain/icp/vault/services/ICPGameService';
 import {
   GameAnnouncementType,
   Metadata,
@@ -29,6 +30,7 @@ import {
 import { asMap, asText, mdGet, optGetOr } from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
 import { buyGame } from '../../blockchain/icp/vault/services/ICPPurchaseService';
+import { MediaItem } from '../../interfaces/app/GameInterface';
 
 export default function GameDetail() {
   const { gameId } = useParams();
@@ -55,11 +57,12 @@ export default function GameDetail() {
       // const developer = await getUserByPrincipalId({
       //   userId: resDetailGame.,
       // });
+      console.log(gameId);
       console.log(resDetailGame);
       setDetailGame(resDetailGame);
       // setDeveloperData(developer);
       setHumanPriceStr(Number(resDetailGame?.pgl1_price) / 1e8);
-      const resAllGames = await getAllGames({ start: 0, limit: 200 });
+      const resAllGames = await getPublishedGames({ start: 0, limit: 200 });
       setAllGames(resAllGames);
     }
 
@@ -276,7 +279,9 @@ export default function GameDetail() {
             <div className="flex items-center justify-center ">
               <div className="w-full aspect-[3/4] relative overflow-hidden shadow-arise-sm rounded-xl">
                 <img
-                  src={optGetOr(detailGame!.pgl1_cover_image, ImageLoading)}
+                  src={
+                    detailGame ? optGetOr(detailGame.pgl1_cover_image, ImageLoading) : ImageLoading
+                  }
                   className="w-full h-full object-cover"
                   alt=""
                 />

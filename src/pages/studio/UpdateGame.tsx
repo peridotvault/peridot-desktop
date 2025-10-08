@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import EditAppPage from './EditGamePage';
+import EditGamePage from './EditGamePage';
 import EditAnnouncementPage from './EditAnnouncementPage';
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -51,7 +51,7 @@ export default function UpdateGame() {
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0}>
-          <EditAppPage />
+          <EditGamePage />
         </CustomTabPanel>
         <CustomTabPanel value={value} index={1}>
           <EditAnnouncementPage />

@@ -31,6 +31,7 @@ export const idlFactory = ({ IDL }: { IDL: any }) => {
   return IDL.Service({
     getAllGameRecord: IDL.Func([], [ApiResponse_1], ['query']),
     getAllGameRecordLimit: IDL.Func([IDL.Nat, IDL.Nat], [ApiResponse_1], ['query']),
+    getGameByDeveloperId: IDL.Func([IDL.Principal, GameId], [ApiResponse], []),
     getGameRecordById: IDL.Func([GameId], [ApiResponse], ['query']),
     isGameRegistered: IDL.Func([IDL.Principal], [IDL.Bool], ['query']),
     register_game: IDL.Func([CreateGameRecord], [ApiResponse], []),

@@ -1,4 +1,3 @@
-// UpdateApp.tsx
 // @ts-ignore
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
@@ -16,18 +15,23 @@ import {
 import { PhotoFieldComponent } from '../../components/atoms/PhotoFieldComponent';
 import { DropDownComponent } from '../../components/atoms/DropDownComponent';
 import { MultiSelectComponent } from '../../components/atoms/MultiSelectComponent';
-import { Option } from '../../interfaces/Additional';
-import CarouselPreview, { MediaItem } from '../../components/organisms/CarouselPreview';
+import CarouselPreview from '../../components/organisms/CarouselPreview';
 import allCategories from '../../assets/json/app/categories.json';
 import { useWallet } from '../../contexts/WalletContext';
 import { BannerFieldComponent } from '../../components/atoms/BannerFieldComponent';
 import { OSKey } from '../../interfaces/CoreInterface';
-import { hasDist, nowNs, nsToDateStr, toOSKey } from '../../utils/Additional';
-import { useParams } from 'react-router-dom';
-import { EditGameService as EditService } from '../../services/studio/EditGameService';
-import { getGameByDeveloperId } from '../../blockchain/icp/vault/services/ICPGameService';
-import { Manifest, PGLMeta, StorageRef } from '../../blockchain/icp/vault/service.did.d';
-import { HydratedAppInterface } from '../../interfaces/app/AppInterface';
+import { hasDist, nowNs, nsToDateStr, toOSKey, dateStrToNs } from '../../utils/Additional';
+import { useParams } from 'react-router-dom'; // Import useParams
+import { EditGameService as EGS } from '../../services/studio/EditGameService';
+import { getGameByDeveloperId } from '../../blockchain/icp/vault/services/ICPGameService'; // Pastikan path benar
+import { Manifest, PGLMeta, StorageRef } from '../../blockchain/icp/vault/service.did.d'; // Pastikan path benar
+import {
+  HydratedGameInterface,
+  MediaItem,
+  Option,
+  HardwareFields,
+  WebHardwareFields,
+} from '../../interfaces/app/GameInterface';
 
 function storageRefLabel(sr: StorageRef): string {
   if ('url' in sr) return sr.url.url ?? '';
@@ -44,16 +48,18 @@ export default function EditGamePage() {
   const { wallet } = useWallet();
 
   // ===== URL param =====
-  const { gameAddress } = useParams(); // NOTE: diasumsikan ini CANISTER ID untuk submitUpdate
+  // Ganti gameAddress menjadi gameId sesuai dengan routes.tsx
+  const { gameId } = useParams<{ gameId: string }>(); // Ambil gameId dari URL
 
   // ===== State data dari chain =====
   const [games, setGames] = useState<PGLMeta[] | null>(null);
   const [loadedGame, setLoadedGame] = useState<PGLMeta | null>(null);
 
   // ===== Service =====
+  // Gunakan gameId di sini juga
   const EditGameService = useMemo(
-    () => new EditService({ wallet, gameAddress: gameAddress! }),
-    [wallet, gameAddress],
+    () => new EGS({ wallet, gameId: gameId! }), // Perhatian: gameAddress mungkin perlu diganti di EditGameService
+    [wallet, gameId],
   );
 
   // init storage (Wasabi)
@@ -88,21 +94,23 @@ export default function EditGamePage() {
     };
   }, [wallet]);
 
-  // find current game by gameAddress
+  // find current game by gameId
   useEffect(() => {
-    if (!games || !gameAddress) return;
-    const found = games.find((a) => String(a.pgl1_game_id) === String(gameAddress));
+    if (!games || !gameId) return; // Gunakan gameId
+    // Asumsikan pgl1_game_id adalah string yang bisa dibandingkan dengan gameId
+    const found = games.find((a) => String(a.pgl1_game_id) === String(gameId)); // Gunakan gameId
     if (found) setLoadedGame(found);
-  }, [games, gameAddress]);
+  }, [games, gameId]); // Gunakan gameId
 
   // ===== General form =====
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [coverImage, setCoverImage] = useState<string>('');
-  const [bannerImage, setBannerImage] = useState<string>('');
+  const [pgl1_game_id, set_pgl1_game_id] = useState('');
+  const [pgl1_name, set_pgl1_name] = useState('');
+  const [pgl1_description, set_pgl1_description] = useState('');
+  const [pgl1_cover_image, set_pgl1_cover_image] = useState<string>('');
+  const [pgl1_banner_image, set_pgl1_banner_image] = useState<string>('');
+  const [pgl1_price, set_pgl1_price] = useState(''); // bigint as string
+  const [pgl1_required_age, set_pgl1_required_age] = useState(''); // bigint as string
 
-  const [priceStr, setPriceStr] = useState(''); // bigint as string
-  const [requiredAgeStr, setRequiredAgeStr] = useState(''); // bigint as string
   const [releaseDateStr, setReleaseDateStr] = useState(nsToDateStr(nowNs())); // YYYY-MM-DD
   const [selectedCategories, setSelectedCategories] = useState<Option[]>([]);
   const statusOptions = [
@@ -147,37 +155,28 @@ export default function EditGamePage() {
     linux: [],
   });
 
-  useEffect(() => {
-    (['windows', 'macos', 'linux'] as OSKey[]).forEach((k) => {
-      setUploadedMeta((prev) => {
-        const want = manifestsByOS[k].length;
-        const cur = prev[k]?.length ?? 0;
-        if (want === cur) return prev;
-        const nextForK = Array.from({ length: want }, (_, i) => prev[k]?.[i] ?? {});
-        return { ...prev, [k]: nextForK };
-      });
-    });
-  }, [manifestsByOS]);
-
-  // native shared hw
-  const [processor, setProcessor] = useState('');
-  const [memoryStr, setMemoryStr] = useState(''); // bigint as string
-  const [storageStr, setStorageStr] = useState(''); // bigint as string
-  const [graphics, setGraphics] = useState('');
-  const [notes, setNotes] = useState('');
-
-  // categories
-  const categoryOptions = allCategories.categories.map((tag: any) => ({
-    value: tag.id,
-    label: tag.name,
-  }));
+  // hardware per-OS
+  const [hardwareByOS, setHardwareByOS] = useState<Record<OSKey, HardwareFields>>({
+    windows: { processor: '', memory: '', storage: '', graphics: '', notes: '' },
+    macos: { processor: '', memory: '', storage: '', graphics: '', notes: '' },
+    linux: { processor: '', memory: '', storage: '', graphics: '', notes: '' },
+  });
 
   // web build
   const [webUrl, setWebUrl] = useState('');
+  const [webHardware, setWebHardware] = useState<WebHardwareFields | null>(null);
 
   // UI
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ ok?: string; err?: string }>({});
+
+  // categories
+  const categoryOptions = useMemo(() => {
+    return allCategories.categories.map((tag: any) => ({
+      value: tag.id,
+      label: tag.name,
+    }));
+  }, []);
 
   // sync manifests grid when distribution changes
   useEffect(() => {
@@ -201,45 +200,71 @@ export default function EditGamePage() {
    *  HYDRATE FROM EXISTING GAME
    *  ====================== */
   useEffect(() => {
-    if (loadedGame) {
-      const h = EditGameService.hydrateFromGame(loadedGame, categoryOptions);
-      setTitle(h.title);
-      setDescription(h.description);
-      setCoverImage(h.coverImage);
-      setBannerImage(h.bannerImage);
-      setPriceStr(h.priceStr);
-      setRequiredAgeStr(h.requiredAgeStr);
-      setReleaseDateStr(h.releaseDateStr);
-      setStatusCode(h.statusCode);
-      setSelectedCategories(h.selectedCategories);
-      setAppTags(h.appTags);
-      setPreviewItems(h.previewItems);
-      setSelectedDistribution(h.selectedDistribution);
-      setManifestsByOS(h.manifestsByOS);
-      setWebUrl(h.webUrl);
-      setProcessor(h.processor);
-      setMemoryStr(h.memory);
-      setStorageStr(h.storage);
-      setGraphics(h.graphics);
-      setNotes(h.notes);
-    }
-  }, [loadedGame, EditGameService, categoryOptions]);
+    if (!loadedGame) return;
+
+    const h = EditGameService.hydrateFromGame(loadedGame, categoryOptions);
+
+    set_pgl1_game_id(h.pgl1_game_id ?? '');
+    set_pgl1_name(h.pgl1_name ?? '');
+    set_pgl1_description(h.pgl1_description ?? '');
+    set_pgl1_cover_image(h.pgl1_cover_image ?? '');
+    set_pgl1_banner_image(h.pgl1_banner_image ?? '');
+    set_pgl1_price(h.pgl1_price ?? '');
+    set_pgl1_required_age(h.pgl1_required_age ?? '');
+
+    // release date (ns -> YYYY-MM-DD) dari pgl1_published
+    const releasedAtNs = h.pgl1_published?.releasedAt;
+    setReleaseDateStr(releasedAtNs ? nsToDateStr(releasedAtNs) : '');
+
+    setStatusCode(h.pgl1_published?.status ?? 'notPublish');
+
+    // categories: Hydrated berisi string[], convert ke Option[]
+    const catsAsOptions = (h.pgl1_categories ?? []).map((cat) => {
+      const opt = categoryOptions.find((o) => o.label === cat || o.value === cat);
+      return opt ?? { value: cat, label: cat };
+    });
+    setSelectedCategories(catsAsOptions);
+
+    setAppTags(h.pgl1_tags ?? []);
+    setPreviewItems(h.pgl1_previews ?? []);
+    setSelectedDistribution(h.pgl1_distribution ?? []);
+    setManifestsByOS(h.manifestsByOS ?? { windows: [], macos: [], linux: [] });
+
+    // hardware per-OS
+    setHardwareByOS(
+      h.hardwareByOS ?? {
+        windows: { processor: '', memory: '', storage: '', graphics: '', notes: '' },
+        macos: { processor: '', memory: '', storage: '', graphics: '', notes: '' },
+        linux: { processor: '', memory: '', storage: '', graphics: '', notes: '' },
+      },
+    );
+
+    setWebUrl(h.pgl1_website ?? '');
+    setWebHardware(h.webHardware ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadedGame, categoryOptions]); // ⬅️ JANGAN masukkan EditGameService di sini
 
   /** ======================
    *  UPLOAD HELPERS (Wasabi)
    *  ====================== */
   async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const apiUrl = (await EditGameService.handleAssetChange({ e })) || '';
-    setCoverImage(apiUrl);
+    set_pgl1_cover_image(apiUrl);
   }
   async function handleBannerChange(e: React.ChangeEvent<HTMLInputElement>) {
     const apiUrl = (await EditGameService.handleAssetChange({ e })) || '';
-    setBannerImage(apiUrl);
+    set_pgl1_banner_image(apiUrl);
   }
-  async function handlePreviewUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const item = await EditGameService.handlePreviewUpload(e);
-    if (!item) return;
-    setPreviewItems((prev) => [...prev, item]);
+  function handlePreviewUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    const newly: MediaItem[] = files.map((f) => {
+      const url = URL.createObjectURL(f);
+      if (f.type.startsWith('video/')) {
+        return { kind: 'video', src: url }; // poster bisa di-generate kemudian pakai canvas kalau mau
+      }
+      return { kind: 'image', src: url };
+    });
+    setPreviewItems((prev) => [...prev, ...newly]); // where setPreviewItems is your state setter
   }
 
   // Build file upload per manifest
@@ -288,32 +313,34 @@ export default function EditGamePage() {
       setToast({});
 
       if (!EditGameService) throw new Error('Wallet atau AppId tidak tersedia.');
-      if (!gameAddress) throw new Error('Game Canister ID tidak ditemukan dari URL.');
+      // Gunakan gameId dari URL, bukan gameAddress
+      if (!gameId) throw new Error('Game ID tidak ditemukan dari URL.');
 
-      // bentuk object sesuai HydratedAppInterface
-      const form: HydratedAppInterface = {
-        title,
-        description,
-        coverImage,
-        bannerImage,
-        priceStr,
-        requiredAgeStr,
-        releaseDateStr, // (opsional: kamu juga punya releaseDateNs dari dateStrToNs jika mau)
-        statusCode,
-        selectedCategories,
-        appTags,
-        previewItems,
-        selectedDistribution,
+      // bentuk object sesuai HydratedGameInterface
+      const form: HydratedGameInterface = {
+        pgl1_game_id,
+        pgl1_name,
+        pgl1_description,
+        pgl1_cover_image,
+        pgl1_banner_image,
+        pgl1_price,
+        pgl1_required_age,
+        pgl1_published: {
+          status: statusCode,
+          releasedAt: dateStrToNs(releaseDateStr),
+        },
+        pgl1_categories: selectedCategories.map((o) => o.label),
+        pgl1_tags: appTags,
+        pgl1_previews: previewItems,
+        pgl1_distribution: selectedDistribution,
         manifestsByOS,
-        webUrl,
-        processor,
-        memory: memoryStr, // penting: service butuh "memory" bukan "memoryStr"
-        storage: storageStr, // penting: service butuh "storage" bukan "storageStr"
-        graphics,
-        notes,
-      } as any;
+        pgl1_website: webUrl,
+        hardwareByOS,
+        webHardware,
+      };
 
-      await EditGameService.submitUpdate(form, String(gameAddress)); // diasumsikan gameAddress = CANISTER ID
+      // Kirim gameId ke submitUpdate, bukan gameAddress
+      await EditGameService.submitUpdate(form, gameId); // <--- Perubahan di sini
       setToast({ ok: 'App updated successfully 🎉' });
     } catch (err: any) {
       console.error('Error Service Update App :', err);
@@ -348,22 +375,30 @@ export default function EditGamePage() {
         <div className="flex flex-col gap-8 w-full">
           <section className="flex flex-col gap-4">
             <h2 className="text-2xl font-semibold pb-2">General</h2>
-
             <InputFieldComponent
-              name="title"
+              name="Game Id"
               icon={faHeading}
               type="text"
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle((e.target as HTMLInputElement).value)}
+              disabled={true}
+              placeholder="Game Id"
+              value={pgl1_game_id}
+              onChange={() => {}}
+            />
+            <InputFieldComponent
+              name="Game Name"
+              icon={faHeading}
+              type="text"
+              placeholder="Game Name"
+              value={pgl1_name}
+              onChange={(e) => set_pgl1_name((e.target as HTMLInputElement).value)}
             />
             <InputFieldComponent
               name="description"
               icon={faMessage}
               type="text"
               placeholder="Description"
-              value={description}
-              onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
+              value={pgl1_description}
+              onChange={(e) => set_pgl1_description((e.target as HTMLInputElement).value)}
             />
             <div className="grid grid-cols-2 gap-4">
               <InputFieldComponent
@@ -371,16 +406,18 @@ export default function EditGamePage() {
                 icon={faMoneyBill1Wave}
                 type="number"
                 placeholder="Price (Nat)"
-                value={priceStr}
-                onChange={(e) => setPriceStr((e.target as HTMLInputElement).value)}
+                required={false}
+                value={pgl1_price}
+                onChange={(e) => set_pgl1_price((e.target as HTMLInputElement).value)}
               />
               <InputFieldComponent
                 name="requiredAge"
                 icon={faPersonCane}
                 type="number"
                 placeholder="Required Age (Nat)"
-                value={requiredAgeStr}
-                onChange={(e) => setRequiredAgeStr((e.target as HTMLInputElement).value)}
+                required={false}
+                value={pgl1_required_age}
+                onChange={(e) => set_pgl1_required_age((e.target as HTMLInputElement).value)}
               />
             </div>
 
@@ -389,6 +426,7 @@ export default function EditGamePage() {
               icon={faCalendarDays}
               type="date"
               placeholder="Release Date"
+              required={false}
               value={releaseDateStr}
               onChange={(e) => setReleaseDateStr((e.target as HTMLInputElement).value)}
             />
@@ -453,7 +491,7 @@ export default function EditGamePage() {
 
         <BannerFieldComponent
           title="Banner Image"
-          imageUrl={bannerImage}
+          imageUrl={pgl1_banner_image}
           onChange={handleBannerChange}
         />
 
@@ -476,7 +514,7 @@ export default function EditGamePage() {
           <div className="w-1/3">
             <PhotoFieldComponent
               title="Cover Image"
-              imageUrl={coverImage}
+              imageUrl={pgl1_cover_image}
               onChange={handleCoverChange}
             />
           </div>
@@ -510,10 +548,73 @@ export default function EditGamePage() {
             name="webUrl"
             icon={faGlobe}
             type="text"
-            placeholder="https://your-app.example/play"
+            required={false}
+            placeholder=" https://your-app.example/play"
             value={webUrl}
             onChange={(e) => setWebUrl((e.target as HTMLInputElement).value)}
           />
+
+          {/* Web Hardware Requirements */}
+          <div className="mt-6 p-4 bg-surface rounded-lg">
+            <h3 className="text-lg font-medium mb-3">Web Hardware Requirements</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <InputFieldComponent
+                name="processor"
+                icon={faBrain}
+                type="text"
+                required={false}
+                placeholder="Processor"
+                value={webHardware?.processor || ''}
+                onChange={(e) =>
+                  setWebHardware((hw) => (hw ? { ...hw, processor: e.target.value } : null))
+                }
+              />
+              <InputFieldComponent
+                name="memory"
+                icon={faBrain}
+                type="number"
+                placeholder="Memory (bytes)"
+                required={false}
+                value={webHardware?.memory || ''}
+                onChange={(e) =>
+                  setWebHardware((hw) => (hw ? { ...hw, memory: e.target.value } : null))
+                }
+              />
+              <InputFieldComponent
+                name="storage"
+                icon={faBrain}
+                type="number"
+                placeholder="Storage (bytes)"
+                required={false}
+                value={webHardware?.storage || ''}
+                onChange={(e) =>
+                  setWebHardware((hw) => (hw ? { ...hw, storage: e.target.value } : null))
+                }
+              />
+              <InputFieldComponent
+                name="graphics"
+                icon={faBrain}
+                type="text"
+                placeholder="Graphics"
+                required={false}
+                value={webHardware?.graphics || ''}
+                onChange={(e) =>
+                  setWebHardware((hw) => (hw ? { ...hw, graphics: e.target.value } : null))
+                }
+              />
+            </div>
+            <InputFieldComponent
+              name="notes"
+              icon={faBrain}
+              type="text"
+              placeholder="Additional Notes"
+              required={false}
+              value={webHardware?.notes || ''}
+              onChange={(e) =>
+                setWebHardware((hw) => (hw ? { ...hw, notes: e.target.value } : null))
+              }
+            />
+          </div>
         </section>
       )}
 
@@ -522,7 +623,7 @@ export default function EditGamePage() {
         hasDist(selectedDistribution, osKey) ? (
           <section key={osKey} className="flex flex-col gap-4">
             <hr className="border-t border-background_disabled" />
-            <h2 className="text-2xl font-semibold pb-2 capitalize">{osKey} Manifests</h2>
+            <h2 className="text-2xl font-semibold pb-2 capitalize">{osKey} Distribution</h2>
 
             <ManifestList
               osKey={osKey}
@@ -548,59 +649,85 @@ export default function EditGamePage() {
               onUploadFile={(idx, file) => uploadBuildForManifest(osKey, idx, file)}
               metaList={uploadedMeta[osKey] ?? []}
             />
+
+            {/* Hardware Requirements for this OS */}
+            <div className="mt-6 p-4 bg-surface rounded-lg">
+              <h3 className="text-lg font-medium mb-3">Hardware Requirements</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <InputFieldComponent
+                  name="processor"
+                  icon={faBrain}
+                  type="text"
+                  placeholder="Processor"
+                  required={false}
+                  value={hardwareByOS[osKey].processor}
+                  onChange={(e) =>
+                    setHardwareByOS((prev) => ({
+                      ...prev,
+                      [osKey]: { ...prev[osKey], processor: e.target.value },
+                    }))
+                  }
+                />
+                <InputFieldComponent
+                  name="memory"
+                  icon={faBrain}
+                  type="number"
+                  placeholder="Memory (bytes)"
+                  required={false}
+                  value={hardwareByOS[osKey].memory}
+                  onChange={(e) =>
+                    setHardwareByOS((prev) => ({
+                      ...prev,
+                      [osKey]: { ...prev[osKey], memory: e.target.value },
+                    }))
+                  }
+                />
+                <InputFieldComponent
+                  name="storage"
+                  icon={faBrain}
+                  type="number"
+                  placeholder="Storage (bytes)"
+                  required={false}
+                  value={hardwareByOS[osKey].storage}
+                  onChange={(e) =>
+                    setHardwareByOS((prev) => ({
+                      ...prev,
+                      [osKey]: { ...prev[osKey], storage: e.target.value },
+                    }))
+                  }
+                />
+                <InputFieldComponent
+                  name="graphics"
+                  icon={faBrain}
+                  type="text"
+                  placeholder="Graphics"
+                  required={false}
+                  value={hardwareByOS[osKey].graphics}
+                  onChange={(e) =>
+                    setHardwareByOS((prev) => ({
+                      ...prev,
+                      [osKey]: { ...prev[osKey], graphics: e.target.value },
+                    }))
+                  }
+                />
+              </div>
+              <InputFieldComponent
+                name="notes"
+                icon={faBrain}
+                type="text"
+                placeholder="Additional Notes"
+                required={false}
+                value={hardwareByOS[osKey].notes}
+                onChange={(e) =>
+                  setHardwareByOS((prev) => ({
+                    ...prev,
+                    [osKey]: { ...prev[osKey], notes: e.target.value },
+                  }))
+                }
+              />
+            </div>
           </section>
         ) : null,
-      )}
-
-      {/* Native shared hardware */}
-      {(hasDist(selectedDistribution, 'windows') ||
-        hasDist(selectedDistribution, 'macos') ||
-        hasDist(selectedDistribution, 'linux')) && (
-        <section className="flex flex-col gap-4">
-          <h3 className="text-xl font-semibold pt-2">Native Hardware</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <InputFieldComponent
-              name="processor"
-              icon={faBrain}
-              type="text"
-              placeholder="Processor"
-              value={processor}
-              onChange={(e) => setProcessor((e.target as HTMLInputElement).value)}
-            />
-            <InputFieldComponent
-              name="memory"
-              icon={faBrain}
-              type="number"
-              placeholder="Memory (Nat)"
-              value={memoryStr}
-              onChange={(e) => setMemoryStr((e.target as HTMLInputElement).value)}
-            />
-            <InputFieldComponent
-              name="storage"
-              icon={faBrain}
-              type="number"
-              placeholder="Storage (Nat)"
-              value={storageStr}
-              onChange={(e) => setStorageStr((e.target as HTMLInputElement).value)}
-            />
-            <InputFieldComponent
-              name="graphics"
-              icon={faBrain}
-              type="text"
-              placeholder="Graphics"
-              value={graphics}
-              onChange={(e) => setGraphics((e.target as HTMLInputElement).value)}
-            />
-          </div>
-          <InputFieldComponent
-            name="notes"
-            icon={faBrain}
-            type="text"
-            placeholder="Additional Notes"
-            value={notes}
-            onChange={(e) => setNotes((e.target as HTMLInputElement).value)}
-          />
-        </section>
       )}
 
       {/* Submit */}
@@ -612,7 +739,7 @@ export default function EditGamePage() {
             busy ? 'opacity-60 cursor-not-allowed' : ''
           }`}
         >
-          {busy ? 'Updating...' : 'Update App'}
+          {busy ? 'Updating...' : 'Update Game'}
         </button>
       </div>
     </form>

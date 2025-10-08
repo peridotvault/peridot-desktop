@@ -239,7 +239,7 @@ export const UpdateProfile = () => {
           <p className="text-2xl font-semibold">Account Settings</p>
           <button
             onClick={handleSubmit}
-            className="w-52 p-3 rounded-xl hover:shadow-arise-sm shadow-flat-sm duration-300 hover:text-white text-text_disabled"
+            className="p-3 px-10 rounded-xl duration-300 bg-accent_secondary font-bold"
           >
             Update
           </button>

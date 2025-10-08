@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isNative, isWeb } from '../../interfaces/app/AppInterface';
+import { isNative, isWeb } from '../../interfaces/app/GameInterface';
 import { useParams } from 'react-router-dom';
 import { useWallet } from '../../contexts/WalletContext';
 import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
@@ -34,7 +34,7 @@ export default function GameDetailLibrary() {
   const { wallet } = useWallet();
   const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
 
-  const [theGame, setTheGame] = useState<PGLMeta | null>();
+  const [theGame, setTheGame] = useState<PGLMeta | null>(null);
 
   // normalize appId untuk localStorage key
   const appIdKey = useMemo(() => {
@@ -118,7 +118,6 @@ export default function GameDetailLibrary() {
       try {
         setTheGame(null); // reset agar tidak menampilkan data lama
         const res = await getGamesByGameId({ gameId: gameId! });
-        console.log(res);
         if (!cancelled) setTheGame(res);
 
         let listAnnouncement =

@@ -21,7 +21,7 @@ export const VerticalCard = ({
   };
   return (
     <Link
-      to={`/${formatTitle(gameName)}/${Number(gameId)}`}
+      to={`/${formatTitle(gameName)}/${gameId}`}
       className="w-full max-w-[250px] flex flex-col gap-3 group"
     >
       <div className="w-full aspect-[3/4] overflow-hidden bg-white rounded-xl duration-300">

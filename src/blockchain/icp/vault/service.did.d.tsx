@@ -15,9 +15,10 @@ export type ApiError =
 export type ApiResponse = { ok: PGLMeta } | { err: ApiError };
 export type ApiResponse_1 = { ok: GameAnnouncementType } | { err: ApiError };
 export type ApiResponse_2 = { ok: GameAnnouncementInteractionType } | { err: ApiError };
-export type ApiResponse_3 = { ok: Array<GameAnnouncementType> } | { err: ApiError };
-export type ApiResponse_4 = { ok: string } | { err: ApiError };
-export type ApiResponse_5 = { ok: PurchaseType } | { err: ApiError };
+export type ApiResponse_3 = { ok: Array<PGLMeta> } | { err: ApiError };
+export type ApiResponse_4 = { ok: Array<GameAnnouncementType> } | { err: ApiError };
+export type ApiResponse_5 = { ok: string } | { err: ApiError };
+export type ApiResponse_6 = { ok: PurchaseType } | { err: ApiError };
 export interface DTOGameAnnouncement {
   status: Status;
   content: string;
@@ -109,22 +110,23 @@ export interface WebBuild {
   processor: string;
 }
 export interface _SERVICE {
-  buyGame: ActorMethod<[GameId], ApiResponse_5>;
+  buyGame: ActorMethod<[GameId], ApiResponse_6>;
   commentByAnnouncementId: ActorMethod<[AnnouncementId, string], ApiResponse_2>;
   createAnnouncement: ActorMethod<[GameId, DTOGameAnnouncement], ApiResponse_1>;
-  deleteAnnouncement: ActorMethod<[AnnouncementId], ApiResponse_4>;
+  deleteAnnouncement: ActorMethod<[AnnouncementId], ApiResponse_5>;
   dislikeByAnnouncementId: ActorMethod<[AnnouncementId], ApiResponse_2>;
-  getAllAnnouncementsByGameId: ActorMethod<[GameId], ApiResponse_3>;
+  getAllAnnouncementsByGameId: ActorMethod<[GameId], ApiResponse_4>;
   getAllGames: ActorMethod<[bigint, bigint], Array<PGLMeta>>;
   getAnnouncementsByAnnouncementId: ActorMethod<[AnnouncementId], ApiResponse_1>;
   getGameByDeveloperId: ActorMethod<[Principal, bigint, bigint], Array<PGLMeta>>;
   getGameMetadata: ActorMethod<[string], PGLMeta>;
   getGamesByGameId: ActorMethod<[string], [] | [PGLMeta]>;
   getMyGames: ActorMethod<[], Array<PGLMeta>>;
+  getPublishedGames: ActorMethod<[bigint, bigint], ApiResponse_3>;
   likeByAnnouncementId: ActorMethod<[AnnouncementId], ApiResponse_2>;
   unLikeDislikeByAnnouncementId: ActorMethod<[AnnouncementId], ApiResponse_2>;
   updateAnnouncement: ActorMethod<[AnnouncementId, DTOGameAnnouncement], ApiResponse_1>;
-  updateGame: ActorMethod<[string, PGLMeta], ApiResponse>;
+  updateGame: ActorMethod<[GameId, PGLMeta], ApiResponse>;
   verify_license: ActorMethod<[string], boolean>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;

@@ -2,7 +2,7 @@ import { HttpAgent } from '@dfinity/agent';
 import { walletService } from '../../../../features/wallet/services/WalletService';
 import { hexToArrayBuffer } from '../../../../utils/crypto';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
-import { ApiResponse_5, PurchaseType } from '../service.did.d';
+import { ApiResponse_6, PurchaseType } from '../service.did.d';
 import { createActorVault } from '../../idlFactories';
 import { hostICP } from '../../../../constants/lib.const';
 
@@ -25,7 +25,7 @@ export async function buyGame({
 
     const actor = createActorVault(vaultCanister, { agent });
 
-    const result = (await actor.buyGame(gameId)) as ApiResponse_5;
+    const result = (await actor.buyGame(gameId)) as ApiResponse_6;
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`buyApp failed: ${k} - ${v}`);

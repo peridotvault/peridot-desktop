@@ -1,24 +1,5 @@
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
-/**
- * Steam-like media carousel (screenshots/videos) with thumbnails.
- * - TailwindCSS for styling
- * - TypeScript + React
- * - Keyboard (←/→/Space), mouse drag, touch swipe
- * - Autoplay with progress bar; pauses on hover or when tab hidden
- */
-
-export type Subaccount = [] | [Uint8Array]; // kept for parity with your codebase style (not used here)
-
-export type MediaItem =
-  | { kind: 'image'; src: string; alt?: string; storageKey?: string }
-  | {
-      kind: 'video';
-      src: string;
-      poster?: string;
-      alt?: string;
-      storageKey?: string;
-    };
+import { MediaItem } from '../../interfaces/app/GameInterface';
 
 export interface CarouselPreviewProps {
   items: MediaItem[];
@@ -40,6 +21,23 @@ const Chevron = ({ dir = 'left' }: { dir?: 'left' | 'right' }) => (
   </svg>
 );
 
+// sanitize: trim semua string untuk hindari " ...mp4  " (spasi di ujung)
+function sanitize(items: MediaItem[]): MediaItem[] {
+  return (items ?? [])
+    .map((it) =>
+      it.kind === 'image'
+        ? { ...it, src: it.src.trim(), alt: it.alt?.trim(), storageKey: it.storageKey?.trim() }
+        : {
+            ...it,
+            src: it.src.trim(),
+            poster: it.poster?.trim(),
+            alt: it.alt?.trim(),
+            storageKey: it.storageKey?.trim(),
+          },
+    )
+    .filter((it) => it.src.length > 0);
+}
+
 export default function CarouselPreview({
   items,
   initialIndex = 0,
@@ -49,46 +47,69 @@ export default function CarouselPreview({
   htmlElement,
   onIndexChange,
 }: CarouselPreviewProps) {
-  const [index, setIndex] = useState(() =>
-    Math.min(Math.max(0, initialIndex), Math.max(0, items.length - 1)),
-  );
+  const normalized = useMemo(() => sanitize(items), [items]);
+  const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
 
   const wrap = useRef<HTMLDivElement | null>(null);
   const track = useRef<HTMLDivElement | null>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const dragStart = useRef<{ x: number; at: number } | null>(null);
   const dragDX = useRef(0);
 
-  const canNavigate = items.length > 1;
+  const canNavigate = normalized.length > 1;
 
-  // Keep external listener informed
+  // clamp index saat items berubah & set initialIndex
+  useEffect(() => {
+    const clamped = Math.min(Math.max(0, initialIndex), Math.max(0, normalized.length - 1));
+    setIndex((prev) => Math.min(prev, clamped));
+  }, [normalized.length, initialIndex]);
+
+  // inform parent
   useEffect(() => {
     onIndexChange?.(index);
   }, [index, onIndexChange]);
 
-  // Pause autoplay when tab is hidden
+  // pause autoplay saat tab hidden
   useEffect(() => {
-    function onVisibility() {
+    const onVis = () => {
       if (document.hidden) setIsPlaying(false);
-    }
-    document.addEventListener('visibilitychange', onVisibility);
-    return () => document.removeEventListener('visibilitychange', onVisibility);
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
   }, []);
+
+  // kontrol play/pause untuk video aktif
+  useEffect(() => {
+    videoRefs.current.forEach((v, i) => {
+      if (!v) return;
+      if (i === index && isPlaying) {
+        v.play().catch(() => {
+          /* autoplay might be blocked; ignore */
+        });
+      } else {
+        v.pause();
+        try {
+          v.currentTime = 0;
+        } catch {}
+      }
+    });
+  }, [index, isPlaying, normalized.length]);
 
   const goTo = useCallback(
     (i: number) => {
-      if (!canNavigate) return;
-      const n = items.length;
-      const next = ((i % n) + n) % n; // safe modulo
+      const n = normalized.length;
+      if (!n) return;
+      const next = ((i % n) + n) % n;
       setIndex(next);
     },
-    [items.length, canNavigate],
+    [normalized.length],
   );
 
   const goPrev = useCallback(() => goTo(index - 1), [goTo, index]);
   const goNext = useCallback(() => goTo(index + 1), [goTo, index]);
 
-  // Keyboard controls when focused
+  // keyboard
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (!canNavigate) return;
     if (e.key === 'ArrowLeft') {
@@ -103,7 +124,7 @@ export default function CarouselPreview({
     }
   };
 
-  // Drag / swipe
+  // drag / swipe
   const onPointerDown = (e: React.PointerEvent) => {
     if (!wrap.current) return;
     (e.target as Element).setPointerCapture?.(e.pointerId);
@@ -118,7 +139,7 @@ export default function CarouselPreview({
     const pct = (dx / width) * 100;
     track.current.style.transform = `translateX(calc(${-index * 100}% + ${pct}%))`;
   };
-  const onPointerUp = (_: React.PointerEvent) => {
+  const onPointerUp = () => {
     if (!wrap.current || !track.current) return;
     const dx = dragDX.current;
     dragStart.current = null;
@@ -126,16 +147,17 @@ export default function CarouselPreview({
     track.current.style.transform = `translateX(${-index * 100}%)`;
 
     const width = wrap.current.clientWidth || 1;
-    const threshold = Math.min(0.25 * width, 160); // px
+    const threshold = Math.min(0.25 * width, 160);
     if (dx > threshold) goPrev();
     else if (dx < -threshold) goNext();
   };
 
+  // slides
   const renderedSlides = useMemo(
     () =>
-      items.map((it, i) => (
+      normalized.map((it, i) => (
         <div
-          key={i}
+          key={`${it.kind}-${i}`}
           className="relative shrink-0 grow-0 basis-full h-full select-none"
           aria-hidden={i !== index}
         >
@@ -148,24 +170,34 @@ export default function CarouselPreview({
             />
           ) : (
             <video
+              key={it.src} // force re-init saat src berubah
+              ref={(el) => (videoRefs.current[i] = el)}
               className="h-full w-full object-cover"
-              src={it.src}
-              poster={it.poster}
               muted
-              loop
               playsInline
-              autoPlay={i === index}
+              preload={i === index ? 'auto' : 'metadata'}
+              loop
               controls={i === index}
-            />
+              crossOrigin="anonymous" // aktifkan hanya jika server kasih CORS
+              onLoadedMetadata={() => console.log('loadedmetadata', it.src)}
+              onCanPlay={() => console.log('canplay', it.src)}
+              onStalled={() => console.warn('stalled', it.src)}
+              onError={(e) => {
+                const err = (e.currentTarget as HTMLVideoElement).error;
+                console.warn('Video failed to load:', it.src, err);
+              }}
+            >
+              <source src={it.src} type="video/mp4" />
+            </video>
           )}
         </div>
       )),
-    [items, index],
+    [normalized, index],
   );
 
   return (
-    <div className={['relative w-full', '', className ?? ''].join(' ')}>
-      {/* Media viewport */}
+    <div className={['relative w-full', className ?? ''].join(' ')}>
+      {/* Viewport */}
       <div
         ref={wrap}
         className="relative aspect-video overflow-hidden rounded-2xl shadow-arise-sm"
@@ -177,7 +209,6 @@ export default function CarouselPreview({
         role="region"
         aria-label="App media carousel"
       >
-        {/* Track */}
         <div
           ref={track}
           className="flex h-full w-full transition-transform duration-300 ease-out"
@@ -186,9 +217,9 @@ export default function CarouselPreview({
           {renderedSlides}
         </div>
 
-        {/* Overlay counters & controls */}
+        {/* Counter */}
         <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md px-2 py-1 text-xs text-white shadow-flat-sm bg-background_primary">
-          {items.length ? `${index + 1} / ${items.length}` : '0 / 0'}
+          {normalized.length ? `${index + 1} / ${normalized.length}` : '0 / 0'}
         </div>
 
         {/* Play/Pause autoplay */}
@@ -222,32 +253,23 @@ export default function CarouselPreview({
             </button>
           </>
         )}
-
-        {/* Progress bar (autoplay) */}
-        {/* {autoPlay && canNavigate && (
-          <div className="absolute bottom-0 left-0 right-0 z-10 h-1 overflow-hidden rounded-b-2xl bg-black/40">
-            <div
-              className="h-full bg-white/80"
-              style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
-            />
-          </div>
-        )} */}
       </div>
 
-      {/* Thumbnails */}
+      {/* Thumbnails & upload slot */}
       {(showThumbnails || htmlElement) && (
         <div className="flex gap-4 overflow-x-auto py-6">
           {htmlElement && htmlElement}
-          {items.map((it, i) => (
+          {normalized.map((it, i) => (
             <button
               key={`thumb-${i}`}
               type="button"
               onClick={() => goTo(i)}
               className={[
-                'relative h-20 aspect-video shrink-0 overflow-hidden rounded-md duration-300 ',
+                'relative h-20 aspect-video shrink-0 overflow-hidden rounded-md duration-300',
                 i === index ? 'border' : 'opacity-60',
               ].join(' ')}
               aria-label={`Go to media ${i + 1}`}
+              title={it.alt ?? `Media ${i + 1}`}
             >
               {it.kind === 'image' ? (
                 <img
@@ -257,13 +279,17 @@ export default function CarouselPreview({
                 />
               ) : (
                 <>
-                  <img
-                    src={it.poster || it.src}
-                    alt={it.alt ?? `thumb ${i + 1}`}
-                    className="h-full w-full object-cover opacity-90"
-                  />
+                  {/* poster boleh kosong; tetap tampilkan overlay play */}
+                  {it.poster ? (
+                    <img
+                      src={it.poster}
+                      alt={it.alt ?? `thumb ${i + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-black/40" />
+                  )}
                   <span className="pointer-events-none absolute inset-0 grid place-items-center text-white/90">
-                    {/* play glyph */}
                     <svg viewBox="0 0 24 24" className="h-6 w-6 drop-shadow">
                       <path fill="currentColor" d="M8 5v14l11-7z" />
                     </svg>
@@ -277,21 +303,3 @@ export default function CarouselPreview({
     </div>
   );
 }
-
-/*
-USAGE EXAMPLE
--------------
-
-<SteamLikeCarousel
-  items={[
-    { kind: "image", src: "/shots/1.jpg", alt: "Screenshot 1" },
-    { kind: "video", src: "/trailers/trailer1.mp4", poster: "/trailers/poster.jpg" },
-    { kind: "image", src: "/shots/2.jpg", alt: "Screenshot 2" },
-  ]}
-  initialIndex={0}
-  autoPlay
-  interval={5000}
-  showThumbnails
-  onIndexChange={(i) => console.log("active slide:", i)}
-/>
-*/

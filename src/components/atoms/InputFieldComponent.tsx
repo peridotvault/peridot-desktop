@@ -9,6 +9,7 @@ export const InputFieldComponent = ({
   type,
   placeholder,
   value,
+  required = true,
   disabled = false,
   onChange,
 }: {
@@ -18,6 +19,7 @@ export const InputFieldComponent = ({
   placeholder: string;
   disabled?: boolean;
   value: string;
+  required?: boolean;
   onChange: ChangeEventHandler<HTMLInputElement>;
 }) => {
   return (
@@ -32,7 +34,7 @@ export const InputFieldComponent = ({
         <input
           type={type}
           name={name}
-          required
+          required={required}
           disabled={disabled}
           className={`w-full bg-transparent shadow-sunken-sm px-3 outline-none focus:shadow-arise-sm duration-300`}
           placeholder={placeholder}

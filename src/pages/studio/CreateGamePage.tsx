@@ -1,8 +1,8 @@
 // @ts-ignore
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useWallet } from '../../contexts/WalletContext';
 
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faUpLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import { Alert } from '../../components/molecules/Alert';
@@ -13,57 +13,71 @@ import { ImageLoading } from '../../constants/lib.const';
 import { NewGame } from '../../components/organisms/NewGame';
 import { getGameUnRegistered } from '../../blockchain/icp/factory/services/ICPFactoryService';
 import { Principal } from '@dfinity/principal';
+import { register_game } from '../../blockchain/icp/registry/services/ICPRegistryService';
+import { CreateGameRecord } from '../../blockchain/icp/registry/service.did.d';
 
 export const CreateGamePage = () => {
   const { wallet } = useWallet();
 
   const [games, setGames] = useState<PGLMeta[] | null>(null);
-  const [gameRecords, setGameRecords] = useState<
-    {
-      name: string;
-      canister_id: Principal;
-      game_id: string;
-      registered: boolean;
-    }[]
-  >([
-    {
-      name: '',
-      canister_id: Principal.fromText('aaaaa-aa'),
-      game_id: '',
-      registered: false,
-    },
-  ]);
+  const [unRegisteredGame, setUnRegisteredGame] = useState<
+    { name: string; canister_id: Principal; game_id: string; registered: boolean }[]
+  >([]);
   const [isCreateGameModal, setIsCreateGameModal] = useState<boolean>(false);
   const [alert, setAlert] = useState<{
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const refetchAll = useCallback(async () => {
+    if (!wallet?.principalId) return;
+    const [listGame, listUnRegistered] = await Promise.all([
+      getGameByDeveloperId({ dev: wallet.principalId, start: 0, limit: 200 }),
+      getGameUnRegistered({ wallet }),
+    ]);
+    console.log(listGame);
+    setGames(listGame);
+    setUnRegisteredGame(listUnRegistered);
+  }, [wallet?.principalId, wallet]);
 
   useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        if (!wallet) return; // jaga2 kalau wallet belum siap
-        const listGame = await getGameByDeveloperId({
-          dev: wallet.principalId!,
-          start: 0,
-          limit: 200,
-        });
-        const listUnRegistered = await getGameUnRegistered({
-          wallet: wallet,
-        });
-        if (isMounted) {
-          setGameRecords(listUnRegistered);
-          setGames(listGame);
-        }
-      } catch (e) {
-        console.error(e);
+    refetchAll().catch(console.error);
+  }, [refetchAll]);
+
+  const handleRegisterGame = async ({
+    canister_id,
+    developer,
+  }: {
+    canister_id: Principal;
+    developer: string;
+  }) => {
+    if (busy) return;
+    try {
+      setBusy(true);
+      const cidTxt = canister_id.toText();
+      if (cidTxt === 'aaaaa-aa') {
+        console.warn('Skip invalid canister id aaaaa-aa');
+        return; // cukup return; jangan lempar error biar UX bersih
       }
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, [wallet]);
+
+      // optimistic remove
+      setUnRegisteredGame((prev) => prev.filter((r) => r.canister_id.toText() !== cidTxt));
+
+      const meta: CreateGameRecord = {
+        canister_id,
+        developer: Principal.fromText(developer),
+      };
+      await register_game({ meta });
+
+      await refetchAll(); // sinkronkan ulang
+    } catch (err) {
+      console.error(err);
+      await refetchAll(); // balikin data kalau gagal
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="flex flex-col w-full max-w-[1400px] p-8">
@@ -84,12 +98,12 @@ export const CreateGamePage = () => {
       </section>
 
       {/* List Games   */}
-      <section className="mt-8">
-        {games && games?.length > 0 ? (
+      <section className="mt-4">
+        {games?.length ? (
           games.map((item, index) => (
             <Link
               key={index}
-              className="border-b border-text_disabled/25 px-8 py-4 hover:bg-background_secondary flex gap-6 items-center justify-between"
+              className="px-8 py-4 hover:bg-background_secondary flex gap-6 items-center justify-between"
               to={'/studio/update/' + item.pgl1_game_id.toString()}
             >
               <div className="flex gap-6 items-start">
@@ -122,17 +136,13 @@ export const CreateGamePage = () => {
           </section>
         )}
 
-        {gameRecords && gameRecords?.length > 0 && (
-          <section className="flex flex-col gap-2">
+        {!!unRegisteredGame?.length && (
+          <section className="flex flex-col gap-2 mt-8">
             <h2 className="font-bold text-lg">Unregistered Games</h2>
             <hr className="border-white/10" />
             <div className="">
-              {gameRecords.map((item, index) => (
-                <Link
-                  key={index}
-                  className="px-8 py-4 hover:bg-background_secondary flex gap-6 items-center"
-                  to={'/studio/update/' + item.game_id.toString()}
-                >
+              {unRegisteredGame.map((item, index) => (
+                <div key={index} className="px-8 py-4 flex gap-6 items-center justify-between">
                   <div className="flex gap-6 items-center">
                     <div className="h-12 aspect-video">
                       <img
@@ -143,7 +153,19 @@ export const CreateGamePage = () => {
                     </div>
                     <p className="">{item.name}</p>
                   </div>
-                </Link>
+                  <button
+                    onClick={() =>
+                      handleRegisterGame({
+                        canister_id: item.canister_id,
+                        developer: wallet.principalId!,
+                      })
+                    }
+                    disabled={busy}
+                    className="shadow-arise-sm hover:shadow-flat-sm duration-300 px-3 py-2 rounded-md"
+                  >
+                    <FontAwesomeIcon icon={faUpLong} />
+                  </button>
+                </div>
               ))}
             </div>
           </section>
@@ -160,7 +182,12 @@ export const CreateGamePage = () => {
           onClick={() => setIsCreateGameModal(false)}
           className="absolute w-full h-full right-0 top-0 p-8 z-50 flex justify-center items-center bg-black/10 backdrop-blur-md"
         >
-          <NewGame setIsCreateGameModal={setIsCreateGameModal} />
+          <NewGame
+            onCreated={async () => {
+              await refetchAll();
+              setIsCreateGameModal(false);
+            }}
+          />
         </div>
       )}
     </div>

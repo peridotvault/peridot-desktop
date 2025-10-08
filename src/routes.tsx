@@ -71,7 +71,7 @@ const router = createHashRouter([
         element: <DownloadPage />,
       },
       {
-        path: ':app_name/:gameId',
+        path: ':gameName/:gameId',
         element: <GameDetail />,
       },
       // profile
@@ -105,7 +105,7 @@ const router = createHashRouter([
             element: <CreateGamePage />,
           },
           {
-            path: 'update/:gameAddress',
+            path: 'update/:gameId',
             element: <UpdateApp />,
           },
         ],

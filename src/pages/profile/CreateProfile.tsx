@@ -60,7 +60,7 @@ const AccountSettingsInputField = ({
           className={`w-full bg-transparent shadow-sunken-sm px-3 ${className}`}
           placeholder={placeholder}
           value={value}
-          onChange={onChange}
+          onChange={onChange} // <-- onChange tetap digunakan
         />
       </div>
     </section>
@@ -120,7 +120,7 @@ export const CreateProfile = () => {
     valid: true,
     msg: '',
   });
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(''); // State username tetap
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -129,10 +129,33 @@ export const CreateProfile = () => {
   const { wallet } = useWallet();
   const navigate = useNavigate();
 
+  // Gunakan handleUsernameChange khusus untuk username
+  const handleUsernameChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    // Ambil nilai input dan ubah menjadi lowercase
+    const lowercaseValue = e.target.value.toLowerCase();
+    // Set state username ke nilai lowercase
+    setUsername(lowercaseValue);
+
+    // Panggil validasi
+    const result: ApiResponse<Boolean> = await getIsUsernameValid(lowercaseValue); // Validasi juga terhadap lowercase
+
+    if ('err' in result) {
+      const error = result as { err: { InvalidInput: string } };
+      setIsValidUsername({
+        valid: false,
+        msg: error.err.InvalidInput ?? 'Invalid username',
+      });
+    } else {
+      setIsValidUsername({ valid: true, msg: 'username valid' });
+    }
+  };
+
+  // Gunakan handleInputChange umum untuk field lain
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<string>>,
   ) => {
+    // Untuk field selain username, gunakan nilai asli
     setter(e.target.value);
   };
 
@@ -158,7 +181,7 @@ export const CreateProfile = () => {
     } as Gender;
     // Validation before submission
     const metadataCreateUser: CreateUserInterface = {
-      username: username,
+      username: username, // <-- Nilai username sekarang sudah lowercase
       displayName: displayName,
       email: email,
       birthDate: dateToNanoSeconds(birthDate),
@@ -236,22 +259,9 @@ export const CreateProfile = () => {
               icon={faUser}
               type="text"
               placeholder="username"
-              className="lowercase"
-              value={username}
-              onChange={async (e) => {
-                handleInputChange(e, setUsername);
-                const result: ApiResponse<Boolean> = await getIsUsernameValid(e.target.value);
-
-                if ('err' in result) {
-                  const error = result as { err: { InvalidInput: string } };
-                  setIsValidUsername({
-                    valid: false,
-                    msg: error.err.InvalidInput ?? 'Invalid username',
-                  });
-                } else {
-                  setIsValidUsername({ valid: true, msg: 'username valid' });
-                }
-              }}
+              className="lowercase" // Anda bisa tetap menggunakan ini untuk tampilan UI tambahan jika diinginkan
+              value={username} // Nilai state yang lowercase
+              onChange={handleUsernameChange} // Gunakan handler khusus
             />
             <p className={` ${isValidUsername.valid ? 'text-success' : 'text-danger'}`}>
               {isValidUsername.msg}
@@ -264,7 +274,7 @@ export const CreateProfile = () => {
             placeholder="Display Name"
             className=""
             value={displayName}
-            onChange={(e) => handleInputChange(e, setDisplayName)}
+            onChange={(e) => handleInputChange(e, setDisplayName)} // Gunakan handler umum
           />
           <AccountSettingsInputField
             name="email"
@@ -273,7 +283,7 @@ export const CreateProfile = () => {
             placeholder="Email"
             className=""
             value={email}
-            onChange={(e) => handleInputChange(e, setEmail)}
+            onChange={(e) => handleInputChange(e, setEmail)} // Gunakan handler umum
           />
           <AccountSettingsInputField
             name="birthDate"
@@ -282,7 +292,7 @@ export const CreateProfile = () => {
             placeholder="Birth Date"
             className=""
             value={birthDate}
-            onChange={(e) => setBirthDate(e.target.value)}
+            onChange={(e) => setBirthDate(e.target.value)} // Gunakan setter langsung untuk date
           />
           <AccountSettingsDropdownField
             name="gender"
