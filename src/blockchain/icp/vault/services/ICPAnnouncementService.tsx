@@ -10,7 +10,7 @@ import {
   GameAnnouncementInteractionType,
   ApiResponse_2,
   ApiResponse_1,
-  ApiResponse_3,
+  ApiResponse_4,
 } from '../service.did.d';
 import { createActorVault } from '../../idlFactories';
 import { hostICP } from '../../../../constants/lib.const';
@@ -105,7 +105,7 @@ export async function getAllAnnouncementsByGameId({
 
     const actor = createActorVault(vaultCanister, { agent });
 
-    const result = (await actor.getAllAnnouncementsByGameId(gameId)) as ApiResponse_3;
+    const result = (await actor.getAllAnnouncementsByGameId(gameId)) as ApiResponse_4;
     console.log('Announcements: ' + result);
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];

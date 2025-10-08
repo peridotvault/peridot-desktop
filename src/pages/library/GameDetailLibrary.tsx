@@ -9,7 +9,7 @@ import { AnnouncementContainer } from '../../components/atoms/AnnouncementContai
 import { useInstalled } from '../../hooks/useInstalled';
 import { getInstalledRecord } from '../../utils/installedStorage';
 import { useDownloadManager } from '../../components/molecules/DownloadManager';
-import { getGamesByGameId } from '../../blockchain/icp/vault/services/ICPGameService';
+import { getGameByGameId } from '../../blockchain/icp/vault/services/ICPGameService';
 import {
   Distribution,
   GameAnnouncementType,
@@ -117,7 +117,7 @@ export default function GameDetailLibrary() {
       let isMounted = true;
       try {
         setTheGame(null); // reset agar tidak menampilkan data lama
-        const res = await getGamesByGameId({ gameId: gameId! });
+        const res = await getGameByGameId({ gameId: gameId! });
         if (!cancelled) setTheGame(res);
 
         let listAnnouncement =

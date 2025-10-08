@@ -13,6 +13,7 @@ import {
 import { hostICP } from '../../../../constants/lib.const';
 import { GameRecordType } from '../../registry/service.did.d';
 import { asText, mdGet } from '../../../../interfaces/helpers/icp.helpers';
+import { getGameRecordById } from '../../registry/services/ICPRegistryService';
 
 const vaultCanister = import.meta.env.VITE_PERIDOT_CANISTER_VAULT_BACKEND;
 const factoryCanister = import.meta.env.VITE_PERIDOT_CANISTER_FACTORY_BACKEND;
@@ -186,28 +187,6 @@ export async function getPublishedGames({
   return metas.filter(Boolean) as PGLMeta[];
 }
 
-// export async function getAllGames({
-//   start,
-//   limit,
-// }: {
-//   start: number;
-//   limit: number;
-// }): Promise<PGLMeta[]> {
-//   try {
-//     // Initialize agent with identity
-//     const agent = new HttpAgent({
-//       host: hostICP,
-//     });
-
-//     const actor = createActorVault(vaultCanister, { agent });
-
-//     const result = (await actor.getAllGames(BigInt(start), BigInt(limit))) as PGLMeta[];
-//     return result;
-//   } catch (error) {
-//     throw new Error('Error Service Get All Games : ' + error);
-//   }
-// }
-
 export async function getGameMetadata({ gameAddress }: { gameAddress: string }): Promise<PGLMeta> {
   // Parameter tetap 'gameAddress', tapi seharusnya sekarang menerima 'gameId' dari EditGamePage
   try {
@@ -246,17 +225,19 @@ export async function getGameMetadata({ gameAddress }: { gameAddress: string }):
   }
 }
 
-export async function getGamesByGameId({ gameId }: { gameId: string }): Promise<PGLMeta | null> {
+export async function getGameByGameId({ gameId }: { gameId: string }): Promise<PGLMeta> {
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
       host: hostICP,
     });
 
-    const actor = createActorVault(vaultCanister, { agent });
+    const gameRecord: GameRecordType = await getGameRecordById({ gameId });
 
-    const result = (await actor.getGamesByGameId(gameId)) as [] | PGLMeta;
-    return Array.isArray(result) ? null : result;
+    const pgl = createActorPGL1(gameRecord.canister_id, { agent });
+    const cm = await pgl.pgl1_game_metadata();
+
+    return cm;
   } catch (error) {
     throw new Error('Error Service Get Game By Id : ' + error);
   }

@@ -13,7 +13,7 @@ import Modal from '@mui/material/Modal';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
 import {
   getPublishedGames,
-  getGamesByGameId,
+  getGameByGameId,
 } from '../../blockchain/icp/vault/services/ICPGameService';
 import {
   GameAnnouncementType,
@@ -36,7 +36,7 @@ export default function GameDetail() {
   const { gameId } = useParams();
   const { wallet } = useWallet();
   const [isOnPayment, setIsOnPayment] = useState(false);
-  const [detailGame, setDetailGame] = useState<PGLMeta | null>();
+  const [detailGame, setDetailGame] = useState<PGLMeta | null>(null);
   // const [developerData, setDeveloperData] = useState<UserInterface | null>();
   const [allGames, setAllGames] = useState<PGLMeta[] | null>();
   const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
@@ -51,7 +51,7 @@ export default function GameDetail() {
     async function fetchData() {
       window.scrollTo(0, 0);
 
-      const resDetailGame = (await getGamesByGameId({
+      const resDetailGame = (await getGameByGameId({
         gameId: gameId!,
       })) as PGLMeta;
       // const developer = await getUserByPrincipalId({
