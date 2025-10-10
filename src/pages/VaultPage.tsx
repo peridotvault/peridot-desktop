@@ -2,12 +2,18 @@
 import React, { useEffect, useState } from 'react';
 import { VerticalCard } from '../components/cards/VerticalCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { faAngleRight, faTrophy } from '@fortawesome/free-solid-svg-icons';
 import AIChat from '../components/ai/AIChat';
 import { getPublishedGames } from '../blockchain/icp/vault/services/ICPGameService';
 import { PGLMeta } from '../blockchain/icp/vault/service.did.d';
 import { optGetOr } from '../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../constants/lib.const';
+import { TypographyH1 } from '../components/atoms/typography-h1';
+import { GameHorizontal } from '../components/molecules/game-horizontal';
+import Input from '@mui/material/Input';
+import { InputField } from '../components/atoms/InputField';
+import { TypographyH2 } from '../components/atoms/typography-h2';
+import { categories } from './../assets/json/app/categories.json';
 
 export default function VaultPage() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -59,42 +65,53 @@ export default function VaultPage() {
 
   return (
     <main className="flex flex-col gap-3">
-      {/* AI Chat */}
-      <AIChat />
-
-      {/* section 1  */}
-      <section className="w-full h-[30rem] pt-20 mb-4 relative">
-        <img src="https://i.imgur.com/ZlbIhY2.gif" alt="" className="w-full h-full object-cover" />
-        <div className="w-full h-16 absolute bottom-0 bg-gradient-to-t from-background_primary"></div>
-      </section>
-
-      {/* section 2  */}
-      <section className="flex justify-center px-12 py-6">
-        <div className="flex gap-6 xl:gap-12 duration-300 w-full container">
-          {images.map((image, index) => (
-            <div
-              key={index}
-              className={`w-1/3 aspect-video rounded-xl bg-background_primary overflow-hidden duration-300 flex items-center justify-center 
-          ${activeIndex === index ? 'scale-105 opacity-100 shadow-flat' : 'scale-100 opacity-70'}
-        `}
-              onMouseEnter={() => handleMouseEnter(index)}
-              onMouseLeave={() => handleMouseLeave()}
-            >
-              <img src={image} alt="" className="w-full h-full object-cover rounded-xl" />
+      {/* Section 1  */}
+      <section className="flex justify-center px-12 py-6 ">
+        <div className="w-full max-w-[1200px] flex flex-col gap-8">
+          <div className="flex w-full gap-8">
+            <div className="w-full text-start">
+              <TypographyH1 text="Game Vault" />
             </div>
-          ))}
+            <div className="max-w-80 w-full flex flex-col gap-4">
+              <InputField type="text" placeholder="Search Game" onChange={() => {}} value="" />
+            </div>
+          </div>
+
+          <div className="flex w-full max-lg:flex-col gap-8">
+            <div className="w-full duration-300">
+              <div className="bg-background_disabled w-full aspect-video rounded-xl duration-300 overflow-hidden">
+                <img src={images[1]} alt="" className="w-full h-full object-cover" />
+              </div>
+            </div>
+            <div className="lg:max-w-80 w-full flex flex-col gap-4 max-lg:pb-8 duration-300">
+              {/* Top Games This Month  */}
+              <div className="flex gap-2 font-bold items-center">
+                <FontAwesomeIcon icon={faTrophy} className="text-xl" />
+                <TypographyH2 text="Top Games This Month" />
+              </div>
+
+              <div className="grid max-lg:grid-cols-3 gap-2 w-full">
+                {allGames?.slice(0, 3).map((item, idx) => (
+                  <GameHorizontal
+                    key={idx}
+                    gameId={item.pgl1_game_id}
+                    gameName={item.pgl1_name}
+                    imgUrl={optGetOr(item.pgl1_cover_image, ImageLoading)}
+                    price={Number(item.pgl1_price)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
+      <AIChat />
+
       {/* section 3  */}
       <section className="flex justify-center px-12 py-6">
-        <div className="flex flex-col gap-6 w-full container">
-          {/* title  */}
-          <button className="flex items-center gap-3">
-            <p className="text-xl font-semibold">Black Friday - Cyber Monday Spotlight</p>
-            <FontAwesomeIcon icon={faAngleRight} />
-          </button>
-
+        <div className="flex flex-col gap-6 w-full max-w-[1200px]">
+          <TypographyH2 text="New on PeridotVault" />
           {/* contents  */}
           <div className="flex gap-6">
             {allGames?.slice(0, 5).map((item, idx) => (
@@ -112,27 +129,27 @@ export default function VaultPage() {
 
       {/* section 4  */}
       <section className="flex justify-center px-12 py-6">
-        <div className="flex flex-col gap-6  w-full container">
-          {/* title  */}
-          <button className="flex items-center gap-3">
-            <p className="text-xl font-semibold">Black Friday - Cyber Monday Spotlight</p>
-            <FontAwesomeIcon icon={faAngleRight} />
-          </button>
-
-          {/* contents  */}
-          <div className="flex gap-6">
-            {allGames?.slice(0, 5).map((item, idx) => (
-              <VerticalCard
-                key={idx}
-                gameId={item.pgl1_game_id}
-                gameName={item.pgl1_name}
-                imgUrl={optGetOr(item.pgl1_cover_image, ImageLoading)}
-                price={Number(item.pgl1_price)}
-              />
+        <div className="flex flex-col gap-6 w-full max-w-[1200px]">
+          <TypographyH2 text="Favorite Categories" />
+          <div className="flex gap-6 xl:gap-12 duration-300 ">
+            {categories.slice(0, 3).map((item, idx) => (
+              <div
+                key={item.id}
+                className={`w-1/3 aspect-video rounded-xl bg-background_disabled overflow-hidden duration-300 flex items-end font-bold p-6 text-xl 
+              ${activeIndex === idx ? 'scale-105 opacity-100 shadow-flat' : 'scale-100 opacity-70'}
+              `}
+                onMouseEnter={() => handleMouseEnter(idx)}
+                onMouseLeave={() => handleMouseLeave()}
+              >
+                {/* <img src={image} alt="" className="w-full h-full object-cover rounded-xl" /> */}
+                <span>{item.name}</span>
+              </div>
             ))}
           </div>
         </div>
       </section>
+
+      <div className="mb-8"></div>
     </main>
   );
 }

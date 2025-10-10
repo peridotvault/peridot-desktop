@@ -13,9 +13,9 @@ export function createUpdaterWindow(): BrowserWindow {
     updaterWindow = new BrowserWindow({
         width: 420,
         height: 300,
-        // resizable: false,
-        // maximizable: false,
-        // minimizable: false,
+        resizable: false,
+        maximizable: false,
+        minimizable: false,
         frame: true,
         title: 'PeridotVault — Checking for updates…',
         backgroundColor: '#111315',

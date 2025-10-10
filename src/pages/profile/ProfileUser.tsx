@@ -47,7 +47,7 @@ export const ProfileUser = () => {
   const imgOpt = userData?.imageUrl ?? [];
 
   return (
-    <main className="pt-20 flex flex-col items-center mb-10 px-10">
+    <main className="flex flex-col items-center mb-10 px-10">
       {isLoading && <LoadingScreen />}
 
       <div className="container flex gap-6 mt-6 duration-300">

@@ -5,7 +5,7 @@ import { Sidebar } from './LibrarySidebar';
 
 export default function LibraryMainLayout() {
   return (
-    <main className="pt-20 flex flex-1">
+    <main className="flex flex-1">
       {/* Fixed sidebar with its own scroll */}
       <div className="fixed top-20 left-0 bottom-0" data-lenis-prevent>
         <Sidebar />

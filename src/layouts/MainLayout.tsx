@@ -134,7 +134,9 @@ export default function MainLayout() {
   return (
     <main className="min-h-screen flex flex-col">
       <Navbar onOpenWallet={() => setIOpenWallet(true)} profileImage={GetOpt(userData?.imageUrl)} />
-      <div className={`flex-1  ${isRequiredPassword || isOpenWallet ? 'overflow-y-hidden' : ''} `}>
+      <div
+        className={`flex-1 mt-20 ${isRequiredPassword || isOpenWallet ? 'overflow-y-hidden' : ''} `}
+      >
         <div className={` ${isRequiredPassword || isOpenWallet ? 'h-dvh' : ''} `}>
           <Outlet />
         </div>

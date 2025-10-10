@@ -230,7 +230,7 @@ export const UpdateProfile = () => {
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <main className="pt-20 w-full flex flex-col">
+    <main className="w-full flex flex-col">
       <div className="flex flex-col items-center">
         {showSuccess && <AlertMessage msg="Account Updated Successfully" isSuccess />}
         {showFailed && <AlertMessage msg="Account Update Failed" isSuccess={false} />}

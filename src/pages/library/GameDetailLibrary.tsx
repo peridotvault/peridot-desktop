@@ -2,21 +2,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { isNative, isWeb } from '../../interfaces/app/GameInterface';
+import { getGameByGameId } from '../../blockchain/icp/vault/services/ICPGameService';
+// import { isNative, isWeb } dari GameInterface mungkin perlu disesuaikan jika tipe berubah
+// import { isNative, isWeb } from '../../interfaces/app/GameInterface'; // Tidak digunakan karena struktur berbeda
 import { useParams } from 'react-router-dom';
 import { useWallet } from '../../contexts/WalletContext';
 import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
 import { useInstalled } from '../../hooks/useInstalled';
 import { getInstalledRecord } from '../../utils/installedStorage';
 import { useDownloadManager } from '../../components/molecules/DownloadManager';
-import { getGameByGameId } from '../../blockchain/icp/vault/services/ICPGameService';
 import {
   Distribution,
   GameAnnouncementType,
   PGLMeta,
 } from '../../blockchain/icp/vault/service.did.d';
 import { getAllAnnouncementsByGameId } from '../../blockchain/icp/vault/services/ICPAnnouncementService';
-import { optGetOr } from '../../interfaces/helpers/icp.helpers';
+// import { optGetOr } from '../../interfaces/helpers/icp.helpers'; // Tidak digunakan di sini
 import { ImageLoading } from '../../constants/lib.const';
 
 // helper deteksi OSKey
@@ -27,6 +28,19 @@ function detectOSKey(): 'windows' | 'macos' | 'linux' {
   if (p.includes('mac') || ua.includes('mac') || ua.includes('darwin')) return 'macos';
   return 'linux';
 }
+
+// Fungsi helper untuk menangani ?[T] dari Candid
+function unwrapOptVec<T>(v: [] | [T[]] | null | undefined): T[] {
+  if (!v || v.length === 0) return [];
+  return v[0]; // Ambil array dari dalam optional vector
+}
+
+// Fungsi helper untuk mengecek apakah distribusi adalah NativeBuild
+// Karena struktur data sekarang adalah Array<Array<Distribution>>, kita periksa dalam resolveFromApp
+// Tapi jika Anda perlu di sini, Anda harus mengiterasi struktur yang salah terlebih dahulu
+// Lebih baik tetap di DownloadManager.tsx
+// function isNative(d: any): d is { native: NativeBuild } { return 'native' in d; }
+// function isWeb(d: any): d is { web: WebBuild } { return 'web' in d; }
 
 export default function GameDetailLibrary() {
   const { gameId } = useParams();
@@ -54,23 +68,40 @@ export default function GameDetailLibrary() {
   const osKey = useMemo(() => detectOSKey(), []);
   const { installed, latest } = useInstalled(appIdKey!, osKey); // status ter-install untuk OS ini
 
-  // apakah ada web dist?
-  const hasWeb = useMemo(() => {
-    const dists = unwrapOptVec<Distribution>(theGame?.pgl1_distribution as any);
-    return dists.some(isWeb);
-  }, [theGame]);
-
   // apakah ada native dist utk OS ini?
+  // Perubahan: Gunakan unwrapOptVec dan sesuaikan dengan struktur array dalam array
   const hasNativeForOS = useMemo(() => {
-    const dists = unwrapOptVec<Distribution>(theGame?.pgl1_distribution as any);
-    return dists.some(
-      (d) => isNative(d),
-      // &&
-      //   (('windows' in d.native.os && osKey === 'windows') ||
-      //     ('macos' in d.native.os && osKey === 'macos') ||
-      //     ('linux' in d.native.os && osKey === 'linux')),
-    );
+    if (!theGame) return false;
+    // Asumsikan theGame.pgl1_distribution adalah Array<Array<Distribution>>
+    const rawDists = theGame.pgl1_distribution;
+    for (const innerDistArray of rawDists) {
+      for (const d of innerDistArray) {
+        if ('native' in d) {
+          // Periksa apakah os dari native build cocok dengan osKey
+          // Kita asumsikan d.native.os adalah string seperti "macos", "windows", "linux"
+          if (d.native.os.toLowerCase() === osKey) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }, [theGame, osKey]);
+
+  // apakah ada web dist?
+  // Perubahan: Gunakan unwrapOptVec dan sesuaikan dengan struktur array dalam array
+  const hasWeb = useMemo(() => {
+    if (!theGame) return false;
+    const rawDists = theGame.pgl1_distribution;
+    for (const innerDistArray of rawDists) {
+      for (const d of innerDistArray) {
+        if ('web' in d) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }, [theGame]);
 
   const onLaunch = async () => {
     if (hasWeb) return openWebApp();
@@ -82,6 +113,7 @@ export default function GameDetailLibrary() {
       return;
     }
 
+    // Gunakan launchPath jika tersedia, jika tidak, coba filePath atau installDir
     const candidate = entry.launchPath || entry.filePath || entry.installDir;
     if (!candidate) {
       alert('Lokasi aplikasi tidak ditemukan. Silakan install ulang.');
@@ -92,11 +124,13 @@ export default function GameDetailLibrary() {
       const res = await (window as any).electronAPI.launchApp(candidate);
       if (!res?.ok) alert('Gagal menjalankan aplikasi: ' + (res?.error || 'unknown'));
     } else {
-      // Fallback: buka folder (browser)
+      // Fallback: buka folder (browser) jika launchPath tidak tersedia
       if (entry.installDir) {
         alert('Tidak berjalan di Electron. Buka folder: ' + entry.installDir);
+      } else if (entry.filePath) {
+        alert('Tidak berjalan di Electron. Buka file: ' + entry.filePath);
       } else {
-        alert('Tidak berjalan di Electron.');
+        alert('Tidak berjalan di Electron. Tidak ada lokasi file/folder yang dikenali.');
       }
     }
   };
@@ -157,17 +191,19 @@ export default function GameDetailLibrary() {
     };
   }, [gameId, wallet]);
 
-  function unwrapOptVec<T>(v: T[] | [T[]] | null | undefined): T[] {
-    if (!v) return [];
-    return Array.isArray(v) && v.length === 1 && Array.isArray(v[0]) ? v[0] : (v as T[]);
-  }
-
   // Ambil url web pertama dari distributions
+  // Perubahan: Gunakan unwrapOptVec dan sesuaikan dengan struktur array dalam array
   function getWebUrlFromApp(app?: PGLMeta | null): string | null {
     if (!app) return null;
-    const dists = unwrapOptVec<Distribution>(app.pgl1_distribution as any);
-    const web = dists.find(isWeb) as { web: { url: string } } | undefined;
-    return web?.web?.url ?? null;
+    const rawDists = app.pgl1_distribution;
+    for (const innerDistArray of rawDists) {
+      for (const d of innerDistArray) {
+        if ('web' in d) {
+          return d.web.url ?? null;
+        }
+      }
+    }
+    return null;
   }
 
   const openWebApp = () => {
@@ -188,7 +224,13 @@ export default function GameDetailLibrary() {
     <main className="flex flex-col items-center gap-5 mb-32">
       <div className="bg-white w-full h-96 relative">
         <img
-          src={optGetOr(theGame!.pgl1_banner_image, ImageLoading)}
+          src={
+            theGame
+              ? Array.isArray(theGame.pgl1_banner_image) && theGame.pgl1_banner_image.length > 0
+                ? theGame.pgl1_banner_image[0]
+                : ImageLoading
+              : ImageLoading
+          }
           className="object-cover w-full h-[30rem]"
           alt=""
         />
@@ -227,7 +269,11 @@ export default function GameDetailLibrary() {
             <div className="flex flex-col gap-2">
               <p>current price</p>
               <p className="text-3xl font-bold">
-                {Number(theGame?.pgl1_price) > 0 ? String(theGame?.pgl1_price) + ' PER' : 'FREE'}
+                {Array.isArray(theGame?.pgl1_price) &&
+                theGame.pgl1_price.length > 0 &&
+                Number(theGame.pgl1_price[0]) > 0
+                  ? String(theGame.pgl1_price[0]) + ' PER'
+                  : 'FREE'}
               </p>
             </div>
 

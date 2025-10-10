@@ -9,9 +9,9 @@ import {
 } from '../../../../interfaces/user/UserInterface';
 import { walletService } from '../../../../features/wallet/services/WalletService';
 import { hexToArrayBuffer } from '../../../../utils/crypto';
-import { ApiResponse, UserId } from '../../../../interfaces/CoreInterface';
 import { createActorDirectory } from '../../idlFactories';
 import { hostICP } from '../../../../constants/lib.const';
+import { ApiResponse, ApiResponse_5, UserId } from '../service.did.d';
 
 const directoryCanister = import.meta.env.VITE_PERIDOT_CANISTER_DIRECTORY_BACKEND;
 
@@ -59,7 +59,7 @@ async function updateUser({
 
     const actor = createActorDirectory(directoryCanister, { agent });
 
-    const result = (await actor.updateUser(metadataUpdate)) as ApiResponse<UpdateUserInterface>;
+    const result = (await actor.updateUser(metadataUpdate)) as ApiResponse;
     if ('err' in result) {
       const [k, v] = Object.entries(result.err)[0] as [string, string];
       throw new Error(`updateUser failed: ${k} - ${v}`);
@@ -70,7 +70,7 @@ async function updateUser({
   }
 }
 
-async function getIsUsernameValid(username: string): Promise<ApiResponse<Boolean>> {
+async function getIsUsernameValid(username: string): Promise<Boolean> {
   try {
     // Initialize agent with identity
     const agent = new HttpAgent({
@@ -80,9 +80,12 @@ async function getIsUsernameValid(username: string): Promise<ApiResponse<Boolean
     const actor = createActorDirectory(directoryCanister, { agent });
 
     // Call balance method
-    const result = (await actor.getIsUsernameValid(username)) as ApiResponse<Boolean>;
-
-    return result;
+    const result = (await actor.getIsUsernameValid(username)) as ApiResponse_5;
+    if ('err' in result) {
+      const [k, v] = Object.entries(result.err)[0] as [string, string];
+      throw new Error(`getIsUsernameValid failed: ${k} - ${v}`);
+    }
+    return result.ok;
   } catch (error) {
     throw new Error('Error getIsUsernameValid : ' + error);
   }
@@ -97,7 +100,7 @@ async function getUserByPrincipalId({ userId }: { userId: UserId }): Promise<Use
 
     const actor = createActorDirectory(directoryCanister, { agent });
 
-    const result = (await actor.getUserByPrincipalId(userId)) as ApiResponse<UserInterface>;
+    const result = (await actor.getUserByPrincipalId(userId)) as ApiResponse;
     if ('err' in result) {
       const [k, _] = Object.entries(result.err)[0] as [string, string];
       throw new Error(` ${k}`);
@@ -120,7 +123,7 @@ async function getUserData({ wallet }: { wallet: any }): Promise<UserInterface> 
 
     const actor = createActorDirectory(directoryCanister, { agent });
 
-    const result = (await actor.getUserData()) as ApiResponse<UserInterface>;
+    const result = (await actor.getUserData()) as ApiResponse;
     if ('err' in result) {
       const [k, _] = Object.entries(result.err)[0] as [string, string];
       throw new Error(` ${k}`);

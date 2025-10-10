@@ -5,7 +5,7 @@ import { StudioSidebar } from './StudioSidebar';
 
 export const StudioMainLayout = () => {
   return (
-    <main className="pt-20 flex">
+    <main className="flex">
       {/* Fixed sidebar with its own scroll */}
       <div className="fixed w-[70px] top-20 left-0 bottom-0" data-lenis-prevent>
         <StudioSidebar />

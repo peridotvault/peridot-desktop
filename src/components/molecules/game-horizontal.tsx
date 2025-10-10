@@ -1,9 +1,9 @@
 // @ts-ignore
 import React from 'react';
-import { PriceCoin } from './PriceCoin';
+import { PriceCoin } from '../../lib/constants/const-price';
 import { Link } from 'react-router-dom';
 
-export const VerticalCard = ({
+export const GameHorizontal = ({
   gameId,
   gameName,
   imgUrl,
@@ -15,28 +15,28 @@ export const VerticalCard = ({
   price: number;
 }) => {
   const convertedPrice = Number(price) / 1e8;
-  // const convertedPrice = Number(price);
   const formatTitle = (title: string): string => {
     return title.toLowerCase().replace(/\s+/g, '_');
   };
   return (
     <Link
       to={`/${formatTitle(gameName)}/${gameId}`}
-      className="w-full max-w-[230px] flex flex-col gap-3 group"
+      className="flex gap-3 items-center py-2 rounded-md h-32 group"
     >
-      <div className="w-full aspect-[3/4] overflow-hidden bg-white rounded-xl duration-300">
+      <div className="h-full aspect-[3/4] bg-background_disabled rounded-md overflow-hidden">
         <img
           src={imgUrl}
           alt={gameName}
           className="w-full h-full object-cover group-hover:scale-105 duration-300"
         />
       </div>
-      <div className="flex flex-col gap-1 items-start">
-        <p className="text-sm text-disabled_text">Base Game</p>
-        <p className="font-bold text-lg text-start line-clamp-2">{gameName}</p>
+      <div className="flex flex-col gap-1">
+        <span aria-label="game-name" className="font-bold line-clamp-1">
+          Peridot Game
+        </span>
+        {/* price  */}
+        <PriceCoin price={convertedPrice} />
       </div>
-      {/* price  */}
-      <PriceCoin price={convertedPrice} />
     </Link>
   );
 };

@@ -7,7 +7,7 @@ export const DownloadPage: React.FC = () => {
   console.log('electronAPI', window.electronAPI);
 
   return (
-    <div className="container mx-auto max-w-4xl px-6 pt-20 pb-24">
+    <div className="container mx-auto max-w-4xl p-6 pb-24">
       <h1 className="text-3xl font-semibold mb-6">Download Queue</h1>
 
       {queue.length === 0 ? (

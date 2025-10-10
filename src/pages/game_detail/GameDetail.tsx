@@ -1,8 +1,9 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
-import { StarComponent } from '../../components/atoms/StarComponent';
+// import { StarComponent } from '../../components/atoms/StarComponent';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleRight, faMessage } from '@fortawesome/free-solid-svg-icons';
+import { faAngleRight, faGlobe, faMessage } from '@fortawesome/free-solid-svg-icons';
+import { faWindows, faApple, faLinux, faAndroid } from '@fortawesome/free-brands-svg-icons';
 import { AppPayment } from '../../features/wallet/views/Payment';
 import { useParams } from 'react-router-dom';
 import { useWallet } from '../../contexts/WalletContext';
@@ -27,10 +28,23 @@ import {
   getAllAnnouncementsByGameId,
   getAnnouncementsByAnnouncementId,
 } from '../../blockchain/icp/vault/services/ICPAnnouncementService';
-import { asMap, asText, mdGet, optGetOr } from '../../interfaces/helpers/icp.helpers';
+import {
+  asArray,
+  asBigInt,
+  asMap,
+  asText,
+  mdGet,
+  NativeSpec,
+  NormalizedDist,
+  normalizeDistribution,
+  optGetOr,
+  PlatformKey,
+  WebSpec,
+} from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
 import { buyGame } from '../../blockchain/icp/vault/services/ICPPurchaseService';
 import { MediaItem } from '../../interfaces/app/GameInterface';
+import { Distribution } from '../../blockchain/icp/pgl1/service.did.d';
 
 export default function GameDetail() {
   const { gameId } = useParams();
@@ -46,10 +60,12 @@ export default function GameDetail() {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<GameAnnouncementType | null>(
     null,
   );
+  const [dist, setDist] = useState<NormalizedDist>({});
+  const [activeTab, setActiveTab] = useState<PlatformKey | null>(null);
 
   useEffect(() => {
     async function fetchData() {
-      window.scrollTo(0, 0);
+      // window.scrollTo(0, 0);
 
       const resDetailGame = (await getGameByGameId({
         gameId: gameId!,
@@ -60,6 +76,13 @@ export default function GameDetail() {
       console.log(gameId);
       console.log(resDetailGame);
       setDetailGame(resDetailGame);
+      const norm = normalizeDistribution(resDetailGame?.pgl1_distribution);
+      setDist(norm);
+      const firstTab = (['Website', 'Windows', 'macOS', 'Linux', 'Other'] as PlatformKey[]).find(
+        (k) => (norm as any)[k]?.length,
+      );
+      setActiveTab(firstTab ?? null);
+
       // setDeveloperData(developer);
       setHumanPriceStr(Number(resDetailGame?.pgl1_price) / 1e8);
       const resAllGames = await getPublishedGames({ start: 0, limit: 200 });
@@ -166,6 +189,84 @@ export default function GameDetail() {
     }
   }
 
+  const getGameCategories = ({ md }: { md: [Metadata] | undefined | [] }): string[] => {
+    const categoriesText = (asArray(mdGet(md, 'pgl1_category')) ?? [])
+      .map(asText)
+      .filter(Boolean) as string[];
+    return categoriesText;
+  };
+
+  const getTags = ({ md }: { md: [Metadata] | undefined | [] }): string[] => {
+    const tagsText = (asArray(mdGet(md, 'pgl1_tags')) ?? [])
+      .map(asText)
+      .filter(Boolean) as string[];
+    return tagsText;
+  };
+
+  const getReleaseDate = ({ md }: { md: [Metadata] | [] | undefined }): string => {
+    // const releaseDate = mdGet(md, 'release_date_ns') ?? [];
+    const releaseDate = (asArray(mdGet(md, 'release_date_ns')) ?? []).map(asBigInt).filter(Boolean);
+    return releaseDate.toString();
+  };
+
+  const KRow = ({ k, v }: { k: string; v?: string }) => {
+    if (!v) return null;
+    return (
+      <tr className="align-top">
+        <td className="pr-8 py-2 text-text_disabled">{k}</td>
+        <td className="py-2">{v}</td>
+      </tr>
+    );
+  };
+
+  const NativeCard = ({ s }: { s: NativeSpec }) => (
+    <table className="w-full">
+      <tbody>
+        <KRow k="OS" v={s.os} />
+        <KRow k="Processor" v={s.processor} />
+        <KRow k="Graphics" v={s.graphics} />
+        <KRow k="Memory" v={s.memory} />
+        <KRow k="Storage" v={s.storage} />
+        <KRow k="Notes" v={s.notes} />
+      </tbody>
+    </table>
+  );
+
+  const WebCard = ({ s }: { s: WebSpec }) => (
+    <table className="w-full">
+      <tbody>
+        <KRow k="Processor" v={s.processor} />
+        <KRow k="Graphics" v={s.graphics} />
+        <KRow k="Memory" v={s.memory} />
+        <KRow k="Storage" v={s.storage} />
+        <KRow k="Notes" v={s.notes} />
+      </tbody>
+    </table>
+  );
+
+  const platformsFromDistribution = (distOpt: [] | [Array<Distribution>] | undefined): string[] => {
+    if (!distOpt || !Array.isArray(distOpt) || distOpt.length === 0) return [];
+    const dist = distOpt[0] ?? [];
+    const out: string[] = [];
+
+    for (const d of dist) {
+      if ('web' in d) {
+        out.push('Web');
+      } else if ('native' in d) {
+        const os = d.native.os.toLowerCase();
+        if (os.includes('win')) out.push('Windows');
+        else if (os.includes('mac') || os.includes('os x') || os.includes('darwin'))
+          out.push('macOS');
+        else if (os.includes('linux') || os.includes('ubuntu') || os.includes('debian'))
+          out.push('Linux');
+        else out.push('Other');
+      }
+    }
+    // unik + urutan yang enak
+    const order = ['Web', 'Windows', 'macOS', 'Linux', 'Android', 'iOS', 'Other'];
+    return Array.from(new Set(out)).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  };
+
   return (
     <main className="flex justify-center duration-300">
       {/* Announcement modal */}
@@ -233,18 +334,66 @@ export default function GameDetail() {
         </div>
       </Modal>
       <div className="max-w-[1400px] w-full flex flex-col gap-6 duration-300">
-        <div className="mb-20"></div>
-        {/* title */}
-        <div className="px-12 pt-6 flex flex-col gap-3">
-          <h1 className="text-3xl font-bold">
-            {detailGame?.pgl1_name ? detailGame?.pgl1_name : 'PeridotVault Game'}
-          </h1>
-          <StarComponent rate={4} />
-        </div>
+        {/* Header  =========================== */}
+        <section className="w-full h-[30rem] relative">
+          {/* title */}
+          <div className="px-12 py-8 flex gap-3 h-full justify-between items-end">
+            <div className="flex flex-col gap-4 w-3/5">
+              {/* tags  */}
+              <div className="flex gap-2 text-sm">
+                {getGameCategories({ md: detailGame?.pgl1_metadata }).map((item, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-white/10 px-4 py-1 rounded-full border border-white/20 uppercase backdrop-blur-sm font-bold"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <h1 className="text-5xl font-bold leading-tight">
+                {detailGame?.pgl1_name ? detailGame?.pgl1_name : 'PeridotVault Game'}
+              </h1>
+              {/* <StarComponent rate={4} /> */}
+            </div>
+
+            <div className="flex gap-6 items-center w-2/5 justify-end">
+              {Number(humanPriceStr!) > 0 ? (
+                <div className="flex gap-2 items-center text-start">
+                  <img
+                    src="/assets/coin-peridot.png"
+                    className="h-6 aspect-square object-contain"
+                  />
+                  <p className="text-lg">{humanPriceStr.toString()} PER</p>
+                </div>
+              ) : (
+                <div className="flex gap-2 items-center text-start text-lg font-bold">
+                  <p>FREE</p>
+                </div>
+              )}
+              <button
+                className="px-12 font-bold py-3 rounded-md bg-accent_secondary"
+                onClick={() => setIsOnPayment(true)}
+              >
+                Buy Now
+              </button>
+            </div>
+          </div>
+
+          {/* background  */}
+          <div className="w-full h-full absolute top-0 left-0 -z-10">
+            <img
+              src={detailGame ? optGetOr(detailGame.pgl1_banner_image, ImageLoading) : ImageLoading}
+              alt=""
+              className="w-full h-full object-cover absolute"
+            />
+            <div className="bg-gradient-to-t from-background_primary w-full h-full absolute"></div>
+          </div>
+        </section>
+
         {/* First Section */}
         <section className="px-12 py-6 flex gap-12 lg:gap-14 duration-300">
           {/* Left side ======================== */}
-          <div className="w-3/4 flex flex-col gap-12 text-lg">
+          <div className="w-3/4 flex flex-col gap-10 text-lg">
             {/* overview */}
             <CarouselPreview
               items={previewsFromMetadata(detailGame?.pgl1_metadata)}
@@ -252,8 +401,27 @@ export default function GameDetail() {
               autoPlay
               showThumbnails
             />
-            {/* section 1 */}
-            <p>{detailGame?.pgl1_description}</p>
+
+            {/* Description */}
+            <div className="flex flex-col gap-3">
+              <h2 className="text-base text-text_disabled">Description</h2>
+              <p>{detailGame?.pgl1_description}</p>
+            </div>
+
+            {/* Tags */}
+            <div className="flex flex-col gap-3">
+              <h2 className="text-base text-text_disabled">Tags</h2>
+              <div className="flex gap-2 text-sm">
+                {getTags({ md: detailGame?.pgl1_metadata }).map((item, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-white/10 px-4 py-1 rounded-full border border-white/20 uppercase backdrop-blur-sm font-bold"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
 
             {/* Announcement */}
             <div className="flex flex-col gap-6">
@@ -272,21 +440,51 @@ export default function GameDetail() {
                 ))}
               </div>
             </div>
+
+            {/* System Requirements */}
+            <div className="flex flex-col gap-3">
+              <h2 className="text-base text-text_disabled">System Requirements</h2>
+              {/* Navbar  */}
+              <nav className="flex gap-2 flex-wrap border-b border-white/20">
+                {(['Website', 'Windows', 'macOS', 'Linux', 'Other'] as PlatformKey[])
+                  .filter((p) => (dist as any)[p]?.length)
+                  .map((pf) => {
+                    const isActive = pf === activeTab;
+                    return (
+                      <button
+                        key={pf}
+                        onClick={() => setActiveTab(pf)}
+                        className={[
+                          'pb-3',
+                          isActive && 'border-b border-accent_primary  text-accent_primary',
+                        ].join(' ')}
+                      >
+                        {pf}
+                      </button>
+                    );
+                  })}
+              </nav>
+
+              {/* description  */}
+              {!activeTab ? (
+                <p className="text-sm text-text_disabled">No distribution data.</p>
+              ) : activeTab === 'Website' ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {dist.Website!.map((s, i) => (
+                    <WebCard key={i} s={s} />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {(dist[activeTab] as NativeSpec[]).map((s, i) => (
+                    <NativeCard key={i} s={s} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           {/* right side ======================== */}
           <div className="w-1/4 min-w-[300px]  flex flex-col gap-6">
-            {/* age regulation  */}
-            <div className="flex items-center justify-center ">
-              <div className="w-full aspect-[3/4] relative overflow-hidden shadow-arise-sm rounded-xl">
-                <img
-                  src={
-                    detailGame ? optGetOr(detailGame.pgl1_cover_image, ImageLoading) : ImageLoading
-                  }
-                  className="w-full h-full object-cover"
-                  alt=""
-                />
-              </div>
-            </div>
             {/* age regulation  */}
             <div className="flex shadow-arise-sm p-6 rounded-xl items-start gap-4 ">
               <img
@@ -305,40 +503,18 @@ export default function GameDetail() {
             </div>
             {/* details game  */}
             <div className="flex flex-col">
-              {/* <GameTypes title="Developer" content={developerData?.displayName!} /> */}
-              {/* <GameTypes title="Publisher" content="Antigane Inc." /> */}
-              {/* <GameTypes
+              <GameTypes title="Publisher" content="Antigane Inc" />
+              <GameTypes
                 title="Release Date"
-                content={nsToDateStr(detailGame?.releaseDate.toString()) || ''}
-              /> */}
-              <GameTypes title="Requirement" content="RAM 8GB" />
-              <GameTypes title="Platform" content="Web" />
+                content={getReleaseDate({ md: detailGame?.pgl1_metadata })}
+              />
+              <GamePlatforms
+                title="Platform"
+                platforms={platformsFromDistribution(detailGame?.pgl1_distribution)}
+              />
             </div>
             {/* Buy Game  */}
             <div className="flex flex-col gap-4 py-3">
-              {Number(humanPriceStr!) > 0 ? (
-                <div className="flex gap-2 items-center text-start">
-                  <img
-                    src="/assets/coin-peridot.png"
-                    className="h-6 aspect-square object-contain"
-                  />
-                  <p className="text-lg">{humanPriceStr.toString()} PER</p>
-                </div>
-              ) : (
-                <div className="flex gap-2 items-center text-start text-lg font-bold">
-                  <p>FREE</p>
-                </div>
-              )}
-
-              <button
-                className="w-full p-4 rounded-xl bg-accent_secondary"
-                onClick={() => setIsOnPayment(true)}
-              >
-                Buy Now
-              </button>
-              <button className="w-full p-4 rounded-xl shadow-sunken-sm hover:shadow-arise-sm duration-300">
-                Add To Cart
-              </button>
               <button className="w-full p-4 rounded-xl shadow-sunken-sm hover:shadow-arise-sm duration-300">
                 Add To Wishlist
               </button>
@@ -373,7 +549,7 @@ export default function GameDetail() {
           <AppPayment
             price={Number(humanPriceStr)}
             onClose={() => setIsOnPayment(false)}
-            SPENDER={import.meta.env.VITE_PERIDOT_CANISTER_APP_BACKEND}
+            SPENDER={import.meta.env.VITE_PERIDOT_CANISTER_VAULT_BACKEND}
             onExecute={async () => {
               const res: PurchaseType = await buyGame({
                 gameId: gameId!,
@@ -394,8 +570,44 @@ const GameTypes = ({ title, content }: { title: string; content: string }) => {
   return (
     <div className="flex flex-col">
       <div className="flex justify-between py-4">
-        <p className="text-text_disabled">{title}</p>
-        <p>{content}</p>
+        <label className="text-text_disabled">{title}</label>
+        {content}
+      </div>
+      <hr className="border-text_disabled/50" />
+    </div>
+  );
+};
+
+const GamePlatforms = ({ title, platforms }: { title: string; platforms: string[] }) => {
+  // hilangkan duplikat + hanya ambil yang kita kenal
+  const normalizePlatform = (p: string) => p.trim().toLowerCase().replace(/\s+/g, '');
+
+  const PLATFORM_ICON: Record<string, { icon: any; label: string }> = {
+    web: { icon: faGlobe, label: 'Web' },
+    windows: { icon: faWindows, label: 'Windows' },
+    macos: { icon: faApple, label: 'macOS' },
+    linux: { icon: faLinux, label: 'Linux' },
+    android: { icon: faAndroid, label: 'Android' },
+    ios: { icon: faApple, label: 'iOS' },
+  };
+  const uniq = Array.from(
+    new Set(platforms.map(normalizePlatform).filter((p) => PLATFORM_ICON[p] !== undefined)),
+  );
+  return (
+    <div className="flex flex-col">
+      <div className="flex justify-between items-center py-4">
+        <label className="text-text_disabled">{title}</label>
+
+        <div className="flex items-center gap-3">
+          {uniq.length === 0 ? (
+            <span className="text-text_disabled">—</span>
+          ) : (
+            uniq.map((key) => {
+              const { icon } = PLATFORM_ICON[key];
+              return <FontAwesomeIcon key={key} icon={icon} />;
+            })
+          )}
+        </div>
       </div>
       <hr className="border-text_disabled/50" />
     </div>

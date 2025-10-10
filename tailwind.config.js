@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        accent_primary: '#90EE90',
-        accent_secondary: '#4D8A6A',
+        accent_primary: '#87EE83',
+        accent_secondary: '#349B65',
         // "accent_primary": "#47DA47",
         // "accent_secondary": "#134125",
 

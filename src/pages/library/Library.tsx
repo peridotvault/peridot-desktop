@@ -14,6 +14,7 @@ export const Library = () => {
   useEffect(() => {
     async function fetchData() {
       const resAllGames = await getMyGames({ wallet: wallet });
+      console.log('RESS :', resAllGames);
       setMyGames(resAllGames);
     }
 
