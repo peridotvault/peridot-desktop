@@ -1,7 +1,7 @@
 // @ts-ignore
 import React from 'react';
-import { PriceCoin } from './PriceCoin';
 import { Link } from 'react-router-dom';
+import { PriceCoin } from '../../lib/constants/const-price';
 
 export const VerticalCard = ({
   gameId,
@@ -15,16 +15,15 @@ export const VerticalCard = ({
   price: number;
 }) => {
   const convertedPrice = Number(price) / 1e8;
-  // const convertedPrice = Number(price);
   const formatTitle = (title: string): string => {
     return title.toLowerCase().replace(/\s+/g, '_');
   };
   return (
     <Link
       to={`/${formatTitle(gameName)}/${gameId}`}
-      className="w-full max-w-[230px] flex flex-col gap-3 group"
+      className="w-full max-w-[250px] flex flex-col gap-3 group"
     >
-      <div className="w-full aspect-[3/4] overflow-hidden bg-white rounded-xl duration-300">
+      <div className="w-full aspect-[3/4] overflow-hidden bg-background_disabled rounded-xl duration-300">
         <img
           src={imgUrl}
           alt={gameName}

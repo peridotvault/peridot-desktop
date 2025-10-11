@@ -5,10 +5,10 @@ import { createHashRouter } from 'react-router-dom';
 
 import Login from './pages/signin/Login';
 import VaultPage from './pages/VaultPage';
-import MainLayout from './layouts/MainLayout';
+import MainLayout from './layouts/_main_/MainLayout';
 import GameDetailLibrary from './pages/library/GameDetailLibrary';
 import GameDetail from './pages/game_detail/GameDetail';
-import LibraryMainLayout from './layouts/library/LibraryMainLayout';
+import LibraryLayout from './layouts/library/LibraryLayout';
 import { Library } from './pages/library/Library';
 import { Market } from './pages/market/Market';
 import { CreateProfile } from './pages/profile/CreateProfile';
@@ -16,7 +16,7 @@ import { UpdateProfile } from './pages/profile/UpdateProfile';
 import { ProfileUser } from './pages/profile/ProfileUser';
 import { ProfileDeveloper } from './pages/profile/ProfileDeveloper';
 import { CreateDeveloper } from './pages/studio/CreateDeveloper';
-import { StudioMainLayout } from './layouts/studio/StudioMainLayout';
+import { StudioLayout } from './layouts/studio/StudioLayout';
 import { NotFound } from './pages/additional/NotFound';
 import { DeveloperStudio } from './pages/studio/DeveloperStudio';
 import UpdateApp from './pages/studio/UpdateGame';
@@ -50,7 +50,7 @@ const router = createHashRouter([
       },
       {
         path: 'library',
-        element: <LibraryMainLayout />,
+        element: <LibraryLayout />,
         children: [
           {
             index: true,
@@ -94,7 +94,7 @@ const router = createHashRouter([
       },
       {
         path: 'studio',
-        element: <StudioMainLayout />,
+        element: <StudioLayout />,
         children: [
           {
             index: true,

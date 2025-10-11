@@ -1,26 +1,31 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
-import { Navbar } from './Navbar';
+import { MainNavbar } from './MainNavbar';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import _ from 'lodash';
-import { useWallet } from '../contexts/WalletContext';
-import { UserInterface } from '../interfaces/user/UserInterface';
-import { getUserInfo, saveUserInfo } from '../utils/IndexedDb';
-import { walletService } from '../features/wallet/services/WalletService';
-import { getUserData } from '../blockchain/icp/directory/services/ICPUserService';
-import { Wallet } from '../features/wallet/views/Wallet';
-import { InputField } from '../components/atoms/InputField';
-import { GetOpt } from '../interfaces/CoreInterface';
+import { useWallet } from '../../contexts/WalletContext';
+import { UserInterface } from '../../interfaces/user/UserInterface';
+import { getUserInfo, saveUserInfo } from '../../utils/IndexedDb';
+import { walletService } from '../../features/wallet/services/WalletService';
+import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
+import { Wallet } from '../../features/wallet/views/Wallet';
+import { InputField } from '../../components/atoms/InputField';
+import { GetOpt } from '../../interfaces/CoreInterface';
+import { MainSidebar } from './MainSidebar';
+import { Slide } from '../../pages/Slide';
+import AIChatbot from '../../components/organisms/ai-chatbot';
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
+  const [isOpenPeri, setIOpenPeri] = useState(false);
   const { wallet, isCheckingWallet, setIsCheckingWallet } = useWallet();
   const navigate = useNavigate();
   const [isRequiredPassword, setIsRequiredPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserInterface | null>(null);
+  const [isOpenSettings, setIsOpenSettings] = useState(false);
 
   const saveMetadata = async (
     oldUserMetadata: UserInterface | null,
@@ -121,6 +126,21 @@ export default function MainLayout() {
     }
   };
 
+  const togglePeri = () => {
+    setIOpenPeri((prev) => {
+      const next = !prev;
+      if (next) setIOpenWallet(false); // tutup Wallet saat Peri dibuka
+      return next;
+    });
+  };
+  const toggleWallet = () => {
+    setIOpenWallet((prev) => {
+      const next = !prev;
+      if (next) setIOpenPeri(false); // tutup Peri saat Wallet dibuka
+      return next;
+    });
+  };
+
   if (isCheckingWallet) {
     return (
       <div className="min-h-screen flex justify-center items-center">
@@ -133,22 +153,41 @@ export default function MainLayout() {
 
   return (
     <main className="min-h-screen flex flex-col">
-      <Navbar onOpenWallet={() => setIOpenWallet(true)} profileImage={GetOpt(userData?.imageUrl)} />
-      <div
-        className={`flex-1 mt-20 ${isRequiredPassword || isOpenWallet ? 'overflow-y-hidden' : ''} `}
-      >
-        <div className={` ${isRequiredPassword || isOpenWallet ? 'h-dvh' : ''} `}>
+      <MainSidebar
+        onOpenWallet={toggleWallet}
+        onOpenPeri={togglePeri}
+        walletActive={isOpenWallet}
+        periActive={isOpenPeri}
+      />
+
+      {/* Content Area */}
+      <div className={`flex-1 ml-20 relative`}>
+        <MainNavbar
+          onOpenMainMenu={() => setIsOpenSettings(true)}
+          profileImage={GetOpt(userData?.imageUrl)}
+        />
+        <div className={``}>
           <Outlet />
         </div>
       </div>
 
+      {/* Store Modal ========================= */}
+      <AIChatbot
+        open={isOpenPeri}
+        onClose={() => setIOpenPeri(false)}
+        leftClassName="left-20" // selaras dengan lebar sidebar w-20
+        title="Peri Chat"
+      />
+
+      <Wallet
+        open={isOpenWallet}
+        onClose={() => setIOpenWallet(false)}
+        onLockChanged={() => setIsRequiredPassword(true)}
+        leftClassName="left-20"
+      />
+
       <AnimatePresence>
-        {isOpenWallet && (
-          <Wallet
-            onClose={() => setIOpenWallet(false)}
-            onLockChanged={() => setIsRequiredPassword(true)}
-          />
-        )}
+        {isOpenSettings ? <Slide onClose={() => setIsOpenSettings(false)} /> : null}
       </AnimatePresence>
 
       {isRequiredPassword && (

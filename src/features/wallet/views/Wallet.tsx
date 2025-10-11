@@ -1,50 +1,93 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { WalletNavigation } from '../components/WalletNavigation';
+import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { NavItem, WalletNavigation } from '../components/WalletNavigation';
 import { Home } from './Home';
 import { History } from './History';
 import { Nft } from './Nft';
 import { Settings } from './Settings';
 
-interface NavbarProps {
+interface WalletProps {
+  open: boolean;
   onClose: () => void;
   onLockChanged: () => void;
+  leftClassName?: string; // sejajarkan dg lebar sidebar: "left-20" dll
 }
 
-export const Wallet: React.FC<NavbarProps> = ({ onClose, onLockChanged }) => {
-  const [activeNav, setActiveNav] = useState<string>('home');
+export const Wallet: React.FC<WalletProps> = ({
+  open,
+  onClose,
+  onLockChanged,
+  leftClassName = 'left-24',
+}) => {
+  const [activeNav, setActiveNav] = useState<NavItem>('home');
+
+  // Lock scroll belakang + ESC untuk close
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  // lock scroll behind modal (opsional)
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
 
   return (
-    <motion.div
-      className="fixed inset-0 bg-black/40 z-50 flex justify-end"
-      onClick={onClose}
-      animate={{ opacity: 1 }}
-      data-lenis-prevent
-    >
-      <motion.main
-        className="w-[370px] bg-background_primary flex flex-col justify-between min-h-screen"
-        onClick={(e) => e.stopPropagation()}
-        initial={{ x: 400 }}
-        animate={{ x: 0 }}
-        exit={{ x: 400 }}
-        transition={{ type: 'tween', duration: 0.2 }}
-      >
-        {/* Content  */}
-        {activeNav == 'home' ? (
-          <Home onLockChanged={onLockChanged} />
-        ) : activeNav == 'nft' ? (
-          <Nft />
-        ) : activeNav == 'history' ? (
-          <History />
-        ) : activeNav == 'settings' ? (
-          <Settings />
-        ) : (
-          <div className=""></div>
-        )}
+    <AnimatePresence>
+      {open && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            className="fixed inset-0 z-40 bg-black/50"
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
 
-        {/* Navigation  */}
-        <WalletNavigation activeNav={activeNav} setActiveNav={setActiveNav} />
-      </motion.main>
-    </motion.div>
+          {/* Panel */}
+          <motion.aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Wallet"
+            className={[
+              'fixed bottom-0 h-full w-[370px] bg-background_primary border-r border-white/10 shadow-2xl',
+              'flex flex-col justify-between z-40', // di atas backdrop
+              leftClassName,
+            ].join(' ')}
+            initial={{ x: '-100%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '-100%', opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 480, damping: 42, mass: 0.8 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* CONTENT */}
+            {activeNav === 'home' ? (
+              <Home onLockChanged={onLockChanged} />
+            ) : activeNav === 'nft' ? (
+              <Nft />
+            ) : activeNav === 'history' ? (
+              <History />
+            ) : activeNav === 'settings' ? (
+              <Settings />
+            ) : (
+              <div />
+            )}
+
+            {/* NAVIGATION */}
+            <WalletNavigation activeNav={activeNav} setActiveNav={setActiveNav} />
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
