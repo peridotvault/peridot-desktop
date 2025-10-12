@@ -55,10 +55,10 @@ export const ProfileUser = () => {
         <div className="w-full flex flex-col gap-6 duration-300 transition-all">
           <section className="p-6 bg-background_primary rounded-3xl shadow-arise-sm">
             {/* cover */}
-            <div className="w-full h-[11rem]">
+            <div className="w-full h-44">
               <img
                 src={optGetOr(bgOpt, ImageLoading)}
-                className="w-full h-[15rem] object-cover rounded-2xl"
+                className="w-full h-60 object-cover rounded-2xl"
                 alt="cover"
               />
             </div>
@@ -88,7 +88,7 @@ export const ProfileUser = () => {
 
         {/* right */}
         <div className="w-2/5 max-w-[350px] flex flex-col gap-6 duration-300 transition-all">
-          <section className="aspect-[3/4] rounded-3xl overflow-hidden shadow-flat-sm">
+          <section className="aspect-3/4 rounded-3xl overflow-hidden shadow-flat-sm">
             <img
               src="https://i.pinimg.com/736x/e0/c1/11/e0c1114baf11244075041ea00cfca531.jpg"
               className="w-full h-full object-cover"

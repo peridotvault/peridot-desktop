@@ -15,7 +15,7 @@ export const PhotoFieldComponent = ({
       <p className="capitalize font-semibold">{title}</p>
 
       <div className="flex justify-center">
-        <div className="shadow-arise-sm w-[230px] aspect-[3/4] rounded-xl overflow-hidden grid place-items-center bg-background_secondary">
+        <div className="shadow-arise-sm w-[230px] aspect-3/4 rounded-xl overflow-hidden grid place-items-center bg-background_secondary">
           {imageUrl ? (
             <img
               src={imageUrl} // sekarang langsung pakai URL publik

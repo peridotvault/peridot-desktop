@@ -133,7 +133,7 @@ export const SeedPhraseInput = ({ onContinue, seedPhrase }: SeedPhraseInputProps
               onContinue(phrase);
             }
           }}
-          className={`w-full bg-gradient-to-tr from-accent_primary to-accent_secondary text-white font-bold p-3 rounded-xl ${
+          className={`w-full bg-linear-to-tr from-accent_primary to-accent_secondary text-white font-bold p-3 rounded-xl ${
             isValid() ? '' : 'opacity-30 cursor-not-allowed'
           }`}
           disabled={!isValid()}

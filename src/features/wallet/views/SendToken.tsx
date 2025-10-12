@@ -355,7 +355,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                 <button
                   onClick={handleSend}
                   disabled={!canSend}
-                  className={`w-full text-lg rounded-lg font bg-gradient-to-tr from-accent_primary to-accent_secondary p-2  duration-300 ${
+                  className={`w-full text-lg rounded-lg font bg-linear-to-tr from-accent_primary to-accent_secondary p-2  duration-300 ${
                     canSend ? 'hover:scale-105' : 'opacity-50'
                   } `}
                 >

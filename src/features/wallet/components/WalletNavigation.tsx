@@ -20,9 +20,9 @@ export const WalletNavigation: React.FC<WalletNavigationProps> = ({ activeNav, s
   ];
 
   const baseBtn =
-    'relative flex flex-col items-center justify-center gap-1 w-14 h-[4.5rem] text-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent_primary/60 rounded-md transition-colors';
-  const inactiveBtn = 'text-white/30 hover:text-white/60';
-  const activeBtn = 'text-accent_primary';
+    'relative flex flex-col items-center justify-center gap-1 w-14 h-18 text-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-foreground/60 rounded-md transition-colors';
+  const inactiveBtn = 'text-foreground/30 hover:text-foreground/60';
+  const activeBtn = 'text-accent-foreground';
 
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     const idx = navLists.findIndex((n) => n.title === activeNav);
@@ -38,7 +38,7 @@ export const WalletNavigation: React.FC<WalletNavigationProps> = ({ activeNav, s
 
   return (
     <nav
-      className="shadow-flat-sm px-8 flex justify-between gap-4 border-t border-white/10 bg-background_primary"
+      className="shadow-flat-sm px-8 flex justify-between gap-4 border-t border-foreground/10 bg-background"
       role="tablist"
       aria-label="Wallet navigation"
       onKeyDown={onKeyDown}
@@ -61,7 +61,7 @@ export const WalletNavigation: React.FC<WalletNavigationProps> = ({ activeNav, s
               {isActive && (
                 <motion.span
                   layoutId="wallet-nav-indicator"
-                  className="absolute left-0 right-0 top-0 h-0.5 bg-accent_primary"
+                  className="absolute left-0 right-0 top-0 h-0.5 bg-accent-foreground"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}

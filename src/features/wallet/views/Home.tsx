@@ -149,21 +149,21 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
   return (
     <div className="flex flex-col overflow-y-auto">
       {/* section 1  */}
-      <section className="p-6 bg-background_primary flex flex-col gap-8 relative ">
+      <section className="p-6 bg-background flex flex-col gap-8 relative ">
         {/* background  */}
         <div className="bg-radial absolute top-0 left-0 w-full h-full z-0 opacity-30"></div>
         <div className="flex items-center gap-3 justify-between z-10">
           {/* Network  */}
           <div className="flex gap-6">
             {/* <button
-              className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
+              className="bg-background shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
               onClick={() => setIsOpenWalletAddress(!isOpenWalletAddress)}
             >
               <FontAwesomeIcon icon={faGear} className="text-md" />
             </button> */}
             {/* Lock  */}
             <button
-              className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
+              className="bg-background shadow-arise-sm hover:shadow-flat-sm w-12 h-12 flex justify-center items-center rounded-xl duration-300 opacity-80 hover:opacity-100"
               onClick={handleCloseLock}
             >
               <FontAwesomeIcon icon={faLock} className="text-md" />
@@ -173,7 +173,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
           <div
             className={`fixed right-[370px] top-6 ${
               isOpenWalletAddress ? 'flex' : 'hidden'
-            } justify-start flex-col bg-background_primary py-6 px-10 mx-6 rounded-b-2xl rounded-tl-2xl gap-5 duration-300`}
+            } justify-start flex-col bg-background py-6 px-10 mx-6 rounded-b-2xl rounded-tl-2xl gap-5 duration-300`}
           >
             {/* Peridot Wallet Address */}
             <div className="flex justify-between mb-1 items-center">
@@ -206,14 +206,14 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
             >
               <div className="flex gap-3 items-center">
                 <div className="w-12 h-12 shadow-arise-sm rounded-xl flex justify-center items-center">
-                  <FontAwesomeIcon icon={faSeedling} className="text-accent_primary size-5" />
+                  <FontAwesomeIcon icon={faSeedling} className="text-accent size-5" />
                 </div>
                 <div className="flex flex-col items-start">
                   <p className="text-md font-semibold">Seed Phrase</p>
                   <p>click to reveal your seed phrase</p>
                 </div>
               </div>
-              <FontAwesomeIcon icon={faLock} className="text-text_disabled" />
+              <FontAwesomeIcon icon={faLock} className="text-muted-foreground" />
             </button>
             {/* Private Key */}
             <button
@@ -225,20 +225,20 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
             >
               <div className="flex gap-3 items-center">
                 <div className="w-12 h-12 shadow-arise-sm rounded-xl flex justify-center items-center">
-                  <FontAwesomeIcon icon={faKey} className="text-yellow-300 size-5" />
+                  <FontAwesomeIcon icon={faKey} className="text-chart-3 size-5" />
                 </div>
                 <div className="flex flex-col items-start">
                   <p className="text-md font-semibold">Private Key</p>
                   <p>click to reveal your private key</p>
                 </div>
               </div>
-              <FontAwesomeIcon icon={faLock} className="text-text_disabled" />
+              <FontAwesomeIcon icon={faLock} className="text-muted-foreground" />
             </button>
           </div>
           {/* Logout  */}
           <button
             onClick={handleClearData}
-            className="w-12 h-12 flex justify-center items-center rounded-xl bg-background_primary shadow-arise-sm hover:shadow-flat-sm opacity-80 hover:opacity-100 duration-300"
+            className="w-12 h-12 flex justify-center items-center rounded-xl bg-background shadow-arise-sm hover:shadow-flat-sm opacity-80 hover:opacity-100 duration-300"
           >
             <FontAwesomeIcon icon={faArrowRightFromBracket} className="text-md" />
           </button>
@@ -252,7 +252,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
           {/* Send */}
           <div className=" flex flex-col items-center gap-3 opacity-80 hover:opacity-100 duration-300">
             <button
-              className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
+              className="bg-background shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
               onClick={() =>
                 setOpenButton({
                   send: true,
@@ -268,7 +268,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
           {/* Receive */}
           <div className=" flex flex-col items-center gap-3 opacity-80 hover:opacity-100 duration-300">
             <button
-              className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
+              className="bg-background shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
               onClick={() =>
                 setOpenButton({
                   send: false,
@@ -284,7 +284,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
           {/* Manage */}
           <div className=" flex flex-col items-center gap-3 opacity-80 hover:opacity-100 duration-300">
             <button
-              className="bg-background_primary shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
+              className="bg-background shadow-arise-sm hover:shadow-flat-sm w-[45px] h-[45px] flex items-center justify-center rounded-xl aspect-square hover:scale-105 duration-300"
               onClick={() =>
                 setOpenButton({
                   send: false,
@@ -484,7 +484,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({ pkORsp, onClose, onConfirm 
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-background_primary p-10 rounded-2xl flex flex-col items-center gap-6 w-[400px]"
+        className="bg-background p-10 rounded-2xl flex flex-col items-center gap-6 w-[400px]"
       >
         <p className="font-bold text-lg">Show {title}</p>
         <div className="flex flex-col gap-3 w-full ">
@@ -495,10 +495,10 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({ pkORsp, onClose, onConfirm 
             placeholder="Password"
             disabled={decryptedKey !== null ? true : false}
           />
-          {error && <p className="text-danger text-sm">{error}</p>}
+          {error && <p className="text-chart-5 text-sm">{error}</p>}
           {decryptedKey && (
             <button
-              className="bg-background_secondary p-3 rounded-lg break-all hover:scale-105 duration-300"
+              className="bg-card p-3 rounded-lg break-all hover:scale-105 duration-300"
               onClick={() => {
                 copyToClipboard(decryptedKey);
               }}
@@ -507,8 +507,8 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({ pkORsp, onClose, onConfirm 
             </button>
           )}
         </div>
-        <div className="bg-danger/10 font-bold p-3 pr-5 items-start flex gap-3 border-l-4 border-danger rounded-r-lg">
-          <FontAwesomeIcon icon={faTriangleExclamation} className="size-6 text-danger" />
+        <div className="bg-chart-5/10 font-bold p-3 pr-5 items-start flex gap-3 border-l-4 border-chart-5 rounded-r-lg">
+          <FontAwesomeIcon icon={faTriangleExclamation} className="size-6 text-chart-5" />
           <p className="">
             {decryptedKey !== null
               ? 'Your ' +
@@ -534,7 +534,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({ pkORsp, onClose, onConfirm 
             onTouchEnd={stopHolding}
             className={`w-1/2 ${
               password.length === 0 || decryptedKey !== null
-                ? 'bg-accent_secondary/30 text-text_disabled'
+                ? 'bg-accent_secondary/30 text-muted-foreground'
                 : 'bg-accent_secondary hover:scale-105'
             } p-3 rounded-2xl font-bold duration-300 overflow-hidden`}
             disabled={password.length === 0 || decryptedKey !== null}
@@ -545,7 +545,9 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({ pkORsp, onClose, onConfirm 
           </button>
         </div>
         {decryptedKey && (
-          <p className="text-sm text-text_disabled">This page will close in {countdown} seconds</p>
+          <p className="text-sm text-muted-foreground">
+            This page will close in {countdown} seconds
+          </p>
         )}
       </div>
     </div>

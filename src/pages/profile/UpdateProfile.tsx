@@ -281,7 +281,7 @@ export const UpdateProfile = () => {
             <div className="flex flex-col gap-3">
               <p className="capitalize font-semibold">Background Image</p>
               <div className="flex justify-center">
-                <div className="shadow-arise-sm w-full h-[15rem] rounded-xl overflow-hidden">
+                <div className="shadow-arise-sm w-full h-60 rounded-xl overflow-hidden">
                   {form.backgroundImageUrl && (
                     <img
                       src={getCoverImage(form.backgroundImageUrl)}

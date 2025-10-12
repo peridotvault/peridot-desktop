@@ -23,7 +23,7 @@ export const GameHorizontal = ({
       to={`/${formatTitle(gameName)}/${gameId}`}
       className="flex gap-3 items-center py-2 rounded-md h-32 group"
     >
-      <div className="h-full aspect-[3/4] bg-background_disabled rounded-md overflow-hidden">
+      <div className="h-full aspect-3/4 bg-background_disabled rounded-md overflow-hidden">
         <img
           src={imgUrl}
           alt={gameName}

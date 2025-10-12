@@ -86,7 +86,7 @@ export const MultiSelectComponent = ({
           onChange={(e) => setSearch(e.target.value)}
           onFocus={() => setIsOpen(true)}
           placeholder={selected.length === 0 ? placeholder : 'Search...'}
-          className="flex-grow min-w-[120px] border-none outline-none bg-transparent px-1 py-1"
+          className="grow min-w-[120px] border-none outline-none bg-transparent px-1 py-1"
         />
       </div>
       {isOpen && selected.length < maxValue ? (

@@ -121,7 +121,7 @@ export const Settings = () => {
               ref={(el) => (buttonRefs.current[item.currency] = el)}
               className={`${
                 walletInfo?.currency.currency == item.currency ? 'border border-accent_primary' : ''
-              } shadow-arise-sm p-6 w-40 rounded-xl flex-shrink-0 flex flex-col justify-between aspect-[6/7] text-start`}
+              } shadow-arise-sm p-6 w-40 rounded-xl shrink-0 flex flex-col justify-between aspect-6/7 text-start`}
               onClick={() => fetchAPICurrency(item.currency)}
             >
               <div className="w-8 rounded-full aspect-square bg-background_disabled overflow-hidden">

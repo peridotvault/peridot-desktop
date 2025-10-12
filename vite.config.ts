@@ -4,9 +4,12 @@ import electron from 'vite-plugin-electron/simple';
 import react from '@vitejs/plugin-react';
 import wasm from 'vite-plugin-wasm';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import tailwindcss from '@tailwindcss/vite'
+
 
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     wasm(),
     nodeResolve({
       preferBuiltins: false,

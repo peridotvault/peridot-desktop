@@ -95,7 +95,7 @@ export const AddCoin: React.FC<NavbarProps> = ({ onClose }) => {
         )}
         <button
           onClick={handleSubmit}
-          className={`w-full text-lg rounded-lg font bg-gradient-to-tr from-accent_primary to-accent_secondary p-2  duration-300 ${
+          className={`w-full text-lg rounded-lg font bg-linear-to-tr from-accent_primary to-accent_secondary p-2  duration-300 ${
             !isCoinAvailable ? 'opacity-30 cursor-not-allowed ' : 'hover:scale-105 cursor-pointer'
           }`}
           disabled={!isCoinAvailable}

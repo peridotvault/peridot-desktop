@@ -20,7 +20,7 @@ export const AlertMessage = ({ msg, isSuccess }: { msg: string; isSuccess: boole
           </p>
         </div>
         <div className="flex items-center gap-3 w-full">
-          <div className="w-8 flex-shrink-0"></div>
+          <div className="w-8 shrink-0"></div>
           <p className="text-white/70">{msg}</p>
         </div>
       </div>

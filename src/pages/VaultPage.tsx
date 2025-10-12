@@ -23,7 +23,7 @@ export default function VaultPage() {
     },
     {
       gameId: 'SADC2',
-      gameBannerImage: './assets/vault/Content2.png',
+      gameBannerImage: './assets/vault/header.png',
       gameName: 'Cyberpunk',
       gameDescription:
         'Welcome to Shatterline - ground zero for the apocalypse. Are you ready? Shatterline is a fierce, intense multiplayer FPS, offering roguelike co-op PVE modes as well as competitive PvP modes.',
@@ -52,15 +52,15 @@ export default function VaultPage() {
   }, []);
 
   return (
-    <main className="flex flex-col gap-3">
+    <main className="flex flex-col items-center gap-16">
       {/* Section 1  */}
       <VaultCarousel items={welcomeGame} />
 
-      {/* section 3  */}
+      {/* ✅ section 3  */}
       <VaultTopGames />
 
-      {/* section 3  */}
-      <section className="flex justify-center px-12 py-6">
+      {/* ✅ section 3  */}
+      <section className="flex justify-center w-full px-10">
         <div className="flex flex-col gap-6 w-full max-w-[1400px]">
           <TypographyH2 text="New on PeridotVault" />
           {/* contents  */}
@@ -79,14 +79,14 @@ export default function VaultPage() {
       </section>
 
       {/* section 4  */}
-      <section className="flex justify-center px-12 py-6">
+      <section className="flex justify-center w-full px-10">
         <div className="flex flex-col gap-6 w-full max-w-[1400px]">
           <TypographyH2 text="Favorite Categories" />
           <div className="flex gap-6 xl:gap-12 duration-300 ">
             {categories.slice(0, 3).map((item) => (
               <div
                 key={item.id}
-                className={`w-1/3 aspect-video rounded-xl bg-background_disabled overflow-hidden duration-300 flex items-end font-bold p-6 text-xl`}
+                className={`w-1/3 aspect-video rounded-xl bg-muted overflow-hidden duration-300 flex items-end font-bold p-6 text-xl`}
               >
                 {/* <img src={image} alt="" className="w-full h-full object-cover rounded-xl" /> */}
                 <span>{item.name}</span>
@@ -97,7 +97,7 @@ export default function VaultPage() {
       </section>
 
       {/* section 5  */}
-      <section className="flex justify-center px-12 py-6">
+      <section className="flex justify-center w-full px-10">
         <div className="flex flex-col gap-6 w-full max-w-[1400px]">
           <TypographyH2 text="All Games" />
           {/* contents  */}

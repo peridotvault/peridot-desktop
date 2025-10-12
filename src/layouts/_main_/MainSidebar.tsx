@@ -10,6 +10,7 @@ import {
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome';
 import { NavLink } from 'react-router-dom';
 import { ImagePeridotLogo } from '../../lib/constants/const-url';
+import { ButtonWithSound } from '../../components/atoms/button-with-sound';
 
 interface MainSidebarProps {
   onOpenWallet: () => void;
@@ -31,10 +32,9 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
   ];
 
   const base =
-    'p-4 flex aspect-square rounded-lg text-xl items-center justify-center duration-300 text-text_disabled';
-  const active =
-    'text-white text-background_primary bg-gradient-to-tr from-accent_primary to-accent_secondary';
-  const inactive = 'hover:text-white';
+    'flex aspect-square rounded-lg text-xl items-center justify-center duration-300 active:-translate-y-1 hover:cursor-pointer';
+  const active = 'text-foreground text-background bg-linear-to-tr from-accent to-accent-foreground';
+  const inactive = 'hover:text-white text-muted-foreground hover:pointer-events-auto';
 
   const ActionBtn = ({
     icon,
@@ -47,7 +47,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
     onClick: () => void;
     isActive: boolean;
   }) => (
-    <button
+    <ButtonWithSound
       type="button"
       onClick={onClick}
       aria-label={label}
@@ -56,11 +56,11 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
       className={`${base} ${isActive ? active : inactive}`}
     >
       <FontAwesomeIcon icon={icon} />
-    </button>
+    </ButtonWithSound>
   );
 
   return (
-    <div className="fixed bg-background_primary flex flex-col h-full shadow-flat-sm z-50 w-20 p-2">
+    <div className="fixed bg-background flex flex-col h-full shadow-flat-sm z-50 w-20 p-2">
       {/* List Path  */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="flex flex-col p-2 gap-2 justify-between h-full">
@@ -72,16 +72,17 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
 
             {/* Actions  */}
             {linkSidebar.map((item, index) => (
-              <NavLink
-                key={index}
-                to={item.link}
-                end={item.exact}
-                className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
-                aria-label={item.label}
-                title={item.label}
-              >
-                <FontAwesomeIcon icon={item.icon} />
-              </NavLink>
+              <ButtonWithSound key={index}>
+                <NavLink
+                  to={item.link}
+                  end={item.exact}
+                  className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
+                  aria-label={item.label}
+                  title={item.label}
+                >
+                  <FontAwesomeIcon icon={item.icon} />
+                </NavLink>
+              </ButtonWithSound>
             ))}
           </div>
 

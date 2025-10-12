@@ -213,7 +213,7 @@ export default function GameDetail() {
     if (!v) return null;
     return (
       <tr className="align-top">
-        <td className="pr-8 py-2 text-text_disabled">{k}</td>
+        <td className="pr-8 py-2 text-muted-foreground">{k}</td>
         <td className="py-2">{v}</td>
       </tr>
     );
@@ -335,7 +335,7 @@ export default function GameDetail() {
       </Modal>
       <div className="max-w-[1400px] w-full flex flex-col gap-6 duration-300">
         {/* Header  =========================== */}
-        <section className="w-full h-[30rem] relative">
+        <section className="w-full h-120 relative">
           {/* title */}
           <div className="px-12 py-8 flex gap-3 h-full justify-between items-end">
             <div className="flex flex-col gap-4 w-3/5">
@@ -371,7 +371,7 @@ export default function GameDetail() {
                 </div>
               )}
               <button
-                className="px-12 font-bold py-3 rounded-md bg-accent_secondary"
+                className="px-12 font-bold py-3 rounded-md bg-accent"
                 onClick={() => setIsOnPayment(true)}
               >
                 Buy Now
@@ -386,7 +386,7 @@ export default function GameDetail() {
               alt=""
               className="w-full h-full object-cover absolute"
             />
-            <div className="bg-gradient-to-t from-background_primary w-full h-full absolute"></div>
+            <div className="bg-linear-to-t from-background w-full h-full absolute"></div>
           </div>
         </section>
 
@@ -404,13 +404,13 @@ export default function GameDetail() {
 
             {/* Description */}
             <div className="flex flex-col gap-3">
-              <h2 className="text-base text-text_disabled">Description</h2>
+              <h2 className="text-base text-muted-foreground">Description</h2>
               <p>{detailGame?.pgl1_description}</p>
             </div>
 
             {/* Tags */}
             <div className="flex flex-col gap-3">
-              <h2 className="text-base text-text_disabled">Tags</h2>
+              <h2 className="text-base text-muted-foreground">Tags</h2>
               <div className="flex gap-2 text-sm">
                 {getTags({ md: detailGame?.pgl1_metadata }).map((item, idx) => (
                   <span
@@ -443,7 +443,7 @@ export default function GameDetail() {
 
             {/* System Requirements */}
             <div className="flex flex-col gap-3">
-              <h2 className="text-base text-text_disabled">System Requirements</h2>
+              <h2 className="text-base text-muted-foreground">System Requirements</h2>
               {/* Navbar  */}
               <nav className="flex gap-2 flex-wrap border-b border-white/20">
                 {(['Website', 'Windows', 'macOS', 'Linux', 'Other'] as PlatformKey[])
@@ -456,7 +456,7 @@ export default function GameDetail() {
                         onClick={() => setActiveTab(pf)}
                         className={[
                           'pb-3',
-                          isActive && 'border-b border-accent_primary  text-accent_primary',
+                          isActive && 'border-b border-accent-foreground  text-accent-foreground',
                         ].join(' ')}
                       >
                         {pf}
@@ -467,7 +467,7 @@ export default function GameDetail() {
 
               {/* description  */}
               {!activeTab ? (
-                <p className="text-sm text-text_disabled">No distribution data.</p>
+                <p className="text-sm text-muted-foreground">No distribution data.</p>
               ) : activeTab === 'Website' ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {dist.Website!.map((s, i) => (
@@ -484,7 +484,7 @@ export default function GameDetail() {
             </div>
           </div>
           {/* right side ======================== */}
-          <div className="w-1/4 min-w-[300px]  flex flex-col gap-6">
+          <div className="w-1/4 min-w-[300px] flex flex-col gap-6">
             {/* age regulation  */}
             <div className="flex shadow-arise-sm p-6 rounded-xl items-start gap-4 ">
               <img
@@ -494,7 +494,7 @@ export default function GameDetail() {
               />
               <div className="flex flex-col gap-2">
                 <p className="font-bold">Everyone</p>
-                <hr className="border-text_disabled/50" />
+                <hr className="border-muted-foreground/50" />
                 <p>
                   A safe game for all, although it may contain some mild violence or more complex
                   themes.
@@ -570,10 +570,10 @@ const GameTypes = ({ title, content }: { title: string; content: string }) => {
   return (
     <div className="flex flex-col">
       <div className="flex justify-between py-4">
-        <label className="text-text_disabled">{title}</label>
+        <label className="text-muted-foreground">{title}</label>
         {content}
       </div>
-      <hr className="border-text_disabled/50" />
+      <hr className="border-muted-foreground/50" />
     </div>
   );
 };
@@ -596,11 +596,11 @@ const GamePlatforms = ({ title, platforms }: { title: string; platforms: string[
   return (
     <div className="flex flex-col">
       <div className="flex justify-between items-center py-4">
-        <label className="text-text_disabled">{title}</label>
+        <label className="text-muted-foreground">{title}</label>
 
         <div className="flex items-center gap-3">
           {uniq.length === 0 ? (
-            <span className="text-text_disabled">—</span>
+            <span className="text-muted-foreground">—</span>
           ) : (
             uniq.map((key) => {
               const { icon } = PLATFORM_ICON[key];
@@ -609,7 +609,7 @@ const GamePlatforms = ({ title, platforms }: { title: string; platforms: string[
           )}
         </div>
       </div>
-      <hr className="border-text_disabled/50" />
+      <hr className="border-muted-foreground/50" />
     </div>
   );
 };

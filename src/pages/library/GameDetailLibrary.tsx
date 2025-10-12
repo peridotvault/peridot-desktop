@@ -231,10 +231,10 @@ export default function GameDetailLibrary() {
                 : ImageLoading
               : ImageLoading
           }
-          className="object-cover w-full h-[30rem]"
+          className="object-cover w-full h-120"
           alt=""
         />
-        <div className="bg-gradient-to-t from-background_primary via-background_primary/50 w-full h-[7rem] absolute bottom-0 translate-y-[6.2rem]"></div>
+        <div className="bg-linear-to-t from-background_primary via-background_primary/50 w-full h-28 absolute bottom-0 translate-y-[6.2rem]"></div>
       </div>
 
       {/* column */}

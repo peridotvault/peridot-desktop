@@ -51,10 +51,10 @@ export const ProfileDeveloper = () => {
           {/* detail user  */}
           <section className="p-6 bg-background_primary rounded-3xl shadow-arise-sm">
             {/* cover  */}
-            <div className="w-full h-[11rem]">
+            <div className="w-full h-44">
               <img
                 src={GetOpt(userData?.backgroundImageUrl!)}
-                className="w-full h-[15rem] object-cover rounded-2xl "
+                className="w-full h-60 object-cover rounded-2xl "
                 alt=""
               />
             </div>
@@ -236,7 +236,7 @@ export const ProfileDeveloper = () => {
         {/* right  ============================ */}
         <div className="w-1/3 flex flex-col gap-6">
           {/* Character Section  */}
-          <section className="aspect-[3/4] rounded-3xl overflow-hidden shadow-flat-sm">
+          <section className="aspect-3/4 rounded-3xl overflow-hidden shadow-flat-sm">
             <img
               src="https://i.pinimg.com/736x/e0/c1/11/e0c1114baf11244075041ea00cfca531.jpg"
               className="w-full h-full object-cover"

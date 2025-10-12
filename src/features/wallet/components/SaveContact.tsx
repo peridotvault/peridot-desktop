@@ -86,7 +86,7 @@ export const SaveContact: React.FC<NavbarProps> = ({ onClose, address }) => {
 
         <button
           onClick={handleAddContact}
-          className="w-full text-lg rounded-lg font bg-gradient-to-tr from-accent_primary to-accent_secondary p-2 hover:scale-105 duration-300"
+          className="w-full text-lg rounded-lg font bg-linear-to-tr from-accent_primary to-accent_secondary p-2 hover:scale-105 duration-300"
         >
           Add Contact
         </button>

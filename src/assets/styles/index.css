@@ -1,16 +1,48 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --shadow-flat-sm: var(--flat-sm);
+  --shadow-sunken-sm: var(--sunken-sm);
+  --shadow-arise-sm: var(--arise-sm);
+}
 
 :root {
-  --background_primary: #1c1f1d;
-  --background_secondary: #121714;
-  --text: #e0e4e4;
+  --background: #1c1f1d;
+  --foreground: white;
+  --card: #121714; /* background_secondary */
+  --card-foreground: white;
+  --accent: #349b65;
+  --accent-foreground: #87ee83;
+  --muted: #121714; /* background_disabled */
+  --muted-foreground: rgb(110, 110, 110); /* text_disabled */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  /* shadow  */
+  --flat-sm: 3px 3px 6px #0c0d0c, -3px -3px 6px #2c312e;
+  --sunken-sm: inset 5px 5px 10px #0c0d0c, inset -5px -5px 10px #2c312e;
+  --arise-sm:
+    inset 2px 2px 5px #0c0d0c, inset -2px -2px 5px #2c312e, 2px 2px 5px #0c0d0c,
+    -2px -2px 5px #2c312e;
 
+  background: var(--background);
+  color: var(--foreground);
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-
-  background: #1c1f1d;
-  color: var(--text);
 
   font-size: 0.85rem /* 14px */;
   line-height: 1.5rem;
@@ -18,6 +50,13 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.light {
+  --background: #1c1f1d;
+  --foreground: #e0e4e4;
+  --accent-1: #349b65;
+  --accent-2: #87ee83;
 }
 
 ::-webkit-scrollbar {

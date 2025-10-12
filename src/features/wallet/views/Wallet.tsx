@@ -60,7 +60,7 @@ export const Wallet: React.FC<WalletProps> = ({
             aria-modal="true"
             aria-label="Wallet"
             className={[
-              'fixed bottom-0 h-full w-[370px] bg-background_primary border-r border-white/10 shadow-2xl',
+              'fixed bottom-0 h-full w-[370px] bg-background border-r border-foreground/10 shadow-2xl',
               'flex flex-col justify-between z-40', // di atas backdrop
               leftClassName,
             ].join(' ')}

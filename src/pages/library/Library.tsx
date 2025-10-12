@@ -44,7 +44,7 @@ export const Library = () => {
               <Link
                 to={`/library/${formatTitle(item.pgl1_name)}/${item.pgl1_game_id}`}
                 key={item.pgl1_game_id}
-                className="w-[170px] aspect-[3/4] bg-background_secondary rounded-xl overflow-hidden"
+                className="w-[170px] aspect-3/4 bg-background_secondary rounded-xl overflow-hidden"
               >
                 <img
                   src={optGetOr(item.pgl1_cover_image, ImageLoading)}

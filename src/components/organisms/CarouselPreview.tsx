@@ -218,7 +218,7 @@ export default function CarouselPreview({
         </div>
 
         {/* Counter */}
-        <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md px-2 py-1 text-xs text-white shadow-flat-sm bg-background_primary">
+        <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-md px-2 py-1 text-xs text-foreground shadow-flat-sm bg-background">
           {normalized.length ? `${index + 1} / ${normalized.length}` : '0 / 0'}
         </div>
 
@@ -227,7 +227,7 @@ export default function CarouselPreview({
           type="button"
           onClick={() => setIsPlaying((s) => !s)}
           aria-label={isPlaying ? 'Pause autoplay' : 'Play autoplay'}
-          className="absolute right-3 top-3 z-10 rounded-md px-2 py-1 text-xs text-white hover:bg-black/70"
+          className="absolute right-3 top-3 z-10 rounded-md px-2 py-1 text-xs text-foreground hover:bg-black/70"
         >
           {isPlaying ? 'Pause' : 'Play'}
         </button>
@@ -239,7 +239,7 @@ export default function CarouselPreview({
               type="button"
               onClick={goPrev}
               aria-label="Previous"
-              className="group absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
+              className="group absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-foreground hover:bg-black/70"
             >
               <Chevron dir="left" />
             </button>
@@ -247,7 +247,7 @@ export default function CarouselPreview({
               type="button"
               onClick={goNext}
               aria-label="Next"
-              className="group absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
+              className="group absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-black/50 p-2 text-foreground hover:bg-black/70"
             >
               <Chevron dir="right" />
             </button>
@@ -289,7 +289,7 @@ export default function CarouselPreview({
                   ) : (
                     <div className="h-full w-full bg-black/40" />
                   )}
-                  <span className="pointer-events-none absolute inset-0 grid place-items-center text-white/90">
+                  <span className="pointer-events-none absolute inset-0 grid place-items-center text-foreground/90">
                     <svg viewBox="0 0 24 24" className="h-6 w-6 drop-shadow">
                       <path fill="currentColor" d="M8 5v14l11-7z" />
                     </svg>

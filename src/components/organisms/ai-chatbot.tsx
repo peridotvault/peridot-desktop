@@ -184,7 +184,7 @@ export default function AIChatbot({
           {/* Panel (slide from left) */}
           <motion.div
             className={[
-              'fixed bottom-0 h-full w-[448px] bg-background_primary border-x border-white/10 shadow-2xl',
+              'fixed bottom-0 h-full w-[448px] bg-background border-x border-foreground/10 shadow-2xl',
               'flex flex-col z-40',
               leftClassName,
             ].join(' ')}
@@ -197,12 +197,12 @@ export default function AIChatbot({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header (sticky) */}
-            <div className="sticky top-0 z-10 bg-background_primary/80 backdrop-blur supports-[backdrop-filter]:bg-background_primary/60 border-b border-white/10">
+            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-foreground/10">
               <div className="px-4 py-3 flex items-center justify-between">
                 <span className="text-sm font-semibold opacity-90">{title}</span>
                 <button
                   onClick={onClose}
-                  className="text-xs px-2 py-1 rounded-md border border-white/10 hover:bg-white/5"
+                  className="text-xs px-2 py-1 rounded-md border border-foreground/10 hover:bg-foreground/5"
                   aria-label="Close"
                 >
                   Close
@@ -220,11 +220,11 @@ export default function AIChatbot({
                     <span className="text-text_disabled text-sm">Give Peri a task to work</span>
                   </div>
 
-                  <ol className="w-full border border-white/10 rounded-lg divide-y divide-white/10 overflow-hidden text-left max-w-[368px]">
+                  <ol className="w-full border border-foreground/10 rounded-lg divide-y divide-foreground/10 overflow-hidden text-left max-w-[368px]">
                     {quick.map((q, idx) => (
                       <li key={idx}>
                         <button
-                          className="py-3 px-3 w-full text-start hover:bg-white/5 transition text-sm"
+                          className="py-3 px-3 w-full text-start hover:bg-foreground/5 transition text-sm"
                           onClick={() => send(q)}
                         >
                           {q}
@@ -248,10 +248,10 @@ export default function AIChatbot({
                         )}
                         <div
                           className={[
-                            'rounded-xl px-3 py-2 leading-relaxed border border-white/10 whitespace-pre-wrap break-words',
+                            'rounded-xl px-3 py-2 leading-relaxed border border-foreground/10 whitespace-pre-wrap break-words',
                             m.role === 'user'
-                              ? 'bg-white/10 text-white'
-                              : 'bg-background_primary/80 text-white/90',
+                              ? 'bg-foreground/10 text-foreground'
+                              : 'bg-background/80 text-foreground/90',
                           ].join(' ')}
                         >
                           {m.text}
@@ -266,7 +266,7 @@ export default function AIChatbot({
                         <div className="text-[10px] tracking-wider text-text_disabled/70 mb-1">
                           Peri
                         </div>
-                        <div className="rounded-xl border border-white/10 px-3 py-2 bg-background_primary/80 inline-flex items-center gap-1">
+                        <div className="rounded-xl border border-foreground/10 px-3 py-2 bg-background/80 inline-flex items-center gap-1">
                           <span className="h-2 w-2 bg-background_disabled rounded-full inline-block animate-bounce" />
                           <span
                             className="h-2 w-2 bg-background_disabled rounded-full inline-block animate-bounce"
@@ -287,10 +287,10 @@ export default function AIChatbot({
             {/* Input (sticky bottom) */}
             <form
               onSubmit={onSubmit}
-              className="sticky bottom-0 bg-background_primary border-t border-white/10"
+              className="sticky bottom-0 bg-background border-t border-foreground/10"
             >
               <div className="p-2">
-                <div className="bg-background_primary border border-white/10 rounded-lg p-2">
+                <div className="bg-background border border-foreground/10 rounded-lg p-2">
                   <textarea
                     ref={inputRef}
                     value={input}

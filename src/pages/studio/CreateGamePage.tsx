@@ -107,7 +107,7 @@ export const CreateGamePage = () => {
               to={'/studio/update/' + item.pgl1_game_id.toString()}
             >
               <div className="flex gap-6 items-start">
-                <div className="w-12 aspect-[3/4]">
+                <div className="w-12 aspect-3/4">
                   <img
                     src={optGetOr(item.pgl1_cover_image, ImageLoading)}
                     alt={item.pgl1_name}

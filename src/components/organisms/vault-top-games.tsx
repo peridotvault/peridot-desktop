@@ -4,8 +4,11 @@ import { TypographyH2 } from '../atoms/typography-h2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
-export const VaultTopGames = () => {
-  // refs & state
+type Props = {
+  className?: string; // optional: untuk -mt overlap dari parent
+};
+
+export const VaultTopGames: React.FC<Props> = ({ className = '' }) => {
   const scrollerRef = React.useRef<HTMLDivElement | null>(null);
   const [canLeft, setCanLeft] = React.useState(false);
   const [canRight, setCanRight] = React.useState(true);
@@ -14,7 +17,7 @@ export const VaultTopGames = () => {
   const getStep = React.useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return 300;
-    const flex = el.querySelector('.flex.gap-2.w-max') as HTMLElement | null;
+    const flex = el.querySelector('.pv-topgames-row') as HTMLElement | null;
     if (!flex || !flex.firstElementChild) return Math.max(300, Math.floor(el.clientWidth * 0.9));
     const firstItem = flex.firstElementChild as HTMLElement;
     const rect = firstItem.getBoundingClientRect();
@@ -36,7 +39,7 @@ export const VaultTopGames = () => {
     const el = scrollerRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
-    const maxLeft = scrollWidth - clientWidth - 1; // epsilon
+    const maxLeft = scrollWidth - clientWidth - 1;
     setCanLeft(scrollLeft > 0);
     setCanRight(scrollLeft < maxLeft);
   }, []);
@@ -45,12 +48,13 @@ export const VaultTopGames = () => {
     const el = scrollerRef.current;
     if (!el) return;
     updateArrows();
+
     const onScroll = () => updateArrows();
     el.addEventListener('scroll', onScroll, { passive: true });
 
     const ro = new ResizeObserver(updateArrows);
     ro.observe(el);
-    const innerFlex = el.querySelector('.flex.gap-2.w-max') as HTMLElement | null;
+    const innerFlex = el.querySelector('.pv-topgames-row') as HTMLElement | null;
     if (innerFlex) ro.observe(innerFlex);
 
     return () => {
@@ -60,48 +64,48 @@ export const VaultTopGames = () => {
   }, [updateArrows]);
 
   return (
-    <section className="flex justify-center py-6">
-      <div className="flex flex-col items-center gap-6 w-full">
-        <div className="w-full px-12 flex justify-center">
-          <div className="max-w-[1400px] w-full flex items-center justify-between">
-            <TypographyH2 text="Top Games This Month" />
-            {/* button  */}
-            <div className="flex items-center gap-4">
-              <button
-                className="aspect-square w-10 rounded-md bg-accent_secondary disabled:opacity-30 duration-300 disabled:cursor-not-allowed"
-                onClick={() => scrollStep('left')}
-                disabled={!canLeft}
-                aria-disabled={!canLeft}
-                aria-label="Scroll left"
-              >
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
-              <button
-                className="aspect-square w-10 rounded-md bg-accent_secondary disabled:opacity-30 duration-300 disabled:cursor-not-allowed"
-                onClick={() => scrollStep('right')}
-                disabled={!canRight}
-                aria-disabled={!canRight}
-                aria-label="Scroll right"
-              >
-                <FontAwesomeIcon icon={faChevronRight} />
-              </button>
-            </div>
+    // ✅ sama seperti section-section lain: w-full + px-10 + center
+    <section className={['flex justify-center w-full px-10', className].join(' ')}>
+      {/* ✅ kontainer konsisten: max-w + w-full + gap */}
+      <div className="w-full max-w-[1400px] flex flex-col gap-6">
+        {/* header row: judul & tombol */}
+        <div className="w-full flex items-center justify-between">
+          <TypographyH2 text="Top Games This Month" />
+          <div className="flex items-center gap-4">
+            <button
+              className="aspect-square w-10 rounded-md bg-accent disabled:opacity-30 duration-300 disabled:cursor-not-allowed"
+              onClick={() => scrollStep('left')}
+              disabled={!canLeft}
+              aria-disabled={!canLeft}
+              aria-label="Scroll left"
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
+            <button
+              className="aspect-square w-10 rounded-md bg-accent disabled:opacity-30 duration-300 disabled:cursor-not-allowed"
+              onClick={() => scrollStep('right')}
+              disabled={!canRight}
+              aria-disabled={!canRight}
+              aria-label="Scroll right"
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
           </div>
         </div>
 
-        {/* contents  */}
-        <div className="w-full max-w-[1400px] relative">
+        {/* contents */}
+        <div className="relative">
           <div
             ref={scrollerRef}
-            className=" mx-auto overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth pr-12"
+            className="overflow-x-auto overflow-y-hidden scrollbar-hide scroll-smooth"
           >
-            <div className="flex gap-2 w-max">
+            <div className="pv-topgames-row flex gap-2 w-max">
               {Array.from({ length: 10 }).map((_, idx) => (
                 <div key={idx} className="w-72 h-80 relative flex justify-end">
                   <span className="text-[12rem] font-bold absolute left-2 bottom-16">
                     {idx + 1}
                   </span>
-                  <div className="h-80 w-60 bg-background_disabled rounded-lg">
+                  <div className="h-80 w-60 bg-muted rounded-lg">
                     <img src="" alt="" />
                   </div>
                 </div>
@@ -109,8 +113,9 @@ export const VaultTopGames = () => {
             </div>
           </div>
 
-          <div className="h-full w-16 bg-gradient-to-r from-background_primary absolute left-0 top-0 z-10"></div>
-          <div className="h-full w-16 bg-gradient-to-l from-background_primary absolute right-0 top-0 z-10"></div>
+          {/* edge fades — pointer-events none biar gak nutupin klik */}
+          <div className="pointer-events-none h-full w-16 bg-linear-to-r from-background absolute left-0 top-0 z-10"></div>
+          <div className="pointer-events-none h-full w-16 bg-linear-to-l from-background absolute right-0 top-0 z-10"></div>
         </div>
       </div>
     </section>

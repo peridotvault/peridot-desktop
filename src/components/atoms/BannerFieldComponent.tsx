@@ -14,7 +14,7 @@ export const BannerFieldComponent = ({
     <div className="flex flex-col gap-3">
       <p className="capitalize font-semibold">{title}</p>
       <div className="flex justify-center">
-        <div className="shadow-arise-sm w-full flex justify-center items-center h-[25rem] rounded-xl overflow-hidden bg-background_secondary">
+        <div className="shadow-arise-sm w-full flex justify-center items-center h-100 rounded-xl overflow-hidden bg-background_secondary">
           {imageUrl ? (
             <img
               src={imageUrl} // sekarang langsung pakai URL publik
