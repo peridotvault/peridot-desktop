@@ -11,19 +11,24 @@ import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontaw
 import { NavLink } from 'react-router-dom';
 import { ImagePeridotLogo } from '../../lib/constants/const-url';
 import { ButtonWithSound } from '../../components/atoms/button-with-sound';
+import { Avatar } from '../../components/atoms/avatar';
 
 interface MainSidebarProps {
   onOpenWallet: () => void;
   onOpenPeri: () => void;
+  onOpenMenuAvatar: () => void;
   walletActive?: boolean;
   periActive?: boolean;
+  avatarActive?: boolean;
 }
 
 export const MainSidebar: React.FC<MainSidebarProps> = ({
   onOpenWallet,
   onOpenPeri,
+  onOpenMenuAvatar,
   walletActive = false,
   periActive = false,
+  avatarActive = false,
 }) => {
   const linkSidebar = [
     { link: '/', icon: faDungeon, label: 'Vault', exact: true },
@@ -63,11 +68,11 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
     <div className="fixed bg-background flex flex-col h-full shadow-flat-sm z-50 w-20 p-2">
       {/* List Path  */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="flex flex-col p-2 gap-2 justify-between h-full">
+        <div className="flex flex-col p-1 gap-2 justify-between h-full">
           {/* Top  */}
-          <div className="flex flex-col gap-2">
-            <div className="p-2 mb-8">
-              <img src={ImagePeridotLogo} alt="" />
+          <div className="flex flex-col">
+            <div className="p-2 mb-10">
+              <img src={ImagePeridotLogo} alt="" draggable={false} />
             </div>
 
             {/* Actions  */}
@@ -87,19 +92,32 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
           </div>
 
           {/* Bottom  */}
-          <div className="flex flex-col mb-2 gap-2">
-            <ActionBtn
-              icon={faRobot}
-              label="Peri Chatbot"
-              onClick={onOpenPeri}
-              isActive={periActive}
-            />
-            <ActionBtn
-              icon={faWallet}
-              label="Wallet"
-              onClick={onOpenWallet}
-              isActive={walletActive}
-            />
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-col bg-card rounded-lg border border-foreground/10 gap-2">
+              <ActionBtn
+                icon={faRobot}
+                label="Peri Chatbot"
+                onClick={onOpenPeri}
+                isActive={periActive}
+              />
+              <ActionBtn
+                icon={faWallet}
+                label="Wallet"
+                onClick={onOpenWallet}
+                isActive={walletActive}
+              />
+            </div>
+            <hr className="my-2 border-muted-foreground/50" />
+            <ButtonWithSound
+              type="button"
+              onClick={onOpenMenuAvatar}
+              aria-label={'Menu Avatar'}
+              aria-pressed={avatarActive}
+              title={'Menu Avatar'}
+              className="hover:cursor-pointer"
+            >
+              <Avatar />
+            </ButtonWithSound>
           </div>
         </div>
       </div>

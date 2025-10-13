@@ -88,13 +88,13 @@ export const CreateGamePage = () => {
           <button
             onClick={() => setIsCreateGameModal(true)}
             className={
-              'flex aspect-square text-lg bg-accent_secondary rounded-full w-8 h-8 items-center justify-center duration-300 hover:shadow-flat-sm'
+              'flex aspect-square text-lg bg-accent rounded-full w-8 h-8 items-center justify-center duration-300 hover:shadow-flat-sm'
             }
           >
             <FontAwesomeIcon icon={faPlus} />
           </button>
         </div>
-        <hr className="border-white/20" />
+        <hr className="border-foreground/20" />
       </section>
 
       {/* List Games   */}
@@ -103,7 +103,7 @@ export const CreateGamePage = () => {
           games.map((item, index) => (
             <Link
               key={index}
-              className="px-8 py-4 hover:bg-background_secondary flex gap-6 items-center justify-between"
+              className="px-8 py-4 hover:bg-card flex gap-6 items-center justify-between"
               to={'/studio/update/' + item.pgl1_game_id.toString()}
             >
               <div className="flex gap-6 items-start">
@@ -116,7 +116,7 @@ export const CreateGamePage = () => {
                 </div>
                 <div className="">
                   <p className="">{item.pgl1_name}</p>
-                  <p className="text-sm text-text_disabled">{item.pgl1_description}</p>
+                  <p className="text-sm text-muted-foreground">{item.pgl1_description}</p>
                 </div>
               </div>
             </Link>
@@ -128,7 +128,7 @@ export const CreateGamePage = () => {
             <div className="mt-4">
               <button
                 onClick={() => setIsCreateGameModal(true)}
-                className="bg-accent_secondary px-6 py-2 rounded-lg"
+                className="bg-accent px-6 py-2 rounded-lg"
               >
                 Add Games
               </button>
@@ -139,7 +139,7 @@ export const CreateGamePage = () => {
         {!!unRegisteredGame?.length && (
           <section className="flex flex-col gap-2 mt-8">
             <h2 className="font-bold text-lg">Unregistered Games</h2>
-            <hr className="border-white/10" />
+            <hr className="border-foreground/10" />
             <div className="">
               {unRegisteredGame.map((item, index) => (
                 <div key={index} className="px-8 py-4 flex gap-6 items-center justify-between">

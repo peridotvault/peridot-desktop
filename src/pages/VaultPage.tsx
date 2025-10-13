@@ -9,13 +9,14 @@ import { TypographyH2 } from '../components/atoms/typography-h2';
 import { categories } from './../assets/json/app/categories.json';
 import { VaultCarousel } from '../components/organisms/vault-carousel';
 import { VaultTopGames } from '../components/organisms/vault-top-games';
+import { Avatar } from '../components/atoms/avatar';
 
 export default function VaultPage() {
   const [allGames, setAllGames] = useState<PGLMeta[] | null>();
   const welcomeGame = [
     {
       gameId: 'SADC1',
-      gameBannerImage: './assets/vault/Content1.png',
+      gameBannerImage: './assets/vault/header.png',
       gameName: 'Peridot Game',
       gameDescription:
         'Welcome to Shatterline - ground zero for the apocalypse. Are you ready? Shatterline is a fierce, intense multiplayer FPS, offering roguelike co-op PVE modes as well as competitive PvP modes.',

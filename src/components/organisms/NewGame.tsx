@@ -1,7 +1,7 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
 import { InputFieldComponent } from '../atoms/InputFieldComponent';
-import { faHeader } from '@fortawesome/free-solid-svg-icons';
+import { faComment, faHashtag, faHeader } from '@fortawesome/free-solid-svg-icons';
 import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
 import { createGame } from '../../blockchain/icp/vault/services/ICPGameService';
 import { useWallet } from '../../contexts/WalletContext';
@@ -118,13 +118,13 @@ export const NewGame = ({ onCreated }: NewGameProps) => {
     <div
       role="dialog"
       onClick={(e) => e.stopPropagation()}
-      className="bg-background_primary p-8 border border-white/5 rounded-lg w-full md:max-w-[500px] flex flex-col gap-6"
+      className="bg-background p-8 border border-foreground/5 rounded-lg w-full md:max-w-[500px] flex flex-col gap-6"
     >
       <h1 className="text-xl font-bold">New Game</h1>
 
       <div className="flex flex-col gap-4">
         <InputFieldComponent
-          icon={faHeader}
+          icon={faHashtag}
           name="pgl1_game_id"
           onChange={(e) => set_pgl1_game_id(e.target.value)}
           placeholder="Game Id"
@@ -141,7 +141,7 @@ export const NewGame = ({ onCreated }: NewGameProps) => {
           value={pgl1_name}
         />
         <InputFieldComponent
-          icon={faHeader}
+          icon={faComment}
           name="description"
           onChange={(e) => set_pgl1_description(e.target.value)}
           placeholder="Game Description"
@@ -153,7 +153,7 @@ export const NewGame = ({ onCreated }: NewGameProps) => {
         <button
           onClick={handleCreateGame}
           disabled={busy}
-          className="bg-accent_secondary px-6 py-2 rounded-lg"
+          className="bg-accent px-6 py-2 rounded-lg"
         >
           {busy ? 'Creating…' : 'Create'}
         </button>

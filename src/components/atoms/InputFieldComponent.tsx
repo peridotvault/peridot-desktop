@@ -22,21 +22,27 @@ export const InputFieldComponent = ({
   required?: boolean;
   onChange: ChangeEventHandler<HTMLInputElement>;
 }) => {
+  const base =
+    'w-full bg-transparent shadow-sunken-sm px-3 outline-none focus:shadow-arise-sm duration-300 placeholder:text-muted-foreground';
+
+  const active = '';
+  const inactive = 'opacity-50';
+
   return (
     <div className="flex flex-col gap-3">
       <p className="capitalize font-semibold">
-        {placeholder} <label className="text-accent_primary"> *</label>
+        {placeholder} <label className="text-accent-foreground"> *</label>
       </p>
-      <div className="flex rounded-xl overflow-hidden border border-text_disabled/30">
+      <div className="flex rounded-xl overflow-hidden border border-muted-foreground/30">
         <div className="h-14 w-14 flex justify-center items-center">
-          <FontAwesomeIcon icon={icon} className="text-text_disabled" />
+          <FontAwesomeIcon icon={icon} className="text-muted-foreground" />
         </div>
         <input
           type={type}
           name={name}
           required={required}
           disabled={disabled}
-          className={`w-full bg-transparent shadow-sunken-sm px-3 outline-none focus:shadow-arise-sm duration-300`}
+          className={`${base} ${disabled ? inactive : active}`}
           placeholder={placeholder}
           value={value}
           onChange={onChange}

@@ -15,10 +15,12 @@ import { GetOpt } from '../../interfaces/CoreInterface';
 import { MainSidebar } from './MainSidebar';
 import { Slide } from '../../pages/Slide';
 import AIChatbot from '../../components/organisms/ai-chatbot';
+import { MenuAvatar } from '../../components/organisms/menu-avatar';
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
   const [isOpenPeri, setIOpenPeri] = useState(false);
+  const [isOpenMenuAvatar, setIOpenMenuAvatar] = useState(false);
   const { wallet, isCheckingWallet, setIsCheckingWallet } = useWallet();
   const navigate = useNavigate();
   const [isRequiredPassword, setIsRequiredPassword] = useState(false);
@@ -129,14 +131,31 @@ export default function MainLayout() {
   const togglePeri = () => {
     setIOpenPeri((prev) => {
       const next = !prev;
-      if (next) setIOpenWallet(false); // tutup Wallet saat Peri dibuka
+      if (next) {
+        setIOpenMenuAvatar(false);
+        setIOpenWallet(false);
+      }
       return next;
     });
   };
   const toggleWallet = () => {
     setIOpenWallet((prev) => {
       const next = !prev;
-      if (next) setIOpenPeri(false); // tutup Peri saat Wallet dibuka
+      if (next) {
+        setIOpenPeri(false);
+        setIOpenMenuAvatar(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleAvatar = () => {
+    setIOpenMenuAvatar((prev) => {
+      const next = !prev;
+      if (next) {
+        setIOpenPeri(false);
+        setIOpenWallet(false);
+      }
       return next;
     });
   };
@@ -156,8 +175,10 @@ export default function MainLayout() {
       <MainSidebar
         onOpenWallet={toggleWallet}
         onOpenPeri={togglePeri}
+        onOpenMenuAvatar={toggleAvatar}
         walletActive={isOpenWallet}
         periActive={isOpenPeri}
+        avatarActive={isOpenMenuAvatar}
       />
 
       {/* Content Area */}
@@ -184,6 +205,12 @@ export default function MainLayout() {
         onClose={() => setIOpenWallet(false)}
         onLockChanged={() => setIsRequiredPassword(true)}
         leftClassName="left-20"
+      />
+
+      <MenuAvatar
+        open={isOpenMenuAvatar}
+        onClose={() => setIOpenMenuAvatar(false)}
+        leftClassName="left-24"
       />
 
       <AnimatePresence>

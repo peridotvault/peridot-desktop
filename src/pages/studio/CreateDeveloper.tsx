@@ -33,10 +33,10 @@ export const CreateDeveloper = () => {
       {/* form  */}
       <div
         aria-label="form"
-        className="w-[400px] p-8 flex flex-col gap-6 bg-background_primary rounded-2xl"
+        className="w-[400px] p-8 flex flex-col gap-6 bg-background rounded-2xl"
       >
-        <div className="bg-background_secondary aspect-video rounded-xl flex flex-col justify-center items-center">
-          <p className="text-text_disabled">one-time payment for</p>
+        <div className="bg-card aspect-video rounded-xl flex flex-col justify-center items-center">
+          <p className="text-muted-foreground">one-time payment for</p>
           <p className="text-5xl font-bold">{priceUpgradeToDeveloperAccount} PER</p>
         </div>
         {/* title  */}
@@ -52,7 +52,7 @@ export const CreateDeveloper = () => {
           <InputField onChange={(e) => setBio(e)} type="text" placeholder="Bio" value={bio} />
         </div>
         {/* Alert  */}
-        <p className="text-text_disabled">
+        <p className="text-muted-foreground">
           *Alert! you can not REFUND but You still can change this details later
         </p>
         <ButtonTransaction onClick={() => setIsOnPayment(true)} text="Pay" />

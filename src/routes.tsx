@@ -92,23 +92,25 @@ const router = createHashRouter([
         path: 'create_developer',
         element: <CreateDeveloper />,
       },
+    ],
+  },
+
+  // Studio
+  {
+    path: 'studio',
+    element: <StudioLayout />,
+    children: [
       {
-        path: 'studio',
-        element: <StudioLayout />,
-        children: [
-          {
-            index: true,
-            element: <DeveloperStudio />,
-          },
-          {
-            path: 'create',
-            element: <CreateGamePage />,
-          },
-          {
-            path: 'update/:gameId',
-            element: <UpdateApp />,
-          },
-        ],
+        index: true,
+        element: <DeveloperStudio />,
+      },
+      {
+        path: 'create',
+        element: <CreateGamePage />,
+      },
+      {
+        path: 'update/:gameId',
+        element: <UpdateApp />,
       },
     ],
   },
