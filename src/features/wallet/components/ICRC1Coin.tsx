@@ -96,7 +96,7 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
               className={`w-full ${canisterId == 'ryjl3-tyaaa-aaaaa-aaaba-cai' ? 'p-3' : ''}`}
             />
           ) : (
-            <div className="w-full h-full bg-background_disabled animate-pulse"></div>
+            <div className="w-full h-full bg-foreground/20 animate-pulse"></div>
           )}
         </div>
         <div className="flex flex-col">
@@ -104,20 +104,20 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
             {icrc1?.balance != null ? (
               <p>{icrc1?.balance}</p>
             ) : (
-              <div className="w-12 h-5 bg-background_disabled rounded-full animate-pulse"></div>
+              <div className="w-12 h-5 bg-foreground/20 rounded-full animate-pulse"></div>
             )}
 
             {icrc1?.symbol != null ? (
               <p>{icrc1?.symbol}</p>
             ) : (
-              <div className="w-7 h-5 bg-background_disabled rounded-full animate-pulse"></div>
+              <div className="w-7 h-5 bg-foreground/20 rounded-full animate-pulse"></div>
             )}
           </div>
           <div className="text-xs text-start">
             {icrc1?.name != null ? (
               <p>{icrc1?.name}</p>
             ) : (
-              <div className="w-7 h-3 bg-background_disabled rounded-full animate-pulse mt-1"></div>
+              <div className="w-7 h-3 bg-foreground/20 rounded-full animate-pulse mt-1"></div>
             )}
           </div>
         </div>
@@ -125,10 +125,10 @@ export const ICRC1Coin = ({ canisterId, onBalanceUpdate }: ICRC1CoinProps) => {
       {rates != null && rates != '0' && icrc1?.balance != null ? (
         <div className="flex flex-col items-end">
           <p>{formatCurrency((parseFloat(rates) * icrc1.balance).toLocaleString(), 2)}</p>
-          <p className="text-xs text-text_disabled">{formatCurrency(rates)}</p>
+          <p className="text-xs text-card-foreground">{formatCurrency(rates)}</p>
         </div>
       ) : (
-        <div className="w-12 h-5 bg-background_disabled rounded-full animate-pulse"></div>
+        <div className="w-12 h-5 bg-foreground/20 rounded-full animate-pulse"></div>
       )}
     </div>
   );

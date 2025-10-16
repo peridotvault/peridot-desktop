@@ -1,5 +1,4 @@
-// @ts-ignore
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useWallet } from '../../contexts/WalletContext';
 import { Link } from 'react-router-dom';
 import { getMyGames } from '../../blockchain/icp/vault/services/ICPGameService';
@@ -7,11 +6,11 @@ import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
 import { optGetOr } from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
 
-export const Library = () => {
+export default function LibraryPage() {
   const { wallet } = useWallet();
-  const [myGames, setMyGames] = useState<PGLMeta[] | null>();
+  const [myGames, setMyGames] = React.useState<PGLMeta[] | null>();
 
-  useEffect(() => {
+  React.useEffect(() => {
     async function fetchData() {
       const resAllGames = await getMyGames({ wallet: wallet });
       console.log('RESS :', resAllGames);
@@ -32,7 +31,7 @@ export const Library = () => {
         <section className="px-6 py-4 flex flex-col gap-4">
           <p className="text-xl font-medium">Recently you play</p>
           <div className="flex flex-wrap gap-8">
-            <p className="text-white/50">You didn't play any game yet</p>
+            <p className="text-foreground/50">You didn't play any game yet</p>
           </div>
         </section>
 
@@ -44,7 +43,7 @@ export const Library = () => {
               <Link
                 to={`/library/${formatTitle(item.pgl1_name)}/${item.pgl1_game_id}`}
                 key={item.pgl1_game_id}
-                className="w-[170px] aspect-3/4 bg-background_secondary rounded-xl overflow-hidden"
+                className="w-[170px] aspect-3/4 bg-card rounded-xl overflow-hidden"
               >
                 <img
                   src={optGetOr(item.pgl1_cover_image, ImageLoading)}
@@ -58,4 +57,4 @@ export const Library = () => {
       </div>
     </div>
   );
-};
+}

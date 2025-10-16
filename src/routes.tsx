@@ -1,37 +1,45 @@
 // @ts-ignore
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 
 import { createHashRouter } from 'react-router-dom';
 
-import Login from './pages/signin/Login';
-import VaultPage from './pages/VaultPage';
-import MainLayout from './layouts/_main_/MainLayout';
-import GameDetailLibrary from './pages/library/GameDetailLibrary';
-import GameDetail from './pages/game_detail/GameDetail';
-import LibraryLayout from './layouts/library/LibraryLayout';
-import { Library } from './pages/library/Library';
-import { Market } from './pages/market/Market';
-import { CreateProfile } from './pages/profile/CreateProfile';
-import { UpdateProfile } from './pages/profile/UpdateProfile';
-import { ProfileUser } from './pages/profile/ProfileUser';
-import { ProfileDeveloper } from './pages/profile/ProfileDeveloper';
-import { CreateDeveloper } from './pages/studio/CreateDeveloper';
-import { StudioLayout } from './layouts/studio/StudioLayout';
-import { NotFound } from './pages/additional/NotFound';
-import { DeveloperStudio } from './pages/studio/DeveloperStudio';
-import UpdateApp from './pages/studio/UpdateGame';
-import { DownloadPage } from './pages/DownloadPage';
+// EAGER (tetap biasa)
 import UpdaterPage from './pages/additional/UpdaterPage';
-import { CreateGamePage } from './pages/studio/CreateGamePage';
+import AppShell from './layouts/app-shell';
+import MainLayout from './layouts/_main_/main-layout';
+import VaultPage from './pages/VaultPage';
+import Login from './pages/signin/Login';
+import { LoadingScreen } from './components/organisms/LoadingScreen';
+import { StudioGameMedia } from './pages/studio/game/studio-game-media';
+import { StudioGameBuilds } from './pages/studio/game/studio-game-builds';
+import { StudioGameMarket } from './pages/studio/game/studio-game-market';
+import { StudioGameNewBuild } from './pages/studio/game/studio-game-newbuild';
+import { StudioGamePublish } from './pages/studio/game/studio-game-publish';
 
-// import React, { lazy, Suspense } from "react";
-// const Login = lazy(() => import("./pages/signin/Login"));
-// const CreateWallet = lazy(() => import("./pages/signin/CreateWallet"));
-// const ImportWallet = lazy(() => import("./pages/signin/ImportWallet"));
-// const Home = lazy(() => import("./pages/Home"));
-// const MainLayout = lazy(() => import("./components/layout/MainLayout"));
-// const Library = lazy(() => import("./pages/Library"));
-// const GameDetail = lazy(() => import("./pages/game_detail/GameDetail"));
+// LAZY (split)
+const LibraryLayout = lazy(() => import('./layouts/library/library-layout'));
+const LibraryPage = lazy(() => import('./pages/library/library'));
+const LibraryGameDetail = lazy(() => import('./pages/library/library-game-detail'));
+const Market = lazy(() => import('./pages/market/Market'));
+const DownloadPage = lazy(() => import('./pages/download-page'));
+const GameDetail = lazy(() => import('./pages/game_detail/GameDetail'));
+const ProfileUser = lazy(() => import('./pages/profile/profile-user'));
+const ProfileDeveloper = lazy(() => import('./pages/profile/ProfileDeveloper'));
+const UpdateProfile = lazy(() => import('./pages/profile/update-user'));
+const CreateDeveloper = lazy(() => import('./pages/studio/CreateDeveloper'));
+const StudioLayout = lazy(() => import('./layouts/studio/studio-layout'));
+const StudioDashboard = lazy(() => import('./pages/studio/studio-dashboard'));
+const StudioGames = lazy(() => import('./pages/studio/studio-games'));
+const StudioGameLayout = lazy(() => import('./layouts/studio/game/studio-game-layout'));
+const StudioGameDetails = lazy(() => import('./pages/studio/game/studio-game-details'));
+const CreateProfile = lazy(() => import('./pages/profile/CreateProfile'));
+const StudioGameAnnouncement = lazy(() => import('./pages/studio/game/studio-game-announcements'));
+const StudioTeamPage = lazy(() => import('./pages/studio/studio-team'));
+const NotFound = lazy(() => import('./pages/additional/NotFound'));
+
+const withSuspense = (el: React.ReactNode) => (
+  <Suspense fallback={<LoadingScreen />}>{el}</Suspense>
+);
 
 const router = createHashRouter([
   {
@@ -39,78 +47,125 @@ const router = createHashRouter([
     element: <UpdaterPage />,
   },
 
-  // home
   {
     path: '/',
-    element: <MainLayout />,
+    element: <AppShell />, // ⬅️ wrapper global
     children: [
+      // home
       {
-        index: true,
-        element: <VaultPage />,
-      },
-      {
-        path: 'library',
-        element: <LibraryLayout />,
+        element: <MainLayout />,
         children: [
           {
             index: true,
-            element: <Library />,
+            element: <VaultPage />,
           },
           {
-            path: ':appName/:gameId',
-            element: <GameDetailLibrary />,
+            path: 'library',
+            element: withSuspense(<LibraryLayout />),
+            children: [
+              {
+                index: true,
+                element: withSuspense(<LibraryPage />),
+              },
+              {
+                path: ':appName/:gameId',
+                element: withSuspense(<LibraryGameDetail />),
+              },
+            ],
+          },
+          {
+            path: 'market',
+            element: withSuspense(<Market />),
+          },
+          {
+            path: 'download',
+            element: withSuspense(<DownloadPage />),
+          },
+          {
+            path: 'vault/:gameName/:gameId',
+            element: withSuspense(<GameDetail />),
+          },
+          // profile
+          {
+            path: 'profile',
+            element: withSuspense(<ProfileUser />),
+          },
+          {
+            path: 'profile-developer',
+            element: withSuspense(<ProfileDeveloper />),
+          },
+          {
+            path: 'update-profile',
+            element: withSuspense(<UpdateProfile />),
+          },
+          // Developer
+          {
+            path: 'create-developer',
+            element: withSuspense(<CreateDeveloper />),
           },
         ],
       },
-      {
-        path: 'market',
-        element: <Market />,
-      },
-      {
-        path: 'download',
-        element: <DownloadPage />,
-      },
-      {
-        path: ':gameName/:gameId',
-        element: <GameDetail />,
-      },
-      // profile
-      {
-        path: 'profile_user',
-        element: <ProfileUser />,
-      },
-      {
-        path: 'profile_developer',
-        element: <ProfileDeveloper />,
-      },
-      {
-        path: 'update_profile',
-        element: <UpdateProfile />,
-      },
-      // Developer
-      {
-        path: 'create_developer',
-        element: <CreateDeveloper />,
-      },
-    ],
-  },
 
-  // Studio
-  {
-    path: 'studio',
-    element: <StudioLayout />,
-    children: [
+      // Studio
       {
-        index: true,
-        element: <DeveloperStudio />,
-      },
-      {
-        path: 'create',
-        element: <CreateGamePage />,
-      },
-      {
-        path: 'update/:gameId',
-        element: <UpdateApp />,
+        path: 'studio',
+        element: withSuspense(<StudioLayout />),
+        children: [
+          {
+            index: true,
+            element: withSuspense(<StudioDashboard />),
+          },
+          {
+            path: 'dashboard',
+            element: withSuspense(<StudioDashboard />),
+          },
+          {
+            path: 'game',
+            element: withSuspense(<StudioGames />),
+          },
+          {
+            path: 'game/:gameId',
+            element: withSuspense(<StudioGameLayout />),
+            children: [
+              {
+                index: true,
+                element: withSuspense(<StudioGameDetails />),
+              },
+              {
+                path: 'details',
+                element: withSuspense(<StudioGameDetails />),
+              },
+              {
+                path: 'media',
+                element: withSuspense(<StudioGameMedia />),
+              },
+              {
+                path: 'builds',
+                element: withSuspense(<StudioGameBuilds />),
+              },
+              {
+                path: 'builds/new',
+                element: <StudioGameNewBuild />,
+              },
+              {
+                path: 'market',
+                element: withSuspense(<StudioGameMarket />),
+              },
+              {
+                path: 'publish',
+                element: withSuspense(<StudioGamePublish />),
+              },
+              {
+                path: 'announcements',
+                element: withSuspense(<StudioGameAnnouncement />),
+              },
+            ],
+          },
+          {
+            path: 'team',
+            element: withSuspense(<StudioTeamPage />),
+          },
+        ],
       },
     ],
   },

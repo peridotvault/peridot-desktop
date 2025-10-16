@@ -18,7 +18,7 @@ import { getUserData } from '../../blockchain/icp/directory/services/ICPUserServ
 import { UserInterface } from '../../interfaces/user/UserInterface';
 import { GetOpt } from '../../interfaces/CoreInterface';
 
-export const ProfileDeveloper = () => {
+export default function ProfileDeveloper() {
   const { wallet } = useWallet();
   const [userData, setUserData] = useState<UserInterface | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -296,4 +296,4 @@ export const ProfileDeveloper = () => {
       </div>
     </main>
   );
-};
+}

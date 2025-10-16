@@ -10,8 +10,8 @@ import { useWallet } from '../../../contexts/WalletContext';
 import { SaveContact } from '../components/SaveContact';
 import theCoin from '../../../assets/json/coins.json';
 import { AlertMessage } from '../components/AlertMessage';
-import { Coin } from '../../../local_db/wallet/models/Coin';
-import { CoinService } from '../../../local_db/wallet/services/coinService';
+import { Coin } from '../../../local-db/wallet/models/Coin';
+import { CoinService } from '../../../local-db/wallet/services/coinService';
 import { transferTokenICRC1 } from '../blockchain/icp/services/ICPCoinService';
 
 interface Props {
@@ -158,7 +158,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
   }
 
   return (
-    <div className="fixed top-0 right-0 w-[370px] bg-background_primary h-full p-6 flex flex-col gap-6">
+    <div className="fixed top-0 left-20 w-[370px] bg-background h-full p-6 flex flex-col gap-6">
       {/* header  */}
       <section className="flex justify-between items-center">
         <button
@@ -220,14 +220,14 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
           ))}
         </section>
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-text_disabled pb-20">
+        <div className="w-full h-full flex items-center justify-center text-muted-foreground pb-20">
           <p>You Don't Have Contact</p>
         </div>
       )}
 
       {/* Choose Coin  */}
       {finalAddress ? (
-        <div className="fixed top-0 right-0 w-[370px] bg-background_primary h-full p-6 flex flex-col gap-6">
+        <div className="fixed top-0 left-0 w-[370px] bg-background h-full p-6 flex flex-col gap-6">
           {/* header  */}
           <section className="flex justify-between items-center">
             <button
@@ -339,7 +339,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                     </div>
                   </div>
                   {!canSend && (
-                    <p className="text-sm text-red-400">
+                    <p className="text-sm text-chart-5">
                       Amount exceeds balance ({tokenBalances} {coinMetadata?.symbol})
                     </p>
                   )}
@@ -355,7 +355,7 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
                 <button
                   onClick={handleSend}
                   disabled={!canSend}
-                  className={`w-full text-lg rounded-lg font bg-linear-to-tr from-accent_primary to-accent_secondary p-2  duration-300 ${
+                  className={`w-full text-lg rounded-lg font bg-linear-to-tr from-accent-foreground to-accent p-2  duration-300 ${
                     canSend ? 'hover:scale-105' : 'opacity-50'
                   } `}
                 >

@@ -54,7 +54,7 @@ export const TransactionProof = ({
   function receivedComponent(isUserSender: boolean) {
     return (
       <div className="flex">
-        <p className="bg-accent_primary px-3 text-sm rounded-full text-black">
+        <p className="bg-accent-foreground px-3 text-sm rounded-full text-black">
           {isUserSender ? 'Sent' : 'Received'}
         </p>
       </div>
@@ -62,7 +62,7 @@ export const TransactionProof = ({
   }
 
   return (
-    <div className="fixed right-0 w-[370px] top-0 bg-background_primary h-full flex flex-col p-8 gap-12 justify-between">
+    <div className="fixed left-20 w-[370px] top-0 bg-background h-full flex flex-col p-8 gap-12 justify-between">
       {/* header  */}
       <header className="flex justify-between items-center">
         <button onClick={onCloseModal} className="w-6 aspect-square">
@@ -81,9 +81,9 @@ export const TransactionProof = ({
                 key={index}
                 className={`${
                   metadata.length - 1 == index ? '' : 'border-b'
-                } border-background_disabled`}
+                } border-muted-foreground`}
               >
-                <td className="pl-6 py-6 text-text_disabled">{item.title}</td>
+                <td className="pl-6 py-6 text-muted-foreground">{item.title}</td>
                 <td className="pr-6 py-6">{item.content}</td>
               </tr>
             ))}

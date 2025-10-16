@@ -4,8 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputField } from '../../../components/atoms/InputField';
 import { AddCoin } from '../components/AddCoin';
 import theCoin from '../../../assets/json/coins.json';
-import { Coin } from '../../../local_db/wallet/models/Coin';
-import { CoinService } from '../../../local_db/wallet/services/coinService';
+import { Coin } from '../../../local-db/wallet/models/Coin';
+import { CoinService } from '../../../local-db/wallet/services/coinService';
 
 interface Props {
   onClose: () => void;
@@ -101,14 +101,14 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
 
   if (isLoading) {
     return (
-      <div className="fixed top-0 right-0 w-[370px] bg-background_primary h-full p-6 flex justify-center items-center">
+      <div className="fixed top-0 left-20 w-[370px] bg-background h-full p-6 flex justify-center items-center">
         Loading...
       </div>
     );
   }
 
   return (
-    <div className="fixed top-0 right-0 w-[370px] bg-background_primary h-full p-6 flex flex-col gap-4">
+    <div className="fixed top-0 left-20 w-[370px] bg-background h-full p-6 flex flex-col gap-4">
       {/* header  */}
       <section className="flex justify-between items-center">
         <button
@@ -183,7 +183,7 @@ export const Manage: React.FC<Props> = ({ onClose }) => {
                   onChange={() => handleToggle(item.coinAddress)}
                 />
                 <span
-                  className={`absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-background_primary shadow-arise-sm transition-all duration-500 rounded-lg ${
+                  className={`absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-background shadow-arise-sm transition-all duration-500 rounded-lg ${
                     item.isChecked ? 'bg-white shadow-lg' : ''
                   }`}
                 ></span>

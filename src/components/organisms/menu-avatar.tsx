@@ -7,7 +7,11 @@ import {
   faGamepad,
   faGear,
   faUser,
+  faUserEdit,
+  IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
+import { ButtonWithSound } from '../atoms/button-with-sound';
 
 type Props = {
   open: boolean;
@@ -20,14 +24,22 @@ type Props = {
 export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) => {
   const list = [
     {
-      label: 'View Account',
+      href: '/profile',
+      label: 'View Profile',
       icon: faUser,
     },
     {
+      href: '/update-profile',
+      label: 'Update Profile',
+      icon: faUserEdit,
+    },
+    {
+      href: '/studio',
       label: 'Studio',
       icon: faGamepad,
     },
     {
+      href: '#',
       label: 'Settings',
       icon: faGear,
     },
@@ -52,6 +64,27 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
     };
   }, [open]);
 
+  const NavComponent = ({
+    href,
+    icon,
+    label,
+  }: {
+    href: string;
+    icon: IconDefinition;
+    label: string;
+  }) => {
+    return (
+      <ButtonWithSound>
+        <Link to={href} className="hover:bg-foreground/10 rounded-lg flex items-center">
+          <div className="w-10 h-10 flex justify-center items-center text-muted-foreground">
+            <FontAwesomeIcon icon={icon} />
+          </div>
+          <label htmlFor={label}>{label}</label>
+        </Link>
+      </ButtonWithSound>
+    );
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -68,7 +101,7 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
           {/* Panel (slide from left) */}
           <motion.div
             className={[
-              'fixed bottom-4 w-60 p-4 bg-background border-foreground/10 rounded-lg',
+              'fixed bottom-4 w-72 p-4 bg-background border-foreground/10 rounded-lg',
               'flex flex-col gap-2 z-40',
               leftClassName,
             ].join(' ')}
@@ -84,28 +117,20 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
             <section className="flex gap-4 items-center pb-1">
               <Avatar />
               <div className="flex flex-col gap-1">
-                <span className="font-bold leading-4">Ifal</span>
-                <span className="text-sm leading-3">m@example.com</span>
+                <span className="font-bold leading-4 line-clamp-1">Ifal</span>
+                <span className="text-sm leading-3 line-clamp-1">m@example.com</span>
               </div>
             </section>
             <hr className="border-foreground/10" />
             {/* Main  */}
             <section className="flex flex-col">
               {list.map((item, index) => (
-                <div key={index} className="hover:bg-foreground/10 rounded-lg flex items-center">
-                  <div className="w-10 h-10 flex justify-center items-center text-muted-foreground">
-                    <FontAwesomeIcon icon={item.icon} />
-                  </div>
-                  <label htmlFor={item.label}>{item.label}</label>
-                </div>
+                <NavComponent key={index} href={item.href} icon={item.icon} label={item.label} />
               ))}
             </section>
             <hr className="border-foreground/10" />
-            <section className="hover:bg-foreground/10 rounded-lg flex items-center text-chart-5">
-              <div className="w-10 h-10 flex justify-center items-center">
-                <FontAwesomeIcon icon={faArrowRightFromBracket} />
-              </div>
-              <label htmlFor={'Log out'}>{'Log out'}</label>
+            <section>
+              <NavComponent href="#" icon={faArrowRightFromBracket} label="Log out" />
             </section>
           </motion.div>
         </>

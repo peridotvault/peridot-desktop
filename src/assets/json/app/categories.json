@@ -2,6 +2,7 @@
   "categories": [
     {
       "id": "action",
+      "coverImage": "/images/games/category-action.webp",
       "name": "Action",
       "subgenres": [
         "Platformer",
@@ -17,6 +18,7 @@
     },
     {
       "id": "adventure",
+      "coverImage": "/images/games/category-adventure.webp",
       "name": "Adventure",
       "subgenres": [
         "Point and Click",
@@ -29,6 +31,7 @@
     },
     {
       "id": "role_playing",
+      "coverImage": "/images/games/category-rpg.webp",
       "name": "Role-Playing (RPG)",
       "subgenres": [
         "Action RPG",
@@ -126,12 +129,22 @@
     {
       "id": "sandbox",
       "name": "Sandbox",
-      "subgenres": ["Open World", "Creative Sandbox", "Destruction Sandbox", "Moddable Sandbox"]
+      "subgenres": [
+        "Open World",
+        "Creative Sandbox",
+        "Destruction Sandbox",
+        "Moddable Sandbox"
+      ]
     },
     {
       "id": "platformer",
       "name": "Platformer",
-      "subgenres": ["2D Platformer", "3D Platformer", "Metroidvania", "Precision Platformer"]
+      "subgenres": [
+        "2D Platformer",
+        "3D Platformer",
+        "Metroidvania",
+        "Precision Platformer"
+      ]
     },
     {
       "id": "shooter",
@@ -149,7 +162,12 @@
     {
       "id": "fighting",
       "name": "Fighting",
-      "subgenres": ["2D Fighter", "3D Fighter", "Arena Fighting", "Platform Fighting"]
+      "subgenres": [
+        "2D Fighter",
+        "3D Fighter",
+        "Arena Fighting",
+        "Platform Fighting"
+      ]
     },
     {
       "id": "party",
@@ -165,27 +183,53 @@
     {
       "id": "educational",
       "name": "Educational",
-      "subgenres": ["Math", "Language Learning", "Science", "Typing", "History"]
+      "subgenres": [
+        "Math",
+        "Language Learning",
+        "Science",
+        "Typing",
+        "History"
+      ]
     },
     {
       "id": "music",
       "name": "Music / Rhythm",
-      "subgenres": ["Rhythm Game", "Instrument Simulation", "Music Creation", "Dance Game"]
+      "subgenres": [
+        "Rhythm Game",
+        "Instrument Simulation",
+        "Music Creation",
+        "Dance Game"
+      ]
     },
     {
       "id": "narrative",
       "name": "Narrative",
-      "subgenres": ["Choice-Based", "Interactive Story", "Cinematic", "Emotional Journey"]
+      "subgenres": [
+        "Choice-Based",
+        "Interactive Story",
+        "Cinematic",
+        "Emotional Journey"
+      ]
     },
     {
       "id": "vr_ar",
       "name": "VR / AR",
-      "subgenres": ["VR Action", "VR Puzzle", "VR Exploration", "AR Adventure"]
+      "subgenres": [
+        "VR Action",
+        "VR Puzzle",
+        "VR Exploration",
+        "AR Adventure"
+      ]
     },
     {
       "id": "experimental",
       "name": "Experimental",
-      "subgenres": ["Abstract", "Art Game", "Short Form", "Experimental Mechanics"]
+      "subgenres": [
+        "Abstract",
+        "Art Game",
+        "Short Form",
+        "Experimental Mechanics"
+      ]
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { Block } from '../local_db/wallet/models/Block';
+import { Block } from '../local-db/wallet/models/Block';
 import { TrainedDataInterface } from '../features/wallet/interfaces/History';
 
 export function transformBlockToTrained(block: Block, principalId: string): TrainedDataInterface {

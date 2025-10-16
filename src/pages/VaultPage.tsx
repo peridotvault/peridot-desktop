@@ -9,7 +9,6 @@ import { TypographyH2 } from '../components/atoms/typography-h2';
 import { categories } from './../assets/json/app/categories.json';
 import { VaultCarousel } from '../components/organisms/vault-carousel';
 import { VaultTopGames } from '../components/organisms/vault-top-games';
-import { Avatar } from '../components/atoms/avatar';
 
 export default function VaultPage() {
   const [allGames, setAllGames] = useState<PGLMeta[] | null>();
@@ -87,10 +86,14 @@ export default function VaultPage() {
             {categories.slice(0, 3).map((item) => (
               <div
                 key={item.id}
-                className={`w-1/3 aspect-video rounded-xl bg-muted overflow-hidden duration-300 flex items-end font-bold p-6 text-xl`}
+                className={`w-1/3 aspect-video rounded-xl bg-muted overflow-hidden relative duration-300 flex items-end font-bold p-6 text-xl group`}
               >
-                {/* <img src={image} alt="" className="w-full h-full object-cover rounded-xl" /> */}
-                <span>{item.name}</span>
+                <img
+                  src={item.coverImage}
+                  alt={item.name + ' Image'}
+                  className="w-full h-full object-cover absolute top-0 left-0 opacity-50 duration-300 group-hover:scale-105"
+                />
+                <span className="z-10">{item.name}</span>
               </div>
             ))}
           </div>

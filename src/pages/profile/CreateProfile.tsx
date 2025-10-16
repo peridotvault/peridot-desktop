@@ -114,7 +114,7 @@ const AccountSettingsDropdownField = ({
   );
 };
 
-export const CreateProfile = () => {
+export default function CreateProfile() {
   const { setWallet, setIsGeneratedSeedPhrase } = useWallet();
   const [isValidUsername, setIsValidUsername] = useState({
     valid: true,
@@ -137,7 +137,7 @@ export const CreateProfile = () => {
     setUsername(lowercaseValue);
 
     // Panggil validasi
-    const result: ApiResponse<Boolean> = await getIsUsernameValid(lowercaseValue); // Validasi juga terhadap lowercase
+    const result = await getIsUsernameValid(lowercaseValue);
 
     if ('err' in result) {
       const error = result as { err: { InvalidInput: string } };
@@ -322,4 +322,4 @@ export const CreateProfile = () => {
       </div>
     </main>
   );
-};
+}

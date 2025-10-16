@@ -24,7 +24,7 @@ export const Receive: React.FC<Props> = ({ onClose }) => {
   ]);
 
   return (
-    <div className="fixed top-0 right-0 w-[370px] bg-background_primary h-full p-6 flex flex-col gap-8">
+    <div className="fixed top-0 left-20 w-[370px] bg-background h-full p-6 flex flex-col gap-8">
       {/* header  */}
       <div className="flex justify-between items-center">
         <button

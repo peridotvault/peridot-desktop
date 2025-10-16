@@ -7,7 +7,7 @@ import { createDeveloperProfile } from '../../blockchain/icp/directory/services/
 import { AppPayment } from '../../features/wallet/views/Payment';
 import { useNavigate } from 'react-router-dom';
 
-export const CreateDeveloper = () => {
+export default function CreateDeveloper() {
   const { wallet } = useWallet();
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [bio, setBio] = useState('');
@@ -69,4 +69,4 @@ export const CreateDeveloper = () => {
       <div className="bg-radial absolute top-0 left-0 w-full h-full -z-10 opacity-30"></div>
     </div>
   );
-};
+}

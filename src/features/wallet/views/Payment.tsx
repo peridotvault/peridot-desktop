@@ -246,18 +246,18 @@ export const AppPayment: React.FC<Props> = ({ onClose, price, onExecute, SPENDER
 
   return (
     <motion.div
-      className="fixed inset-0 bg-black/40 z-50 flex justify-end"
+      className="fixed inset-0 bg-black/40 z-50 flex justify-start"
       onClick={onClose}
       animate={{ opacity: 1 }}
       data-lenis-prevent
     >
       <motion.main
-        className="w-[370px] bg-background_primary flex flex-col justify-between min-h-screen p-8 gap-8"
+        className="w-[370px] bg-background flex flex-col justify-between min-h-screen p-8 gap-8"
+        initial={{ x: '-100%', opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: '-100%', opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 480, damping: 42, mass: 0.8 }}
         onClick={(e) => e.stopPropagation()}
-        initial={{ x: 400 }}
-        animate={{ x: 0 }}
-        exit={{ x: 400 }}
-        transition={{ type: 'tween', duration: 0.2 }}
       >
         {alertData.isSuccess !== null && (
           <AlertMessage msg={alertData.msg} isSuccess={alertData.isSuccess} />

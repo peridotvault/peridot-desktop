@@ -30,8 +30,8 @@ import {
 import { Currency } from '../../../features/wallet/interfaces/Currency';
 import { WalletInfo } from '../../../features/wallet/interfaces/Wallet';
 import { InputField } from '../../../components/atoms/InputField';
-import { CoinService } from '../../../local_db/wallet/services/coinService';
-import { Coin } from '../../../local_db/wallet/models/Coin';
+import { CoinService } from '../../../local-db/wallet/services/coinService';
+import { Coin } from '../../../local-db/wallet/models/Coin';
 
 interface HomeProps {
   onLockChanged: () => void;
@@ -480,7 +480,7 @@ const ModalOpenKey: React.FC<ModalOpenKeyProps> = ({ pkORsp, onClose, onConfirm 
   return (
     <div
       onClick={onClose}
-      className="bg-black/40 fixed top-0 right-0 w-full h-full flex justify-center items-center  z-10"
+      className="bg-black/40 fixed top-0 left-20 w-full h-full flex justify-center items-center  z-10"
     >
       <div
         onClick={(e) => e.stopPropagation()}

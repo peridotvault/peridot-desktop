@@ -1,6 +1,5 @@
 // Alert.tsx
 import React from 'react';
-import GlassSurface from '../atoms/GlassSurface';
 
 interface AlertProps {
   type: 'success' | 'error';
@@ -15,15 +14,13 @@ export const Alert: React.FC<AlertProps> = ({ type, message, onClose }) => {
       : 'bg-red-500/20 border-red-500 text-red-700';
 
   return (
-    <GlassSurface
-      className={`fixed top-5 right-5 px-6 py-4 rounded-lg border shadow-lg z-50 ${bg}`}
-    >
+    <div className={`fixed top-5 right-5 px-6 py-4 rounded-lg border shadow-lg z-50 ${bg}`}>
       <div className="flex items-center justify-between gap-4">
         <span>{message}</span>
         <button onClick={onClose} className="ml-4 text-sm font-bold hover:opacity-70">
           ✕
         </button>
       </div>
-    </GlassSurface>
+    </div>
   );
 };

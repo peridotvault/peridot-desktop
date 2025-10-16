@@ -20,7 +20,7 @@ export const VerticalCard = ({
   };
   return (
     <Link
-      to={`/${formatTitle(gameName)}/${gameId}`}
+      to={`/vault/${formatTitle(gameName)}/${gameId}`}
       className="w-full max-w-[250px] flex flex-col gap-3 group"
     >
       <div className="w-full aspect-3/4 overflow-hidden bg-muted rounded-xl duration-300">

@@ -20,7 +20,7 @@ export const Avatar = ({
             draggable={false}
             className="inline-block relative object-cover object-center rounded-lg w-10 h-10 bg-muted-foreground"
           />
-          <span className="absolute min-w-[12px] min-h-[12px] rounded-full py-1 px-1 text-xs font-medium content-[''] leading-none grid place-items-center top-[14%] right-[14%] translate-x-2/4 -translate-y-2/4 bg-green-500 text-foreground border border-background"></span>
+          <span className="absolute min-w-[10px] min-h-[10px] rounded-full py-1 px-1 text-xs font-medium content-[''] leading-none grid place-items-center top-[14%] right-[14%] translate-x-3/4 -translate-y-3/4 bg-green-500 text-foreground border border-background"></span>
         </div>
       );
 
@@ -33,7 +33,7 @@ export const Avatar = ({
             draggable={false}
             className="inline-block relative object-cover object-center rounded-full w-10 h-10 bg-muted-foreground"
           />
-          <span className="absolute min-w-[12px] min-h-[12px] rounded-full py-1 px-1 text-xs font-medium content-[''] leading-none grid place-items-center bottom-[14%] right-[14%] translate-x-2/4 translate-y-2/4 bg-muted-foreground text-foreground border border-background"></span>
+          <span className="absolute min-w-[10px] min-h-[10px] rounded-full py-1 px-1 text-xs font-medium content-[''] leading-none grid place-items-center bottom-[14%] right-[14%] translate-x-3/4 translate-y-3/4 bg-muted-foreground text-foreground border border-background"></span>
         </div>
       );
 

@@ -120,11 +120,13 @@ export const Settings = () => {
               key={idx}
               ref={(el) => (buttonRefs.current[item.currency] = el)}
               className={`${
-                walletInfo?.currency.currency == item.currency ? 'border border-accent_primary' : ''
+                walletInfo?.currency.currency == item.currency
+                  ? 'border border-accent-foreground'
+                  : ''
               } shadow-arise-sm p-6 w-40 rounded-xl shrink-0 flex flex-col justify-between aspect-6/7 text-start`}
               onClick={() => fetchAPICurrency(item.currency)}
             >
-              <div className="w-8 rounded-full aspect-square bg-background_disabled overflow-hidden">
+              <div className="w-8 rounded-full aspect-square bg-card overflow-hidden">
                 <img src={item.flag_url} alt="" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col items-start w-full gap-1">
