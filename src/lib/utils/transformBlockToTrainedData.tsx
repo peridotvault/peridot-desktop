@@ -1,5 +1,5 @@
-import { Block } from '../local-db/wallet/models/Block';
-import { TrainedDataInterface } from '../features/wallet/interfaces/History';
+import { Block } from '../../local-db/wallet/models/Block';
+import { TrainedDataInterface } from '../../features/wallet/interfaces/History';
 
 export function transformBlockToTrained(block: Block, principalId: string): TrainedDataInterface {
   const isSender = block.from === principalId;

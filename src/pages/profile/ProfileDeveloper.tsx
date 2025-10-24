@@ -11,7 +11,6 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { Slide } from '../Slide';
 import { useWallet } from '../../contexts/WalletContext';
 import { LoadingScreen } from '../../components/organisms/LoadingScreen';
 import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
@@ -119,9 +118,9 @@ export default function ProfileDeveloper() {
                   <FontAwesomeIcon icon={faGear} className="shadow-sunken-sm " />
                 </div>
               </button>
-              <AnimatePresence>
+              {/* <AnimatePresence>
                 {isOpenWallet ? <Slide onClose={() => setIOpenWallet(false)} /> : ''}
-              </AnimatePresence>
+              </AnimatePresence> */}
             </div>
           </section>
           {/* Posts  */}

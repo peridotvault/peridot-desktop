@@ -1,10 +1,11 @@
 // @ts-ignore
 import React, { useState, useRef, useEffect } from 'react';
 import { InputField } from '../../../components/atoms/InputField';
-import { copyToClipboard } from '../../../utils/Additional';
+import { copyToClipboard } from '../../../lib/utils/Additional';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClone } from '@fortawesome/free-solid-svg-icons';
 import { validateMnemonic, wordlists } from 'bip39';
+import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
 
 interface SeedPhraseInputProps {
   onContinue: (seedPhrase: string) => void;
@@ -114,18 +115,18 @@ export const SeedPhraseInput = ({ onContinue, seedPhrase }: SeedPhraseInputProps
 
       <div className="flex">
         {seedPhrase ? (
-          <button
-            className="w-full text-sm flex gap-2 items-center duration-300 hover:scale-105"
+          <ButtonWithSound
+            className="w-full text-sm flex gap-2 items-center duration-300 hover:scale-105 hover:cursor-pointer"
             onClick={() => copyToClipboard(seedPhrase)}
           >
             <FontAwesomeIcon icon={faClone} />
             Copy to Clipboard
-          </button>
+          </ButtonWithSound>
         ) : (
           ''
         )}
 
-        <button
+        <ButtonWithSound
           type="submit"
           onClick={() => {
             if (isValid()) {
@@ -133,13 +134,13 @@ export const SeedPhraseInput = ({ onContinue, seedPhrase }: SeedPhraseInputProps
               onContinue(phrase);
             }
           }}
-          className={`w-full bg-linear-to-tr from-accent_primary to-accent_secondary text-white font-bold p-3 rounded-xl ${
-            isValid() ? '' : 'opacity-30 cursor-not-allowed'
+          className={`w-full bg-linear-to-tr from-accent-foreground to-accent text-foreground font-bold p-3 rounded-xl ${
+            isValid() ? 'cursor-pointer' : 'opacity-30 cursor-not-allowed'
           }`}
           disabled={!isValid()}
         >
           Continue
-        </button>
+        </ButtonWithSound>
       </div>
     </form>
   );

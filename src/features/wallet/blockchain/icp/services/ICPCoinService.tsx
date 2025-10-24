@@ -1,7 +1,7 @@
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { walletService } from '../../../services/WalletService';
-import { hexToArrayBuffer } from '../../../../../utils/crypto';
+import { hexToArrayBuffer } from '../../../../../lib/utils/crypto';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { tokenIdlFactory } from '../types/token';
 import { ArchiveInfo, ICRC1Metadata } from '../../../interfaces/Coin';

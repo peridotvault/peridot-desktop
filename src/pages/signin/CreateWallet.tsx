@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { PasswordPage } from './PasswordPage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faDice } from '@fortawesome/free-solid-svg-icons';
-import { clearWalletData } from '../../utils/StoreService';
-import { SeedPhraseInput } from '../../features/wallet/components/SeedPhraseInput';
-import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
+import { SeedPhraseInput } from '../../features/wallet/components/input-seedphrase';
+import { ButtonWithSound } from '../../components/atoms/button-with-sound';
+import { clearWalletData } from '../../lib/utils/StoreService';
 
 interface CreateWalletProps {
   setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -24,17 +24,10 @@ export const CreateWallet = ({ setIsImportWallet }: CreateWalletProps) => {
     async function userHandle() {
       try {
         if (wallet.encryptedPrivateKey) {
-          const isUserExist = await getUserData({
-            wallet: wallet,
-          });
-          if (isUserExist) {
-            navigate('/');
-          }
+          navigate('/');
         }
       } catch (error) {
-        const msg = String((error as Error)?.message ?? error);
-        if (msg.includes('NotFound')) navigate('/create_profile');
-        else console.error(error);
+        console.error(error);
       }
     }
 
@@ -90,8 +83,8 @@ export const CreateWallet = ({ setIsImportWallet }: CreateWalletProps) => {
       return (
         <div className="flex flex-col gap-4 items-center">
           <div className="flex items-center justify-between w-full">
-            <button
-              className="flex items-center gap-2 border px-6 py-3 rounded-xl border-white/20"
+            <ButtonWithSound
+              className="flex items-center gap-2 border px-6 py-3 rounded-xl border-foreground/20 hover:cursor-pointer"
               onClick={() => {
                 clearSeedPhrase();
                 setIsImportWallet(true);
@@ -99,25 +92,25 @@ export const CreateWallet = ({ setIsImportWallet }: CreateWalletProps) => {
             >
               <FontAwesomeIcon icon={faChevronLeft} />
               <span>Back</span>
-            </button>
+            </ButtonWithSound>
           </div>
 
-          <div className="border border-white/20 rounded-3xl flex justify-center items-center px-8 py-6 flex-col gap-6">
+          <div className="border border-foreground/20 rounded-3xl flex justify-center items-center px-8 py-6 flex-col gap-6">
             <div className="flex flex-col w-full gap-4">
               <h2 className="text-2xl font-bold">Create Your Wallet</h2>
-              <hr className="border-t border-white/20" />
+              <hr className="border-t border-foreground/20" />
               <p className="text-sm">Choose your Seed Phrase Combination</p>
             </div>
 
             {/* Generate another Seed Phrase  */}
             <div className="flex w-full max-w-md justify-end gap-4">
-              <button
-                className="rounded-xl text-center shadow-sunken-sm hover:shadow-flat-lg hover:bg-white/5 duration-300 border border-white/10 hover:border-white/5 py-3 px-4 text-lg flex gap-2 w-full items-center justify-center"
+              <ButtonWithSound
+                className="rounded-xl text-center shadow-sunken-sm hover:cursor-pointer hover:shadow-flat-lg hover:bg-foreground/5 duration-300 border border-foreground/10 hover:border-foreground/5 py-3 px-4 text-lg flex gap-2 w-full items-center justify-center"
                 onClick={generateSeedPhrase}
               >
                 <FontAwesomeIcon icon={faDice} />
                 <p className="text-base">Generate another seed phrase</p>
-              </button>
+              </ButtonWithSound>
             </div>
 
             <SeedPhraseInput

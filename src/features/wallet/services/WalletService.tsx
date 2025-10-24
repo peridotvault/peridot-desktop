@@ -8,7 +8,7 @@ import { Buffer } from 'buffer';
 import * as ecc from 'tiny-secp256k1';
 import localforage from 'localforage';
 import { createEncryptionService, EncryptedData } from '@antigane/encryption';
-import { forceToArrayBuffer } from '../../../utils/crypto';
+import { forceToArrayBuffer } from '../../../lib/utils/crypto';
 
 const bip32 = BIP32Factory(ecc);
 

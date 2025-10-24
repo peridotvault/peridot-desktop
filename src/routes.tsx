@@ -14,7 +14,7 @@ import { StudioGameMedia } from './pages/studio/game/studio-game-media';
 import { StudioGameBuilds } from './pages/studio/game/studio-game-builds';
 import { StudioGameMarket } from './pages/studio/game/studio-game-market';
 import { StudioGameNewBuild } from './pages/studio/game/studio-game-newbuild';
-import { StudioGamePublish } from './pages/studio/game/studio-game-publish';
+import StudioGamePublish from './pages/studio/game/studio-game-publish';
 
 // LAZY (split)
 const LibraryLayout = lazy(() => import('./layouts/library/library-layout'));
@@ -32,7 +32,6 @@ const StudioDashboard = lazy(() => import('./pages/studio/studio-dashboard'));
 const StudioGames = lazy(() => import('./pages/studio/studio-games'));
 const StudioGameLayout = lazy(() => import('./layouts/studio/game/studio-game-layout'));
 const StudioGameDetails = lazy(() => import('./pages/studio/game/studio-game-details'));
-const CreateProfile = lazy(() => import('./pages/profile/CreateProfile'));
 const StudioGameAnnouncement = lazy(() => import('./pages/studio/game/studio-game-announcements'));
 const StudioTeamPage = lazy(() => import('./pages/studio/studio-team'));
 const NotFound = lazy(() => import('./pages/additional/NotFound'));
@@ -174,10 +173,6 @@ const router = createHashRouter([
   {
     path: '/login',
     element: <Login />,
-  },
-  {
-    path: '/create_profile',
-    element: <CreateProfile />,
   },
   {
     path: '/*',

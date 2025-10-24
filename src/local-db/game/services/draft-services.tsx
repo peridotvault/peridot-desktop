@@ -15,7 +15,7 @@ import {
   MediaItem,
   PublishInfo,
   Tag,
-} from '../../../lib/interfaces/types-game';
+} from '../../../lib/interfaces/game.types';
 import { dbGame } from '../database';
 
 /** Util: pastikan draft ada */

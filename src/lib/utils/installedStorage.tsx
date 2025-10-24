@@ -1,4 +1,4 @@
-import { OSKey } from '../interfaces/CoreInterface';
+import { OSKey } from '../../interfaces/CoreInterface';
 
 export type InstalledEntry = {
   version: string;

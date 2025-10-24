@@ -1,5 +1,5 @@
 import { isNativeBuild, isWebBuild } from '../../lib/helpers/helper-pgl1';
-import { Hardware, Platform, ViewMode, WebBuild } from '../../lib/interfaces/types-game';
+import { Hardware, Platform, ViewMode, WebBuild } from '../../lib/interfaces/game.types';
 import { DraftService } from '../../local-db/game/services/draft-services';
 
 export const BuildService = {

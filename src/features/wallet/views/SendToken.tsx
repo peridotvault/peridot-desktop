@@ -2,7 +2,7 @@ import { faAddressBook, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 import { InputField } from '../../../components/atoms/InputField';
-import { shortenAddress } from '../../../utils/Additional';
+import { shortenAddress } from '../../../lib/utils/Additional';
 import { Principal } from '@dfinity/principal';
 import localforage from 'localforage';
 import { ICRC1Coin } from '../components/ICRC1Coin';

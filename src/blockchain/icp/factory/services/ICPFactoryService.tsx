@@ -1,6 +1,6 @@
 import { HttpAgent } from '@dfinity/agent';
 import { walletService } from '../../../../features/wallet/services/WalletService';
-import { hexToArrayBuffer } from '../../../../utils/crypto';
+import { hexToArrayBuffer } from '../../../../lib/utils/crypto';
 import { hostICP } from '../../../../constants/lib.const';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { createActorFactory } from '../../idlFactories';

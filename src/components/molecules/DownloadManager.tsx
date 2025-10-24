@@ -9,11 +9,10 @@ import React, {
   useState,
 } from 'react';
 import { OSKey } from '../../interfaces/CoreInterface';
-import { upsertInstalledEntry } from '../../utils/installedStorage';
+import { upsertInstalledEntry } from '../../lib/utils/installedStorage';
 // Gunakan tipe dari service.did.d
 import {
   PGLMeta,
-  Distribution,
   NativeBuild as NativeBuildDid,
   Manifest as ManifestDid,
   StorageRef,
@@ -79,12 +78,6 @@ const isElectron = () => {
   return !!w?.electronAPI?.showSaveDialog || !!(window as any).process?.versions?.electron;
 };
 const isZip = (name: string) => name.toLowerCase().endsWith('.zip');
-
-// Fungsi helper untuk menangani ?[T] dari Candid
-function unwrapOptVec<T>(v: [] | [T[]] | undefined): T[] {
-  if (!v || v.length === 0) return [];
-  return v[0]; // Ambil array dari dalam optional vector
-}
 
 function latestPerOS(builds: ResolvedBuild[]): ResolvedBuild[] {
   // asumsikan builds sudah di-sort desc (terbaru duluan)

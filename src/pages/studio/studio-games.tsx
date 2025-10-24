@@ -10,11 +10,35 @@ import { getGameByDeveloperId } from '../../blockchain/icp/vault/services/ICPGam
 import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
 import { optGetOr } from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
-import { NewGame } from '../../components/organisms/NewGame';
+import { NewGame } from '../../components/organisms/new-game.modal';
 import { getGameUnRegistered } from '../../blockchain/icp/factory/services/ICPFactoryService';
 import { Principal } from '@dfinity/principal';
 import { register_game } from '../../blockchain/icp/registry/services/ICPRegistryService';
 import { CreateGameRecord } from '../../blockchain/icp/registry/service.did.d';
+
+// ✅ Skeleton Component untuk Game Item
+const GameSkeleton = () => (
+  <div className="px-8 py-4 flex gap-6 items-center justify-between animate-pulse">
+    <div className="flex gap-6 items-start">
+      <div className="w-12 aspect-3/4 bg-muted rounded"></div>
+      <div className="space-y-2">
+        <div className="h-4 bg-muted rounded w-32"></div>
+        <div className="h-3 bg-muted rounded w-48"></div>
+      </div>
+    </div>
+  </div>
+);
+
+// ✅ Skeleton Component untuk Unregistered Game
+const UnregisteredGameSkeleton = () => (
+  <div className="px-8 py-4 flex gap-6 items-center justify-between animate-pulse">
+    <div className="flex gap-6 items-center">
+      <div className="h-12 aspect-video bg-muted rounded"></div>
+      <div className="h-4 bg-muted rounded w-24"></div>
+    </div>
+    <div className="w-8 h-8 bg-muted rounded"></div>
+  </div>
+);
 
 export default function StudioGames() {
   const { wallet } = useWallet();
@@ -29,16 +53,30 @@ export default function StudioGames() {
     message: string;
   } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true); // ✅ Tambahkan loading state
 
   const refetchAll = useCallback(async () => {
-    if (!wallet?.principalId) return;
-    const [listGame, listUnRegistered] = await Promise.all([
-      getGameByDeveloperId({ dev: wallet.principalId, start: 0, limit: 200 }),
-      getGameUnRegistered({ wallet }),
-    ]);
-    console.log(listGame);
-    setGames(listGame);
-    setUnRegisteredGame(listUnRegistered);
+    if (!wallet?.principalId) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true); // ✅ Mulai loading
+    try {
+      const [listGame, listUnRegistered] = await Promise.all([
+        getGameByDeveloperId({ dev: wallet.principalId, start: 0, limit: 200 }),
+        getGameUnRegistered({ wallet }),
+      ]);
+      setGames(listGame);
+      setUnRegisteredGame(listUnRegistered);
+    } catch (err) {
+      console.error('Failed to fetch games:', err);
+      // Tetap set state kosong agar UI tetap konsisten
+      setGames([]);
+      setUnRegisteredGame([]);
+    } finally {
+      setLoading(false); // ✅ Selesai loading
+    }
   }, [wallet?.principalId, wallet]);
 
   useEffect(() => {
@@ -58,7 +96,7 @@ export default function StudioGames() {
       const cidTxt = canister_id.toText();
       if (cidTxt === 'aaaaa-aa') {
         console.warn('Skip invalid canister id aaaaa-aa');
-        return; // cukup return; jangan lempar error biar UX bersih
+        return;
       }
 
       // optimistic remove
@@ -70,10 +108,10 @@ export default function StudioGames() {
       };
       await register_game({ meta });
 
-      await refetchAll(); // sinkronkan ulang
+      await refetchAll();
     } catch (err) {
       console.error(err);
-      await refetchAll(); // balikin data kalau gagal
+      await refetchAll();
     } finally {
       setBusy(false);
     }
@@ -99,7 +137,14 @@ export default function StudioGames() {
 
       {/* List Games   */}
       <section className="mt-4">
-        {games?.length ? (
+        {loading ? (
+          // ✅ Tampilkan skeleton saat loading
+          <>
+            <GameSkeleton />
+            <GameSkeleton />
+            <GameSkeleton />
+          </>
+        ) : games?.length ? (
           games.map((item, index) => (
             <Link
               key={index}
@@ -112,6 +157,7 @@ export default function StudioGames() {
                     src={optGetOr(item.pgl1_cover_image, ImageLoading)}
                     alt={item.pgl1_name}
                     className="w-full h-full object-cover"
+                    onError={(e) => (e.currentTarget.src = ImageLoading)}
                   />
                 </div>
                 <div className="">
@@ -136,40 +182,54 @@ export default function StudioGames() {
           </section>
         )}
 
-        {!!unRegisteredGame?.length && (
-          <section className="flex flex-col gap-2 mt-8">
-            <h2 className="font-bold text-lg">Unregistered Games</h2>
-            <hr className="border-foreground/10" />
-            <div className="">
-              {unRegisteredGame.map((item, index) => (
-                <div key={index} className="px-8 py-4 flex gap-6 items-center justify-between">
-                  <div className="flex gap-6 items-center">
-                    <div className="h-12 aspect-video">
-                      <img
-                        src={ImageLoading}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <p className="">{item.name}</p>
+        {loading
+          ? // ✅ Skeleton untuk unregistered games
+            unRegisteredGame.length > 0 && (
+              <>
+                <section className="flex flex-col gap-2 mt-8">
+                  <h2 className="font-bold text-lg">Unregistered Games</h2>
+                  <hr className="border-foreground/10" />
+                  <div className="">
+                    <UnregisteredGameSkeleton />
+                    <UnregisteredGameSkeleton />
                   </div>
-                  <button
-                    onClick={() =>
-                      handleRegisterGame({
-                        canister_id: item.canister_id,
-                        developer: wallet.principalId!,
-                      })
-                    }
-                    disabled={busy}
-                    className="shadow-arise-sm hover:shadow-flat-sm duration-300 px-3 py-2 rounded-md"
-                  >
-                    <FontAwesomeIcon icon={faUpLong} />
-                  </button>
+                </section>
+              </>
+            )
+          : !!unRegisteredGame?.length && (
+              <section className="flex flex-col gap-2 mt-8">
+                <h2 className="font-bold text-lg">Unregistered Games</h2>
+                <hr className="border-foreground/10" />
+                <div className="">
+                  {unRegisteredGame.map((item, index) => (
+                    <div key={index} className="px-8 py-4 flex gap-6 items-center justify-between">
+                      <div className="flex gap-6 items-center">
+                        <div className="h-12 aspect-video">
+                          <img
+                            src={ImageLoading}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <p className="">{item.name}</p>
+                      </div>
+                      <button
+                        onClick={() =>
+                          handleRegisterGame({
+                            canister_id: item.canister_id,
+                            developer: wallet.principalId!,
+                          })
+                        }
+                        disabled={busy}
+                        className="shadow-arise-sm hover:shadow-flat-sm duration-300 px-3 py-2 rounded-md"
+                      >
+                        <FontAwesomeIcon icon={faUpLong} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
+              </section>
+            )}
 
         {alert && (
           <Alert type={alert.type} message={alert.message} onClose={() => setAlert(null)} />

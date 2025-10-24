@@ -12,8 +12,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import countriesData from '../../assets/json/countries.json';
 import { LoadingScreen } from '../../components/organisms/LoadingScreen';
-import { getCoverImage, getProfileImage } from '../../utils/Additional';
-import { saveUserInfo } from '../../utils/IndexedDb';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
 import { DropDownComponent } from '../../components/atoms/DropDownComponent';
 import { AlertMessage } from '../../features/wallet/components/AlertMessage';
@@ -25,6 +23,8 @@ import {
   updateUser,
 } from '../../blockchain/icp/directory/services/ICPUserService';
 import { optGet, ToOpt } from '../../interfaces/helpers/icp.helpers';
+import { saveUserInfo } from '../../lib/utils/IndexedDb';
+import { getCoverImage, getProfileImage } from '../../lib/utils/Additional';
 
 /** Utils — konversi tanggal (ns <-> YYYY-MM-DD UTC) */
 function unixNsToDateStr(ns: bigint): string {

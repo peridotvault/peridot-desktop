@@ -10,8 +10,11 @@ import {
   faUserEdit,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ButtonWithSound } from '../atoms/button-with-sound';
+import { clearWalletData } from '../../lib/utils/StoreService';
+import { useWallet } from '../../contexts/WalletContext';
+import { shortenAddress } from '../../lib/utils/short-address';
 
 type Props = {
   open: boolean;
@@ -22,6 +25,8 @@ type Props = {
 };
 
 export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) => {
+  const { wallet, setWallet, setIsGeneratedSeedPhrase } = useWallet();
+  const navigate = useNavigate();
   const list = [
     {
       href: '/profile',
@@ -74,7 +79,7 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
     label: string;
   }) => {
     return (
-      <ButtonWithSound>
+      <ButtonWithSound className="w-full">
         <Link to={href} className="hover:bg-foreground/10 rounded-lg flex items-center">
           <div className="w-10 h-10 flex justify-center items-center text-muted-foreground">
             <FontAwesomeIcon icon={icon} />
@@ -83,6 +88,24 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
         </Link>
       </ButtonWithSound>
     );
+  };
+
+  const handleClearData = async () => {
+    try {
+      await clearWalletData();
+      setWallet({
+        encryptedSeedPhrase: null,
+        principalId: null,
+        accountId: null,
+        encryptedPrivateKey: null,
+        lock: null,
+        verificationData: null,
+      });
+      setIsGeneratedSeedPhrase(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Error clearing wallet data:', error);
+    }
   };
 
   return (
@@ -117,7 +140,9 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
             <section className="flex gap-4 items-center pb-1">
               <Avatar />
               <div className="flex flex-col gap-1">
-                <span className="font-bold leading-4 line-clamp-1">Ifal</span>
+                <span className="font-bold leading-4 line-clamp-1">
+                  {shortenAddress({ address: wallet.principalId, slice: 6 })}
+                </span>
                 <span className="text-sm leading-3 line-clamp-1">m@example.com</span>
               </div>
             </section>
@@ -130,7 +155,15 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
             </section>
             <hr className="border-foreground/10" />
             <section>
-              <NavComponent href="#" icon={faArrowRightFromBracket} label="Log out" />
+              <ButtonWithSound
+                onClick={handleClearData}
+                className="w-full hover:bg-foreground/10 rounded-lg flex items-center hover:cursor-pointer"
+              >
+                <div className="w-10 h-10 flex justify-center items-center text-muted-foreground">
+                  <FontAwesomeIcon icon={faArrowRightFromBracket} />
+                </div>
+                <label htmlFor="Log out">Log out</label>
+              </ButtonWithSound>
             </section>
           </motion.div>
         </>

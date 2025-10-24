@@ -1,33 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
 import { InputPreviews } from '../../../components/atoms/input-previews';
 import { useParams } from 'react-router-dom';
-import { DraftService } from '../../../local-db/game/services/draft-services';
-import {
-  dbToInputPreviews,
-  inputPreviewsToDb,
-  readPreviews,
-} from '../../../lib/helpers/helper-pgl1';
-import { PreviewItem } from '../../../lib/interfaces/types-game';
-import { initAppStorage, uploadToPrefix } from '../../../api/wasabiClient'; // ✅
+import { PreviewItem } from '../../../lib/interfaces/game.types';
+import { API_BASE_STORAGE, initAppStorage, uploadToPrefix } from '../../../api/wasabiClient'; // ✅
+import { LoadingPage } from '../../additional/loading-page';
+import { fetchPreviews, updatePreviews } from '../../../api/game-draft.api';
+import { GamePreview } from '../../../lib/interfaces/game-draft.types';
+import { LoadingComponent } from '../../../components/atoms/loading.component';
 
 export const StudioGameMedia = () => {
   const { gameId } = useParams<{ gameId: string }>();
+  const [loading, setLoading] = useState<boolean>(false);
   if (!gameId) {
     return <div>Invalid game ID</div>;
   }
 
-  const [previews, setPreviews] = React.useState<PreviewItem[]>([]); // ✅ tipe benar
+  const [previews, setPreviews] = React.useState<PreviewItem[]>([]);
 
   // --- Load draft ---
+  const loadDraft = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchPreviews(gameId);
+      const previewItems: PreviewItem[] = (data.previews || []).map((p, i) => ({
+        id: `preview-${i}`,
+        file: new File([], p.src.split('/').pop() || 'preview.jpg'),
+        url: p.src,
+        kind: p.kind,
+      }));
+      setPreviews(previewItems);
+    } catch (error) {
+      console.error('Failed to load previews:', error);
+      alert('Gagal memuat preview');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   React.useEffect(() => {
-    const loadDraft = async () => {
-      const draft = await DraftService.get(gameId);
-      if (draft) {
-        // ✅ Konversi dari DB ke format InputPreviews
-        setPreviews(dbToInputPreviews(readPreviews(draft.pgl1_metadata)));
-      }
-    };
     loadDraft();
   }, [gameId]);
 
@@ -45,42 +56,52 @@ export const StudioGameMedia = () => {
       public: true,
     });
 
-    return `${import.meta.env.VITE_API_BASE}/files/${key}`;
+    return `${API_BASE_STORAGE}/files/${key}`;
   };
 
   // --- Handle file selection ---
   const handlePreviewsChange = async (newItems: PreviewItem[]) => {
-    const updatedItems = [...newItems];
+    try {
+      setLoading(true);
+      const updatedItems = [...newItems];
 
-    // Upload file yang masih pakai blob URL
-    for (let i = 0; i < updatedItems.length; i++) {
-      const item = updatedItems[i];
+      // Upload file yang masih pakai blob URL
+      for (let i = 0; i < updatedItems.length; i++) {
+        const item = updatedItems[i];
 
-      // Jika URL masih blob:, berarti belum di-upload
-      if (item.url.startsWith('blob:')) {
-        try {
-          const permanentUrl = await uploadFile(item.file, i);
-          updatedItems[i] = {
-            ...item,
-            url: permanentUrl,
-            // Tetap simpan file untuk alt text
-          };
-        } catch (err) {
-          console.error('Upload failed:', err);
-          alert(`Gagal upload preview ke-${i + 1}`);
+        // Jika URL masih blob:, berarti belum di-upload
+        if (item.url.startsWith('blob:')) {
+          try {
+            const permanentUrl = await uploadFile(item.file, i);
+            updatedItems[i] = {
+              ...item,
+              url: permanentUrl,
+              // Tetap simpan file untuk alt text
+            };
+          } catch (err) {
+            console.error('Upload failed:', err);
+            alert(`Gagal upload preview ke-${i + 1}`);
+          }
         }
       }
-    }
 
-    setPreviews(updatedItems);
+      setPreviews(updatedItems);
+    } catch (error) {
+      error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   // --- Save ---
   const handleSaveDraft = async () => {
     try {
-      // ✅ Konversi ke format database sebelum simpan
-      const dbPreviews = inputPreviewsToDb(previews);
-      await DraftService.updatePreviews(gameId, dbPreviews);
+      const savePreviews = previews.map((p) => ({
+        kind: p.kind,
+        src: p.url,
+      }));
+      const apiPreviews: GamePreview = { previews: savePreviews };
+      await updatePreviews(gameId, apiPreviews);
       alert('Draft saved successfully!');
     } catch (err) {
       console.error('Failed to save draft:', err);
@@ -95,6 +116,10 @@ export const StudioGameMedia = () => {
       <p className="text-foreground/70">{description}</p>
     </div>
   );
+
+  if (loading) {
+    <LoadingPage />;
+  }
 
   return (
     <div className="flex justify-center w-full">
@@ -113,23 +138,26 @@ export const StudioGameMedia = () => {
           </ButtonWithSound>
         </section>
 
-        {/* Previews */}
-        <section className="grid gap-8">
-          <HeaderContainer
-            title="Upload Previews"
-            description="Upload cover for your game page on PeridotVault"
-          />
-          <InputPreviews
-            label="Previews"
-            multiple
-            className="h-72"
-            maxFiles={20}
-            maxSize={8 * 1024 * 1024}
-            helperText="Dukungan gambar & video. Rekomendasi rasio 16:9. Urutan akan dipakai untuk tampilan."
-            value={previews}
-            onChange={handlePreviewsChange}
-          />
-        </section>
+        {loading ? (
+          <LoadingComponent />
+        ) : (
+          <section className="grid gap-8">
+            <HeaderContainer
+              title="Upload Previews"
+              description="Upload cover for your game page on PeridotVault"
+            />
+            <InputPreviews
+              label="Previews"
+              multiple
+              className="h-72"
+              maxFiles={20}
+              maxSize={8 * 1024 * 1024}
+              helperText="Dukungan gambar & video. Rekomendasi rasio 16:9. Urutan akan dipakai untuk tampilan."
+              value={previews}
+              onChange={handlePreviewsChange}
+            />
+          </section>
+        )}
       </div>
     </div>
   );

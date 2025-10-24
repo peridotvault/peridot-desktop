@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { useWallet } from '../../contexts/WalletContext';
 import { LoadingScreen } from '../../components/organisms/LoadingScreen';
-import { getProfileImage } from '../../utils/Additional';
 import { UserInterface } from '../../interfaces/user/UserInterface';
 import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
 import { optGet, optGetOr } from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
+import { getProfileImage } from '../../lib/utils/Additional';
 
 export default function ProfileUser() {
   const { wallet } = useWallet();

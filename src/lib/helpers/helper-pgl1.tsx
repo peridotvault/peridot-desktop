@@ -7,7 +7,7 @@ import type {
   Distribution,
   NativeBuild,
   WebBuild,
-} from '../../lib/interfaces/types-game';
+} from '../interfaces/game.types';
 
 // type guards
 export const isText = (v?: Value | null): v is { text: string } => !!v && 'text' in v;

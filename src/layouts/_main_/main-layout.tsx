@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { MainNavbar } from './main-navbar';
 import { Outlet } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 import { Wallet } from '../../features/wallet/views/Wallet';
 import { MainSidebar } from './main-sidebar';
 import AIChatbot from '../../components/organisms/ai-chatbot';
@@ -12,7 +11,6 @@ export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
   const [isOpenPeri, setIOpenPeri] = useState(false);
   const [isOpenMenuAvatar, setIOpenMenuAvatar] = useState(false);
-  const [isOpenSettings, setIsOpenSettings] = useState(false);
 
   const togglePeri = () => {
     setIOpenPeri((prev) => {

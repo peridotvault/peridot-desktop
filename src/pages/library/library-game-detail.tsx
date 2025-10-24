@@ -9,7 +9,6 @@ import { useParams } from 'react-router-dom';
 import { useWallet } from '../../contexts/WalletContext';
 import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
 import { useInstalled } from '../../hooks/useInstalled';
-import { getInstalledRecord } from '../../utils/installedStorage';
 import { useDownloadManager } from '../../components/molecules/DownloadManager';
 import {
   Distribution,
@@ -19,6 +18,7 @@ import {
 import { getAllAnnouncementsByGameId } from '../../blockchain/icp/vault/services/ICPAnnouncementService';
 // import { optGetOr } from '../../interfaces/helpers/icp.helpers'; // Tidak digunakan di sini
 import { ImageLoading } from '../../constants/lib.const';
+import { getInstalledRecord } from '../../lib/utils/installedStorage';
 
 // helper deteksi OSKey
 function detectOSKey(): 'windows' | 'macos' | 'linux' {

@@ -1,12 +1,29 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faCircleXmark, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
 import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
+import { Link, useParams } from 'react-router-dom';
+import { Platform, Manifest } from '../../../lib/interfaces/game.types';
+import { isNativeBuild, isWebBuild } from '../../../lib/helpers/helper-pgl1';
+import { fetchWholeDraft } from '../../../api/game-draft.api';
+import { GameDraft } from '../../../lib/interfaces/game-draft.types';
 
-/** ====== UI ONLY — HARDCODED SAMPLE DATA ====== */
-type Platform = 'windows' | 'macos' | 'linux' | 'web';
+type PlatformBuildInfo = {
+  key: Platform;
+  info: {
+    webUrl?: string;
+    fileName?: string;
+    fileSizeMB?: number;
+    requirement: {
+      processor: string;
+      graphics: string;
+      memory: string;
+      storage: string;
+      notes: string;
+    };
+  };
+};
 
 const platformIcon: Record<Platform, any> = {
   windows: faWindows,
@@ -15,101 +32,457 @@ const platformIcon: Record<Platform, any> = {
   web: faGlobe,
 };
 
-const mock = {
-  // === Details ===
-  pgl1_game_id: 'GAME-1234',
-  pgl1_name: 'Starfall Tactics',
-  pgl1_description:
-    'A fast-paced tactical shooter set in a retro-futuristic galaxy. Build squads, outsmart enemies, and seize the stars.',
-  pgl1_required_age: 13,
-  pgl1_price: 19.99,
-  pgl1_website: 'https://starfall.example',
-  pgl1_categories: ['action', 'shooter'],
-  pgl1_tags: ['Sci-Fi', 'Fast-Paced', 'Controller Support'],
+export const StudioGamePublish: React.FC = () => {
+  const { gameId } = useParams<{ gameId: string }>();
+  const [draftData, setDraftData] = useState<GameDraft | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // === Media ===
-  pgl1_cover_image:
-    'https://images.unsplash.com/photo-1517976487492-576ea6b2936d?q=80&w=1280&auto=format&fit=crop',
-  pgl1_banner_image:
-    'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1600&auto=format&fit=crop',
-  pgl1_previews: [
-    { kind: 'image', url: 'https://images.unsplash.com/photo-1520975867597-0f8d3cb7b810?w=1200' },
-    { kind: 'video', url: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-    { kind: 'image', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200' },
-  ] as Array<{ kind: 'image' | 'video'; url: string }>,
+  // State untuk data yang sudah diproses
+  const [processedData, setProcessedData] = useState<{
+    details: any;
+    media: {
+      cover_vertical_image: string;
+      cover_horizontal_image: string;
+      banner_image: string;
+      previews: any[];
+    };
+    builds: PlatformBuildInfo[];
+  } | null>(null);
 
-  // === Builds (ringkas) ===
-  version: '1.2.0',
-  platforms: (['windows', 'macos', 'web'] as Platform[]).map((p) => ({
-    key: p as Platform,
-    info:
-      p === 'web'
-        ? {
-            webUrl: 'https://play.starfall.example',
-            requirement: {
-              processor: 'Intel i3 / Apple M1',
-              graphics: 'Integrated',
-              memory: '4',
-              storage: '2',
-              notes: 'Works best on Chromium-based browsers.',
-            },
+  // ✅ Ambil data dari draft service
+  useEffect(() => {
+    const loadDraftData = async () => {
+      if (!gameId) {
+        setError('Game ID is required');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const draft = await fetchWholeDraft(gameId);
+        console.log(draft);
+        if (!draft) {
+          setError('Game draft not found');
+          setLoading(false);
+          return;
+        }
+
+        setDraftData(draft);
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to load draft:', err);
+        setError('Failed to load game data');
+        setLoading(false);
+      }
+    };
+
+    loadDraftData();
+  }, [gameId]);
+
+  // ✅ Proses data draft menjadi format yang bisa ditampilkan
+  useEffect(() => {
+    if (!draftData || loading) return;
+
+    try {
+      // Ekstrak details
+      const details: GameDraft = {
+        game_id: draftData.game_id,
+        name: draftData.name,
+        description: draftData.description,
+        required_age: draftData.required_age,
+        price: draftData.price,
+        website: draftData.website,
+        categories: draftData.categories,
+        tags: draftData.tags,
+      };
+
+      // ✅ Ekstrak media — GUNAKAN FIELD YANG BENAR
+      const media = {
+        cover_vertical_image: draftData.cover_vertical_image || '',
+        cover_horizontal_image: draftData.cover_horizontal_image || '',
+        banner_image: draftData.banner_image || '',
+        previews: draftData.previews || [],
+      };
+
+      // ✅ Ekstrak HANYA build LIVE
+      const liveBuilds: PlatformBuildInfo[] = [];
+
+      if (draftData.distributions) {
+        for (const dist of draftData.distributions) {
+          if (isWebBuild(dist)) {
+            // Web build selalu live
+            liveBuilds.push({
+              key: 'web',
+              info: {
+                webUrl: dist.web.url,
+                requirement: {
+                  processor: dist.web.processor,
+                  graphics: dist.web.graphics,
+                  memory: dist.web.memory.toString(),
+                  storage: dist.web.storage.toString(),
+                  notes: dist.web.additionalNotes,
+                },
+              },
+            });
+          } else if (isNativeBuild(dist)) {
+            // Cek apakah ada versi live
+            const liveVersion = dist.native.liveVersion;
+            if (liveVersion) {
+              const liveManifest = dist.native.manifests.find(
+                (m: Manifest) => m.version === liveVersion,
+              );
+
+              if (liveManifest) {
+                liveBuilds.push({
+                  key: dist.native.os as Platform,
+                  info: {
+                    fileName: liveManifest.listing,
+                    fileSizeMB: liveManifest.size_bytes / (1024 * 1024),
+                    requirement: {
+                      processor: dist.native.processor,
+                      graphics: dist.native.graphics,
+                      memory: dist.native.memory.toString(),
+                      storage: dist.native.storage.toString(),
+                      notes: dist.native.additionalNotes,
+                    },
+                  },
+                });
+              }
+            }
           }
-        : {
-            fileName:
-              p === 'windows'
-                ? 'starfall-win64-v1.2.0.zip'
-                : p === 'macos'
-                  ? 'starfall-macos-1.2.0.dmg'
-                  : 'starfall-linux.AppImage',
-            fileSizeMB: p === 'windows' ? 1350 : p === 'macos' ? 1280 : 1420,
-            requirement: {
-              processor: p === 'macos' ? 'Apple M1 / Intel i5' : 'Intel i5',
-              graphics: 'GTX 1050 / RX 560',
-              memory: '8',
-              storage: '20',
-              notes: 'Controller recommended.',
-            },
-          },
-  })),
-  lastUpdated: Date.now(),
+        }
+      }
+
+      setProcessedData({ details, media, builds: liveBuilds });
+    } catch (err) {
+      console.error('Failed to process draft data:', err);
+      setError('Failed to process game data');
+    }
+  }, [draftData, loading]);
+
+  // ✅ Validasi kelengkapan data — PERBAIKI COVER IMAGE
+  const checkDetails = () => {
+    const missing: string[] = [];
+    if (!processedData?.details.name) missing.push('Name');
+    if (!processedData?.details.description) missing.push('Description');
+    if (!processedData?.details.categories?.length) missing.push('Categories');
+    if (!processedData?.details.tags?.length) missing.push('Tags');
+    return { ok: missing.length === 0, missing };
+  };
+
+  const checkMedia = () => {
+    const missing: string[] = [];
+    // ✅ Periksa cover vertical (atau horizontal — sesuaikan kebutuhan)
+    if (!processedData?.media.cover_vertical_image) missing.push('Cover Image (Vertical)');
+    if (!processedData?.media.banner_image) missing.push('Banner Image');
+    if (!processedData?.media.previews?.length) missing.push('Previews (min. 1)');
+    return { ok: missing.length === 0, missing };
+  };
+
+  const checkBuilds = () => {
+    const missing: string[] = [];
+    if (!processedData?.builds?.length) missing.push('At least 1 live platform');
+
+    processedData?.builds?.forEach((p) => {
+      const r = p.info.requirement;
+      if (p.key === 'web') {
+        if (!p.info.webUrl) missing.push('Web URL (Website)');
+      }
+      if (!r?.processor) missing.push(`Processor (${p.key})`);
+      if (!r?.graphics) missing.push(`Graphics (${p.key})`);
+      if (!r?.memory) missing.push(`Memory GB (${p.key})`);
+      if (!r?.storage) missing.push(`Storage GB (${p.key})`);
+    });
+    return { ok: missing.length === 0, missing };
+  };
+
+  const vDetails = checkDetails();
+  const vMedia = checkMedia();
+  const vBuilds = checkBuilds();
+  const allOk = vDetails.ok && vMedia.ok && vBuilds.ok;
+
+  const bytes = (mb: number) => `${mb.toFixed(0)} MB`;
+  const mdy = (t: number) =>
+    new Date(t).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+
+  if (loading) {
+    return (
+      <div className="flex justify-center w-full">
+        <div className="w-full max-w-[1400px] flex flex-col p-10 gap-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-muted rounded w-64 mb-4"></div>
+            <div className="h-4 bg-muted rounded w-96 mb-8"></div>
+            <div className="space-y-6">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-background rounded-xl border border-muted-foreground/40 p-5"
+                >
+                  <div className="h-6 bg-muted rounded w-32 mb-4"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-muted rounded w-full"></div>
+                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                    <div className="h-4 bg-muted rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!processedData) {
+    return (
+      <div className="flex justify-center w-full p-10">
+        <div className="text-center text-muted-foreground">No data available</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex justify-center w-full">
+      <div className="w-full max-w-[1400px] flex flex-col p-10 gap-8">
+        {/* Header  */}
+        <section className="flex justify-between items-center gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold">Review & Publish</h1>
+            <p className="text-foreground/70">This information appears on PeridotVault</p>
+          </div>
+          <ButtonWithSound
+            disabled={!allOk}
+            onClick={() => alert('Publish clicked (UI only)')}
+            className={`bg-card-foreground text-card font-bold py-2 px-6 rounded-md ${!allOk && 'cursor-not-allowed opacity-40'}`}
+          >
+            <span>Publish</span>
+          </ButtonWithSound>
+        </section>
+
+        {/* Meta ringkas + Publish */}
+        <div className="flex flex-wrap items-center gap-8">
+          <div>
+            <div className="text-sm text-muted-foreground">Game ID</div>
+            <div className="text-lg font-medium">{gameId}</div>
+          </div>
+          <div>
+            <div className="text-sm text-muted-foreground">Last Updated</div>
+            <div className="text-lg font-medium">{mdy(Date.now())}</div>
+          </div>
+        </div>
+
+        {/* DETAILS */}
+        <SectionCard title="Details" ok={vDetails.ok} missing={vDetails.missing}>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <div className="text-sm text-muted-foreground">Name</div>
+              <div className="text-lg">{processedData.details.name || '—'}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Required Age</div>
+              <div className="text-lg">
+                {processedData.details.required_age
+                  ? `${processedData.details.required_age}+`
+                  : '—'}
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <div className="text-sm text-muted-foreground">Description</div>
+              <div className="text-lg whitespace-pre-wrap">
+                {processedData.details.description || '—'}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Categories</div>
+              <div className="text-lg">
+                {processedData.details.categories?.length
+                  ? processedData.details.categories.join(', ')
+                  : '—'}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Tags</div>
+              <div className="text-lg">
+                {processedData.details.tags?.length ? processedData.details.tags.join(', ') : '—'}
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <div className="text-sm text-muted-foreground">Website</div>
+              <div className="text-lg break-all">{processedData.details.website || '—'}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">Price</div>
+              <div className="text-lg">
+                {processedData.details.price ? `$${processedData.details.price}` : '—'}
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* MEDIA */}
+        <SectionCard title="Media" ok={vMedia.ok} missing={vMedia.missing}>
+          <div className="grid grid-cols-3 gap-4">
+            {/* Banner */}
+            <div className="rounded-lg border border-muted-foreground/30 aspect-[4/1] overflow-hidden col-span-full">
+              {processedData.media.banner_image ? (
+                <img
+                  src={processedData.media.banner_image.trim()} // ✅ trim whitespace
+                  alt="banner"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                  No banner
+                </div>
+              )}
+            </div>
+
+            {/* ✅ Tampilkan cover vertical */}
+            <div className="col-span-1">
+              <div className="">
+                <div className="text-sm mb-2 text-muted-foreground">Cover (Vertical)</div>
+                {processedData.media.cover_vertical_image ? (
+                  <img
+                    src={processedData.media.cover_vertical_image.trim()} // ✅ trim whitespace
+                    alt="cover vertical"
+                    className="rounded-lg border border-muted-foreground/30 w-full aspect-[3/4] object-cover"
+                  />
+                ) : (
+                  <div className="rounded-lg border border-muted-foreground/30 w-full aspect-[3/4] flex items-center justify-center text-muted-foreground">
+                    No cover
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="col-span-2 flex flex-col gap-4">
+              {/* ✅ Tampilkan cover Horizontal */}
+              <div className="col-span-1">
+                <div className="text-sm mb-2 text-muted-foreground">Cover (Horizontal)</div>
+                {processedData.media.cover_horizontal_image ? (
+                  <img
+                    src={processedData.media.cover_horizontal_image.trim()} // ✅ trim whitespace
+                    alt="cover horizontal"
+                    className="rounded-lg border border-muted-foreground/30 w-full aspect-video object-cover"
+                  />
+                ) : (
+                  <div className="rounded-lg border border-muted-foreground/30 w-full aspect-video flex items-center justify-center text-muted-foreground">
+                    No cover
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="text-sm text-muted-foreground mb-2">
+                  Horizontal Cover & Previews
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {/* Previews */}
+                  {processedData.media.previews.slice(0, 5).map((p: any, i: number) => (
+                    <div
+                      key={i}
+                      className="rounded-lg border border-muted-foreground/30 aspect-video overflow-hidden"
+                    >
+                      {p.kind === 'image' ? (
+                        <img
+                          src={p.src?.trim()} // ✅ gunakan `src`, bukan `url`, dan trim
+                          className="w-full h-full object-cover"
+                          alt={`preview ${i}`}
+                        />
+                      ) : (
+                        <video
+                          src={p.src?.trim()}
+                          className="w-full h-full object-cover"
+                          controls
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </SectionCard>
+
+        {/* BUILDS - HANYA LIVE */}
+        <SectionCard title="Live Builds" ok={vBuilds.ok} missing={vBuilds.missing}>
+          <div className="grid gap-3">
+            <div className="flex flex-wrap items-center gap-6">
+              <div>
+                <div className="text-sm text-muted-foreground">Platforms</div>
+                <div className="flex items-center gap-4 text-xl">
+                  {processedData.builds.map((p) => (
+                    <span key={p.key} title={p.key}>
+                      <FontAwesomeIcon icon={platformIcon[p.key]} />
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {processedData.builds.map((p) => (
+                <div key={p.key} className="rounded-lg border border-muted-foreground/30 p-4">
+                  <div className="flex items-center gap-2 text-lg font-medium mb-2 capitalize">
+                    <FontAwesomeIcon icon={platformIcon[p.key]} />
+                    {p.key}
+                  </div>
+
+                  {p.key === 'web' ? (
+                    <div className="text-base grid gap-2">
+                      <div>
+                        <div className="text-sm text-muted-foreground">Web URL</div>
+                        <div className="break-all">{p.info.webUrl || '—'}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="CPU" value={p.info.requirement.processor} />
+                        <Field label="GPU" value={p.info.requirement.graphics} />
+                        <Field label="Memory (GB)" value={p.info.requirement.memory} />
+                        <Field label="Storage (GB)" value={p.info.requirement.storage} />
+                      </div>
+                      {p.info.requirement.notes && (
+                        <div>
+                          <div className="text-sm text-muted-foreground">Notes</div>
+                          <div>{p.info.requirement.notes}</div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-base grid gap-2">
+                      <div className="flex items-center justify-between rounded-md border border-muted-foreground/30 px-3 py-2">
+                        <div className="text-muted-foreground">File</div>
+                        <div className="font-medium">
+                          {p.info.fileName || '—'}{' '}
+                          {p.info.fileSizeMB && `(${bytes(p.info.fileSizeMB)})`}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <Field label="CPU" value={p.info.requirement.processor} />
+                        <Field label="GPU" value={p.info.requirement.graphics} />
+                        <Field label="Memory (GB)" value={p.info.requirement.memory} />
+                        <Field label="Storage (GB)" value={p.info.requirement.storage} />
+                      </div>
+                      {p.info.requirement.notes && (
+                        <div>
+                          <div className="text-sm text-muted-foreground">Notes</div>
+                          <div>{p.info.requirement.notes}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </SectionCard>
+      </div>
+    </div>
+  );
 };
 
-/** Simple completeness check (UI only) */
-function checkDetails() {
-  const missing: string[] = [];
-  if (!mock.pgl1_name) missing.push('Name');
-  if (!mock.pgl1_description) missing.push('Description');
-  if (!mock.pgl1_categories?.length) missing.push('Categories');
-  if (!mock.pgl1_tags?.length) missing.push('Tags');
-  return { ok: missing.length === 0, missing };
-}
-function checkMedia() {
-  const missing: string[] = [];
-  if (!mock.pgl1_cover_image) missing.push('Cover Image');
-  if (!mock.pgl1_banner_image) missing.push('Banner Image');
-  if (!mock.pgl1_previews?.length) missing.push('Previews (min. 1)');
-  return { ok: missing.length === 0, missing };
-}
-function checkBuilds() {
-  const missing: string[] = [];
-  if (!mock.version) missing.push('Version');
-  if (!mock.platforms?.length) missing.push('At least 1 platform');
-
-  mock.platforms?.forEach((p) => {
-    const r = (p.info as any).requirement;
-    if (p.key === 'web') {
-      if (!(p.info as any).webUrl) missing.push('Web URL (Website)');
-    } else {
-      if (!(p.info as any).fileName) missing.push(`File (${p.key})`);
-    }
-    if (!r?.processor) missing.push(`Processor (${p.key})`);
-    if (!r?.graphics) missing.push(`Graphics (${p.key})`);
-    if (!r?.memory) missing.push(`Memory GB (${p.key})`);
-    if (!r?.storage) missing.push(`Storage GB (${p.key})`);
-  });
-  return { ok: missing.length === 0, missing };
-}
-
+/** kecil-kecil */
 const SectionCard: React.FC<{
   title: string;
   ok: boolean;
@@ -147,247 +520,6 @@ const SectionCard: React.FC<{
   </div>
 );
 
-const bytes = (mb: number) => `${mb.toFixed(0)} MB`;
-const mdy = (t: number) =>
-  new Date(t).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
-
-export const StudioGamePublish: React.FC = () => {
-  const { gameId } = useParams<{ gameId: string }>();
-
-  const vDetails = checkDetails();
-  const vMedia = checkMedia();
-  const vBuilds = checkBuilds();
-  const allOk = vDetails.ok && vMedia.ok && vBuilds.ok;
-
-  return (
-    <div className="flex justify-center w-full">
-      <div className="w-full max-w-[1400px] flex flex-col p-10 gap-8">
-        {/* Header  */}
-        <section className="flex justify-between items-center gap-4">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold">Review & Publish</h1>
-            <p className="text-foreground/70">This information appears on PeridotVault</p>
-          </div>
-          <ButtonWithSound
-            disabled={!allOk}
-            onClick={() => alert('Publish clicked (UI only)')}
-            className="bg-card-foreground text-card font-bold py-2 px-6 rounded-md"
-          >
-            <span>Publish</span>
-          </ButtonWithSound>
-        </section>
-
-        {/* Meta ringkas + Publish */}
-        <div className="flex flex-wrap items-center gap-8">
-          <div>
-            <div className="text-sm text-muted-foreground">Game ID</div>
-            <div className="text-lg font-medium">{gameId}</div>
-          </div>
-          <div>
-            <div className="text-sm text-muted-foreground">Last Updated</div>
-            <div className="text-lg font-medium">{mdy(mock.lastUpdated)}</div>
-          </div>
-        </div>
-
-        {/* DETAILS */}
-        <SectionCard title="Details" ok={vDetails.ok} missing={vDetails.missing}>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <div className="text-sm text-muted-foreground">Name</div>
-              <div className="text-lg">{mock.pgl1_name}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">Required Age</div>
-              <div className="text-lg">{mock.pgl1_required_age}+</div>
-            </div>
-            <div className="md:col-span-2">
-              <div className="text-sm text-muted-foreground">Description</div>
-              <div className="text-lg whitespace-pre-wrap">{mock.pgl1_description}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">Categories</div>
-              <div className="text-lg">
-                {mock.pgl1_categories?.length ? mock.pgl1_categories.join(', ') : '—'}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">Tags</div>
-              <div className="text-lg">
-                {mock.pgl1_tags?.length ? mock.pgl1_tags.join(', ') : '—'}
-              </div>
-            </div>
-            <div className="md:col-span-2">
-              <div className="text-sm text-muted-foreground">Website</div>
-              <div className="text-lg break-all">{mock.pgl1_website}</div>
-            </div>
-            <div>
-              <div className="text-sm text-muted-foreground">Price</div>
-              <div className="text-lg">${mock.pgl1_price}</div>
-            </div>
-          </div>
-          <div className="pt-2">
-            <button
-              type="button"
-              className="text-accent-foreground hover:underline"
-              onClick={() => alert('Go to Edit Details (UI only)')}
-            >
-              Edit Details
-            </button>
-          </div>
-        </SectionCard>
-
-        {/* MEDIA */}
-        <SectionCard title="Media" ok={vMedia.ok} missing={vMedia.missing}>
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="col-span-1">
-              <div className="text-sm text-muted-foreground">Cover</div>
-              {mock.pgl1_cover_image ? (
-                <img
-                  src={mock.pgl1_cover_image}
-                  alt="cover"
-                  className="rounded-lg border border-muted-foreground/30 w-full aspect-video object-cover"
-                />
-              ) : (
-                <div className="rounded-lg border border-muted-foreground/30 w-full aspect-video flex items-center justify-center text-muted-foreground">
-                  No cover
-                </div>
-              )}
-            </div>
-            <div className="col-span-2">
-              <div className="text-sm text-muted-foreground mb-2">Banner & Previews</div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-lg border border-muted-foreground/30 aspect-video overflow-hidden">
-                  {mock.pgl1_banner_image ? (
-                    <img
-                      src={mock.pgl1_banner_image}
-                      alt="banner"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                      No banner
-                    </div>
-                  )}
-                </div>
-                {mock.pgl1_previews.slice(0, 5).map((p, i) => (
-                  <div
-                    key={i}
-                    className="rounded-lg border border-muted-foreground/30 aspect-video overflow-hidden"
-                  >
-                    {p.kind === 'image' ? (
-                      <img src={p.url} className="w-full h-full object-cover" />
-                    ) : (
-                      <video src={p.url} className="w-full h-full object-cover" controls />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="pt-2">
-            <button
-              type="button"
-              className="text-accent-foreground hover:underline"
-              onClick={() => alert('Go to Edit Media (UI only)')}
-            >
-              Edit Media
-            </button>
-          </div>
-        </SectionCard>
-
-        {/* BUILDS */}
-        <SectionCard title="Builds" ok={vBuilds.ok} missing={vBuilds.missing}>
-          <div className="grid gap-3">
-            <div className="flex flex-wrap items-center gap-6">
-              <div>
-                <div className="text-sm text-muted-foreground">Version</div>
-                <div className="text-lg">{mock.version}</div>
-              </div>
-              <div>
-                <div className="text-sm text-muted-foreground">Platforms</div>
-                <div className="flex items-center gap-4 text-xl">
-                  {mock.platforms.map((p) => (
-                    <span key={p.key} title={p.key}>
-                      <FontAwesomeIcon icon={platformIcon[p.key]} />
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              {mock.platforms.map((p) => (
-                <div key={p.key} className="rounded-lg border border-muted-foreground/30 p-4">
-                  <div className="flex items-center gap-2 text-lg font-medium mb-2 capitalize">
-                    <FontAwesomeIcon icon={platformIcon[p.key]} />
-                    {p.key}
-                  </div>
-
-                  {p.key === 'web' ? (
-                    <div className="text-base grid gap-2">
-                      <div>
-                        <div className="text-sm text-muted-foreground">Web URL</div>
-                        <div className="break-all">{(p.info as any).webUrl}</div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <Field label="CPU" value={(p.info as any).requirement.processor} />
-                        <Field label="GPU" value={(p.info as any).requirement.graphics} />
-                        <Field label="Memory (GB)" value={(p.info as any).requirement.memory} />
-                        <Field label="Storage (GB)" value={(p.info as any).requirement.storage} />
-                      </div>
-                      {((p.info as any).requirement.notes as string) && (
-                        <div>
-                          <div className="text-sm text-muted-foreground">Notes</div>
-                          <div>{(p.info as any).requirement.notes}</div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-base grid gap-2">
-                      <div className="flex items-center justify-between rounded-md border border-muted-foreground/30 px-3 py-2">
-                        <div className="text-muted-foreground">File</div>
-                        <div className="font-medium">
-                          {(p.info as any).fileName || '—'}{' '}
-                          {typeof (p.info as any).fileSizeMB === 'number' &&
-                            `(${bytes((p.info as any).fileSizeMB)})`}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <Field label="CPU" value={(p.info as any).requirement.processor} />
-                        <Field label="GPU" value={(p.info as any).requirement.graphics} />
-                        <Field label="Memory (GB)" value={(p.info as any).requirement.memory} />
-                        <Field label="Storage (GB)" value={(p.info as any).requirement.storage} />
-                      </div>
-                      {((p.info as any).requirement.notes as string) && (
-                        <div>
-                          <div className="text-sm text-muted-foreground">Notes</div>
-                          <div>{(p.info as any).requirement.notes}</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="pt-2">
-            <button
-              type="button"
-              className="text-accent-foreground hover:underline"
-              onClick={() => alert('Go to Edit Builds (UI only)')}
-            >
-              Edit Builds
-            </button>
-          </div>
-        </SectionCard>
-      </div>
-    </div>
-  );
-};
-
-/** kecil-kecil */
 const Field: React.FC<{ label: string; value?: string }> = ({ label, value }) => (
   <div>
     <div className="text-sm text-muted-foreground">{label}</div>

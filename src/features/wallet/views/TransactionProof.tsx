@@ -3,7 +3,7 @@ import React from 'react';
 import { TrainedDataInterface } from '../interfaces/History';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { shortenAddress } from '../../../utils/Additional';
+import { shortenAddress } from '../../../lib/utils/Additional';
 import { ButtonTransaction } from '../../../components/atoms/ButtonTransaction';
 import { ipcRenderer } from 'electron';
 import { DateTime } from 'luxon';

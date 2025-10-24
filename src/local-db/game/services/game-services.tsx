@@ -1,4 +1,4 @@
-import { GameId, PGLContractMeta } from '../../../lib/interfaces/types-game';
+import { GameId, PGLContractMeta } from '../../../lib/interfaces/game.types';
 import { dbGame } from '../database';
 
 export const gameService = {

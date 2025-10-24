@@ -8,12 +8,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons';
 import { FilterHistory } from '../components/FilterHistory';
 import { BlockService } from '../../../local-db/wallet/services/blockService';
-import { filterByType, groupByDay } from '../../../utils/classifier';
-import { transformBlockToTrained } from '../../../utils/transformBlockToTrainedData';
+import { filterByType, groupByDay } from '../../../lib/utils/classifier';
+import { transformBlockToTrained } from '../../../lib/utils/transformBlockToTrainedData';
 import { CoinService } from '../../../local-db/wallet/services/coinService';
 import { UserProgressService } from '../../../local-db/wallet/services/userProgressService';
 import { Principal } from '@dfinity/principal';
-import { formatShortEn } from '../../../utils/Additional';
+import { formatShortEn } from '../../../lib/utils/Additional';
 import {
   getArchiveBlockLength,
   getLedgerBlockLength,

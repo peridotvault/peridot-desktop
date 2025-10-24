@@ -44,7 +44,7 @@ import {
 import { ImageLoading } from '../../constants/lib.const';
 import { buyGame } from '../../blockchain/icp/vault/services/ICPPurchaseService';
 import { MediaItem } from '../../interfaces/app/GameInterface';
-import { Distribution } from '../../blockchain/icp/pgl1/service.did.d';
+import { Distribution } from '../../blockchain/icp/pgc/service.did.d';
 
 export default function GameDetail() {
   const { gameId } = useParams();

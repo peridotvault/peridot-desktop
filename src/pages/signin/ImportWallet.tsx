@@ -4,9 +4,10 @@ import { useWallet } from '../../contexts/WalletContext';
 import { walletService } from '../../features/wallet/services/WalletService';
 import { useNavigate } from 'react-router-dom';
 import { PasswordPage } from './PasswordPage';
-import { clearWalletData } from '../../utils/StoreService';
-import { SeedPhraseInput } from '../../features/wallet/components/SeedPhraseInput';
-import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
+import { SeedPhraseInput } from '../../features/wallet/components/input-seedphrase';
+import { RedirectPage } from '../additional/redirect-page';
+import { ButtonWithSound } from '../../components/atoms/button-with-sound';
+import { clearWalletData } from '../../lib/utils/StoreService';
 
 interface ImportWalletProps {
   setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,17 +23,10 @@ export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
     async function userHandle() {
       try {
         if (wallet.encryptedPrivateKey) {
-          const isUserExist = await getUserData({
-            wallet: wallet,
-          });
-          if (isUserExist) {
-            navigate('/');
-          }
+          navigate('/');
         }
       } catch (error) {
-        const msg = String((error as Error)?.message ?? error);
-        if (msg.includes('NotFound')) navigate('/create_profile');
-        else console.error(error);
+        console.error(error);
       }
     }
 
@@ -79,10 +73,10 @@ export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
     if (!isGeneratedSeedPhrase) {
       return (
         <div className="flex flex-col gap-4 items-center">
-          <div className="border border-white/20 rounded-3xl flex justify-center items-center px-8 py-6 flex-col gap-6">
+          <div className="border border-foreground/20 rounded-3xl flex justify-center items-center px-8 py-6 flex-col gap-6">
             <div className="flex flex-col w-full gap-4">
               <h2 className="text-2xl font-bold">Import Your Wallet</h2>
-              <hr className="border-t border-white/20" />
+              <hr className="border-t border-foreground/20" />
               <p className="text-sm">Enter your 12-words Seed Phrase</p>
             </div>
             <SeedPhraseInput
@@ -94,12 +88,12 @@ export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
           </div>
           <div className="flex gap-2">
             <span>Don't have Web3 Wallet?</span>
-            <button
+            <ButtonWithSound
               onClick={() => setIsImportWallet(false)}
-              className="text-accent_primary font-bold"
+              className="text-accent-foreground font-bold hover:cursor-pointer"
             >
               Create Wallet
-            </button>
+            </ButtonWithSound>
           </div>
         </div>
       );
@@ -115,5 +109,5 @@ export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
     );
   }
 
-  return <div className="flex justify-center items-center">Redirecting...</div>;
+  return <RedirectPage />;
 };

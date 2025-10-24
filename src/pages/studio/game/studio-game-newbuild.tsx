@@ -6,15 +6,9 @@ import { faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons'
 import { InputDropdown } from '../../../components/atoms/input-dropdown';
 import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
 import { InputFloating } from '../../../components/atoms/input-floating';
-import {
-  Distribution,
-  Manifest,
-  NativeBuild,
-  Platform,
-  WebBuild,
-} from '../../../lib/interfaces/types-game';
+import { Manifest, Platform } from '../../../lib/interfaces/game.types';
 import { initAppStorage, uploadToPrefix } from '../../../api/wasabiClient';
-import { DraftService } from '../../../local-db/game/services/draft-services';
+import { appendManifest, fetchBuilds } from '../../../api/game-draft.api';
 
 type PlatformBuildData = {
   version: string;
@@ -58,6 +52,11 @@ const getDefaultPlatformData = (): PlatformBuildData => ({
 export const StudioGameNewBuild: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
+  if (!gameId) {
+    alert('Game ID tidak ditemukan');
+    navigate('/studio');
+    return;
+  }
 
   const [formData, setFormData] = React.useState<NewBuildFormData>({
     platforms: [],
@@ -77,7 +76,7 @@ export const StudioGameNewBuild: React.FC = () => {
     { value: 'windows' as Platform, label: 'Windows' },
     { value: 'macos' as Platform, label: 'macOS' },
     { value: 'linux' as Platform, label: 'Linux' },
-    { value: 'web' as Platform, label: 'Website' },
+    // { value: 'web' as Platform, label: 'Website' },
   ];
 
   // ✅ Helper: Pastikan data platform ada
@@ -143,107 +142,62 @@ export const StudioGameNewBuild: React.FC = () => {
     setError(null);
     const chosen = formData.platforms;
 
-    if (chosen.length === 0) {
-      return setError('Pilih minimal satu platform.');
-    }
+    if (chosen.length === 0) return setError('Pilih minimal satu platform.');
 
-    // Validasi per platform
+    // validasi native saja (web memang tidak dipakai di flow ini)
     for (const platform of chosen) {
-      if (platform === 'web') {
-        if (!formData.webUrl.trim()) {
-          return setError('Web URL wajib diisi untuk Website.');
-        }
-      } else {
-        const data = getPlatformData(platform);
-        if (!data.version.trim()) {
-          return setError(`Version wajib diisi untuk ${platformInfo[platform].label}.`);
-        }
-        if (!data.file) {
-          return setError(`File build wajib diupload untuk ${platformInfo[platform].label}.`);
-        }
-      }
+      const data = getPlatformData(platform);
+      if (!data.version.trim())
+        return setError(`Version wajib diisi untuk ${platformInfo[platform].label}.`);
+      if (!data.file)
+        return setError(`File build wajib diupload untuk ${platformInfo[platform].label}.`);
     }
 
     try {
-      // ✅ Ambil draft existing untuk dapat hardware yang sudah diset
-      const existingDraft = await DraftService.get(gameId!);
-      const existingDistributions = existingDraft?.pgl1_distribution || [];
+      // (opsional) ambil dulu untuk referensi (bila butuh)
+      await fetchBuilds(gameId!);
 
-      const distributions: Distribution[] = [];
+      for (const platform of chosen) {
+        const data = getPlatformData(platform);
+        if (!data.file) continue;
 
-      // Web build
-      if (chosen.includes('web')) {
-        // Cari hardware existing untuk web
-        const existingWeb = existingDistributions.find((dist) => 'web' in dist) as
-          | { web: WebBuild }
-          | undefined;
+        // upload ke storage
+        const storage = await initAppStorage(gameId!);
+        const ext = data.file.name.split('.').pop()?.toLowerCase() || 'zip';
+        const safeVersion = data.version.trim().replace(/[^a-zA-Z0-9._-]/g, '_');
+        const fileName = `${gameId}-${platform}-v${safeVersion}.${ext}`;
 
-        distributions.push({
-          web: {
-            url: formData.webUrl.trim(),
-            processor: existingWeb?.web.processor || '',
-            memory: existingWeb?.web.memory || 0,
-            storage: existingWeb?.web.storage || 0,
-            graphics: existingWeb?.web.graphics || '',
-            additionalNotes: existingWeb?.web.additionalNotes || '',
+        await uploadToPrefix({
+          file: data.file,
+          prefix: storage.prefixes[`builds/${platform}` as const],
+          fileName,
+          contentType: data.file.type || 'application/octet-stream',
+          public: true,
+        });
+
+        // bentuk manifest sesuai tipe API (Timestamp = number)
+        const manifest: Manifest = {
+          listing: fileName,
+          createdAt: Date.now(),
+          size_bytes: data.file.size,
+          version: data.version.trim(),
+          checksum: 'temp-checksum',
+          storageRef: {
+            s3: {
+              bucket: storage.bucket,
+              basePath: storage.prefixes[`builds/${platform}` as const],
+            },
           },
+        };
+
+        // simpan ke backend
+        await appendManifest(gameId!, {
+          os: platform, // 'windows' | 'macos' | 'linux'
+          manifest,
+          setLive: false, // (opsional) kalau ingin sekaligus set live
         });
       }
 
-      // Native builds
-      for (const platform of ['windows', 'macos', 'linux'] as const) {
-        if (chosen.includes(platform)) {
-          const data = getPlatformData(platform);
-          if (!data.file || !data.version) continue;
-
-          // Cari hardware existing untuk platform ini
-          const existingNative = existingDistributions.find(
-            (dist) => 'native' in dist && dist.native.os === platform,
-          ) as { native: NativeBuild } | undefined;
-
-          // Upload file
-          const storage = await initAppStorage(gameId!);
-          const ext = data.file.name.split('.').pop()?.toLowerCase() || 'zip';
-          const safeVersion = data.version.trim().replace(/[^a-zA-Z0-9._-]/g, '_');
-          const fileName = `${gameId}-${platform}-v${safeVersion}.${ext}`;
-
-          await uploadToPrefix({
-            file: data.file,
-            prefix: storage.prefixes[`builds/${platform}` as const],
-            fileName,
-            contentType: data.file.type || 'application/octet-stream',
-            public: true,
-          });
-
-          const manifest: Manifest = {
-            listing: fileName,
-            createdAt: Date.now(),
-            size_bytes: data.file.size,
-            version: data.version.trim(),
-            checksum: 'temp-checksum',
-            storageRef: {
-              s3: {
-                bucket: storage.bucket,
-                basePath: storage.prefixes[`builds/${platform}` as const],
-              },
-            },
-          };
-
-          distributions.push({
-            native: {
-              os: platform,
-              processor: existingNative?.native.processor || '',
-              memory: existingNative?.native.memory || 0,
-              storage: existingNative?.native.storage || 0,
-              graphics: existingNative?.native.graphics || '',
-              additionalNotes: existingNative?.native.additionalNotes || '',
-              manifests: [manifest],
-            },
-          });
-        }
-      }
-
-      await DraftService.updateBuilds(gameId!, distributions);
       alert('Build berhasil disimpan ke draft!');
       navigate(`/studio/game/${gameId}/builds`);
     } catch (err: any) {
@@ -313,23 +267,15 @@ export const StudioGameNewBuild: React.FC = () => {
 
                   <div className="p-4">
                     {platform === 'web' ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <InputFloating
-                          placeholder="Version"
-                          value={platformData.version}
-                          onChange={(e) => updateVersion('web', e.target.value)}
-                          required
-                        />
-                        <InputFloating
-                          placeholder="Game Web URL"
-                          type="text"
-                          value={formData.webUrl}
-                          onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, webUrl: e.target.value }))
-                          }
-                          required
-                        />
-                      </div>
+                      <InputFloating
+                        placeholder="Game Web URL"
+                        type="text"
+                        value={formData.webUrl}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, webUrl: e.target.value }))
+                        }
+                        required
+                      />
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <InputFloating

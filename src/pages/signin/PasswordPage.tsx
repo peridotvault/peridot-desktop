@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useWallet } from '../../contexts/WalletContext';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons/faChevronLeft';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ButtonWithSound } from '../../components/atoms/button-with-sound';
+import { InputFloating } from '../../components/atoms/input-floating';
 
 interface PasswordProps {
   backFunction: () => void;
@@ -30,51 +32,49 @@ export const PasswordPage: React.FC<PasswordProps> = ({ backFunction, handlePass
     <div className="flex flex-col gap-4 items-center">
       {/* button back  */}
       <div className="flex items-center justify-between w-full">
-        <button
-          className="flex items-center gap-2 border px-6 py-3 rounded-xl border-white/20"
+        <ButtonWithSound
+          className="flex items-center cursor-pointer gap-2 border px-6 py-3 rounded-xl border-foreground/20"
           onClick={backFunction}
         >
           <FontAwesomeIcon icon={faChevronLeft} />
           <span>Back</span>
-        </button>
+        </ButtonWithSound>
       </div>
 
-      <div className="border border-white/20 rounded-3xl flex justify-center items-center px-8 py-6 flex-col gap-6">
+      <div className="border border-foreground/20 rounded-3xl flex justify-center items-center px-8 py-6 flex-col gap-6">
         <div className="flex flex-col w-full gap-4">
           <h2 className="text-2xl font-bold">Create Your Password</h2>
-          <hr className="border-t border-white/20" />
+          <hr className="border-t border-foreground/20" />
           <p className="text-sm">Now enter your password to continue registration</p>
         </div>
 
-        <div className="flex flex-col gap-3 w-full">
-          <input
-            type="password"
-            name="password"
-            className="border border-white/10 shadow-sunken-lg p-3 w-96 rounded-lg text-white bg-background_primary outline-none"
+        <div className="flex flex-col gap-4 w-96">
+          <InputFloating
             placeholder="Enter your password"
+            type="password"
             value={password || ''}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
-          <input
-            type="password"
-            name="confirmPassword"
-            className="border border-white/10 shadow-sunken-lg p-3 w-96 rounded-lg text-white bg-background_primary outline-none"
+          <InputFloating
             placeholder="Confirm your password"
+            type="password"
             value={confirmPassword || ''}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
           />
         </div>
         {/* button  */}
-        <button
+        <ButtonWithSound
           onClick={handleSubmit}
-          className={`bg-white text-black py-3 px-10 rounded-full ${
+          className={`bg-foreground border-foreground text-black py-3 px-10 rounded-full  ${
             password !== '' && password === confirmPassword && password.length >= 5
-              ? ''
+              ? 'cursor-pointer'
               : 'opacity-30 cursor-not-allowed '
           }`}
         >
           Create Password
-        </button>
+        </ButtonWithSound>
 
         {/* debug user  */}
         {password.length < 5 && password !== '' ? (

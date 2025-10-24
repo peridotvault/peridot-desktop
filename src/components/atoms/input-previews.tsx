@@ -21,7 +21,7 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { PreviewItem } from '../../lib/interfaces/types-game';
+import { PreviewItem } from '../../lib/interfaces/game.types';
 
 type InputPreviewsProps = {
   id?: string;

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { StudioSidebar } from './studio-sidebar';
+import { Toaster } from 'react-hot-toast';
 
 export default function StudioLayout() {
   return (
@@ -14,6 +15,7 @@ export default function StudioLayout() {
       <div className="ml-[70px] flex justify-center w-full ">
         <Outlet />
       </div>
+      <Toaster position="top-right" />
     </main>
   );
 }

@@ -5,7 +5,7 @@ import { ButtonTransaction } from '../../../components/atoms/ButtonTransaction';
 import { ICRC1Coin } from '../components/ICRC1Coin';
 import { AlertMessage } from '../components/AlertMessage';
 import { walletService } from '../services/WalletService';
-import { hexToArrayBuffer } from '../../../utils/crypto';
+import { hexToArrayBuffer } from '../../../lib/utils/crypto';
 import { Actor, ActorSubclass, HttpAgent } from '@dfinity/agent';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { ICPLedgerFactory } from '../blockchain/icp/ICPLedgerFactory';

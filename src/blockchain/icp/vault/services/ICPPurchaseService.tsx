@@ -1,6 +1,6 @@
 import { HttpAgent } from '@dfinity/agent';
 import { walletService } from '../../../../features/wallet/services/WalletService';
-import { hexToArrayBuffer } from '../../../../utils/crypto';
+import { hexToArrayBuffer } from '../../../../lib/utils/crypto';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { ApiResponse_6, PurchaseType } from '../service.did.d';
 import { createActorVault } from '../../idlFactories';

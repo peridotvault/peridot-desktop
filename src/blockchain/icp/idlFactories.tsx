@@ -7,14 +7,14 @@ import { idlFactory as directory_idlFactory } from './directory/service';
 import { idlFactory as factory_idlFactory } from './factory/service';
 import { idlFactory as vault_idlFactory } from './vault/service';
 import { idlFactory as registry_idlFactory } from './registry/service';
-import { idlFactory as pgl1_idlFactory } from './pgl1/service';
+import { idlFactory as pgl1_idlFactory } from './pgc/service';
 
 // ✅ TYPES ONLY -> dari .d.ts (bukan .d.tsx)
 import type { _SERVICE as DirectoryService } from './directory/service.did.d';
 import type { _SERVICE as FactoryService } from './factory/service.did.d';
 import type { _SERVICE as RegistryService } from './registry/service.did.d';
 import type { _SERVICE as VaultService } from './vault/service.did.d';
-import type { _SERVICE as PGL1Service } from './pgl1/service.did.d';
+import type { _SERVICE as PGL1Service } from './pgc/service.did.d';
 
 const directoryCanister = import.meta.env.VITE_PERIDOT_CANISTER_DIRECTORY_BACKEND;
 const factoryCanister = import.meta.env.VITE_PERIDOT_CANISTER_FACTORY_BACKEND;

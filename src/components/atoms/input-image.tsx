@@ -102,7 +102,7 @@ export const InputImage = React.forwardRef<HTMLInputElement, InputImageProps>(
     const validateFiles = (incoming: File[]): { valid: File[]; errorMsg?: string } => {
       const imgs = incoming.filter((f) => f.type.startsWith('image/'));
       if (imgs.length !== incoming.length) {
-        return { valid: [], errorMsg: 'File non-gambar terdeteksi.' };
+        return { valid: [], errorMsg: 'File non-Image terdeteksi.' };
       }
       const overs = imgs.filter((f) => f.size > maxSize);
       if (overs.length) {
@@ -273,8 +273,8 @@ export const InputImage = React.forwardRef<HTMLInputElement, InputImageProps>(
                     removeAt(0);
                   }}
                   className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/80 backdrop-blur text-foreground hover:scale-105 shadow-flat-sm flex items-center justify-center"
-                  aria-label={`Hapus ${filesToShow[0].file.name}`}
-                  title="Hapus"
+                  aria-label={`Delete ${filesToShow[0].file.name}`}
+                  title="Delete"
                 >
                   <FontAwesomeIcon icon={faXmark} />
                 </button>
@@ -294,12 +294,11 @@ export const InputImage = React.forwardRef<HTMLInputElement, InputImageProps>(
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Hapus preview URL → kirim array kosong ke onChange
                     onChange?.([]);
                   }}
                   className="absolute top-2 right-2 h-7 w-7 rounded-full bg-background/80 backdrop-blur text-foreground hover:scale-105 shadow-flat-sm flex items-center justify-center"
-                  aria-label="Hapus gambar"
-                  title="Hapus"
+                  aria-label="Delete Image"
+                  title="Delete"
                 >
                   <FontAwesomeIcon icon={faXmark} />
                 </button>
@@ -312,11 +311,11 @@ export const InputImage = React.forwardRef<HTMLInputElement, InputImageProps>(
                 <FontAwesomeIcon icon={faImage} />
               </div>
               <div className="text-sm">
-                <span className="font-medium text-foreground">Klik untuk pilih</span> atau seret &
-                lepas
+                <span className="font-medium text-foreground">Click for Choose Image</span> or Drag
+                and Drop
               </div>
               <div className="text-xs">
-                {multiple ? 'Bisa multi gambar' : 'Satu gambar saja'} • Batas ukuran{' '}
+                {multiple ? 'Multi Image' : 'Single Image '} • Max size{' '}
                 {Math.round(maxSize / (1024 * 1024))}MB
               </div>
             </div>

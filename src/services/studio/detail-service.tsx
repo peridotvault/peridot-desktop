@@ -1,4 +1,9 @@
-import { initAppStorage, safeFileName, uploadToPrefix } from '../../api/wasabiClient';
+import {
+  API_BASE_STORAGE,
+  initAppStorage,
+  safeFileName,
+  uploadToPrefix,
+} from '../../api/wasabiClient';
 
 export async function handleAssetChange({
   file,
@@ -28,7 +33,7 @@ export async function handleAssetChange({
       contentType: file.type,
     });
 
-    return `${import.meta.env.VITE_API_BASE}/files/${key}`;
+    return `${API_BASE_STORAGE}/files/${key}`;
   } catch (err) {
     console.error('upload assets failed:', err);
   }

@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useWallet } from '../../../contexts/WalletContext';
-import { clearWalletData } from '../../../utils/StoreService';
 import { useNavigate } from 'react-router-dom';
 import {
   faArrowRightFromBracket,
@@ -26,12 +25,13 @@ import {
   getWalletInfo,
   saveCurrencyToWallet,
   saveRatesByCode,
-} from '../../../utils/IndexedDb';
+} from '../../../lib/utils/IndexedDb';
 import { Currency } from '../../../features/wallet/interfaces/Currency';
 import { WalletInfo } from '../../../features/wallet/interfaces/Wallet';
 import { InputField } from '../../../components/atoms/InputField';
 import { CoinService } from '../../../local-db/wallet/services/coinService';
 import { Coin } from '../../../local-db/wallet/models/Coin';
+import { clearWalletData } from '../../../lib/utils/StoreService';
 
 interface HomeProps {
   onLockChanged: () => void;

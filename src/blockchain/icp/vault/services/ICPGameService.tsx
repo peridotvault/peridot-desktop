@@ -1,7 +1,7 @@
 import { HttpAgent } from '@dfinity/agent';
 import { ApiResponse, GameId, PGLMeta } from '../service.did.d';
 import { walletService } from '../../../../features/wallet/services/WalletService';
-import { hexToArrayBuffer } from '../../../../utils/crypto';
+import { hexToArrayBuffer } from '../../../../lib/utils/crypto';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { Principal } from '@dfinity/principal';
 import {

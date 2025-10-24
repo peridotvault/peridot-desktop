@@ -1,4 +1,4 @@
-import { Distribution } from '../../blockchain/icp/pgl1/service.did.d';
+import { Distribution } from '../../blockchain/icp/pgc/service.did.d';
 import { Metadata, Value } from '../../blockchain/icp/vault/service.did.d';
 
 export type Opt<T> = [] | [T];

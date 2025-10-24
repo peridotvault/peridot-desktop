@@ -1,58 +1,67 @@
+// src/api/storage.api.ts
+
 export type OSKey = 'windows' | 'macos' | 'linux';
 
 export interface InitResp {
   bucket: string;
-  region: string;
-  base: string; // ex: "icp/apps/<appId>/"
+  base: string; // ex: "games/GAME123/"
   prefixes: {
-    assets: string; // "icp/apps/<appId>/assets/"
-    announcements: string; // "icp/apps/<appId>/announcements/"
-    previews: string; // "icp/apps/<appId>/previews/"
-    metadata: string; // "icp/apps/<appId>/metadata/"
-    'builds/web': string; // "icp/apps/<appId>/builds/web/"
+    assets: string; // "games/GAME123/assets/"
+    announcements: string; // "games/GAME123/announcements/"
+    previews: string; // "games/GAME123/previews/"
+    metadata: string; // "games/GAME123/metadata/"
+    'builds/web': string;
     'builds/windows': string;
     'builds/macos': string;
     'builds/linux': string;
   };
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
+export const API_BASE_STORAGE = import.meta.env.VITE_API_BASE + '/storage';
 
-function ensureTrailingSlash(x: string) {
+function ensureTrailingSlash(x: string): string {
   return x.endsWith('/') ? x : x + '/';
 }
 
 async function json<T>(res: Response): Promise<T> {
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`HTTP ${res.status}: ${text}`);
+  }
   return res.json();
 }
 
-export function safeFileName(name: string) {
+export function safeFileName(name: string): string {
   const [base, ext = ''] = name.split(/\.(?=[^.]+$)/);
   const cleanBase = base.replace(/[^a-zA-Z0-9._-]+/g, '_').slice(0, 80);
   const cleanExt = ext.replace(/[^a-zA-Z0-9]+/g, '').slice(0, 16);
   return cleanExt ? `${cleanBase}.${cleanExt}` : cleanBase;
 }
 
-/** Inisialisasi struktur folder app di Wasabi */
-export async function initAppStorage(appId: string) {
+/**
+ * Inisialisasi struktur folder game di storage
+ * Menghasilkan prefix: games/<gameId>/...
+ */
+export async function initAppStorage(gameId: string): Promise<InitResp> {
   return json<InitResp>(
-    await fetch(`${API_BASE}/apps/${encodeURIComponent(appId)}/init`, {
+    await fetch(`${API_BASE_STORAGE}/init`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ appId }),
+      body: JSON.stringify({ appId: gameId }), // NestJS tetap pakai `appId` di DTO
     }),
   );
 }
 
-/** Minta presigned PUT (server route: POST /wasabi/sign) */
+/**
+ * Dapatkan presigned URL untuk upload
+ */
 export async function presignUpload(args: {
-  key: string; // full key di bucket, ex: "icp/apps/<appId>/cover/file.png"
+  key: string; // full key, ex: "games/GAME123/assets/logo.png"
   contentType: string;
-  public?: boolean; // opsional, tergantung server
+  public?: boolean;
 }) {
   return json<{ url: string; key: string; publicUrl?: string }>(
-    await fetch(`${API_BASE}/wasabi/sign`, {
+    await fetch(`${API_BASE_STORAGE}/sign`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(args),
@@ -60,10 +69,12 @@ export async function presignUpload(args: {
   );
 }
 
-/** Minta presigned GET untuk baca objek private (POST /wasabi/sign) */
+/**
+ * Dapatkan presigned URL untuk baca file private
+ */
 export async function presignRead(key: string) {
   return json<{ url: string }>(
-    await fetch(`${API_BASE}/wasabi/sign`, {
+    await fetch(`${API_BASE_STORAGE}/sign-get`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key }),
@@ -71,8 +82,14 @@ export async function presignRead(key: string) {
   );
 }
 
-/** PUT ke presigned URL (fungsi internal, dipanggil oleh uploadToPrefix) */
-export async function uploadWithPresignedURL(url: string, fileOrBlob: Blob, contentType: string) {
+/**
+ * Upload ke presigned URL
+ */
+export async function uploadWithPresignedURL(
+  url: string,
+  fileOrBlob: Blob,
+  contentType: string,
+): Promise<void> {
   const res = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': contentType },
@@ -83,11 +100,13 @@ export async function uploadWithPresignedURL(url: string, fileOrBlob: Blob, cont
   }
 }
 
-/** Helper: hitung key dari prefix + fileName, sign PUT, lalu upload */
+/**
+ * Helper: upload ke prefix tertentu
+ */
 export async function uploadToPrefix(args: {
   file: Blob;
-  prefix: string; // ex: "icp/apps/<appId>/cover/"
-  fileName: string; // ex: "cover.png"
+  prefix: string; // ex: "games/GAME123/assets/"
+  fileName: string;
   contentType: string;
   public?: boolean;
 }) {

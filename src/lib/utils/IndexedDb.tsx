@@ -1,9 +1,9 @@
 import localforage from 'localforage';
 
-import { Currency } from '../features/wallet/interfaces/Currency';
-import theCurrencies from './../assets/json/currencies.json';
-import { WalletInfo } from '../features/wallet/interfaces/Wallet';
-import { UserInterface } from '../interfaces/user/UserInterface';
+import { Currency } from '../../features/wallet/interfaces/Currency';
+import theCurrencies from './../../assets/json/currencies.json';
+import { WalletInfo } from '../../features/wallet/interfaces/Wallet';
+import { UserInterface } from '../../interfaces/user/UserInterface';
 
 // ✅ User
 export async function saveUserInfo(user: UserInterface) {
