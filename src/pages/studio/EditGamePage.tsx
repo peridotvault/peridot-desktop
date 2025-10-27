@@ -15,7 +15,7 @@ import {
 import { PhotoFieldComponent } from '../../components/atoms/PhotoFieldComponent';
 import { DropDownComponent } from '../../components/atoms/DropDownComponent';
 import { MultiSelectComponent } from '../../components/atoms/MultiSelectComponent';
-import CarouselPreview from '../../components/organisms/CarouselPreview';
+import CarouselPreview from '../../features/game/components/carousel-preview';
 import allCategories from '../../assets/json/app/categories.json';
 import { useWallet } from '../../contexts/WalletContext';
 import { BannerFieldComponent } from '../../components/atoms/BannerFieldComponent';

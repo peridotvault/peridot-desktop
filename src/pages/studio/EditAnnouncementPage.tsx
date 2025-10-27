@@ -7,9 +7,14 @@ import { PhotoFieldComponent } from '../../components/atoms/PhotoFieldComponent'
 import { DropDownComponent } from '../../components/atoms/DropDownComponent';
 import { AppStatus } from '../../interfaces/app/GameInterface';
 import { useWallet } from '../../contexts/WalletContext';
-import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '../../api/wasabiClient';
+import {
+  initAppStorage,
+  InitResp,
+  safeFileName,
+  uploadToPrefix,
+} from '../../shared/api/wasabi.api';
 import { useParams } from 'react-router-dom';
-import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
+import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
 import {
   createAnnouncement,
   getAllAnnouncementsByGameId,

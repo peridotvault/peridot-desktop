@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faCircleXmark, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
-import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
+import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
 import { Link, useParams } from 'react-router-dom';
 import { Platform, Manifest } from '../../../lib/interfaces/game.types';
 import { isNativeBuild, isWebBuild } from '../../../lib/helpers/helper-pgl1';
-import { fetchWholeDraft } from '../../../api/game-draft.api';
+import { fetchWholeDraft } from '../../../features/game/api/game-draft.api';
 import { GameDraft } from '../../../lib/interfaces/game-draft.types';
 
 type PlatformBuildInfo = {

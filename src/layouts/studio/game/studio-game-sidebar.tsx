@@ -10,7 +10,7 @@ import {
   faBullhorn,
 } from '@fortawesome/free-solid-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
+import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
 
 interface GameProps {
   leftClassName?: string; // sejajarkan dg lebar sidebar: "left-20" dll

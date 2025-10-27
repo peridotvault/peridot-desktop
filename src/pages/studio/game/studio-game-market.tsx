@@ -1,5 +1,5 @@
 import React from 'react';
-import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
+import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
 
 export const StudioGameMarket = () => {
   const HeaderContainer = ({ title, description }: { title: string; description: string }) => {

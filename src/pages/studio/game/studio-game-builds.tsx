@@ -11,7 +11,7 @@ import {
 import { faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { formatMDY } from '../../../lib/helpers/helper-date';
-import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
+import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
 import {
   Hardware,
   Manifest,
@@ -19,9 +19,9 @@ import {
   ViewMode,
   WebBuild,
 } from '../../../lib/interfaces/game.types';
-import { InputTextarea } from '../../../components/atoms/input-textarea';
-import { InputFloating } from '../../../components/atoms/input-floating';
-import { fetchBuilds, setHardware, setLive } from '../../../api/game-draft.api';
+import { InputTextarea } from '../../../shared/components/ui/input-textarea';
+import { InputFloating } from '../../../shared/components/ui/input-floating';
+import { fetchBuilds, setHardware, setLive } from '../../../features/game/api/game-draft.api';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
 import { Distribution, SetHardwarePayload } from '../../../lib/interfaces/game-draft.types';
 import toast from 'react-hot-toast';

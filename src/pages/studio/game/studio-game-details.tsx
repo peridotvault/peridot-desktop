@@ -1,8 +1,8 @@
 // @ts-ignore
 import React, { useState } from 'react';
-import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
-import { InputFloating } from '../../../components/atoms/input-floating';
-import { InputTextarea } from '../../../components/atoms/input-textarea';
+import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
+import { InputFloating } from '../../../shared/components/ui/input-floating';
+import { InputTextarea } from '../../../shared/components/ui/input-textarea';
 import { InputImage } from '../../../components/atoms/input-image';
 import { InputDropdown } from '../../../components/atoms/input-dropdown';
 import { useParams } from 'react-router-dom';
@@ -12,7 +12,7 @@ import {
   fetchGeneral,
   fetchTags,
   updateGeneral,
-} from '../../../api/game-draft.api';
+} from '../../../features/game/api/game-draft.api';
 import { CategoryDraft, TagDraft } from '../../../lib/interfaces/game-draft.types';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
 

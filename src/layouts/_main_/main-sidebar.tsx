@@ -11,8 +11,8 @@ import {
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ImagePeridotLogo } from '../../lib/constants/const-url';
-import { ButtonWithSound } from '../../components/atoms/button-with-sound';
-import { Avatar } from '../../components/atoms/avatar';
+import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
+import { Avatar } from '../../shared/components/ui/avatar';
 
 interface MainSidebarProps {
   onOpenWallet: () => void;

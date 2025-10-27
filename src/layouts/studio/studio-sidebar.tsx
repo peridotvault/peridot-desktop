@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ButtonWithSound } from '../../components/atoms/button-with-sound';
+import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 
 export const StudioSidebar = () => {
   const location = useLocation();

@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Avatar } from '../atoms/avatar';
+import { Avatar } from '../../shared/components/ui/avatar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowRightFromBracket,
@@ -11,7 +11,7 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { ButtonWithSound } from '../atoms/button-with-sound';
+import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 import { clearWalletData } from '../../lib/utils/StoreService';
 import { useWallet } from '../../contexts/WalletContext';
 import { shortenAddress } from '../../lib/utils/short-address';

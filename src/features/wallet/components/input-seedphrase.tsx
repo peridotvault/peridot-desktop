@@ -5,7 +5,7 @@ import { copyToClipboard } from '../../../lib/utils/Additional';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClone } from '@fortawesome/free-solid-svg-icons';
 import { validateMnemonic, wordlists } from 'bip39';
-import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
+import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
 
 interface SeedPhraseInputProps {
   onContinue: (seedPhrase: string) => void;

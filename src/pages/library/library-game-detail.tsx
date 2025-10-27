@@ -7,8 +7,8 @@ import { getGameByGameId } from '../../blockchain/icp/vault/services/ICPGameServ
 // import { isNative, isWeb } from '../../interfaces/app/GameInterface'; // Tidak digunakan karena struktur berbeda
 import { useParams } from 'react-router-dom';
 import { useWallet } from '../../contexts/WalletContext';
-import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
-import { useInstalled } from '../../hooks/useInstalled';
+import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
+import { useInstalled } from '../../features/download/hooks/useInstalled';
 import { useDownloadManager } from '../../components/molecules/DownloadManager';
 import {
   Distribution,

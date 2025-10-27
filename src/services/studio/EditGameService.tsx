@@ -1,4 +1,9 @@
-import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '../../api/wasabiClient';
+import {
+  initAppStorage,
+  InitResp,
+  safeFileName,
+  uploadToPrefix,
+} from '../../shared/api/wasabi.api';
 import {
   Distribution,
   GameId,

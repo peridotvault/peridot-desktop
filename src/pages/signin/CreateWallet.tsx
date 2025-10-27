@@ -7,7 +7,7 @@ import { PasswordPage } from './PasswordPage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faDice } from '@fortawesome/free-solid-svg-icons';
 import { SeedPhraseInput } from '../../features/wallet/components/input-seedphrase';
-import { ButtonWithSound } from '../../components/atoms/button-with-sound';
+import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 import { clearWalletData } from '../../lib/utils/StoreService';
 
 interface CreateWalletProps {

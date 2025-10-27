@@ -4,11 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGlobe, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
 import { InputDropdown } from '../../../components/atoms/input-dropdown';
-import { ButtonWithSound } from '../../../components/atoms/button-with-sound';
-import { InputFloating } from '../../../components/atoms/input-floating';
+import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
+import { InputFloating } from '../../../shared/components/ui/input-floating';
 import { Manifest, Platform } from '../../../lib/interfaces/game.types';
-import { initAppStorage, uploadToPrefix } from '../../../api/wasabiClient';
-import { appendManifest, fetchBuilds } from '../../../api/game-draft.api';
+import { initAppStorage, uploadToPrefix } from '../../../shared/api/wasabi.api';
+import { appendManifest, fetchBuilds } from '../../../features/game/api/game-draft.api';
 
 type PlatformBuildData = {
   version: string;

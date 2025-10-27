@@ -7,9 +7,9 @@ import { faWindows, faApple, faLinux, faAndroid } from '@fortawesome/free-brands
 import { AppPayment } from '../../features/wallet/views/Payment';
 import { useParams } from 'react-router-dom';
 import { useWallet } from '../../contexts/WalletContext';
-import CarouselPreview from '../../components/organisms/CarouselPreview';
+import CarouselPreview from '../../features/game/components/carousel-preview';
 import { VerticalCard } from '../../components/cards/VerticalCard';
-import { AnnouncementContainer } from '../../components/atoms/AnnouncementContainer';
+import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
 import Modal from '@mui/material/Modal';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
 import {

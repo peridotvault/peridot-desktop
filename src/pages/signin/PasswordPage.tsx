@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useWallet } from '../../contexts/WalletContext';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons/faChevronLeft';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ButtonWithSound } from '../../components/atoms/button-with-sound';
-import { InputFloating } from '../../components/atoms/input-floating';
+import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
+import { InputFloating } from '../../shared/components/ui/input-floating';
 
 interface PasswordProps {
   backFunction: () => void;

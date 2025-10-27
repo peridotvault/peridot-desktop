@@ -7,7 +7,7 @@ import { createHashRouter } from 'react-router-dom';
 import UpdaterPage from './pages/additional/UpdaterPage';
 import AppShell from './layouts/app-shell';
 import MainLayout from './layouts/_main_/main-layout';
-import VaultPage from './pages/VaultPage';
+import VaultPage from './pages/Vault';
 import Login from './pages/signin/Login';
 import { LoadingScreen } from './components/organisms/LoadingScreen';
 import { StudioGameMedia } from './pages/studio/game/studio-game-media';

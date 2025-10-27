@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { PasswordPage } from './PasswordPage';
 import { SeedPhraseInput } from '../../features/wallet/components/input-seedphrase';
 import { RedirectPage } from '../additional/redirect-page';
-import { ButtonWithSound } from '../../components/atoms/button-with-sound';
+import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 import { clearWalletData } from '../../lib/utils/StoreService';
 
 interface ImportWalletProps {

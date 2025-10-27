@@ -7,7 +7,12 @@ import {
   createAnnouncement,
   getAllAnnouncementsByGameId,
 } from '../../../blockchain/icp/vault/services/ICPAnnouncementService';
-import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '../../../api/wasabiClient';
+import {
+  initAppStorage,
+  InitResp,
+  safeFileName,
+  uploadToPrefix,
+} from '../../../shared/api/wasabi.api';
 import {
   DTOGameAnnouncement,
   GameAnnouncementType,
@@ -17,7 +22,7 @@ import { InputFieldComponent } from '../../../components/atoms/InputFieldCompone
 import { faCheck, faHeading, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { PhotoFieldComponent } from '../../../components/atoms/PhotoFieldComponent';
 import { DropDownComponent } from '../../../components/atoms/DropDownComponent';
-import { AnnouncementContainer } from '../../../components/atoms/AnnouncementContainer';
+import { AnnouncementContainer } from '../../../features/announcement/components/ann-container.component';
 import { AppStatus } from '../../../interfaces/app/GameInterface';
 
 export default function StudioGameAnnouncement() {
