@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { InputField } from '../../../components/atoms/InputField';
 import { Principal } from '@dfinity/principal';
-import { useWallet } from '../../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { Coin } from '../../../local-db/wallet/models/Coin';
 import { CoinService } from '../../../local-db/wallet/services/coinService';
 import { checkBalance } from '../blockchain/icp/services/ICPCoinService';

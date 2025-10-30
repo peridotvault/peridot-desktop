@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useCallback, useEffect, useState } from 'react';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 
 import { faPlus, faUpLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,7 +10,7 @@ import { getGameByDeveloperId } from '../../blockchain/icp/vault/services/ICPGam
 import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
 import { optGetOr } from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
-import { NewGame } from '../../components/organisms/new-game.modal';
+import { NewGame } from '@features/game/components/new-game.modal';
 import { getGameUnRegistered } from '../../blockchain/icp/factory/services/ICPFactoryService';
 import { Principal } from '@dfinity/principal';
 import { register_game } from '../../blockchain/icp/registry/services/ICPRegistryService';
@@ -85,10 +85,8 @@ export default function StudioGames() {
 
   const handleRegisterGame = async ({
     canister_id,
-    developer,
   }: {
     canister_id: Principal;
-    developer: string;
   }) => {
     if (busy) return;
     try {
@@ -104,7 +102,6 @@ export default function StudioGames() {
 
       const meta: CreateGameRecord = {
         canister_id,
-        developer: Principal.fromText(developer),
       };
       await register_game({ meta });
 
@@ -217,7 +214,6 @@ export default function StudioGames() {
                         onClick={() =>
                           handleRegisterGame({
                             canister_id: item.canister_id,
-                            developer: wallet.principalId!,
                           })
                         }
                         disabled={busy}

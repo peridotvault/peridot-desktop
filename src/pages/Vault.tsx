@@ -1,14 +1,13 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
 import { VerticalCard } from '../components/cards/VerticalCard';
-import { optGetOr } from '../interfaces/helpers/icp.helpers';
 import { TypographyH2 } from '../shared/components/ui/typography-h2';
 import { categories } from '../assets/json/app/categories.json';
 import { VaultCarousel } from '../features/game/components/vault-carousel';
 import { VaultTopGames } from '../features/game/components/vault-top-games';
-import { ImageLoading } from '../shared/config/url.const';
 import { OffChainGameMetadata } from '../features/game/types/game.type';
 import { getPublishedGames } from '../features/game/services/dto.service';
+import { ImageLoading } from '../constants/lib.const';
 
 export default function Vault() {
   const [allGames, setAllGames] = useState<OffChainGameMetadata[] | null>();
@@ -70,7 +69,7 @@ export default function Vault() {
                 key={idx}
                 gameId={item.game_id}
                 gameName={item.name}
-                imgUrl={item.cover_vertical_image}
+                imgUrl={item.metadata?.cover_vertical_image ?? ImageLoading}
                 price={Number(item.price)}
               />
             ))}
@@ -111,7 +110,7 @@ export default function Vault() {
                 key={idx}
                 gameId={item.game_id}
                 gameName={item.name}
-                imgUrl={item.cover_vertical_image}
+                imgUrl={item.metadata?.cover_vertical_image ?? ImageLoading}
                 price={Number(item.price)}
               />
             ))}

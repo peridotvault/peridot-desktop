@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
-import { useWallet } from '../../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { GroupByDayInterface, TrainedDataInterface } from '../interfaces/History';
 import { HistoryComponent } from '../components/HistoryComponent';
 import { TransactionProof } from './TransactionProof';

@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGlobe, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
-import { faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
+import { faAndroid, faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
 import { InputDropdown } from '../../../components/atoms/input-dropdown';
 import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
 import { InputFloating } from '../../../shared/components/ui/input-floating';
@@ -15,11 +15,13 @@ type PlatformBuildData = {
   file: File | null;
 };
 
+type NativePlatform = Extract<Platform, 'windows' | 'macos' | 'linux'>;
+
 type NewBuildFormData = {
-  platforms: Platform[];
+  platforms: NativePlatform[];
   webUrl: string;
-  platformData: Partial<Record<Platform, PlatformBuildData>>;
-};
+  platformData: Partial<Record<NativePlatform, PlatformBuildData>>;
+}; 
 
 const platformInfo: Record<Platform, { label: string; icon: any; accept?: string; hint?: string }> =
   {
@@ -32,6 +34,9 @@ const platformInfo: Record<Platform, { label: string; icon: any; accept?: string
     },
     linux: { label: 'Linux', icon: faLinux, accept: '.zip,.AppImage', hint: 'ZIP/AppImage' },
     web: { label: 'Website', icon: faGlobe },
+    android: { label: 'Android', icon: faAndroid, accept: '.apk,.aab', hint: 'APK/AAB' },
+    ios: { label: 'iOS', icon: faApple, accept: '.ipa', hint: 'IPA archive' },
+    other: { label: 'Other', icon: faGlobe },
   };
 
 const bytesToHuman = (b: number) => {
@@ -73,18 +78,18 @@ export const StudioGameNewBuild: React.FC = () => {
   }, [formData.platformData]);
 
   const platformOptions = [
-    { value: 'windows' as Platform, label: 'Windows' },
-    { value: 'macos' as Platform, label: 'macOS' },
-    { value: 'linux' as Platform, label: 'Linux' },
+    { value: 'windows' as NativePlatform, label: 'Windows' },
+    { value: 'macos' as NativePlatform, label: 'macOS' },
+    { value: 'linux' as NativePlatform, label: 'Linux' },
     // { value: 'web' as Platform, label: 'Website' },
   ];
 
   // ✅ Helper: Pastikan data platform ada
-  const getPlatformData = (platform: Platform): PlatformBuildData => {
+  const getPlatformData = (platform: NativePlatform): PlatformBuildData => {
     return formData.platformData[platform] || getDefaultPlatformData();
   };
 
-  const updateVersion = (platform: Platform, version: string) => {
+  const updateVersion = (platform: NativePlatform, version: string) => {
     setFormData((prev) => ({
       ...prev,
       platformData: {
@@ -98,7 +103,7 @@ export const StudioGameNewBuild: React.FC = () => {
     }));
   };
 
-  const updateFile = (platform: Platform, file: File | null) => {
+  const updateFile = (platform: NativePlatform, file: File | null) => {
     setFormData((prev) => ({
       ...prev,
       platformData: {
@@ -112,17 +117,17 @@ export const StudioGameNewBuild: React.FC = () => {
     }));
   };
 
-  const pickFile = (platform: Platform, fileList: FileList | null) => {
+  const pickFile = (platform: NativePlatform, fileList: FileList | null) => {
     const file = fileList?.[0] || null;
     updateFile(platform, file);
   };
 
-  const removeFile = (platform: Platform) => {
+  const removeFile = (platform: NativePlatform) => {
     updateFile(platform, null);
   };
 
   const handlePlatformChange = (platforms: string[]) => {
-    const newPlatforms = platforms as Platform[];
+    const newPlatforms = platforms as NativePlatform[];
     const newPlatformData = { ...formData.platformData };
 
     newPlatforms.forEach((platform) => {
@@ -258,64 +263,55 @@ export const StudioGameNewBuild: React.FC = () => {
                       <FontAwesomeIcon icon={platformInfo[platform].icon} />
                       {platformInfo[platform].label}
                     </div>
-                    {platform !== 'web' && (
-                      <div className="flex items-center gap-2 text-base text-muted-foreground">
-                        Diterima: {platformInfo[platform].accept} • {platformInfo[platform].hint}
-                      </div>
+                    <div className="flex items-center gap-2 text-base text-muted-foreground">
+                      Diterima: {platformInfo[platform].accept} • {platformInfo[platform].hint}
+                    </div>
+                    {platformData.file && (
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Ukuran: {bytesToHuman(platformData.file.size)}
+                      </p>
                     )}
                   </div>
 
                   <div className="p-4">
-                    {platform === 'web' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <InputFloating
-                        placeholder="Game Web URL"
-                        type="text"
-                        value={formData.webUrl}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, webUrl: e.target.value }))
-                        }
+                        placeholder="Version (1.2.0)"
+                        value={platformData.version}
+                        onChange={(e) => updateVersion(platform, e.target.value)}
                         required
                       />
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <InputFloating
-                          placeholder="Version (1.2.0)"
-                          value={platformData.version}
-                          onChange={(e) => updateVersion(platform, e.target.value)}
-                          required
-                        />
-                        <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-muted-foreground/40 px-3 py-2">
-                          <div className="flex items-center gap-2 text-base">
-                            <FontAwesomeIcon icon={faCloudArrowUp} />
-                            {platformData.file?.name ? (
-                              <span className="text-foreground">{platformData.file.name}</span>
-                            ) : (
-                              <span className="text-muted-foreground">Belum ada file</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {platformData.file && (
-                              <button
-                                type="button"
-                                className="rounded-md border px-3 py-1.5 text-base border-muted-foreground/40 hover:border-foreground/70"
-                                onClick={() => removeFile(platform)}
-                              >
-                                Hapus
-                              </button>
-                            )}
-                            <label className="rounded-md border px-3 py-1.5 text-base border-muted-foreground/40 hover:border-foreground/70 cursor-pointer">
-                              Pilih file
-                              <input
-                                type="file"
-                                accept={platformInfo[platform].accept}
-                                className="hidden"
-                                onChange={(e) => pickFile(platform, e.target.files)}
-                              />
-                            </label>
-                          </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-muted-foreground/40 px-3 py-2">
+                        <div className="flex items-center gap-2 text-base">
+                          <FontAwesomeIcon icon={faCloudArrowUp} />
+                          {platformData.file?.name ? (
+                            <span className="text-foreground">{platformData.file.name}</span>
+                          ) : (
+                            <span className="text-muted-foreground">Belum ada file</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {platformData.file && (
+                            <button
+                              type="button"
+                              className="rounded-md border px-3 py-1.5 text-base border-muted-foreground/40 hover:border-foreground/70"
+                              onClick={() => removeFile(platform)}
+                            >
+                              Hapus
+                            </button>
+                          )}
+                          <label className="rounded-md border px-3 py-1.5 text-base border-muted-foreground/40 hover:border-foreground/70 cursor-pointer">
+                            Pilih file
+                            <input
+                              type="file"
+                              accept={platformInfo[platform].accept}
+                              className="hidden"
+                              onChange={(e) => pickFile(platform, e.target.files)}
+                            />
+                          </label>
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               );

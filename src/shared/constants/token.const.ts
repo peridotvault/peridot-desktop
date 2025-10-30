@@ -1,0 +1,1 @@
+export const USDT_ADDRESS = "cngnf-vqaaa-aaaar-qag4q-cai";

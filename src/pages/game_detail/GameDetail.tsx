@@ -6,7 +6,7 @@ import { faAngleRight, faGlobe, faMessage } from '@fortawesome/free-solid-svg-ic
 import { faWindows, faApple, faLinux, faAndroid } from '@fortawesome/free-brands-svg-icons';
 import { AppPayment } from '../../features/wallet/views/Payment';
 import { useParams } from 'react-router-dom';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import CarouselPreview from '../../features/game/components/carousel-preview';
 import { VerticalCard } from '../../components/cards/VerticalCard';
 import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
@@ -178,12 +178,11 @@ export default function GameDetail() {
   async function onCommentSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const result = await commentByAnnouncementId({
+      await commentByAnnouncementId({
         annId: BigInt(Number(selectedAnnouncement?.announcementId)),
         wallet,
         comment,
       });
-      console.log(result?.comment);
     } catch (err) {
       console.error(err);
     }

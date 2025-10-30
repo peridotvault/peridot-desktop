@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { InputField } from '../../components/atoms/InputField';
 import { ButtonTransaction } from '../../components/atoms/ButtonTransaction';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { createDeveloperProfile } from '../../blockchain/icp/directory/services/ICPUserService';
 import { AppPayment } from '../../features/wallet/views/Payment';
 import { useNavigate } from 'react-router-dom';

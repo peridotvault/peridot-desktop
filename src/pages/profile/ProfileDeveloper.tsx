@@ -10,8 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { LoadingScreen } from '../../components/organisms/LoadingScreen';
 import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
 import { UserInterface } from '../../interfaces/user/UserInterface';
@@ -21,7 +20,6 @@ export default function ProfileDeveloper() {
   const { wallet } = useWallet();
   const [userData, setUserData] = useState<UserInterface | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isOpenWallet, setIOpenWallet] = useState(false);
 
   useEffect(() => {
     async function checkUser() {
@@ -110,10 +108,7 @@ export default function ProfileDeveloper() {
               <button className="w-1/2 shadow-sunken-sm hover:shadow-arise-sm rounded-lg h-12">
                 Message
               </button>
-              <button
-                className="shadow-sunken-sm hover:shadow-arise-sm w-12 h-12 rounded-lg"
-                onClick={() => setIOpenWallet(true)}
-              >
+              <button className="shadow-sunken-sm hover:shadow-arise-sm w-12 h-12 rounded-lg">
                 <div className="w-12 h-12 flex justify-center items-center">
                   <FontAwesomeIcon icon={faGear} className="shadow-sunken-sm " />
                 </div>

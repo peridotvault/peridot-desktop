@@ -1,6 +1,6 @@
 // preload.ts
 import { ipcRenderer, IpcRendererEvent } from 'electron';
-import type { WalletData } from '../src/features/wallet/services/WalletService';
+import type { WalletData } from '@shared/services/wallet.service';
 import { EncryptedData } from '@antigane/encryption';
 import { IPC_UPDATER } from './ipc/updaterChannels';
 

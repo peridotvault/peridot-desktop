@@ -2,10 +2,11 @@
 // @ts-ignore
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useWallet } from '../../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import {
   createAnnouncement,
   getAllAnnouncementsByGameId,
+  CreateAnnouncementTypes,
 } from '../../../blockchain/icp/vault/services/ICPAnnouncementService';
 import {
   initAppStorage,
@@ -13,11 +14,7 @@ import {
   safeFileName,
   uploadToPrefix,
 } from '../../../shared/api/wasabi.api';
-import {
-  DTOGameAnnouncement,
-  GameAnnouncementType,
-} from '../../../blockchain/icp/vault/service.did.d';
-import { AnnouncementStatus } from '../../../interfaces/announcement/AnnouncementInterface';
+import { GameAnnouncementType } from '../../../blockchain/icp/vault/service.did.d';
 import { InputFieldComponent } from '../../../components/atoms/InputFieldComponent';
 import { faCheck, faHeading, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { PhotoFieldComponent } from '../../../components/atoms/PhotoFieldComponent';
@@ -144,10 +141,10 @@ export default function StudioGameAnnouncement() {
    *  Payload ke canister
    *  ====================== */
 
-  function mapAnnouncementStatusToBackend(code: string): AnnouncementStatus {
-    if (code === 'draft') return { draft: null } as unknown as AnnouncementStatus;
-    if (code === 'published') return { published: null } as unknown as AnnouncementStatus;
-    return { archived: null } as unknown as AnnouncementStatus;
+  function mapAnnouncementStatusToBackend(code: string): string {
+    if (code === 'published') return 'published';
+    if (code === 'archived') return 'archived';
+    return 'draft';
   }
 
   // ====== submit ======
@@ -163,7 +160,7 @@ export default function StudioGameAnnouncement() {
 
       if (!announcementCoverImage) throw new Error('Announcement cover image is required.');
 
-      const createData: DTOGameAnnouncement = {
+      const createData: CreateAnnouncementTypes = {
         headline: headline,
         content: content,
         coverImage: announcementCoverImage,

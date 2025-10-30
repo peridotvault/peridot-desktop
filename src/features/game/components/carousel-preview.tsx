@@ -23,19 +23,30 @@ const Chevron = ({ dir = 'left' }: { dir?: 'left' | 'right' }) => (
 
 // sanitize: trim semua string untuk hindari " ...mp4  " (spasi di ujung)
 function sanitize(items: MediaItem[]): MediaItem[] {
-  return (items ?? [])
-    .map((it) =>
-      it.kind === 'image'
-        ? { ...it, src: it.src.trim(), alt: it.alt?.trim(), storageKey: it.storageKey?.trim() }
-        : {
-            ...it,
-            src: it.src.trim(),
-            poster: it.poster?.trim(),
-            alt: it.alt?.trim(),
-            storageKey: it.storageKey?.trim(),
-          },
-    )
-    .filter((it) => it.src.length > 0);
+  const normalized: MediaItem[] = [];
+  for (const it of items ?? []) {
+    const source = (it.src ?? it.url ?? '').trim();
+    if (!source) continue;
+    if (it.kind === 'image') {
+      normalized.push({
+        ...it,
+        src: source,
+        url: source,
+        alt: it.alt?.trim(),
+        storageKey: it.storageKey?.trim(),
+      });
+    } else {
+      normalized.push({
+        ...it,
+        src: source,
+        url: source,
+        poster: it.poster?.trim(),
+        alt: it.alt?.trim(),
+        storageKey: it.storageKey?.trim(),
+      });
+    }
+  }
+  return normalized;
 }
 
 export default function CarouselPreview({

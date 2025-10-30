@@ -1,7 +1,7 @@
 import { ICPPublicAgent } from "../../../shared/blockchain/icp/sdk/actors";
 import { createActorRegistry } from "../../../shared/blockchain/icp/sdk/agents";
 import type { GameRecordType } from "../../../shared/blockchain/icp/sdk/canisters/registry.did.d";
-import { ICP_REGISTRY_CANISTER } from "../../../shared/config/url.const";
+import { ICP_REGISTRY_CANISTER } from "../../../shared/constants/url.const";
 import { OnChainGameMetadata } from "../types/game.type";
 import { getGameByCanister } from "./dto.service";
 

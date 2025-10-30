@@ -1,62 +1,14 @@
-export type GameId = string;
-export type Timestamp = number;
-export type Metadata = Array<[string, Value]>;
-export type Tag = string;
-export type Category = string;
-export type Platform = 'web' | 'windows' | 'macos' | 'linux' | 'android' | 'ios';
-export type Distribution = { web: WebBuild } | { native: NativeBuild };
+export * from '@shared/blockchain/icp/types/legacy.types';
 
-export interface WebBuild {
-  url: string;
-  memory: number;
-  graphics: string;
-  additionalNotes: string;
-  storage: number;
-  processor: string;
-}
-
-export type StorageRef =
-  | { s3: { bucket: string; basePath: string } }
-  | { url: { url: string } }
-  | { ipfs: { cid: string; path: string } };
-
-export interface Manifest {
-  listing: string;
-  createdAt: Timestamp;
-  size_bytes: number;
-  version: string;
-  storageRef: StorageRef;
-  checksum: string;
-}
-
-export type Value =
-  | { int: number }
-  | { map: Array<[string, Value]> }
-  | { nat: number }
-  | { array: Array<Value> }
-  | { blob: Uint8Array | number[] }
-  | { text: string };
-
-export interface NativeBuild {
-  os: string;
-  memory: number;
-  graphics: string;
-  additionalNotes: string;
-  storage: number;
-  manifests: Array<Manifest>;
-  processor: string;
-  liveVersion?: string;
-}
-
-export type MediaItem =
-  | { kind: 'image'; src: string; alt?: string; storageKey?: string }
-  | {
-      kind: 'video';
-      src: string;
-      poster?: string;
-      alt?: string;
-      storageKey?: string;
-    };
+import type {
+  Category,
+  Distribution,
+  GameId,
+  Manifest,
+  MediaItem,
+  Platform,
+  Tag,
+} from '@shared/blockchain/icp/types/legacy.types';
 
 export interface GameDraft {
   game_id?: GameId;

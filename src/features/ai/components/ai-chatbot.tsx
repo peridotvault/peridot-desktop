@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { chat } from '../../shared/api/ai.api';
-import { EyeGlassesIcon } from '../../assets/icons/MainIcons';
+import { chat } from '@shared/api/ai.api';
+import { EyeGlassesIcon } from './../../../assets/icons/MainIcons';
 
 /* ---------- sanitize utils (sama seperti web) ---------- */
 function stripXmlBlocks(s: string) {

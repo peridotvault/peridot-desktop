@@ -18,7 +18,7 @@ import StudioGamePublish from './pages/studio/game/studio-game-publish';
 
 // LAZY (split)
 const LibraryLayout = lazy(() => import('./layouts/library/library-layout'));
-const LibraryPage = lazy(() => import('./pages/library/library'));
+const LibraryPage = lazy(() => import('./pages/library/Library'));
 const LibraryGameDetail = lazy(() => import('./pages/library/library-game-detail'));
 const Market = lazy(() => import('./pages/market/Market'));
 const DownloadPage = lazy(() => import('./pages/download-page'));

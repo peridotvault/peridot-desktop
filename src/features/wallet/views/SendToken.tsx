@@ -6,7 +6,7 @@ import { shortenAddress } from '../../../lib/utils/Additional';
 import { Principal } from '@dfinity/principal';
 import localforage from 'localforage';
 import { ICRC1Coin } from '../components/ICRC1Coin';
-import { useWallet } from '../../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { SaveContact } from '../components/SaveContact';
 import theCoin from '../../../assets/json/coins.json';
 import { AlertMessage } from '../components/AlertMessage';

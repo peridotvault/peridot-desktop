@@ -1,7 +1,7 @@
 import { Principal } from "@dfinity/principal";
 import { ICPPrivateAgent } from "../../../shared/blockchain/icp/sdk/actors";
 import { createActorPGC1 } from "../../../shared/blockchain/icp/sdk/agents";
-import { walletService } from "../../wallet/services/WalletService";
+import { walletService } from '@shared/services/wallet.service';
 
 
 export async function purchaseGame({

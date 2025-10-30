@@ -1,7 +1,7 @@
-import { ICPPrivateAgent } from "../../../shared/blockchain/icp/sdk/actors";
-import { createActorRegistry } from "../../../shared/blockchain/icp/sdk/agents";
-// import { walletService } from "../../wallet/services/WalletService";
-import { OffChainGameMetadata } from "../types/game.type";
+// Placeholder for future library services interacting with the registry canister.
+// import { ICPPrivateAgent } from '@shared/blockchain/icp/sdk/actors';
+// import { createActorRegistry } from '@shared/blockchain/icp/sdk/agents';
+// import { OffChainGameMetadata } from '../types/game.type';
 
 
 // export async function getMyGames({ wallet }: { wallet: any }): Promise<OffChainGameMetadata[]> {

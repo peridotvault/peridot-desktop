@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
-import { useWallet } from '../../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { Principal } from '@dfinity/principal';
 import { ICRC1Metadata } from '../interfaces/Coin';
 import { WalletInfo } from '../interfaces/Wallet';

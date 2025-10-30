@@ -23,12 +23,20 @@ export const StudioGameMedia = () => {
     try {
       setLoading(true);
       const data = await fetchPreviews(gameId);
-      const previewItems: PreviewItem[] = (data.previews || []).map((p, i) => ({
-        id: `preview-${i}`,
-        file: new File([], p.src.split('/').pop() || 'preview.jpg'),
-        url: p.src,
-        kind: p.kind,
-      }));
+      const previewItems: PreviewItem[] = [];
+      (data.previews || []).forEach((p, i) => {
+        const src = (p.src ?? p.url ?? '').trim();
+        if (!src) return;
+        previewItems.push({
+          id: `preview-${i}`,
+          file:
+            typeof File !== 'undefined'
+              ? new File([], src.split('/').pop() || 'preview.jpg')
+              : undefined,
+          url: src,
+          kind: p.kind,
+        });
+      });
       setPreviews(previewItems);
     } catch (error) {
       console.error('Failed to load previews:', error);
@@ -70,7 +78,7 @@ export const StudioGameMedia = () => {
         const item = updatedItems[i];
 
         // Jika URL masih blob:, berarti belum di-upload
-        if (item.url.startsWith('blob:')) {
+        if (item.url.startsWith('blob:') && item.file) {
           try {
             const permanentUrl = await uploadFile(item.file, i);
             updatedItems[i] = {

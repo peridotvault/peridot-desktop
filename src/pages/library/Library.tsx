@@ -1,5 +1,5 @@
 import React from 'react';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { Link } from 'react-router-dom';
 import { getMyGames } from '../../blockchain/icp/vault/services/ICPGameService';
 import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';

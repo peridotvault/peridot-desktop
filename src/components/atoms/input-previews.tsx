@@ -21,7 +21,7 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { PreviewItem } from '../../lib/interfaces/game.types';
+import { PreviewItem } from '@features/game/types/game.type';
 
 type InputPreviewsProps = {
   id?: string;
@@ -72,6 +72,8 @@ function SortableTile({
     boxShadow: isDragging ? '0 8px 24px rgba(0,0,0,0.25)' : undefined,
     opacity: isDragging ? 0.9 : 1,
   };
+  const previewSrc = item.url ?? item.src ?? '';
+  const previewAlt = item.file?.name ?? item.alt ?? 'Preview media';
 
   return (
     <div
@@ -82,14 +84,14 @@ function SortableTile({
       {/* media */}
       {item.kind === 'image' ? (
         <img
-          src={item.url}
-          alt={item.file.name}
+          src={previewSrc}
+          alt={previewAlt}
           className="w-full aspect-video object-cover"
           draggable={false}
         />
       ) : (
         <div className="w-full h-32 bg-black/40 flex items-center justify-center">
-          <video src={item.url} className="h-full" controls draggable={false} />
+          <video src={previewSrc} className="h-full" controls draggable={false} />
           <div className="absolute top-1 left-1 text-[11px] px-1.5 py-0.5 rounded bg-background/80">
             <FontAwesomeIcon icon={faVideo} className="mr-1" />
             Video
@@ -251,7 +253,10 @@ export const InputPreviews = React.forwardRef<HTMLInputElement, InputPreviewsPro
     const removeAt = (idx: number) => {
       const target = items[idx];
       if (!target) return;
-      URL.revokeObjectURL(target.url);
+      const objectUrl = target.url ?? target.src;
+      if (objectUrl && objectUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(objectUrl);
+      }
       const next = items.filter((_, i) => i !== idx);
       apply(next);
     };
@@ -398,13 +403,17 @@ export const InputPreviews = React.forwardRef<HTMLInputElement, InputPreviewsPro
                 <div className="relative rounded-lg overflow-hidden border border-muted-foreground/30 bg-background shadow-2xl">
                   {activeItem.kind === 'image' ? (
                     <img
-                      src={activeItem.url}
-                      alt={activeItem.file.name}
+                      src={activeItem.url ?? activeItem.src ?? ''}
+                      alt={activeItem.file?.name ?? activeItem.alt ?? 'Preview media'}
                       className="h-32 aspect-video object-cover"
                     />
                   ) : (
                     <div className="h-32 aspect-video bg-black/40 flex items-center justify-center">
-                      <video src={activeItem.url} className="h-full" />
+                      <video
+                        src={activeItem.url ?? activeItem.src ?? ''}
+                        className="h-full"
+                        poster={activeItem.poster}
+                      />
                     </div>
                   )}
                 </div>

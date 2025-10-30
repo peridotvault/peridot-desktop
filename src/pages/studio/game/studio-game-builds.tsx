@@ -8,17 +8,12 @@ import {
   faSearch,
   faRocket,
 } from '@fortawesome/free-solid-svg-icons';
-import { faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
+import { faAndroid, faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { formatMDY } from '../../../lib/helpers/helper-date';
 import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
-import {
-  Hardware,
-  Manifest,
-  Platform,
-  ViewMode,
-  WebBuild,
-} from '../../../lib/interfaces/game.types';
+import type { Manifest, WebBuild } from '../../../blockchain/icp/vault/service.did.d';
+import type { Platform, ViewMode } from '@shared/blockchain/icp/types/game.types';
 import { InputTextarea } from '../../../shared/components/ui/input-textarea';
 import { InputFloating } from '../../../shared/components/ui/input-floating';
 import { fetchBuilds, setHardware, setLive } from '../../../features/game/api/game-draft.api';
@@ -26,11 +21,39 @@ import { LoadingComponent } from '../../../components/atoms/loading.component';
 import { Distribution, SetHardwarePayload } from '../../../lib/interfaces/game-draft.types';
 import toast from 'react-hot-toast';
 
+type HardwareForm = {
+  processor: string;
+  graphics: string;
+  memory: string;
+  storage: string;
+  additionalNotes: string;
+};
+
+const createEmptyHardware = (): HardwareForm => ({
+  processor: '',
+  graphics: '',
+  memory: '',
+  storage: '',
+  additionalNotes: '',
+});
+
+type WebBuildForm = {
+  url: string;
+  processor: string;
+  graphics: string;
+  memory: string;
+  storage: string;
+  additionalNotes?: string;
+};
+
 const platformInfo: Record<Platform, { label: string; icon: any }> = {
   windows: { label: 'Windows', icon: faWindows },
   macos: { label: 'macOS', icon: faApple },
   linux: { label: 'Linux', icon: faLinux },
   web: { label: 'Website', icon: faGlobe },
+  android: { label: 'Android', icon: faAndroid },
+  ios: { label: 'iOS', icon: faApple },
+  other: { label: 'Other', icon: faGlobe },
 };
 
 // ✅ Type guards yang benar
@@ -63,9 +86,10 @@ const StatusPill: React.FC<{ isLive: boolean }> = ({ isLive }) => {
   );
 };
 
-const bytesToHuman = (b: number) => {
-  if (b < 1024) return `${b} B`;
-  const k = b / 1024;
+const bytesToHuman = (b: number | bigint) => {
+  const value = Number(b);
+  if (value < 1024) return `${value} B`;
+  const k = value / 1024;
   if (k < 1024) return `${k.toFixed(1)} KB`;
   const m = k / 1024;
   if (m < 1024) return `${m.toFixed(1)} MB`;
@@ -97,21 +121,24 @@ export const StudioGameBuilds: React.FC = () => {
   const [error, setError] = React.useState<string | null>(null);
 
   // State untuk hardware form (Native)
-  const [hardwareForms, setHardwareForms] = React.useState<Record<Platform, Hardware>>({
-    windows: { processor: '', graphics: '', memory: '', storage: '', additionalNotes: '' },
-    macos: { processor: '', graphics: '', memory: '', storage: '', additionalNotes: '' },
-    linux: { processor: '', graphics: '', memory: '', storage: '', additionalNotes: '' },
-    web: { processor: '', graphics: '', memory: '', storage: '', additionalNotes: '' },
+  const [hardwareForms, setHardwareForms] = React.useState<Record<Platform, HardwareForm>>({
+    windows: createEmptyHardware(),
+    macos: createEmptyHardware(),
+    linux: createEmptyHardware(),
+    web: createEmptyHardware(),
+    android: createEmptyHardware(),
+    ios: createEmptyHardware(),
+    other: createEmptyHardware(),
   });
 
   // State untuk WebBuild form
-  const [webBuildForm, setWebBuildForm] = React.useState<WebBuild>({
+  const [webBuildForm, setWebBuildForm] = React.useState<WebBuildForm>({
     url: '',
     processor: '',
     graphics: '',
     additionalNotes: '',
-    storage: 0,
-    memory: 0,
+    storage: '0',
+    memory: '0',
   });
 
   const loadData = async () => {
@@ -142,6 +169,9 @@ export const StudioGameBuilds: React.FC = () => {
         if ('native' in dist) {
           const native = dist.native;
           const liveVersion = native.liveVersion;
+          const nativeNotes = Array.isArray(native.additionalNotes)
+            ? native.additionalNotes[0] ?? ''
+            : native.additionalNotes ?? '';
           native.manifests.forEach((manifest: Manifest) => {
             nativeBuildsData.push({
               platform: native.os as Platform,
@@ -152,7 +182,7 @@ export const StudioGameBuilds: React.FC = () => {
                 graphics: native.graphics,
                 memory: native.memory,
                 storage: native.storage,
-                additionalNotes: native.additionalNotes,
+                additionalNotes: nativeNotes,
               },
             });
           });
@@ -164,7 +194,17 @@ export const StudioGameBuilds: React.FC = () => {
       setNativeBuilds(nativeBuildsData);
       setWebBuild(webBuildData);
       if (webBuildData) {
-        setWebBuildForm(webBuildData);
+        const noteVal = Array.isArray(webBuildData.additionalNotes)
+          ? webBuildData.additionalNotes[0]
+          : undefined;
+        setWebBuildForm({
+          url: webBuildData.url,
+          processor: webBuildData.processor,
+          graphics: webBuildData.graphics,
+          memory: webBuildData.memory?.toString() ?? '',
+          storage: webBuildData.storage?.toString() ?? '',
+          additionalNotes: noteVal ?? '',
+        });
       }
     } catch (err: any) {
       console.error('Failed to load builds:', err);
@@ -189,6 +229,9 @@ export const StudioGameBuilds: React.FC = () => {
 
     if (dist && 'native' in dist) {
       const native = dist.native;
+      const nativeNotes = Array.isArray(native.additionalNotes)
+        ? native.additionalNotes[0] ?? ''
+        : native.additionalNotes ?? '';
       setHardwareForms((prev) => ({
         ...prev,
         [viewMode]: {
@@ -196,7 +239,7 @@ export const StudioGameBuilds: React.FC = () => {
           graphics: native.graphics || '',
           memory: native.memory?.toString() || '',
           storage: native.storage?.toString() || '',
-          additionalNotes: native.additionalNotes || '',
+          additionalNotes: nativeNotes,
         },
       }));
     } else {
@@ -224,15 +267,24 @@ export const StudioGameBuilds: React.FC = () => {
         hardware: {
           processor: webBuildForm.processor,
           graphics: webBuildForm.graphics,
-          memory: webBuildForm.memory,
-          storage: webBuildForm.storage,
+          memory: webBuildForm.memory ? Number(webBuildForm.memory) : undefined,
+          storage: webBuildForm.storage ? Number(webBuildForm.storage) : undefined,
           additionalNotes: webBuildForm.additionalNotes,
         },
         // @ts-ignore — your API expects webUrl separately?
         webUrl: webBuildForm.url,
       };
       await setHardware(gameId!, data);
-      setWebBuild(webBuildForm);
+      setWebBuild({
+        url: webBuildForm.url,
+        processor: webBuildForm.processor,
+        graphics: webBuildForm.graphics,
+        memory: webBuildForm.memory ? Number(webBuildForm.memory) : 0,
+        storage: webBuildForm.storage ? Number(webBuildForm.storage) : 0,
+        additionalNotes: webBuildForm.additionalNotes?.trim()
+          ? [webBuildForm.additionalNotes.trim()]
+          : [],
+      });
       toast.success('Web build configuration saved!');
     } catch (err: any) {
       console.error('Save web build error:', err);
@@ -409,11 +461,11 @@ export const StudioGameBuilds: React.FC = () => {
                     placeholder="Memory (MB)"
                     type="number"
                     min={0}
-                    value={webBuildForm.memory.toString()}
+                    value={webBuildForm.memory}
                     onChange={(e) =>
                       setWebBuildForm((prev) => ({
                         ...prev,
-                        memory: parseInt(e.target.value) || 0,
+                        memory: e.target.value,
                       }))
                     }
                     required
@@ -422,11 +474,11 @@ export const StudioGameBuilds: React.FC = () => {
                     placeholder="Storage (MB)"
                     type="number"
                     min={0}
-                    value={webBuildForm.storage.toString()}
+                    value={webBuildForm.storage}
                     onChange={(e) =>
                       setWebBuildForm((prev) => ({
                         ...prev,
-                        storage: parseInt(e.target.value) || 0,
+                        storage: e.target.value,
                       }))
                     }
                     required
@@ -434,7 +486,7 @@ export const StudioGameBuilds: React.FC = () => {
                   <div className="col-span-2">
                     <InputTextarea
                       placeholder="Additional Notes"
-                      value={webBuildForm.additionalNotes}
+                      value={webBuildForm.additionalNotes ?? ''}
                       onChange={(e) =>
                         setWebBuildForm((prev) => ({ ...prev, additionalNotes: e.target.value }))
                       }
@@ -606,7 +658,7 @@ export const StudioGameBuilds: React.FC = () => {
                                   <StatusPill isLive={true} />
                                 </td>
                                 <td className="px-4 py-3 align-top text-muted-foreground">
-                                  {formatMDY(new Date(build.manifest.createdAt).toISOString())}
+                                  {formatMDY(Number(build.manifest.createdAt ?? 0))}
                                 </td>
                                 <td className="px-4 py-3 align-top">
                                   {bytesToHuman(build.manifest.size_bytes)}
@@ -647,7 +699,7 @@ export const StudioGameBuilds: React.FC = () => {
                                 <StatusPill isLive={build.isLive} />
                               </td>
                               <td className="px-4 py-3 align-top text-muted-foreground">
-                                {formatMDY(new Date(build.manifest.createdAt).toISOString())}
+                                {formatMDY(Number(build.manifest.createdAt ?? 0))}
                               </td>
                               <td className="px-4 py-3 align-top">
                                 {bytesToHuman(build.manifest.size_bytes)}

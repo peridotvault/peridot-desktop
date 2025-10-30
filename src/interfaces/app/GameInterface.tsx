@@ -1,9 +1,11 @@
 import {
   Distribution,
   Manifest,
+  MediaItem,
   NativeBuild,
   WebBuild,
 } from '../../blockchain/icp/vault/service.did.d';
+export type { MediaItem };
 import { OSKey, Timestamp, UserId } from '../CoreInterface';
 
 /** Jika kamu punya enum/variant final, impor dari file lain */
@@ -13,16 +15,6 @@ export type Media = { image: null } | { video: null };
 
 export type Tag = string;
 export type Category = string;
-export type MediaItem =
-  | { kind: 'image'; src: string; alt?: string; storageKey?: string }
-  | {
-      kind: 'video';
-      src: string;
-      poster?: string;
-      alt?: string;
-      storageKey?: string;
-    };
-
 /** =========================
  *  Preview
  *  ========================= */

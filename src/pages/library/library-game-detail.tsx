@@ -6,15 +6,11 @@ import { getGameByGameId } from '../../blockchain/icp/vault/services/ICPGameServ
 // import { isNative, isWeb } dari GameInterface mungkin perlu disesuaikan jika tipe berubah
 // import { isNative, isWeb } from '../../interfaces/app/GameInterface'; // Tidak digunakan karena struktur berbeda
 import { useParams } from 'react-router-dom';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
 import { useInstalled } from '../../features/download/hooks/useInstalled';
 import { useDownloadManager } from '../../components/molecules/DownloadManager';
-import {
-  Distribution,
-  GameAnnouncementType,
-  PGLMeta,
-} from '../../blockchain/icp/vault/service.did.d';
+import { GameAnnouncementType, PGLMeta } from '../../blockchain/icp/vault/service.did.d';
 import { getAllAnnouncementsByGameId } from '../../blockchain/icp/vault/services/ICPAnnouncementService';
 // import { optGetOr } from '../../interfaces/helpers/icp.helpers'; // Tidak digunakan di sini
 import { ImageLoading } from '../../constants/lib.const';
@@ -27,12 +23,6 @@ function detectOSKey(): 'windows' | 'macos' | 'linux' {
   if (p.includes('win') || ua.includes('windows')) return 'windows';
   if (p.includes('mac') || ua.includes('mac') || ua.includes('darwin')) return 'macos';
   return 'linux';
-}
-
-// Fungsi helper untuk menangani ?[T] dari Candid
-function unwrapOptVec<T>(v: [] | [T[]] | null | undefined): T[] {
-  if (!v || v.length === 0) return [];
-  return v[0]; // Ambil array dari dalam optional vector
 }
 
 // Fungsi helper untuk mengecek apakah distribusi adalah NativeBuild

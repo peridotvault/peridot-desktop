@@ -15,7 +15,7 @@ import {
   WebBuild,
 } from '../../blockchain/icp/vault/service.did.d';
 import { updateGame } from '../../blockchain/icp/vault/services/ICPGameService';
-import {
+import type {
   HydratedGameInterface,
   MediaItem,
   Preview,
@@ -25,7 +25,7 @@ import {
 } from '../../interfaces/app/GameInterface';
 import { OSKey } from '../../interfaces/CoreInterface';
 import { asArray, asMap, asText, mdGet, ToOpt } from '../../interfaces/helpers/icp.helpers';
-import { hasDist, nowNs } from '../../utils/Additional';
+import { hasDist, nowNs } from '../../lib/utils/Additional';
 
 type BuildPrefixKey = 'builds/web' | 'builds/windows' | 'builds/macos' | 'builds/linux';
 
@@ -566,7 +566,7 @@ export class EditGameService {
       pgl1_game_id: gameId,
       previews: (form.pgl1_previews ?? []).map((it) => ({
         kind: it.kind === 'video' ? ({ video: null } as const) : ({ image: null } as const),
-        url: it.src,
+        url: it.url ?? it.src ?? '',
       })),
       categories: cats,
       tags: form.pgl1_tags ?? [],

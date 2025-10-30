@@ -1,3 +1,4 @@
+// @ts-ignore
 import React from 'react';
 import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 

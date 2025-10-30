@@ -22,7 +22,7 @@ export const asArray = (v?: Value): Value[] | undefined => (v && (v as any).arra
 export const asMap = (v?: Value): Array<[string, Value]> | undefined =>
   (v && (v as any).map) as any;
 
-export const fmtBytes = (n?: bigint): string | undefined => {
+export const fmtBytes = (n?: number | bigint): string | undefined => {
   if (n === undefined) return undefined;
   const num = Number(n);
   if (Number.isNaN(num)) return String(n);

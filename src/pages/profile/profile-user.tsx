@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { LoadingScreen } from '../../components/organisms/LoadingScreen';
 import { UserInterface } from '../../interfaces/user/UserInterface';
 import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faCircleXmark, faGlobe } from '@fortawesome/free-solid-svg-icons';
-import { faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
+import { faAndroid, faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
 import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Platform, Manifest } from '../../../lib/interfaces/game.types';
 import { isNativeBuild, isWebBuild } from '../../../lib/helpers/helper-pgl1';
 import { fetchWholeDraft } from '../../../features/game/api/game-draft.api';
@@ -30,9 +31,19 @@ const platformIcon: Record<Platform, any> = {
   macos: faApple,
   linux: faLinux,
   web: faGlobe,
+  android: faAndroid,
+  ios: faApple,
+  other: faGlobe,
 };
 
-export const StudioGamePublish: React.FC = () => {
+const unwrapOptString = (value: unknown): string => {
+  if (Array.isArray(value)) {
+    return value.length ? String(value[0] ?? '') : '';
+  }
+  return typeof value === 'string' ? value : '';
+};
+
+export const StudioGamePublish: FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const [draftData, setDraftData] = useState<GameDraft | null>(null);
   const [loading, setLoading] = useState(true);
@@ -121,7 +132,7 @@ export const StudioGamePublish: React.FC = () => {
                   graphics: dist.web.graphics,
                   memory: dist.web.memory.toString(),
                   storage: dist.web.storage.toString(),
-                  notes: dist.web.additionalNotes,
+                  notes: unwrapOptString(dist.web.additionalNotes),
                 },
               },
             });
@@ -138,13 +149,13 @@ export const StudioGamePublish: React.FC = () => {
                   key: dist.native.os as Platform,
                   info: {
                     fileName: liveManifest.listing,
-                    fileSizeMB: liveManifest.size_bytes / (1024 * 1024),
+                    fileSizeMB: Number(liveManifest.size_bytes ?? 0) / (1024 * 1024),
                     requirement: {
                       processor: dist.native.processor,
                       graphics: dist.native.graphics,
                       memory: dist.native.memory.toString(),
                       storage: dist.native.storage.toString(),
-                      notes: dist.native.additionalNotes,
+                      notes: unwrapOptString(dist.native.additionalNotes),
                     },
                   },
                 });
@@ -230,6 +241,14 @@ export const StudioGamePublish: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center w-full">
+        <div className="w-full max-w-[1400px] flex flex-col p-10 gap-8 text-chart-5">{error}</div>
       </div>
     );
   }

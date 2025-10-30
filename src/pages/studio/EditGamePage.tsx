@@ -17,10 +17,10 @@ import { DropDownComponent } from '../../components/atoms/DropDownComponent';
 import { MultiSelectComponent } from '../../components/atoms/MultiSelectComponent';
 import CarouselPreview from '../../features/game/components/carousel-preview';
 import allCategories from '../../assets/json/app/categories.json';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { BannerFieldComponent } from '../../components/atoms/BannerFieldComponent';
 import { OSKey } from '../../interfaces/CoreInterface';
-import { hasDist, nowNs, nsToDateStr, toOSKey, dateStrToNs } from '../../utils/Additional';
+import { hasDist, nowNs, nsToDateStr, toOSKey, dateStrToNs } from '../../lib/utils/Additional';
 import { useParams } from 'react-router-dom'; // Import useParams
 import { EditGameService as EGS } from '../../services/studio/EditGameService';
 import { getGameByDeveloperId } from '../../blockchain/icp/vault/services/ICPGameService'; // Pastikan path benar

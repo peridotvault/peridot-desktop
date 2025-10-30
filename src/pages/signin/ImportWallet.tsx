@@ -1,13 +1,13 @@
 // @ts-ignore
 import React, { useCallback, useEffect, useState } from 'react';
-import { useWallet } from '../../contexts/WalletContext';
-import { walletService } from '../../features/wallet/services/WalletService';
+import { useWallet } from '@shared/contexts/WalletContext';
+import { walletService } from '@shared/services/wallet.service';
 import { useNavigate } from 'react-router-dom';
 import { PasswordPage } from './PasswordPage';
 import { SeedPhraseInput } from '../../features/wallet/components/input-seedphrase';
 import { RedirectPage } from '../additional/redirect-page';
 import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
-import { clearWalletData } from '../../lib/utils/StoreService';
+import { clearWalletData } from '@shared/services/store.service';
 
 interface ImportWalletProps {
   setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;

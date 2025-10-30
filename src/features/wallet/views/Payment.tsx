@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useWallet } from '../../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { motion } from 'framer-motion';
 import { ButtonTransaction } from '../../../components/atoms/ButtonTransaction';
 import { ICRC1Coin } from '../components/ICRC1Coin';
 import { AlertMessage } from '../components/AlertMessage';
-import { walletService } from '../services/WalletService';
-import { hexToArrayBuffer } from '../../../lib/utils/crypto';
+import { walletService } from '@shared/services/wallet.service';
+import { hexToArrayBuffer } from '../../../shared/utils/crypto';
 import { Actor, ActorSubclass, HttpAgent } from '@dfinity/agent';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { ICPLedgerFactory } from '../blockchain/icp/ICPLedgerFactory';

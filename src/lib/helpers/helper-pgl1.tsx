@@ -13,8 +13,8 @@ import type {
 export const isText = (v?: Value | null): v is { text: string } => !!v && 'text' in v;
 export const isArray = (v?: Value | null): v is { array: Value[] } => !!v && 'array' in v;
 export const isMap = (v?: Value | null): v is { map: Array<[string, Value]> } => !!v && 'map' in v;
-export const isNat = (v?: Value | null): v is { nat: number } => !!v && 'nat' in v;
-export const isInt = (v?: Value | null): v is { int: number } => !!v && 'int' in v;
+export const isNat = (v?: Value | null): v is { nat: number | bigint } => !!v && 'nat' in v;
+export const isInt = (v?: Value | null): v is { int: number | bigint } => !!v && 'int' in v;
 export const isBlob = (v?: Value | null): v is { blob: Uint8Array | number[] } =>
   !!v && 'blob' in v;
 
@@ -130,7 +130,7 @@ export const readPreviews = (meta?: Metadata, key = META_PREVIEWS): MediaItem[] 
   for (const it of v.array) {
     if (!isMap(it)) continue;
     const kindV = it.map.find(([k]) => k === 'kind')?.[1];
-    const srcV = it.map.find(([k]) => k === 'src')?.[1] ?? it.map.find(([k]) => k === 'url')?.[1];
+    const srcV = it.map.find(([k]) => k === 'url')?.[1] ?? it.map.find(([k]) => k === 'src')?.[1];
     if (!isText(kindV) || !isText(srcV)) continue;
 
     const kind = kindV.text as 'image' | 'video';
@@ -138,15 +138,24 @@ export const readPreviews = (meta?: Metadata, key = META_PREVIEWS): MediaItem[] 
 
     const altV = it.map.find(([k]) => k === 'alt')?.[1];
     const alt = isText(altV) ? altV.text : undefined;
+    const primaryV = it.map.find(([k]) => k === 'primary')?.[1];
+    const primary = primaryV && isNat(primaryV) ? Number(primaryV.nat) === 1 : undefined;
 
-    if (kind === 'image') {
-      out.push({ kind, src: srcV.text, alt });
-    } else {
-      // kind === 'video'
+    const base = {
+      kind,
+      src: srcV.text,
+      url: srcV.text,
+      alt,
+      primary,
+    } as MediaItem;
+
+    if (kind === 'video') {
       const posterV = it.map.find(([k]) => k === 'poster')?.[1];
       const poster = isText(posterV) ? posterV.text : undefined;
-      out.push({ kind, src: srcV.text, alt, poster });
+      if (poster) base.poster = poster;
     }
+
+    out.push(base);
   }
   return out;
 };
@@ -157,12 +166,18 @@ export const writePreviews = (
   key = META_PREVIEWS,
 ): Metadata => {
   const arrayValue: Array<{ map: Array<[string, Value]> }> = items.map((m) => {
-    const base: Array<[string, Value]> = [
-      ['kind', toText(m.kind)],
-      ['src', toText(m.src)],
-    ];
+    const source = m.url ?? m.src ?? '';
+    const base: Array<[string, Value]> = [['kind', toText(m.kind)]];
+
+    if (source) {
+      base.push(['src', toText(source)]);
+      base.push(['url', toText(source)]);
+    }
 
     if (m.alt) base.push(['alt', toText(m.alt)]);
+    if (m.primary !== undefined) {
+      base.push(['primary', { nat: m.primary ? 1 : 0 }]);
+    }
 
     // Hanya tambahkan 'poster' jika video
     if (m.kind === 'video' && m.poster) {
@@ -215,10 +230,13 @@ export function dbToInputPreviews(dbItems: MediaItem[]): InputPreviewMediaItem[]
   return dbItems.map((item, index) => ({
     id: `preview-${Date.now()}-${index}`,
     // Buat file dummy karena kita tidak punya file asli
-    file: new File([], item.src.split('/').pop() || 'preview.jpg', {
-      type: item.kind === 'image' ? 'image/jpeg' : 'video/mp4',
-    }),
-    url: item.src, // Gunakan permanent URL langsung
+    file:
+      typeof File !== 'undefined'
+        ? new File([], (item.src ?? item.url ?? 'preview').split('/').pop() || 'preview', {
+            type: item.kind === 'image' ? 'image/jpeg' : 'video/mp4',
+          })
+        : undefined,
+    url: item.url ?? item.src ?? '', // Gunakan permanent URL langsung
     kind: item.kind,
     primary: index === 0, // Set item pertama sebagai primary
   }));
@@ -229,7 +247,7 @@ export function inputPreviewsToDb(inputItems: InputPreviewMediaItem[]): MediaIte
   return inputItems.map((item) => ({
     kind: item.kind,
     src: item.url, // Harus URL permanen (bukan blob:)
-    alt: item.file.name,
+    alt: item.file?.name,
     // Tidak ada poster di InputPreviews, jadi skip
   }));
 }

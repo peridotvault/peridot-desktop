@@ -3,31 +3,31 @@ import React, { useEffect, useState } from 'react';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLocation, Link } from 'react-router-dom';
-import { useWallet } from '../../contexts/WalletContext';
-import { getMyGames } from '../../blockchain/icp/vault/services/ICPGameService';
-import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
+import { useWallet } from '@shared/contexts/WalletContext';
+import { OffChainGameMetadata } from '@features/game/types/game.type';
+import { getPublishedGames } from '@features/game/services/dto.service';
 import { ImageLoading } from '../../constants/lib.const';
-import { optGetOr } from '../../interfaces/helpers/icp.helpers';
 
 export const LibrarySidebar = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
 
   const { wallet } = useWallet();
-  const [myApps, setMyApps] = useState<PGLMeta[] | null>();
+  const [myApps, setMyApps] = useState<OffChainGameMetadata[] | null>();
 
   useEffect(() => {
     async function fetchData() {
-      const resAllApps = await getMyGames({ wallet: wallet });
+      if (!wallet) return;
+      const resAllApps = await getPublishedGames({ start: 0, limit: 200 });
       setMyApps(resAllApps);
     }
 
     fetchData();
-  }, []);
+  }, [wallet]);
 
   // Filtered games based on searchQuery
   const filteredGames = myApps?.filter((game) =>
-    game.pgl1_name.toLowerCase().includes(searchQuery.toLowerCase()),
+    game.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const formatTitle = (title: string): string => {
@@ -56,21 +56,21 @@ export const LibrarySidebar = () => {
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="flex flex-col gap-1">
           {filteredGames?.map((item) => {
-            const pathForItem = `/library/${formatTitle(item.pgl1_name)}/${item.pgl1_game_id}`;
+            const pathForItem = `/library/${formatTitle(item.name)}/${item.game_id}`;
             const isActive = location.pathname.startsWith(pathForItem);
             return (
               <Link
-                key={item.pgl1_game_id}
-                to={`/library/${formatTitle(item.pgl1_name)}/${item.pgl1_game_id}`}
+                key={item.game_id}
+                to={`/library/${formatTitle(item.name)}/${item.game_id}`}
                 className={`flex gap-3 px-7 py-2 items-center  duration-100
               ${isActive ? 'shadow-flat-sm scale-110' : 'hover:shadow-arise-sm '}`}
               >
                 <img
-                  src={optGetOr(item.pgl1_cover_image, ImageLoading)}
+                  src={item.metadata?.cover_vertical_image ?? ImageLoading}
                   className="w-6 h-6 object-cover rounded-md"
-                  alt=""
+                  alt={item.name}
                 />
-                <p className="truncate text-sm">{item.pgl1_name}</p>
+                <p className="truncate text-sm">{item.name}</p>
               </Link>
             );
           })}

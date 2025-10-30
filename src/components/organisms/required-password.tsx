@@ -1,9 +1,9 @@
 import React from 'react';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import _ from 'lodash';
 import { useNavigate } from 'react-router-dom';
 import { InputField } from '../atoms/InputField';
-import { walletService } from '../../features/wallet/services/WalletService';
+import { walletService } from '@shared/services/wallet.service';
 import { LoadingPage } from '../../pages/additional/loading-page';
 
 export const RequiredPassword = () => {

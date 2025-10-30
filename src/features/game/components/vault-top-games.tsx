@@ -1,8 +1,8 @@
 // @ts-ignore
 import React from 'react';
-import { TypographyH2 } from '../atoms/typography-h2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { TypographyH2 } from '@shared/components/ui/typography-h2';
 
 type Props = {
   className?: string; // optional: untuk -mt overlap dari parent

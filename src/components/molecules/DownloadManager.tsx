@@ -183,7 +183,12 @@ async function resolveManifest(
     url, // <-- URL yang akan digunakan untuk download
     checksum: manifest.checksum,
     sizeMB: manifest.size_bytes ? Number(manifest.size_bytes) / (1024 * 1024) : undefined,
-    createdAt: manifest.createdAt,
+    createdAt:
+      manifest.createdAt === undefined
+        ? undefined
+        : typeof manifest.createdAt === 'bigint'
+          ? manifest.createdAt
+          : BigInt(manifest.createdAt),
   };
 }
 

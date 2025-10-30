@@ -1,0 +1,15 @@
+export type {
+  Distribution,
+  GameId,
+  GameAnnouncementType,
+  Manifest,
+  MediaItem,
+  Metadata,
+  NativeBuild,
+  PGLMeta,
+  PublishInfo,
+  PurchaseType,
+  Value,
+  WebBuild,
+  StorageRef,
+} from '@shared/blockchain/icp/types/legacy.types';

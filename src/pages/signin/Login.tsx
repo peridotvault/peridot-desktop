@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
-import { useWallet } from '../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { useNavigate } from 'react-router-dom';
 import { ImportWallet } from './ImportWallet';
 import { CreateWallet } from './CreateWallet';

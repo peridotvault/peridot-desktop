@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useWallet } from '../../../contexts/WalletContext';
+import { useWallet } from '@shared/contexts/WalletContext';
 import { useNavigate } from 'react-router-dom';
 import {
   faArrowRightFromBracket,
@@ -15,7 +15,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ICRC1Coin } from '../../../features/wallet/components/ICRC1Coin';
-import { walletService } from '../../../features/wallet/services/WalletService';
+import { walletService } from '@shared/services/wallet.service';
 import { Manage } from '../../../features/wallet/views/Manage';
 import { Receive } from '../../../features/wallet/views/Receive';
 import { SendToken } from '../../../features/wallet/views/SendToken';
@@ -31,7 +31,7 @@ import { WalletInfo } from '../../../features/wallet/interfaces/Wallet';
 import { InputField } from '../../../components/atoms/InputField';
 import { CoinService } from '../../../local-db/wallet/services/coinService';
 import { Coin } from '../../../local-db/wallet/models/Coin';
-import { clearWalletData } from '../../../lib/utils/StoreService';
+import { clearWalletData } from '@shared/services/store.service';
 
 interface HomeProps {
   onLockChanged: () => void;

@@ -1,5 +1,5 @@
 // types.d.ts
-import type { WalletData } from './features/wallet/services/WalletService';
+import type { WalletData } from '@shared/services/wallet.service';
 
 declare global {
   interface Window {

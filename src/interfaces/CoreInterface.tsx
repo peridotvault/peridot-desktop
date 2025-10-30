@@ -24,7 +24,7 @@ export type ApiError =
   | { NotAuthorized: string };
 
 export type ApiResponse<T> = { ok: T } | { err: ApiError };
-type Opt<T> = [] | [T];
+export type Opt<T> = [] | [T];
 export function GetOpt<T>(o: Opt<T> | undefined | null): T | undefined {
   if (!o) return undefined;
   if (Array.isArray(o) && o.length > 0) return o[0];
