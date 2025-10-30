@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGlobe, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import { faAndroid, faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
-import { InputDropdown } from '../../../components/atoms/input-dropdown';
+import { InputDropdown } from '../../../shared/components/ui/input-dropdown';
 import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
 import { InputFloating } from '../../../shared/components/ui/input-floating';
 import { Manifest, Platform } from '../../../lib/interfaces/game.types';
@@ -21,7 +21,7 @@ type NewBuildFormData = {
   platforms: NativePlatform[];
   webUrl: string;
   platformData: Partial<Record<NativePlatform, PlatformBuildData>>;
-}; 
+};
 
 const platformInfo: Record<Platform, { label: string; icon: any; accept?: string; hint?: string }> =
   {

@@ -12,13 +12,14 @@ import { ICPLedgerFactory } from '../blockchain/icp/ICPLedgerFactory';
 import { Principal } from '@dfinity/principal';
 import { ICRCLedgerActor } from '../blockchain/icp/ICRCLedgerFactory';
 
-const PERIDOT_TOKEN_CANISTER = import.meta.env.VITE_PERIDOT_TOKEN_CANISTER;
-
 interface Props {
   onClose: () => void;
   price: number | string;
   SPENDER: string;
   onExecute: () => Promise<void>;
+  tokenCanisterId?: string;
+  tokenSymbol?: string;
+  tokenLogoUrl?: string;
 }
 
 interface AlertInterface {
@@ -26,7 +27,19 @@ interface AlertInterface {
   msg: string;
 }
 
-export const AppPayment: React.FC<Props> = ({ onClose, price, onExecute, SPENDER }) => {
+const DEFAULT_TOKEN_CANISTER = import.meta.env.VITE_PERIDOT_TOKEN_CANISTER;
+const DEFAULT_TOKEN_SYMBOL = 'PER';
+const DEFAULT_TOKEN_LOGO = './assets/logo-peridot.svg';
+
+export const AppPayment: React.FC<Props> = ({
+  onClose,
+  price,
+  onExecute,
+  SPENDER,
+  tokenCanisterId = DEFAULT_TOKEN_CANISTER,
+  tokenSymbol = DEFAULT_TOKEN_SYMBOL,
+  tokenLogoUrl = DEFAULT_TOKEN_LOGO,
+}) => {
   const { wallet } = useWallet();
   const spenderPrincipal = Principal.fromText(SPENDER);
   const [_tokenBalances, setTokenBalances] = useState<{ [id: string]: number }>({});
@@ -72,7 +85,7 @@ export const AppPayment: React.FC<Props> = ({ onClose, price, onExecute, SPENDER
 
     const actor: ActorSubclass<ICRCLedgerActor> = Actor.createActor(ICPLedgerFactory, {
       agent,
-      canisterId: PERIDOT_TOKEN_CANISTER,
+      canisterId: tokenCanisterId,
     });
 
     return { actor, agent };
@@ -271,7 +284,7 @@ export const AppPayment: React.FC<Props> = ({ onClose, price, onExecute, SPENDER
             {/* my balance  */}
             <div className="flex flex-col gap-4">
               <h2>My Balance</h2>
-              <ICRC1Coin canisterId={PERIDOT_TOKEN_CANISTER} onBalanceUpdate={updateTokenBalance} />
+              <ICRC1Coin canisterId={tokenCanisterId} onBalanceUpdate={updateTokenBalance} />
             </div>
 
             {/* my  */}
@@ -279,9 +292,15 @@ export const AppPayment: React.FC<Props> = ({ onClose, price, onExecute, SPENDER
               <h2>You Need to Pay</h2>
               <div className="flex gap-2 items-center">
                 <div className="w-12 h-12 shadow-arise-sm rounded-full flex justify-center items-center overflow-hidden">
-                  <img src="./assets/logo-peridot.svg" alt="" className={`w-full p-4`} />
+                  {tokenLogoUrl ? (
+                    <img src={tokenLogoUrl} alt={tokenSymbol} className="w-full p-4" />
+                  ) : (
+                    <span className="text-sm font-semibold">{tokenSymbol}</span>
+                  )}
                 </div>
-                <span className="text-danger">{price + ' PER'}</span>
+                <span className="text-danger">
+                  {humanPriceStr} {tokenSymbol}
+                </span>
               </div>
             </div>
           </div>

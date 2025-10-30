@@ -1,5 +1,5 @@
 // @ts-ignore
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { InputFieldComponent } from '@components/atoms/InputFieldComponent';
 import { faComment, faHashtag, faHeader } from '@fortawesome/free-solid-svg-icons';
 import { useWallet } from '@shared/contexts/WalletContext';
@@ -7,13 +7,17 @@ import { initAppStorage } from '@shared/api/wasabi.api';
 import { createGamePaid, createGameVoucher } from '@shared/blockchain/icp/services/game.service';
 import type { InitCreateGame } from '@shared/blockchain/icp/types/factory.types';
 import { Principal } from '@dfinity/principal';
+import { AppPayment } from '@features/wallet/views/Payment';
 import { USDT_ADDRESS } from '@shared/constants/token.const';
+import { ICP_FACTORY_CANISTER } from '@shared/constants/url.const';
+import { InputFloating } from '@shared/components/ui/input-floating';
+import { InputDropdown } from '@shared/components/ui/input-dropdown';
 
-/* ---------------- Helpers: slug & IDs ---------------- */
+const CROCK32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ' as const;
+const CKUSDT_DECIMALS = 6;
+const CKUSDT_SYMBOL = 'ckUSDT';
+const CKUSDT_LOGO = '';
 
-const CROCK32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ' as const; // Crockford Base32 (tanpa I,L,O,U)
-
-/** Base32 Crockford encoder */
 function toBase32Crockford(bytes: Uint8Array): string {
   let bits = 0;
   let value = 0;
@@ -30,7 +34,6 @@ function toBase32Crockford(bytes: Uint8Array): string {
   return out;
 }
 
-/** FNV-1a 32-bit (fallback kalau SubtleCrypto tidak tersedia) */
 function fnv1a32(str: string): Uint8Array {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {
@@ -40,7 +43,6 @@ function fnv1a32(str: string): Uint8Array {
   return new Uint8Array([(h >>> 24) & 0xff, (h >>> 16) & 0xff, (h >>> 8) & 0xff, h & 0xff]);
 }
 
-/** bikin slug pendek (4..10 char, default 8) dari principal + name */
 async function makeShortSlug(
   developerPrincipal: string,
   gameName: string,
@@ -53,13 +55,30 @@ async function makeShortSlug(
 
   try {
     const dig = await crypto.subtle.digest('SHA-256', enc);
-    const b32 = toBase32Crockford(new Uint8Array(dig));
-    return b32.slice(0, len);
+    return toBase32Crockford(new Uint8Array(dig)).slice(0, len);
   } catch {
-    const b32 = toBase32Crockford(fnv1a32(payload));
-    return b32.slice(0, len);
+    return toBase32Crockford(fnv1a32(payload)).slice(0, len);
   }
 }
+
+const toSubunits = (value: string, decimals: number): bigint => {
+  const trimmed = value.trim();
+  if (!trimmed) return 0n;
+  if (!/^\d+(\.\d+)?$/.test(trimmed)) {
+    throw new Error(`Amount must be numeric with up to ${decimals} decimals.`);
+  }
+  const [whole, fraction = ''] = trimmed.split('.');
+  const fracPadded = (fraction + '0'.repeat(decimals)).slice(0, decimals);
+  return BigInt(whole + fracPadded);
+};
+
+const parseMaxSupply = (value: string): bigint => {
+  const trimmed = value.trim();
+  if (!trimmed) return 0n;
+  const parsed = BigInt(trimmed);
+  if (parsed < 0n) throw new Error('Max supply must be non-negative.');
+  return parsed;
+};
 
 interface NewGameProps {
   onCreated?: () => void;
@@ -68,36 +87,63 @@ interface NewGameProps {
 export const NewGame = ({ onCreated }: NewGameProps) => {
   const { wallet } = useWallet();
 
-  const [name, set_name] = useState('');
-  const [game_id, set_game_id] = useState('');
-  const [description, set_description] = useState('');
-  const tokenCanister = USDT_ADDRESS;
+  const [name, setName] = useState('');
+  const [gameId, setGameId] = useState('');
+  const [description, setDescription] = useState('');
+  const [metadataUri, setMetadataUri] = useState('');
+  const [maxSupply, setMaxSupply] = useState('');
   const [price, setPrice] = useState('');
   const [mode, setMode] = useState<'paid' | 'voucher'>('paid');
   const [voucherCode, setVoucherCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [seedTs] = useState<number>(() => Date.now());
   const [busy, setBusy] = useState(false);
 
-  // auto-generate stable game_id sekali saat mount
+  const [showPayment, setShowPayment] = useState(false);
+  const [pendingMeta, setPendingMeta] = useState<InitCreateGame | null>(null);
+  const [pendingControllers, setPendingControllers] = useState<string[] | null>(null);
+  const [pendingPrice, setPendingPrice] = useState('0');
+
+  const seedTs = useMemo(() => Date.now(), []);
+
+  const derivedMetadataUri = useMemo(() => {
+    if (!gameId) return '';
+    const base = import.meta.env.VITE_API_BASE ?? '';
+    return `${base}/api/games/${gameId}/metadata`;
+  }, [gameId]);
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const principal = wallet?.principalId ?? '';
-      const slug = await makeShortSlug(principal, name, seedTs, { length: 8 }); // ubah 6..10 sesuai selera
-      if (!cancelled) set_game_id(slug);
+      const slug = await makeShortSlug(principal, name, seedTs, { length: 8 });
+      if (!cancelled) setGameId(slug);
     })();
     return () => {
       cancelled = true;
     };
   }, [wallet?.principalId, name, seedTs]);
 
-  const parsePriceToE6s = (value: number): bigint => {
-    if (value <= 0) {
-      return 0n;
-    } else {
-      return BigInt(value ^ 6);
+  useEffect(() => {
+    setMetadataUri(derivedMetadataUri);
+  }, [derivedMetadataUri]);
+
+  const tokenCanister = USDT_ADDRESS;
+
+  const resetPaymentState = () => {
+    setShowPayment(false);
+    setPendingMeta(null);
+    setPendingControllers(null);
+    setPendingPrice('0');
+  };
+
+  const validateInputs = () => {
+    if (!name.trim()) throw new Error('Game name is required.');
+    if (!description.trim()) throw new Error('Description is required.');
+    if (!metadataUri.trim()) throw new Error('Metadata URI is required.');
+    if (!tokenCanister.trim()) throw new Error('Token canister is required.');
+    if (mode === 'voucher' && !voucherCode.trim()) {
+      throw new Error('Voucher code is required for voucher mode.');
     }
   };
 
@@ -108,24 +154,16 @@ export const NewGame = ({ onCreated }: NewGameProps) => {
       setError(null);
       setSuccess(null);
 
-      const metadataUri = import.meta.env.VITE_API_BASE + '/api/games/' + game_id + 'metadata';
-
-      if (!name.trim()) throw new Error('Game name is required.');
-      if (!description.trim()) throw new Error('Description is required.');
-      if (!metadataUri.trim()) throw new Error('Metadata URI is required.');
-      if (!tokenCanister.trim()) throw new Error('Token canister is required.');
-      if (mode === 'voucher' && !voucherCode.trim()) {
-        throw new Error('Voucher code is required for voucher mode.');
-      }
+      validateInputs();
 
       const meta: InitCreateGame = {
-        initGameId: game_id.trim(),
+        initGameId: gameId.trim(),
         initName: name.trim(),
         initDescription: description.trim(),
-        initMetadataURI: metadataUri,
-        initPrice: parsePriceToE6s(Number(price)),
-        initMaxSupply: 0n,
+        initMetadataURI: metadataUri.trim(),
+        initMaxSupply: parseMaxSupply(maxSupply),
         initTokenCanister: Principal.fromText(tokenCanister.trim()),
+        initPrice: toSubunits(price || '0', CKUSDT_DECIMALS),
       };
 
       if (mode === 'voucher') {
@@ -135,19 +173,16 @@ export const NewGame = ({ onCreated }: NewGameProps) => {
           meta,
           wallet,
         });
+        await initAppStorage(meta.initGameId);
+        setSuccess('Game created successfully with voucher.');
+        onCreated?.();
       } else {
-        await createGamePaid({
-          controllers_extra: null,
-          meta,
-          wallet,
-        });
+        setPendingMeta(meta);
+        setPendingControllers(null);
+        setPendingPrice(price || '0');
+        setShowPayment(true);
+        return;
       }
-
-      await initAppStorage(game_id);
-
-      // 👉 kabari parent utk re-fetch
-      onCreated?.();
-      setSuccess('Game created successfully.');
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : String(err));
@@ -160,7 +195,7 @@ export const NewGame = ({ onCreated }: NewGameProps) => {
     <div
       role="dialog"
       onClick={(e) => e.stopPropagation()}
-      className="bg-background p-8 border max-h-[80dvh] overflow-auto border-foreground/5 rounded-lg w-full md:max-w-[500px] flex flex-col gap-6"
+      className="bg-background p-8 border max-h-[80dvh] overflow-auto border-foreground/5 rounded-lg w-full md:max-w-[520px] flex flex-col gap-6"
     >
       <h1 className="text-xl font-bold">New Game</h1>
 
@@ -174,7 +209,7 @@ export const NewGame = ({ onCreated }: NewGameProps) => {
             onChange={() => setMode('paid')}
             disabled={busy}
           />
-          Paid (uses PER token)
+          Paid (ckUSDT)
         </label>
         <label className="flex items-center gap-2">
           <input
@@ -190,42 +225,49 @@ export const NewGame = ({ onCreated }: NewGameProps) => {
       </div>
 
       <div className="flex flex-col gap-4">
-        <InputFieldComponent
-          icon={faHashtag}
+        <InputFloating
           name="game_id"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => set_game_id(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGameId(e.target.value)}
           placeholder="Game Id"
-          disabled={true}
+          disabled
           type="text"
-          value={game_id}
+          value={gameId}
         />
-        <InputFieldComponent
-          icon={faHeader}
+
+        <InputFloating
           name="title"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => set_name(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
           placeholder="Game Name"
           type="text"
           value={name}
         />
-        <InputFieldComponent
-          icon={faComment}
+
+        <InputFloating
           name="description"
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => set_description(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
           placeholder="Game Description"
           type="text"
           value={description}
         />
-        <InputFieldComponent
-          icon={faComment}
+
+        <InputFloating
+          name="max_supply"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMaxSupply(e.target.value)}
+          placeholder="Max Supply (0 = unlimited)"
+          type="text"
+          value={maxSupply}
+        />
+
+        <InputFloating
           name="price"
+          type="text"
+          placeholder={`Price (${CKUSDT_SYMBOL})`}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrice(e.target.value)}
-          placeholder="Price (USD)"
-          type="number"
           value={price}
         />
+
         {mode === 'voucher' && (
-          <InputFieldComponent
-            icon={faComment}
+          <InputFloating
             name="voucher"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVoucherCode(e.target.value)}
             placeholder="Voucher Code"
@@ -244,9 +286,40 @@ export const NewGame = ({ onCreated }: NewGameProps) => {
           disabled={busy}
           className="bg-accent px-6 py-2 rounded-lg"
         >
-          {busy ? 'Creating…' : 'Create'}
+          {busy
+            ? 'Processing…'
+            : mode === 'voucher'
+              ? 'Redeem & Create'
+              : `Create & Pay (${CKUSDT_SYMBOL})`}
         </button>
       </div>
+
+      {showPayment && pendingMeta && (
+        <AppPayment
+          price={pendingPrice || '0'}
+          SPENDER={ICP_FACTORY_CANISTER}
+          tokenCanisterId={USDT_ADDRESS}
+          tokenSymbol={CKUSDT_SYMBOL}
+          tokenLogoUrl={CKUSDT_LOGO}
+          onClose={() => {
+            resetPaymentState();
+            setBusy(false);
+          }}
+          onExecute={async () => {
+            if (!wallet || !pendingMeta) throw new Error('Missing wallet or metadata payload.');
+            await createGamePaid({
+              controllers_extra: pendingControllers,
+              meta: pendingMeta,
+              wallet,
+            });
+            await initAppStorage(pendingMeta.initGameId);
+            setSuccess('Game created successfully.');
+            resetPaymentState();
+            setBusy(false);
+            onCreated?.();
+          }}
+        />
+      )}
     </div>
   );
 };

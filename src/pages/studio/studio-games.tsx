@@ -67,6 +67,8 @@ export default function StudioGames() {
         getGameByDeveloperId({ dev: wallet.principalId, start: 0, limit: 200 }),
         getGameUnRegistered({ wallet }),
       ]);
+      // console.log(listGame);
+      // console.log( listUnRegistered);
       setGames(listGame);
       setUnRegisteredGame(listUnRegistered);
     } catch (err) {
@@ -83,11 +85,7 @@ export default function StudioGames() {
     refetchAll().catch(console.error);
   }, [refetchAll]);
 
-  const handleRegisterGame = async ({
-    canister_id,
-  }: {
-    canister_id: Principal;
-  }) => {
+  const handleRegisterGame = async ({ canister_id }: { canister_id: Principal }) => {
     if (busy) return;
     try {
       setBusy(true);
