@@ -1,7 +1,5 @@
 // @ts-ignore
 import React, { useEffect, useMemo, useState } from 'react';
-import { InputFieldComponent } from '@components/atoms/InputFieldComponent';
-import { faComment, faHashtag, faHeader } from '@fortawesome/free-solid-svg-icons';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { initAppStorage } from '@shared/api/wasabi.api';
 import { createGamePaid, createGameVoucher } from '@shared/blockchain/icp/services/game.service';
@@ -11,7 +9,6 @@ import { AppPayment } from '@features/wallet/views/Payment';
 import { USDT_ADDRESS } from '@shared/constants/token.const';
 import { ICP_FACTORY_CANISTER } from '@shared/constants/url.const';
 import { InputFloating } from '@shared/components/ui/input-floating';
-import { InputDropdown } from '@shared/components/ui/input-dropdown';
 
 const CROCK32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ' as const;
 const CKUSDT_DECIMALS = 6;
