@@ -5,9 +5,10 @@ import { useParams } from 'react-router-dom';
 import { PreviewItem } from '../../../lib/interfaces/game.types';
 import { API_BASE_STORAGE, initAppStorage, uploadToPrefix } from '../../../shared/api/wasabi.api'; // ✅
 import { LoadingPage } from '../../additional/loading-page';
-import { fetchPreviews, updatePreviews } from '../../../features/game/api/game-draft.api';
+import { updatePreviews } from '../../../features/game/api/game-draft.api';
 import { GamePreview } from '../../../lib/interfaces/game-draft.types';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
+import { fetchDraftPreviewsCombined } from '@features/game/services/draft.service';
 
 export const StudioGameMedia = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -22,7 +23,7 @@ export const StudioGameMedia = () => {
   const loadDraft = async () => {
     try {
       setLoading(true);
-      const data = await fetchPreviews(gameId);
+      const { data } = await fetchDraftPreviewsCombined(gameId);
       const previewItems: PreviewItem[] = [];
       (data.previews || []).forEach((p, i) => {
         const src = (p.src ?? p.url ?? '').trim();

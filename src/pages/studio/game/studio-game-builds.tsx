@@ -16,10 +16,11 @@ import type { Manifest, WebBuild } from '../../../blockchain/icp/vault/service.d
 import type { Platform, ViewMode } from '@shared/blockchain/icp/types/game.types';
 import { InputTextarea } from '../../../shared/components/ui/input-textarea';
 import { InputFloating } from '../../../shared/components/ui/input-floating';
-import { fetchBuilds, setHardware, setLive } from '../../../features/game/api/game-draft.api';
+import { setHardware, setLive } from '../../../features/game/api/game-draft.api';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
 import { Distribution, SetHardwarePayload } from '../../../lib/interfaces/game-draft.types';
 import toast from 'react-hot-toast';
+import { fetchDraftBuildsCombined } from '@features/game/services/draft.service';
 
 type HardwareForm = {
   processor: string;
@@ -145,12 +146,16 @@ export const StudioGameBuilds: React.FC = () => {
     setError(null);
     setLoading(true);
     try {
-      const draft = await fetchBuilds(gameId!);
-      setDistributions(draft.distributions || []);
-      console.log(draft);
+      const { data, sources } = await fetchDraftBuildsCombined(gameId!);
+      const distributionsPayload = data.distributions || [];
 
-      // kalau tidak ada distributions, kosongkan state & selesai
-      if (!draft.distributions || draft.distributions.length === 0) {
+      setDistributions(distributionsPayload);
+      console.log({
+        offChainDistributions: sources.offChain?.distributions,
+        onChainMeta: sources.onChain,
+      });
+
+      if (!distributionsPayload.length) {
         setNativeBuilds([]);
         setWebBuild(null);
         return;
@@ -165,7 +170,7 @@ export const StudioGameBuilds: React.FC = () => {
         hardware: any;
       }> = [];
 
-      for (const dist of draft.distributions) {
+      for (const dist of distributionsPayload) {
         if ('native' in dist) {
           const native = dist.native;
           const liveVersion = native.liveVersion;

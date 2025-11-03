@@ -7,14 +7,10 @@ import { InputImage } from '../../../components/atoms/input-image';
 import { InputDropdown } from '../../../shared/components/ui/input-dropdown';
 import { useParams } from 'react-router-dom';
 import { handleAssetChange } from '../../../services/studio/detail-service';
-import {
-  fetchCategories,
-  fetchGeneral,
-  fetchTags,
-  updateGeneral,
-} from '../../../features/game/api/game-draft.api';
+import { fetchCategories, fetchTags, updateGeneral } from '../../../features/game/api/game-draft.api';
 import { CategoryDraft, TagDraft } from '../../../lib/interfaces/game-draft.types';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
+import { fetchDraftGeneralCombined } from '@features/game/services/draft.service';
 
 export default function StudioGameDetails() {
   const { gameId } = useParams<{ gameId: string }>();
@@ -43,24 +39,84 @@ export default function StudioGameDetails() {
   const loadDraft = async () => {
     try {
       setLoading(true);
-      setListCategoryOptions((await fetchCategories()).categories);
-      setListTagOptions((await fetchTags()).tags);
+      const categoryPayload = await fetchCategories();
+      const tagPayload = await fetchTags();
 
-      const draft = await fetchGeneral(gameId!);
-      console.log(draft);
-      // const draft = await DraftService.get(gameId!);
-      if (draft) {
-        setName(draft.name ?? '');
-        setDescription(draft.description ?? '');
-        setPrice(draft.price ?? '');
-        setAge(draft.required_age ?? '');
-        setWebsite(draft.website ?? '');
-        setBannerUrl(draft.banner_image ?? '');
-        setCoverVerticalUrl(draft.cover_vertical_image ?? '');
-        setCoverHorizontalUrl(draft.cover_horizontal_image ?? '');
-        setTags(draft.tags ?? ['']);
-        setCategories(draft.categories ?? ['']);
-      }
+      const categoryOptions = categoryPayload.categories ?? [];
+      const tagOptions = tagPayload.tags ?? [];
+
+      setListCategoryOptions(categoryOptions);
+      setListTagOptions(tagOptions);
+
+      const { data } = await fetchDraftGeneralCombined(gameId!);
+
+      const normalizeSelection = <T,>(
+        incoming: unknown[] | undefined,
+        options: T[],
+        getId: (opt: T) => string,
+        getLabel: (opt: T) => string,
+      ): string[] => {
+        if (!incoming?.length || !options.length) return [];
+
+        const idSet = new Set(options.map((opt) => getId(opt)));
+        const labelMap = new Map(
+          options.map((opt) => [getLabel(opt).toLowerCase(), getId(opt)]),
+        );
+
+        const extractRaw = (value: unknown): string | null => {
+          if (value === null || value === undefined) return null;
+          if (typeof value === 'string' && value.trim()) return value.trim();
+          if (typeof value === 'number') return value.toString();
+          if (typeof value === 'object') {
+            const obj = value as Record<string, unknown>;
+            const possibleKeys = ['id', 'value', 'category_id', 'tag_id', 'name'];
+            for (const key of possibleKeys) {
+              const raw = obj[key];
+              if (typeof raw === 'string' && raw.trim()) return raw.trim();
+            }
+          }
+          return null;
+        };
+
+        const normalized: string[] = [];
+        incoming.forEach((entry) => {
+          const raw = extractRaw(entry);
+          if (!raw) return;
+          if (idSet.has(raw)) {
+            normalized.push(raw);
+            return;
+          }
+          const labelHit = labelMap.get(raw.toLowerCase());
+          if (labelHit) normalized.push(labelHit);
+        });
+
+        return Array.from(new Set(normalized));
+      };
+
+      setName(data.name ?? '');
+      setDescription(data.description ?? '');
+      setPrice(typeof data.price === 'number' ? data.price : '');
+      setAge(typeof data.required_age === 'number' ? data.required_age : '');
+      setWebsite(data.website ?? '');
+      setBannerUrl(data.banner_image ?? '');
+      setCoverVerticalUrl(data.cover_vertical_image ?? '');
+      setCoverHorizontalUrl(data.cover_horizontal_image ?? '');
+      setTags(
+        normalizeSelection(
+          Array.isArray(data.tags) ? (data.tags as unknown[]) : [],
+          tagOptions,
+          (tag) => tag.tag_id,
+          (tag) => tag.name,
+        ),
+      );
+      setCategories(
+        normalizeSelection(
+          Array.isArray(data.categories) ? (data.categories as unknown[]) : [],
+          categoryOptions,
+          (cat) => cat.category_id,
+          (cat) => cat.name,
+        ),
+      );
     } catch (error) {
       console.log(error);
     } finally {
@@ -85,8 +141,8 @@ export default function StudioGameDetails() {
         cover_vertical_image: coverVerticalUrl || undefined,
         cover_horizontal_image: coverHorizontalUrl || undefined,
         banner_image: bannerUrl || undefined,
-        categories,
-        tags,
+        categories: categories.filter((cat) => !!cat),
+        tags: tags.filter((tag) => !!tag),
       });
 
       alert('Draft saved successfully!');

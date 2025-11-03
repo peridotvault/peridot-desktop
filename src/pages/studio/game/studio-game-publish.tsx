@@ -7,8 +7,9 @@ import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound
 import { useParams } from 'react-router-dom';
 import { Platform, Manifest } from '../../../lib/interfaces/game.types';
 import { isNativeBuild, isWebBuild } from '../../../lib/helpers/helper-pgl1';
-import { fetchWholeDraft } from '../../../features/game/api/game-draft.api';
 import { GameDraft } from '../../../lib/interfaces/game-draft.types';
+import { fetchDraftSummaryCombined } from '@features/game/services/draft.service';
+import type { OnChainGameMetadata } from '@features/game/types/game.type';
 
 type PlatformBuildInfo = {
   key: Platform;
@@ -46,6 +47,7 @@ const unwrapOptString = (value: unknown): string => {
 export const StudioGamePublish: FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const [draftData, setDraftData] = useState<GameDraft | null>(null);
+  const [onChainMeta, setOnChainMeta] = useState<OnChainGameMetadata | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,6 +61,14 @@ export const StudioGamePublish: FC = () => {
       previews: any[];
     };
     builds: PlatformBuildInfo[];
+    chain?: {
+      metadataURI: string;
+      tokenPayment: string;
+      maxSupply: number;
+      price: number;
+      totalPurchased: number;
+      published: boolean;
+    };
   } | null>(null);
 
   // ✅ Ambil data dari draft service
@@ -71,15 +81,21 @@ export const StudioGamePublish: FC = () => {
       }
 
       try {
-        const draft = await fetchWholeDraft(gameId);
-        console.log(draft);
-        if (!draft) {
+        const { data, sources } = await fetchDraftSummaryCombined(gameId);
+        console.log({
+          offChainDraft: sources.offChain,
+          onChainMeta: sources.onChain,
+          metadata: sources.metadata,
+        });
+
+        if (!data) {
           setError('Game draft not found');
           setLoading(false);
           return;
         }
 
-        setDraftData(draft);
+        setDraftData(data);
+        setOnChainMeta(sources.onChain);
         setLoading(false);
       } catch (err) {
         console.error('Failed to load draft:', err);
@@ -165,12 +181,26 @@ export const StudioGamePublish: FC = () => {
         }
       }
 
-      setProcessedData({ details, media, builds: liveBuilds });
+      setProcessedData({
+        details,
+        media,
+        builds: liveBuilds,
+        chain: onChainMeta
+          ? {
+              metadataURI: onChainMeta.metadataURI,
+              tokenPayment: onChainMeta.tokenPayment,
+              maxSupply: onChainMeta.maxSupply,
+              price: onChainMeta.price,
+              totalPurchased: onChainMeta.totalPurchased,
+              published: onChainMeta.published,
+            }
+          : undefined,
+      });
     } catch (err) {
       console.error('Failed to process draft data:', err);
       setError('Failed to process game data');
     }
-  }, [draftData, loading]);
+  }, [draftData, loading, onChainMeta]);
 
   // ✅ Validasi kelengkapan data — PERBAIKI COVER IMAGE
   const checkDetails = () => {
@@ -278,6 +308,57 @@ export const StudioGamePublish: FC = () => {
             <span>Publish</span>
           </ButtonWithSound>
         </section>
+
+        {processedData.chain && (
+          <section className="grid gap-3 rounded-lg border border-foreground/10 bg-card/40 p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">On-chain Snapshot</h2>
+              <span
+                className={`text-sm font-medium ${
+                  processedData.chain.published ? 'text-success' : 'text-muted-foreground'
+                }`}
+              >
+                {processedData.chain.published ? 'Published' : 'Not yet published'}
+              </span>
+            </div>
+            <div className="grid gap-2 text-sm text-foreground/80 md:grid-cols-2">
+              <div className="flex flex-col gap-1 rounded-md bg-background/60 p-3">
+                <span className="text-muted-foreground">Token Payment</span>
+                <span className="font-medium">{processedData.chain.tokenPayment || '—'}</span>
+              </div>
+              <div className="flex flex-col gap-1 rounded-md bg-background/60 p-3">
+                <span className="text-muted-foreground">Price</span>
+                <span className="font-medium">
+                  {typeof processedData.chain.price === 'number'
+                    ? processedData.chain.price
+                    : '—'}
+                </span>
+              </div>
+              <div className="flex flex-col gap-1 rounded-md bg-background/60 p-3">
+                <span className="text-muted-foreground">Max Supply</span>
+                <span className="font-medium">
+                  {typeof processedData.chain.maxSupply === 'number'
+                    ? processedData.chain.maxSupply
+                    : '—'}
+                </span>
+              </div>
+              <div className="flex flex-col gap-1 rounded-md bg-background/60 p-3">
+                <span className="text-muted-foreground">Total Purchased</span>
+                <span className="font-medium">
+                  {typeof processedData.chain.totalPurchased === 'number'
+                    ? processedData.chain.totalPurchased
+                    : '—'}
+                </span>
+              </div>
+              <div className="flex flex-col gap-1 rounded-md bg-background/60 p-3 md:col-span-2">
+                <span className="text-muted-foreground">Metadata URI</span>
+                <span className="font-medium break-all">
+                  {processedData.chain.metadataURI || '—'}
+                </span>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Meta ringkas + Publish */}
         <div className="flex flex-wrap items-center gap-8">

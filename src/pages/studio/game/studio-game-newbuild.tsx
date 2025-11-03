@@ -8,7 +8,8 @@ import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound
 import { InputFloating } from '../../../shared/components/ui/input-floating';
 import { Manifest, Platform } from '../../../lib/interfaces/game.types';
 import { initAppStorage, uploadToPrefix } from '../../../shared/api/wasabi.api';
-import { appendManifest, fetchBuilds } from '../../../features/game/api/game-draft.api';
+import { appendManifest } from '../../../features/game/api/game-draft.api';
+import { fetchDraftBuildsCombined } from '@features/game/services/draft.service';
 
 type PlatformBuildData = {
   version: string;
@@ -160,7 +161,7 @@ export const StudioGameNewBuild: React.FC = () => {
 
     try {
       // (opsional) ambil dulu untuk referensi (bila butuh)
-      await fetchBuilds(gameId!);
+      await fetchDraftBuildsCombined(gameId!);
 
       for (const platform of chosen) {
         const data = getPlatformData(platform);
