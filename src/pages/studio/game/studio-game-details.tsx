@@ -8,7 +8,7 @@ import { InputDropdown } from '../../../shared/components/ui/input-dropdown';
 import { useParams } from 'react-router-dom';
 import { handleAssetChange } from '../../../services/studio/detail-service';
 import { fetchCategories, fetchTags, updateGeneral } from '../../../features/game/api/game-draft.api';
-import { CategoryDraft, TagDraft } from '../../../lib/interfaces/game-draft.types';
+import { CategoryDb, TagDb } from '../../../lib/interfaces/game-draft.types';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
 import { fetchDraftGeneralCombined } from '@features/game/services/draft.service';
 
@@ -32,8 +32,8 @@ export default function StudioGameDetails() {
   const [tags, setTags] = React.useState<string[]>([]);
   const [categories, setCategories] = React.useState<string[]>([]);
 
-  const [listCategoryOptions, setListCategoryOptions] = React.useState<CategoryDraft[]>([]);
-  const [listTagOptions, setListTagOptions] = React.useState<TagDraft[]>([]);
+  const [listCategoryOptions, setListCategoryOptions] = React.useState<CategoryDb[]>([]);
+  const [listTagOptions, setListTagOptions] = React.useState<TagDb[]>([]);
 
   // --- Load draft saat mount ---
   const loadDraft = async () => {

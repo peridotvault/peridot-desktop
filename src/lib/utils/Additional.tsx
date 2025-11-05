@@ -2,6 +2,7 @@ import { EncryptedData } from '@antigane/encryption';
 // import { Option } from '../interfaces/Additional';
 import { DistKey, OSKey } from '../../interfaces/CoreInterface';
 import { Option } from '../../interfaces/app/GameInterface';
+import { resolveTokenInfo, subunitsToNumber } from '@shared/utils/token-info';
 
 export const shortenAddress = (address: string | null, firstSlice: number, secondSlice: number) => {
   if (address) return `${address.slice(0, firstSlice)}...${address.slice(-secondSlice)}`;
@@ -23,9 +24,12 @@ export const copyToClipboard = (data: EncryptedData | string | null) => {
   });
 };
 
-export const formatPeridotTokenPrice = (price: bigint | undefined) => {
-  const convertedPrice = Number(price) / 1e8;
-  return convertedPrice;
+export const formatPeridotTokenPrice = (
+  price: bigint | number | undefined,
+  tokenCanister?: string | null,
+) => {
+  const { decimals } = resolveTokenInfo(tokenCanister ?? undefined);
+  return subunitsToNumber(price ?? 0, decimals);
 };
 
 export const hasDist = (selected: Option[], value: DistKey) =>

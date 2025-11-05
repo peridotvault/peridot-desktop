@@ -35,6 +35,7 @@ export const StudioGameMedia = () => {
               ? new File([], src.split('/').pop() || 'preview.jpg')
               : undefined,
           url: src,
+          src,
           kind: p.kind,
         });
       });
@@ -85,6 +86,7 @@ export const StudioGameMedia = () => {
             updatedItems[i] = {
               ...item,
               url: permanentUrl,
+              src: permanentUrl,
               // Tetap simpan file untuk alt text
             };
           } catch (err) {
@@ -107,7 +109,7 @@ export const StudioGameMedia = () => {
     try {
       const savePreviews = previews.map((p) => ({
         kind: p.kind,
-        src: p.url,
+        src: p.src ?? p.url,
       }));
       const apiPreviews: GamePreview = { previews: savePreviews };
       await updatePreviews(gameId, apiPreviews);

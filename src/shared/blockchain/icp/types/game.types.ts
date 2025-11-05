@@ -1,8 +1,6 @@
 // Core game-related types shared across features and services.
-import type { MediaItem as LegacyMediaItem } from './legacy.types';
-
 export type GameId = string;
-export type Timestamp = number;
+export type Timestamp = string | number | bigint;
 export type Tag = string;
 export type Category = string;
 export type Platform = 'windows' | 'macos' | 'linux' | 'web' | 'android' | 'ios' | 'other';
@@ -15,10 +13,11 @@ export type StorageRef =
 
 export interface Manifest {
     version: string;
-    sizeBytes: number;
+    size_bytes: number;
     checksum: string;
     storageRef: StorageRef;
     createdAt: Timestamp;
+    listing: string;
 }
 
 export interface Hardware {
@@ -29,45 +28,65 @@ export interface Hardware {
     additionalNotes: string;
 }
 
+type LegacyOpt<T> = [] | [T];
+
 export interface WebDistribution {
     url: string;
     processor: string;
     graphics: string;
-    memoryMB: number;
-    storageMB: number;
-    additionalNotes?: string;
+    memory: number | bigint;
+    storage: number | bigint;
+    /**
+     * Backward compatibility for distributions stored with *_MB suffix.
+     */
+    memoryMB?: number;
+    storageMB?: number;
+    additionalNotes?: string | LegacyOpt<string>;
 }
 
 export interface NativeDistribution {
     os: Platform;
     processor: string;
     graphics: string;
-    memoryMB: number;
-    storageMB: number;
-    additionalNotes?: string;
+    memory: number | bigint;
+    storage: number | bigint;
+    /**
+     * Backward compatibility for distributions stored with *_MB suffix.
+     */
+    memoryMB?: number;
+    storageMB?: number;
+    additionalNotes?: string | LegacyOpt<string>;
     manifests: Manifest[];
     liveVersion?: string;
 }
 
 export type Distribution = { web: WebDistribution } | { native: NativeDistribution };
 
-export type MediaItem = LegacyMediaItem & {
-    url: string;
+type BaseMediaItem = {
     src?: string;
+    alt?: string;
+    storageKey?: string;
     primary?: boolean;
+    url?: string;
 };
 
+export type MediaItem =
+    | (BaseMediaItem & { kind: 'image' })
+    | (BaseMediaItem & { kind: 'video'; poster?: string });
+
 export interface Metadata {
-    categories: string[];
-    tags: string[];
-    previews: MediaItem[];
-    required_age: number;
-    cover_vertical_image: string;
-    cover_horizontal_image: string;
-    banner_image: string;
-    social_media: {
-        website?: string;
-    };
+    categories?: string[];
+    tags?: string[];
+    previews?: MediaItem[];
+    required_age?: number;
+    website?: string;
+    banner_image?: string;
+    cover_vertical_image?: string;
+    cover_horizontal_image?: string;
+    release_date?: number;
+    draft_status?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 export interface OffChainGameMetadata {

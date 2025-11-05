@@ -43,8 +43,10 @@ export default function Vault() {
       window.scrollTo(0, 0);
 
       const resAllGames = await getPublishedGames({ start: 0, limit: 200 });
-      console.log(resAllGames);
-      setAllGames(resAllGames);
+      const publishedOnly = Array.isArray(resAllGames)
+        ? resAllGames.filter((game) => game?.published)
+        : resAllGames;
+      setAllGames(publishedOnly);
     }
 
     fetchData();
@@ -70,7 +72,8 @@ export default function Vault() {
                 gameId={item.game_id}
                 gameName={item.name}
                 imgUrl={item.metadata?.cover_vertical_image ?? ImageLoading}
-                price={Number(item.price)}
+                price={item.price}
+                tokenCanister={item.token_payment}
               />
             ))}
           </div>
@@ -111,7 +114,8 @@ export default function Vault() {
                 gameId={item.game_id}
                 gameName={item.name}
                 imgUrl={item.metadata?.cover_vertical_image ?? ImageLoading}
-                price={Number(item.price)}
+                price={item.price}
+                tokenCanister={item.token_payment}
               />
             ))}
           </div>

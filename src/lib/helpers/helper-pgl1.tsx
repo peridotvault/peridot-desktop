@@ -27,8 +27,8 @@ export const metaGetTextArray = (meta?: Metadata, key?: string): string[] => {
   return v.array.map((it) => (isText(it) ? it.text : '')).filter(Boolean);
 };
 
-// pgl1_previews = array of map { kind: text('image'|'video'), url: text }
-export type PreviewItem = { kind: 'image' | 'video'; url: string };
+// pgl1_previews = array of map { kind: text('image'|'video'), url/src: text }
+export type PreviewItem = { kind: 'image' | 'video'; url: string; src?: string };
 export const metaGetPreviews = (meta?: Metadata, key = 'pgl1_previews'): PreviewItem[] => {
   const v = metaFind(meta, key);
   if (!isArray(v)) return [];
@@ -36,9 +36,9 @@ export const metaGetPreviews = (meta?: Metadata, key = 'pgl1_previews'): Preview
   for (const item of v.array) {
     if (!isMap(item)) continue;
     const kindV = item.map.find(([k]) => k === 'kind')?.[1];
-    const urlV = item.map.find(([k]) => k === 'url')?.[1];
-    if (isText(kindV) && isText(urlV) && (kindV.text === 'image' || kindV.text === 'video')) {
-      out.push({ kind: kindV.text, url: urlV.text });
+    const srcV = item.map.find(([k]) => k === 'src')?.[1] ?? item.map.find(([k]) => k === 'url')?.[1];
+    if (isText(kindV) && isText(srcV) && (kindV.text === 'image' || kindV.text === 'video')) {
+      out.push({ kind: kindV.text, url: srcV.text, src: srcV.text });
     }
   }
   return out;
@@ -88,6 +88,7 @@ export const toPreviews = (items: PreviewItem[]): Value => ({
   array: items.map((it) => ({
     map: [
       ['kind', toText(it.kind)],
+      ['src', toText(it.src ?? it.url)],
       ['url', toText(it.url)],
     ],
   })),

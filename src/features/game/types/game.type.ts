@@ -62,5 +62,6 @@ export interface PGLContractMeta {
 export type PreviewItem = MediaItem & {
   id: string;
   url: string;
+  src: string;
   file?: File;
 };

@@ -5,11 +5,21 @@ import { faCheckCircle, faCircleXmark, faGlobe } from '@fortawesome/free-solid-s
 import { faAndroid, faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
 import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
 import { useParams } from 'react-router-dom';
-import { Platform, Manifest } from '../../../lib/interfaces/game.types';
-import { isNativeBuild, isWebBuild } from '../../../lib/helpers/helper-pgl1';
+import type {
+  Platform,
+  Manifest,
+  MediaItem,
+  Distribution,
+  NativeDistribution,
+  WebDistribution,
+} from '@shared/blockchain/icp/types/game.types';
 import { GameDraft } from '../../../lib/interfaces/game-draft.types';
 import { fetchDraftSummaryCombined } from '@features/game/services/draft.service';
 import type { OnChainGameMetadata } from '@features/game/types/game.type';
+import { setGameWhole } from '@features/game/api/game.api';
+import type { GameWhole } from '@features/game/types/game-draft.type';
+import { publishGameOnChain } from '@features/game/services/publish.service';
+import { useWallet } from '@shared/contexts/WalletContext';
 
 type PlatformBuildInfo = {
   key: Platform;
@@ -44,12 +54,95 @@ const unwrapOptString = (value: unknown): string => {
   return typeof value === 'string' ? value : '';
 };
 
+const isWebDistribution = (dist: Distribution): dist is { web: WebDistribution } => 'web' in dist;
+
+const isNativeDistribution = (
+  dist: Distribution,
+): dist is { native: NativeDistribution } => 'native' in dist;
+
 export const StudioGamePublish: FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
+  const { wallet } = useWallet();
   const [draftData, setDraftData] = useState<GameDraft | null>(null);
   const [onChainMeta, setOnChainMeta] = useState<OnChainGameMetadata | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishMessage, setPublishMessage] = useState<string | null>(null);
+
+  const apiBase = (import.meta.env.VITE_API_BASE ?? '').replace(/\/$/, '');
+
+  const normalizeStringArray = (values: unknown[] | undefined): string[] | undefined => {
+    if (!Array.isArray(values) || !values.length) return undefined;
+    const normalized = values
+      .map((value) => {
+        if (typeof value === 'string') return value.trim();
+        if (typeof value === 'number') return value.toString();
+        if (value && typeof value === 'object') {
+          const candidate =
+            (value as any).category_id ??
+            (value as any).tag_id ??
+            (value as any).id ??
+            (value as any).value ??
+            (value as any).name;
+          if (typeof candidate === 'string' || typeof candidate === 'number') {
+            return String(candidate).trim();
+          }
+        }
+        return null;
+      })
+      .filter((entry): entry is string => !!entry && entry.trim().length > 0)
+      .map((entry) => entry.trim());
+
+    const unique = Array.from(new Set(normalized));
+    return unique.length ? unique : undefined;
+  };
+
+  const normalizePreviews = (items: MediaItem[] | undefined): MediaItem[] | undefined => {
+    if (!Array.isArray(items) || !items.length) return undefined;
+    const normalized: MediaItem[] = [];
+
+    items.forEach((item) => {
+      const rawSrc = (item as any).src ?? (item as any).url;
+      const src = typeof rawSrc === 'string' ? rawSrc.trim() : '';
+      if (!src) return;
+
+      if (item.kind === 'image') {
+        normalized.push({
+          kind: 'image',
+          src,
+          ...(item.alt ? { alt: item.alt } : {}),
+          ...(item.storageKey ? { storageKey: item.storageKey } : {}),
+        });
+      } else if (item.kind === 'video') {
+        normalized.push({
+          kind: 'video',
+          src,
+          ...(item.poster ? { poster: item.poster } : {}),
+          ...(item.alt ? { alt: item.alt } : {}),
+          ...(item.storageKey ? { storageKey: item.storageKey } : {}),
+        });
+      }
+    });
+
+    return normalized.length ? normalized : undefined;
+  };
+
+  const toTimestamp = (value: number | string | undefined): number | undefined => {
+    if (typeof value === 'number' && !Number.isNaN(value)) return value;
+    if (typeof value === 'string' && value.trim()) {
+      const parsed = Date.parse(value);
+      return Number.isNaN(parsed) ? undefined : parsed;
+    }
+    return undefined;
+  };
+
+  const toIsoString = (value: number | string | undefined, fallbackMs: number): string => {
+    if (typeof value === 'string' && value.trim()) return value;
+    if (typeof value === 'number' && !Number.isNaN(value)) return new Date(value).toISOString();
+    return new Date(fallbackMs).toISOString();
+  };
 
   // State untuk data yang sudah diproses
   const [processedData, setProcessedData] = useState<{
@@ -137,7 +230,7 @@ export const StudioGamePublish: FC = () => {
 
       if (draftData.distributions) {
         for (const dist of draftData.distributions) {
-          if (isWebBuild(dist)) {
+          if (isWebDistribution(dist)) {
             // Web build selalu live
             liveBuilds.push({
               key: 'web',
@@ -152,7 +245,7 @@ export const StudioGamePublish: FC = () => {
                 },
               },
             });
-          } else if (isNativeBuild(dist)) {
+          } else if (isNativeDistribution(dist)) {
             // Cek apakah ada versi live
             const liveVersion = dist.native.liveVersion;
             if (liveVersion) {
@@ -243,6 +336,139 @@ export const StudioGamePublish: FC = () => {
   const vBuilds = checkBuilds();
   const allOk = vDetails.ok && vMedia.ok && vBuilds.ok;
 
+  const handlePublish = async () => {
+    if (!gameId) {
+      setPublishError('Game ID is missing');
+      return;
+    }
+    if (!draftData) {
+      setPublishError('Game data is not ready');
+      return;
+    }
+    if (!allOk) {
+      return;
+    }
+
+    setPublishError(null);
+    setPublishMessage(null);
+    setPublishing(true);
+
+    try {
+      const nowMs = Date.now();
+      const releaseDate =
+        typeof draftData.release_date === 'number' && !Number.isNaN(draftData.release_date)
+          ? draftData.release_date
+          : nowMs;
+
+      const categories = normalizeStringArray(draftData.categories as unknown[] | undefined);
+      const tags = normalizeStringArray(draftData.tags as unknown[] | undefined);
+      const previews = normalizePreviews(draftData.previews);
+      const distributions =
+        Array.isArray(draftData.distributions) && draftData.distributions.length
+          ? draftData.distributions
+          : undefined;
+
+      const createdAtIso = toIsoString(draftData.created_at, nowMs);
+      const updatedAtIso = new Date(nowMs).toISOString();
+      const createdAtMs = toTimestamp(createdAtIso) ?? nowMs;
+      const updatedAtMs = toTimestamp(updatedAtIso) ?? nowMs;
+
+      const payload: GameWhole = {
+        game_id: draftData.game_id ?? gameId,
+        name: draftData.name?.trim() || undefined,
+        description: draftData.description?.trim() || undefined,
+        required_age:
+          typeof draftData.required_age === 'number' ? draftData.required_age : undefined,
+        price: typeof draftData.price === 'number' ? draftData.price : undefined,
+        website: draftData.website?.trim() || undefined,
+        banner_image: draftData.banner_image?.trim() || undefined,
+        cover_vertical_image: draftData.cover_vertical_image?.trim() || undefined,
+        cover_horizontal_image: draftData.cover_horizontal_image?.trim() || undefined,
+        previews: previews && previews.length ? previews : undefined,
+        distributions,
+        categories,
+        tags,
+        is_published: true,
+        release_date: releaseDate,
+        draft_status: 'published',
+        created_at: createdAtIso,
+        updated_at: updatedAtIso,
+      };
+
+      const saved = await setGameWhole(gameId, payload);
+
+      let chainUpdated = false;
+      const metadataURI =
+        gameId && apiBase ? `${apiBase}/api/games/${gameId}/metadata` : '';
+
+      if (metadataURI && wallet) {
+        try {
+          await publishGameOnChain({
+            gameId,
+            metadataURI,
+            name: payload.name,
+            description: payload.description,
+            published: true,
+            wallet,
+          });
+          chainUpdated = true;
+          setOnChainMeta((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  name: payload.name ?? prev.name,
+                  description: payload.description ?? prev.description,
+                  metadataURI,
+                  published: true,
+                }
+              : prev,
+          );
+        } catch (chainErr) {
+          console.error('Failed to update blockchain state:', chainErr);
+          setPublishError(
+            `Blockchain update failed: ${
+              chainErr instanceof Error ? chainErr.message : 'Unknown error'
+            }`,
+          );
+        }
+      } else if (!wallet) {
+        console.warn('Wallet not available – skipping on-chain publish.');
+      }
+
+      const nextCreatedAt = toTimestamp(saved.created_at) ?? createdAtMs;
+      const nextUpdatedAt = toTimestamp(saved.updated_at) ?? updatedAtMs;
+
+      const nextCreatedAtIso = toIsoString(saved.created_at ?? payload.created_at, nextCreatedAt);
+      const nextUpdatedAtIso = toIsoString(saved.updated_at ?? payload.updated_at, nextUpdatedAt);
+
+      const nextDraft: GameDraft = {
+        ...(draftData ?? {}),
+        ...saved,
+        previews: saved.previews ?? payload.previews ?? draftData.previews,
+        distributions: saved.distributions ?? payload.distributions ?? draftData.distributions,
+        categories: saved.categories ?? payload.categories ?? draftData.categories,
+        tags: saved.tags ?? payload.tags ?? draftData.tags,
+        is_published: true,
+        release_date: releaseDate,
+        draft_status: 'published',
+        created_at: nextCreatedAtIso,
+        updated_at: nextUpdatedAtIso,
+      };
+
+      setDraftData(nextDraft);
+      setPublishMessage(
+        chainUpdated
+          ? 'Game published successfully (off-chain & on-chain).'
+          : 'Game saved to off-chain storage.',
+      );
+    } catch (err) {
+      console.error('Failed to publish game:', err);
+      setPublishError(err instanceof Error ? err.message : 'Failed to publish game');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const bytes = (mb: number) => `${mb.toFixed(0)} MB`;
   const mdy = (t: number) =>
     new Date(t).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
@@ -295,18 +521,22 @@ export const StudioGamePublish: FC = () => {
     <div className="flex justify-center w-full">
       <div className="w-full max-w-[1400px] flex flex-col p-10 gap-8">
         {/* Header  */}
-        <section className="flex justify-between items-center gap-4">
+        <section className="flex justify-between items-center gap-4 flex-wrap md:flex-nowrap">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold">Review & Publish</h1>
             <p className="text-foreground/70">This information appears on PeridotVault</p>
           </div>
-          <ButtonWithSound
-            disabled={!allOk}
-            onClick={() => alert('Publish clicked (UI only)')}
-            className={`bg-card-foreground text-card font-bold py-2 px-6 rounded-md ${!allOk && 'cursor-not-allowed opacity-40'}`}
-          >
-            <span>Publish</span>
-          </ButtonWithSound>
+          <div className="flex flex-col items-end gap-2">
+            <ButtonWithSound
+              disabled={!allOk || publishing}
+              onClick={handlePublish}
+              className={`bg-card-foreground text-card font-bold py-2 px-6 rounded-md ${(!allOk || publishing) ? 'cursor-not-allowed opacity-40' : ''}`}
+            >
+              <span>{publishing ? 'Publishing...' : 'Publish'}</span>
+            </ButtonWithSound>
+            {publishError && <span className="text-sm text-chart-5 text-right max-w-sm">{publishError}</span>}
+            {publishMessage && <span className="text-sm text-success text-right max-w-sm">{publishMessage}</span>}
+          </div>
         </section>
 
         {processedData.chain && (

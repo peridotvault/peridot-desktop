@@ -8,13 +8,20 @@ export const GameHorizontal = ({
   gameName,
   imgUrl,
   price,
+  tokenCanister,
+  tokenSymbol,
+  tokenDecimals,
+  tokenLogo,
 }: {
   gameId: string;
   gameName: string;
   imgUrl: string;
-  price: number;
+  price: number | string | bigint;
+  tokenCanister?: string | null;
+  tokenSymbol?: string;
+  tokenDecimals?: number;
+  tokenLogo?: string | null;
 }) => {
-  const convertedPrice = Number(price) / 1e8;
   const formatTitle = (title: string): string => {
     return title.toLowerCase().replace(/\s+/g, '_');
   };
@@ -35,7 +42,13 @@ export const GameHorizontal = ({
           Peridot Game
         </span>
         {/* price  */}
-        <PriceCoin price={convertedPrice} />
+        <PriceCoin
+          amount={price ?? 0}
+          tokenCanister={tokenCanister}
+          tokenSymbol={tokenSymbol}
+          tokenDecimals={tokenDecimals}
+          tokenLogo={tokenLogo}
+        />
       </div>
     </Link>
   );

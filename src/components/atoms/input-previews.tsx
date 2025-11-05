@@ -196,10 +196,12 @@ export const InputPreviews = React.forwardRef<HTMLInputElement, InputPreviewsPro
       const isImg = file.type.startsWith('image/');
       const isVid = file.type.startsWith('video/');
       if (!isImg && !isVid) return null;
+      const objectUrl = URL.createObjectURL(file);
       return {
         id: uid(),
         file,
-        url: URL.createObjectURL(file),
+        url: objectUrl,
+        src: objectUrl,
         kind: isImg ? 'image' : 'video',
       };
     };

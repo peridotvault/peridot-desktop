@@ -1,14 +1,28 @@
 // @ts-ignore
 import React from 'react';
-import { ImagePERCoin } from './const-url';
+import {
+  formatTokenAmountFromRaw,
+  isZeroTokenAmount,
+  resolveTokenInfo,
+} from '@shared/utils/token-info';
+
+type PriceCoinProps = {
+  amount: number | string | bigint;
+  tokenCanister?: string | null;
+  tokenSymbol?: string;
+  tokenDecimals?: number;
+  tokenLogo?: string | null;
+  textSize?: 'default' | 'xl' | 'lg' | 'sm' | 'xs';
+};
 
 export const PriceCoin = ({
-  price,
+  amount,
+  tokenCanister,
+  tokenSymbol,
+  tokenDecimals,
+  tokenLogo,
   textSize = 'default',
-}: {
-  price: number;
-  textSize?: 'default' | 'xl' | 'lg' | 'sm' | 'xs';
-}) => {
+}: PriceCoinProps) => {
   const textSizeClass = {
     default: '',
     xl: 'text-xl',
@@ -16,20 +30,28 @@ export const PriceCoin = ({
     sm: 'text-sm',
     xs: 'text-xs',
   }[textSize];
-  const convertedPrice = Number(price) / 1e8;
 
-  if (price <= 0) {
+  const resolved = resolveTokenInfo(tokenCanister ?? undefined);
+  const decimals = tokenDecimals ?? resolved.decimals;
+  const symbol = tokenSymbol ?? resolved.symbol;
+  const logo = tokenLogo === null ? undefined : tokenLogo ?? resolved.logo;
+
+  if (isZeroTokenAmount(amount, decimals)) {
     return (
-      <div className={textSizeClass + ' flex gap-2 items-center text-start'}>
+      <div className={`${textSizeClass} flex gap-2 items-center text-start`}>
         <p>FREE</p>
       </div>
     );
   }
 
+  const formatted = formatTokenAmountFromRaw(amount, decimals);
+
   return (
-    <div className={textSizeClass + ' flex gap-2 items-center text-start'}>
-      <img src={ImagePERCoin} className="h-5 aspect-square object-contain" />
-      <p>{convertedPrice} PER</p>
+    <div className={`${textSizeClass} flex gap-2 items-center text-start`}>
+      {logo ? <img src={logo} className="h-5 aspect-square object-contain" /> : null}
+      <p>
+        {formatted} {symbol}
+      </p>
     </div>
   );
 };

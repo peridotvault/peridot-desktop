@@ -9,14 +9,29 @@ const toTextValue = (text: string): Value => ({ text });
 const toArrayText = (items: string[]): Value => ({ array: items.map(toTextValue) });
 
 const toPreviewsValue = (items: OffChainMediaItem[] | undefined): Value => ({
-    array: (items ?? []).map((item) => ({
-        map: [
+    array: (items ?? []).map((item) => {
+        const source = item.src ?? item.url ?? '';
+        const entries: Array<[string, Value]> = [
             ['kind', toTextValue(item.kind)],
-            ['url', toTextValue(item.url)],
-            ...(item.alt ? [['alt', toTextValue(item.alt)]] : []),
-            ...(item.poster ? [['poster', toTextValue(item.poster)]] : []),
-        ] as Array<[string, Value]>,
-    })),
+        ];
+        if (source) {
+            entries.push(['src', toTextValue(source)]);
+            entries.push(['url', toTextValue(source)]);
+        }
+        if (item.alt) {
+            entries.push(['alt', toTextValue(item.alt)]);
+        }
+        if (item.poster) {
+            entries.push(['poster', toTextValue(item.poster)]);
+        }
+        if (item.storageKey) {
+            entries.push(['storageKey', toTextValue(item.storageKey)]);
+        }
+        if (item.primary !== undefined) {
+            entries.push(['primary', { nat: item.primary ? 1 : 0 }]);
+        }
+        return { map: entries };
+    }),
 });
 
 const mapDistribution = (distribution: OffChainGameMetadata['distribution']): Distribution[] =>
@@ -28,8 +43,8 @@ const mapDistribution = (distribution: OffChainGameMetadata['distribution']): Di
                     url: web.url,
                     processor: web.processor,
                     graphics: web.graphics,
-                    memory: Number(web.memoryMB ?? 0),
-                    storage: Number(web.storageMB ?? 0),
+                    memory: Number(((web as any).memory ?? (web as any).memoryMB ?? 0)),
+                    storage: Number(((web as any).storage ?? (web as any).storageMB ?? 0)),
                     additionalNotes: toOpt(
                         web.additionalNotes?.trim() ? web.additionalNotes.trim() : undefined,
                     ),
@@ -43,8 +58,8 @@ const mapDistribution = (distribution: OffChainGameMetadata['distribution']): Di
                 os: native.os,
                 processor: native.processor,
                 graphics: native.graphics,
-                memory: Number(native.memoryMB ?? 0),
-                storage: Number(native.storageMB ?? 0),
+                memory: Number(((native as any).memory ?? (native as any).memoryMB ?? 0)),
+                storage: Number(((native as any).storage ?? (native as any).storageMB ?? 0)),
                 additionalNotes: toOpt(
                     native.additionalNotes?.trim() ? native.additionalNotes.trim() : undefined,
                 ),
@@ -53,7 +68,7 @@ const mapDistribution = (distribution: OffChainGameMetadata['distribution']): Di
                     listing: manifest.version,
                     version: manifest.version,
                     createdAt: manifest.createdAt,
-                    size_bytes: manifest.sizeBytes,
+                    size_bytes: Number((manifest as any).size_bytes ?? manifest.sizeBytes ?? 0),
                     checksum: manifest.checksum,
                     storageRef: manifest.storageRef as any,
                 })),
@@ -78,8 +93,8 @@ const mapMetadata = (meta: OffChainGameMetadata['metadata']): Metadata => {
     if (typeof meta.required_age === 'number') {
         entries.push(['pgl1_required_age', { nat: meta.required_age }]);
     }
-    if (meta.social_media?.website) {
-        entries.push(['pgl1_website', toTextValue(meta.social_media.website)]);
+    if (meta.website) {
+        entries.push(['pgl1_website', toTextValue(meta.website)]);
     }
 
     return entries;
@@ -91,12 +106,12 @@ const mapOffChainToLegacy = (game: OffChainGameMetadata): PGLMeta => {
     const coverVertical = game.metadata?.cover_vertical_image;
     const coverHorizontal = game.metadata?.cover_horizontal_image;
     const banner = game.metadata?.banner_image;
-    const website = game.metadata?.social_media?.website;
+    const website = game.metadata?.website;
     const requiredAge = game.metadata?.required_age;
     const previews = (game.metadata?.previews ?? []).map((item) => ({
         kind: item.kind,
-        src: item.url,
-        url: item.url,
+        src: item.src ?? item.url ?? '',
+        url: item.url ?? item.src ?? '',
         alt: item.alt,
         poster: item.poster,
         storageKey: item.storageKey,

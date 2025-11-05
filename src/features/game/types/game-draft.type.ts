@@ -2,13 +2,15 @@ export * from '@shared/blockchain/icp/types/legacy.types';
 
 import type {
   Category,
-  Distribution,
   GameId,
-  Manifest,
-  MediaItem,
   Platform,
   Tag,
 } from '@shared/blockchain/icp/types/legacy.types';
+import type {
+  Distribution,
+  Manifest,
+  MediaItem,
+} from '@shared/blockchain/icp/types/game.types';
 
 export interface GameDraft {
   game_id?: GameId;
@@ -27,8 +29,8 @@ export interface GameDraft {
   distributions?: Array<Distribution>;
   categories?: Category[];
   tags?: Tag[];
-  created_at?: number;
-  updated_at?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface GameGeneral {
@@ -52,22 +54,55 @@ export interface GameBuilds {
   distributions?: Array<Distribution>;
 }
 
-export interface CategoryDraft {
+export type GameWhole = Omit<GameDraft, 'created_at' | 'updated_at'> & {
+  created_at: string;
+  updated_at?: string;
+};
+
+export interface GameMetadataResponse {
+  categories: string[];
+  tags: string[];
+  previews: MediaItem[];
+  required_age?: number;
+  website?: string;
+  banner_image?: string;
+  cover_vertical_image?: string;
+  cover_horizontal_image?: string;
+  release_date?: number;
+  draft_status?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export type GameWholeUpsertPayload = Partial<Omit<GameWhole, 'updated_at'>> & {
+  /**
+   * Optional ISO timestamp used when creating a new row.
+   * When omitted the service will reuse the current stored value or now().
+   */
+  created_at?: string;
+  /**
+   * Optional ISO timestamp representing the latest update time.
+   * When omitted the service will assign the current time.
+   */
+  updated_at?: string;
+};
+
+export interface CategoryDb {
   category_id: string;
   name: string;
 }
 
-export interface TagDraft {
+export interface TagDb {
   tag_id: string;
   name: string;
 }
 
 export interface CategoriesResponse {
-  categories: CategoryDraft[];
+  categories: CategoryDb[];
 }
 
 export interface TagsResponse {
-  tags: TagDraft[];
+  tags: TagDb[];
 }
 
 // DTO

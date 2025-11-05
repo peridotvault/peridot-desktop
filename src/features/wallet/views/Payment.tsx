@@ -41,7 +41,8 @@ export const AppPayment: React.FC<Props> = ({
   tokenLogoUrl = DEFAULT_TOKEN_LOGO,
 }) => {
   const { wallet } = useWallet();
-  const spenderPrincipal = Principal.fromText(SPENDER);
+  const [spenderPrincipal, setSpenderPrincipal] = useState<Principal | null>(null);
+  const [configError, setConfigError] = useState<string | null>(null);
   const [_tokenBalances, setTokenBalances] = useState<{ [id: string]: number }>({});
   const [myBalance, setMyBalance] = useState(0);
   // const [fee, setFee] = useState<bigint>(0n);
@@ -59,6 +60,43 @@ export const AppPayment: React.FC<Props> = ({
 
   const humanPriceStr = String(price);
   const balanceLeft = useMemo(() => myBalance - Number(humanPriceStr), [myBalance, humanPriceStr]);
+  const requiresPayment = Number(humanPriceStr) > 0;
+
+  useEffect(() => {
+    if (!requiresPayment) {
+      setSpenderPrincipal(null);
+      setConfigError(null);
+      return;
+    }
+
+    if (!SPENDER || typeof SPENDER !== 'string' || !SPENDER.trim()) {
+      setSpenderPrincipal(null);
+      setConfigError('Payment configuration is missing the spender canister id.');
+      setAlertData({
+        isSuccess: false,
+        msg: 'Payment configuration is missing the spender canister id.',
+      });
+      return;
+    }
+    try {
+      const principal = Principal.fromText(SPENDER);
+      setSpenderPrincipal(principal);
+      setConfigError(null);
+      setAlertData((prev) =>
+        prev.isSuccess === false && prev.msg.includes('configuration')
+          ? { isSuccess: null, msg: '' }
+          : prev,
+      );
+    } catch (err) {
+      console.error('[AppPayment] Invalid spender principal:', err);
+      setSpenderPrincipal(null);
+      setConfigError('Payment configuration contains an invalid spender canister id.');
+      setAlertData({
+        isSuccess: false,
+        msg: 'Payment configuration contains an invalid spender canister id.',
+      });
+    }
+  }, [SPENDER, requiresPayment]);
 
   const updateTokenBalance = useCallback(
     (canisterId: string, _balanceUsd: number, balanceToken: number) => {
@@ -74,6 +112,9 @@ export const AppPayment: React.FC<Props> = ({
 
   // setup agent+actor ledger
   async function makeLedgerActor() {
+    if (!wallet?.encryptedPrivateKey) {
+      throw new Error('Wallet is not available. Please connect your wallet first.');
+    }
     const privateKey = await walletService.decryptWalletData(wallet.encryptedPrivateKey!);
     const secretKey = hexToArrayBuffer(privateKey);
 
@@ -102,6 +143,13 @@ export const AppPayment: React.FC<Props> = ({
 
   // load decimals + allowance saat modal dibuka
   useEffect(() => {
+    if (!wallet?.encryptedPrivateKey) {
+      setAlertData({
+        isSuccess: false,
+        msg: 'Wallet is not available. Please connect and try again.',
+      });
+      return;
+    }
     (async () => {
       try {
         const { actor } = await makeLedgerActor();
@@ -121,8 +169,7 @@ export const AppPayment: React.FC<Props> = ({
         setAlertData({ isSuccess: false, msg: e?.message ?? String(e) });
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [wallet?.encryptedPrivateKey, tokenCanisterId]);
 
   let _nonce = 0;
   const uniqueCreatedAtNs = (): bigint => {
@@ -204,8 +251,13 @@ export const AppPayment: React.FC<Props> = ({
       setBusy(true);
       setAlertData({ isSuccess: null, msg: '' });
 
-      if (Number(price) <= 0) {
-      } else {
+      if (requiresPayment) {
+        if (configError) {
+          throw new Error(configError);
+        }
+        if (!spenderPrincipal) {
+          throw new Error('Unable to initiate payment without a valid spender canister.');
+        }
         const { actor, agent } = await makeLedgerActor();
 
         // 1) konversi harga ke subunit
@@ -316,7 +368,11 @@ export const AppPayment: React.FC<Props> = ({
           <ButtonTransaction
             text={busy ? 'Processing...' : 'Pay Now'}
             onClick={handlePayment}
-            disabled={busy || balanceLeft < 0}
+            disabled={
+              busy ||
+              balanceLeft < 0 ||
+              (requiresPayment && (!!configError || !spenderPrincipal))
+            }
           />
         </section>
       </motion.main>

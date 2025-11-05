@@ -9,6 +9,7 @@ import { useParams } from 'react-router-dom';
 import { useWallet } from '@shared/contexts/WalletContext';
 import CarouselPreview from '../../features/game/components/carousel-preview';
 import { VerticalCard } from '../../components/cards/VerticalCard';
+import { PriceCoin } from '../../lib/constants/const-price';
 import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
 import Modal from '@mui/material/Modal';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
@@ -16,13 +17,7 @@ import {
   getPublishedGames,
   getGameByGameId,
 } from '../../blockchain/icp/vault/services/ICPGameService';
-import {
-  GameAnnouncementType,
-  Metadata,
-  PGLMeta,
-  PurchaseType,
-  Value,
-} from '../../blockchain/icp/vault/service.did.d';
+import { GameAnnouncementType, Metadata, PGLMeta, Value } from '../../blockchain/icp/vault/service.did.d';
 import {
   commentByAnnouncementId,
   getAllAnnouncementsByGameId,
@@ -37,14 +32,22 @@ import {
   NativeSpec,
   NormalizedDist,
   normalizeDistribution,
+  optGet,
   optGetOr,
   PlatformKey,
   WebSpec,
 } from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
 import { buyGame } from '../../blockchain/icp/vault/services/ICPPurchaseService';
+import type { PurchaseResult } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
+import { getGameRecordById } from '../../features/game/services/record.service';
 import { MediaItem } from '../../interfaces/app/GameInterface';
 import { Distribution } from '../../blockchain/icp/pgc/service.did.d';
+import {
+  isZeroTokenAmount,
+  resolveTokenInfo,
+  subunitsToNumber,
+} from '@shared/utils/token-info';
 
 export default function GameDetail() {
   const { gameId } = useParams();
@@ -53,8 +56,10 @@ export default function GameDetail() {
   const [detailGame, setDetailGame] = useState<PGLMeta | null>(null);
   // const [developerData, setDeveloperData] = useState<UserInterface | null>();
   const [allGames, setAllGames] = useState<PGLMeta[] | null>();
-  const [humanPriceStr, setHumanPriceStr] = useState<Number>(0);
   const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
+  const [canisterId, setCanisterId] = useState<string | null>(null);
+  const [purchaseState, setPurchaseState] = useState<{ status: 'success' | 'error'; message: string } | null>(null);
+  const [buying, setBuying] = useState(false);
   const [isAnnouncementModalShowed, setIsAnnouncementModalShowed] = useState(false);
   const [comment, setComment] = useState('');
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<GameAnnouncementType | null>(
@@ -67,14 +72,14 @@ export default function GameDetail() {
     async function fetchData() {
       // window.scrollTo(0, 0);
 
+      if (!gameId) return;
+
       const resDetailGame = (await getGameByGameId({
-        gameId: gameId!,
+        gameId,
       })) as PGLMeta;
       // const developer = await getUserByPrincipalId({
       //   userId: resDetailGame.,
       // });
-      console.log(gameId);
-      console.log(resDetailGame);
       setDetailGame(resDetailGame);
       const norm = normalizeDistribution(resDetailGame?.pgl1_distribution);
       setDist(norm);
@@ -84,13 +89,21 @@ export default function GameDetail() {
       setActiveTab(firstTab ?? null);
 
       // setDeveloperData(developer);
-      setHumanPriceStr(Number(resDetailGame?.pgl1_price) / 1e8);
+      try {
+        const record = await getGameRecordById({ gameId });
+        setCanisterId(record.canister_id.toString());
+      } catch (err) {
+        console.error('Unable to resolve game canister id:', err);
+      }
       const resAllGames = await getPublishedGames({ start: 0, limit: 200 });
-      setAllGames(resAllGames);
+      const publishedGames = Array.isArray(resAllGames)
+        ? resAllGames.filter((game) => game?.pgl1_published !== false)
+        : resAllGames;
+      setAllGames(publishedGames);
     }
 
     fetchData();
-  }, []);
+  }, [gameId]);
 
   // Get all announcements by app id
   useEffect(() => {
@@ -169,7 +182,6 @@ export default function GameDetail() {
       });
 
       setSelectedAnnouncement(announcement);
-      console.log(announcement?.headline);
     } catch (err) {
       console.error(err);
     }
@@ -206,6 +218,123 @@ export default function GameDetail() {
     // const releaseDate = mdGet(md, 'release_date_ns') ?? [];
     const releaseDate = (asArray(mdGet(md, 'release_date_ns')) ?? []).map(asBigInt).filter(Boolean);
     return releaseDate.toString();
+  };
+
+  const tokenCanister = detailGame ? optGet(detailGame.pgl1_token_payment ?? []) : undefined;
+  const rawPrice = detailGame ? optGet(detailGame.pgl1_price ?? []) ?? 0 : 0;
+  const tokenInfo = resolveTokenInfo(tokenCanister);
+  const priceIsFree = isZeroTokenAmount(rawPrice, tokenInfo.decimals);
+  const humanPriceNumber = subunitsToNumber(rawPrice, tokenInfo.decimals);
+  const vaultSpenderId = (import.meta.env.VITE_PERIDOT_CANISTER_VAULT_BACKEND ?? '').trim();
+
+  const interpretPurchaseResult = (result: PurchaseResult): { status: 'success' | 'error'; message: string } => {
+    if (result && typeof result === 'object') {
+      if ('success' in result) {
+        return {
+          status: 'success',
+          message: 'Game added to your library.',
+        };
+      }
+      if ('alreadyOwned' in result) {
+        return {
+          status: 'success',
+          message: 'You already own this game.',
+        };
+      }
+      if ('paymentFailed' in result) {
+        return {
+          status: 'error',
+          message: `Payment failed: ${result.paymentFailed}`,
+        };
+      }
+      if ('insufficientAllowance' in result) {
+        return {
+          status: 'error',
+          message: 'Purchase failed: insufficient allowance. Please approve more tokens and try again.',
+        };
+      }
+      if ('soldOut' in result) {
+        return {
+          status: 'error',
+          message: 'Purchase failed: this game is sold out.',
+        };
+      }
+      if ('notPublished' in result) {
+        return {
+          status: 'error',
+          message: 'Purchase failed: the game is not published.',
+        };
+      }
+      const [code] = Object.keys(result);
+      if (code) {
+        return {
+          status: 'error',
+          message: `Purchase failed: ${code}`,
+        };
+      }
+    }
+    return {
+      status: 'error',
+      message: 'Purchase failed due to an unexpected response.',
+    };
+  };
+
+  const finalizePurchase = async (): Promise<PurchaseResult> => {
+    if (!wallet?.encryptedPrivateKey) {
+      throw new Error('Please connect your wallet before purchasing the game.');
+    }
+    if (!gameId) {
+      throw new Error('Missing game identifier.');
+    }
+
+    const result = await buyGame({
+      gameId,
+      wallet,
+      canisterId: canisterId ?? undefined,
+    });
+
+    const outcome = interpretPurchaseResult(result);
+    if (outcome.status === 'success') {
+      setPurchaseState(outcome);
+    } else {
+      setPurchaseState(outcome);
+      throw new Error(outcome.message);
+    }
+
+    return result;
+  };
+
+  const handleBuyClick = async () => {
+    setPurchaseState(null);
+
+    if (!wallet?.encryptedPrivateKey) {
+      setPurchaseState({ status: 'error', message: 'Please connect your wallet first.' });
+      return;
+    }
+
+    if (priceIsFree) {
+      if (buying) return;
+      try {
+        setBuying(true);
+        await finalizePurchase();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        setPurchaseState((prev) => prev ?? { status: 'error', message });
+      } finally {
+        setBuying(false);
+      }
+      return;
+    }
+
+    if (!vaultSpenderId) {
+      setPurchaseState({
+        status: 'error',
+        message: 'Payment configuration is missing the spender canister id. Please update your .env.',
+      });
+      return;
+    }
+
+    setIsOnPayment(true);
   };
 
   const KRow = ({ k, v }: { k: string; v?: string }) => {
@@ -356,25 +485,29 @@ export default function GameDetail() {
             </div>
 
             <div className="flex gap-6 items-center w-2/5 justify-end">
-              {Number(humanPriceStr!) > 0 ? (
-                <div className="flex gap-2 items-center text-start">
-                  <img
-                    src="/assets/coin-peridot.png"
-                    className="h-6 aspect-square object-contain"
-                  />
-                  <p className="text-lg">{humanPriceStr.toString()} PER</p>
-                </div>
-              ) : (
+              {priceIsFree ? (
                 <div className="flex gap-2 items-center text-start text-lg font-bold">
                   <p>FREE</p>
                 </div>
+              ) : (
+                <PriceCoin amount={rawPrice ?? 0} tokenCanister={tokenCanister} textSize="lg" />
               )}
               <button
-                className="px-12 font-bold py-3 rounded-md bg-accent"
-                onClick={() => setIsOnPayment(true)}
+                className={`px-12 font-bold py-3 rounded-md bg-accent ${buying ? 'opacity-60 cursor-not-allowed' : ''}`}
+                onClick={handleBuyClick}
+                disabled={buying}
               >
-                Buy Now
+                {buying ? 'Processing…' : 'Buy Now'}
               </button>
+              {purchaseState ? (
+                <span
+                  className={`text-sm font-medium ${
+                    purchaseState.status === 'success' ? 'text-success' : 'text-chart-5'
+                  }`}
+                >
+                  {purchaseState.message}
+                </span>
+              ) : null}
             </div>
           </div>
 
@@ -538,7 +671,8 @@ export default function GameDetail() {
                   gameId={item.pgl1_game_id}
                   gameName={item.pgl1_name}
                   imgUrl={optGetOr(item.pgl1_cover_image, ImageLoading)}
-                  price={Number(item.pgl1_price)}
+                  price={optGet(item.pgl1_price ?? []) ?? 0}
+                  tokenCanister={optGet(item.pgl1_token_payment ?? [])}
                 />
               ))}
             </div>
@@ -546,16 +680,14 @@ export default function GameDetail() {
         </section>
         {isOnPayment && (
           <AppPayment
-            price={Number(humanPriceStr)}
+            price={humanPriceNumber}
             onClose={() => setIsOnPayment(false)}
-            SPENDER={import.meta.env.VITE_PERIDOT_CANISTER_VAULT_BACKEND}
+            SPENDER={vaultSpenderId}
+            tokenCanisterId={tokenCanister}
+            tokenSymbol={tokenInfo.symbol}
+            tokenLogoUrl={tokenInfo.logo}
             onExecute={async () => {
-              const res: PurchaseType = await buyGame({
-                gameId: gameId!,
-                wallet: wallet,
-              });
-
-              console.log(res);
+              await finalizePurchase();
             }}
           />
         )}

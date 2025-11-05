@@ -39,7 +39,7 @@ export default function StudioDashboard() {
             >
               <h2 className="capitalize order-2 text-foreground/70">{item.label}</h2>
               <span className="order-1 font-semibold text-2xl">
-                {item.isPrice ? <PriceCoin price={item.content} /> : <span>{item.content}</span>}
+                {item.isPrice ? <PriceCoin amount={item.content} /> : <span>{item.content}</span>}
               </span>
             </div>
           ))}

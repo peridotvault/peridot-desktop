@@ -15,6 +15,9 @@ import { getAllAnnouncementsByGameId } from '../../blockchain/icp/vault/services
 // import { optGetOr } from '../../interfaces/helpers/icp.helpers'; // Tidak digunakan di sini
 import { ImageLoading } from '../../constants/lib.const';
 import { getInstalledRecord } from '../../lib/utils/installedStorage';
+import { PriceCoin } from '../../lib/constants/const-price';
+import { optGet } from '../../interfaces/helpers/icp.helpers';
+import { isZeroTokenAmount, resolveTokenInfo } from '@shared/utils/token-info';
 
 // helper deteksi OSKey
 function detectOSKey(): 'windows' | 'macos' | 'linux' {
@@ -39,6 +42,11 @@ export default function LibraryGameDetail() {
   const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
 
   const [theGame, setTheGame] = useState<PGLMeta | null>(null);
+
+  const tokenCanister = theGame ? optGet(theGame.pgl1_token_payment ?? []) : undefined;
+  const rawPrice = theGame ? optGet(theGame.pgl1_price ?? []) ?? 0 : 0;
+  const tokenInfo = resolveTokenInfo(tokenCanister);
+  const priceIsFree = isZeroTokenAmount(rawPrice, tokenInfo.decimals);
 
   // normalize appId untuk localStorage key
   const appIdKey = useMemo(() => {
@@ -258,13 +266,13 @@ export default function LibraryGameDetail() {
             {/* price */}
             <div className="flex flex-col gap-2">
               <p>current price</p>
-              <p className="text-3xl font-bold">
-                {Array.isArray(theGame?.pgl1_price) &&
-                theGame.pgl1_price.length > 0 &&
-                Number(theGame.pgl1_price[0]) > 0
-                  ? String(theGame.pgl1_price[0]) + ' PER'
-                  : 'FREE'}
-              </p>
+              <div className="text-3xl font-bold">
+                {priceIsFree ? (
+                  'FREE'
+                ) : (
+                  <PriceCoin amount={rawPrice ?? 0} tokenCanister={tokenCanister} textSize="xl" />
+                )}
+              </div>
             </div>
 
             {/* CTAs */}
