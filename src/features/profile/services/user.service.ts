@@ -2,7 +2,7 @@ import type {
   Gender,
   UpdateUserInterface,
   UserInterface,
-} from '../../../../interfaces/user/UserInterface';
+} from '../../../interfaces/user/UserInterface';
 
 const nowNs = (): bigint => BigInt(Date.now()) * 1_000_000n;
 

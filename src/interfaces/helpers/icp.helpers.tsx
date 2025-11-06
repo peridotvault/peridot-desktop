@@ -1,5 +1,4 @@
-import { Distribution } from '../../blockchain/icp/pgc/service.did.d';
-import { Metadata, Value } from '../../blockchain/icp/vault/service.did.d';
+import { Distribution, Metadata, Value } from '@shared/blockchain/icp/types/legacy.types';
 
 export type Opt<T> = [] | [T];
 export const optGet = <T,>(o: [] | [T]) => (o.length ? o[0] : undefined);

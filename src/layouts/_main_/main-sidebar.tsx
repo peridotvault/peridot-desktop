@@ -10,7 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ImagePeridotLogo } from '../../lib/constants/const-url';
+import { ImagePeridotLogo } from '@shared/lib/constants/const-url';
 import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 import { Avatar } from '../../shared/components/ui/avatar';
 

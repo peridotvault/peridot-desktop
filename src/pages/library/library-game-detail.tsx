@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getGameByGameId } from '../../blockchain/icp/vault/services/ICPGameService';
+import { getGameByGameId } from '@shared/blockchain/icp/services/game.service';
 // import { isNative, isWeb } dari GameInterface mungkin perlu disesuaikan jika tipe berubah
 // import { isNative, isWeb } from '../../interfaces/app/GameInterface'; // Tidak digunakan karena struktur berbeda
 import { useParams } from 'react-router-dom';
@@ -10,13 +10,13 @@ import { useWallet } from '@shared/contexts/WalletContext';
 import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
 import { useInstalled } from '../../features/download/hooks/useInstalled';
 import { useDownloadManager } from '../../components/molecules/DownloadManager';
-import { GameAnnouncementType, PGLMeta } from '../../blockchain/icp/vault/service.did.d';
-import { getAllAnnouncementsByGameId } from '../../blockchain/icp/vault/services/ICPAnnouncementService';
+import type { OffChainGameMetadata } from '@shared/blockchain/icp/types/game.types';
+import type { GameAnnouncementType } from '@shared/blockchain/icp/types/legacy.types';
+import { getAllAnnouncementsByGameId } from '@features/game/services/announcement.service';
 // import { optGetOr } from '../../interfaces/helpers/icp.helpers'; // Tidak digunakan di sini
 import { ImageLoading } from '../../constants/lib.const';
-import { getInstalledRecord } from '../../lib/utils/installedStorage';
-import { PriceCoin } from '../../lib/constants/const-price';
-import { optGet } from '../../interfaces/helpers/icp.helpers';
+import { getInstalledRecord } from '@shared/lib/utils/installedStorage';
+import { PriceCoin } from '@shared/lib/constants/const-price';
 import { isZeroTokenAmount, resolveTokenInfo } from '@shared/utils/token-info';
 
 // helper deteksi OSKey
@@ -41,10 +41,10 @@ export default function LibraryGameDetail() {
   const { wallet } = useWallet();
   const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
 
-  const [theGame, setTheGame] = useState<PGLMeta | null>(null);
+  const [theGame, setTheGame] = useState<OffChainGameMetadata | null>(null);
 
-  const tokenCanister = theGame ? optGet(theGame.pgl1_token_payment ?? []) : undefined;
-  const rawPrice = theGame ? optGet(theGame.pgl1_price ?? []) ?? 0 : 0;
+  const tokenCanister = theGame?.token_payment;
+  const rawPrice = theGame?.price ?? 0;
   const tokenInfo = resolveTokenInfo(tokenCanister);
   const priceIsFree = isZeroTokenAmount(rawPrice, tokenInfo.decimals);
 
@@ -70,36 +70,21 @@ export default function LibraryGameDetail() {
   // Perubahan: Gunakan unwrapOptVec dan sesuaikan dengan struktur array dalam array
   const hasNativeForOS = useMemo(() => {
     if (!theGame) return false;
-    // Asumsikan theGame.pgl1_distribution adalah Array<Array<Distribution>>
-    const rawDists = theGame.pgl1_distribution;
-    for (const innerDistArray of rawDists) {
-      for (const d of innerDistArray) {
-        if ('native' in d) {
-          // Periksa apakah os dari native build cocok dengan osKey
-          // Kita asumsikan d.native.os adalah string seperti "macos", "windows", "linux"
-          if (d.native.os.toLowerCase() === osKey) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
+    return (theGame.distribution ?? []).some(
+      (dist) => 'native' in dist && dist.native.os.toLowerCase() === osKey,
+    );
   }, [theGame, osKey]);
 
-  // apakah ada web dist?
-  // Perubahan: Gunakan unwrapOptVec dan sesuaikan dengan struktur array dalam array
   const hasWeb = useMemo(() => {
     if (!theGame) return false;
-    const rawDists = theGame.pgl1_distribution;
-    for (const innerDistArray of rawDists) {
-      for (const d of innerDistArray) {
-        if ('web' in d) {
-          return true;
-        }
-      }
-    }
-    return false;
+    return (theGame.distribution ?? []).some((dist) => 'web' in dist && !!dist.web.url);
   }, [theGame]);
+
+  const heroImage =
+    theGame?.metadata?.banner_image ??
+    theGame?.metadata?.cover_horizontal_image ??
+    theGame?.metadata?.cover_vertical_image ??
+    ImageLoading;
 
   const onLaunch = async () => {
     if (hasWeb) return openWebApp();
@@ -191,17 +176,10 @@ export default function LibraryGameDetail() {
 
   // Ambil url web pertama dari distributions
   // Perubahan: Gunakan unwrapOptVec dan sesuaikan dengan struktur array dalam array
-  function getWebUrlFromApp(app?: PGLMeta | null): string | null {
+  function getWebUrlFromApp(app?: OffChainGameMetadata | null): string | null {
     if (!app) return null;
-    const rawDists = app.pgl1_distribution;
-    for (const innerDistArray of rawDists) {
-      for (const d of innerDistArray) {
-        if ('web' in d) {
-          return d.web.url ?? null;
-        }
-      }
-    }
-    return null;
+    const entry = (app.distribution ?? []).find((dist) => 'web' in dist && !!dist.web.url);
+    return entry && 'web' in entry ? entry.web.url ?? null : null;
   }
 
   const openWebApp = () => {
@@ -221,17 +199,7 @@ export default function LibraryGameDetail() {
   return (
     <main className="flex flex-col items-center gap-5 mb-32">
       <div className="bg-foreground w-full h-96 relative">
-        <img
-          src={
-            theGame
-              ? Array.isArray(theGame.pgl1_banner_image) && theGame.pgl1_banner_image.length > 0
-                ? theGame.pgl1_banner_image[0]
-                : ImageLoading
-              : ImageLoading
-          }
-          className="object-cover w-full h-120 bg-card"
-          alt=""
-        />
+        <img src={heroImage} className="object-cover w-full h-120 bg-card" alt="" />
         <div className="bg-linear-to-t from-background via-background/50 w-full h-28 absolute bottom-0 translate-y-[6.2rem]"></div>
       </div>
 
@@ -241,7 +209,7 @@ export default function LibraryGameDetail() {
         <div className="flex flex-col gap-8 w-2/3">
           {/* Header  */}
           <section className="flex flex-col gap-4">
-            <p className="text-3xl font-medium">{theGame?.pgl1_name}</p>
+            <p className="text-3xl font-medium">{theGame?.name ?? 'Untitled Game'}</p>
             <div className="flex gap-4">
               <p className="flex gap-2 items-center">
                 <FontAwesomeIcon icon={faClock} className="text-muted-foreground" />

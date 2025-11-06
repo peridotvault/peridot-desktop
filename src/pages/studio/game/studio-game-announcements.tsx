@@ -6,15 +6,15 @@ import { useWallet } from '@shared/contexts/WalletContext';
 import {
   createAnnouncement,
   getAllAnnouncementsByGameId,
-  CreateAnnouncementTypes,
-} from '../../../blockchain/icp/vault/services/ICPAnnouncementService';
+  CreateAnnouncementPayload,
+} from '@features/game/services/announcement.service';
 import {
   initAppStorage,
   InitResp,
   safeFileName,
   uploadToPrefix,
 } from '../../../shared/api/wasabi.api';
-import { GameAnnouncementType } from '../../../blockchain/icp/vault/service.did.d';
+import { GameAnnouncementType } from '@shared/blockchain/icp/types/legacy.types';
 import { InputFieldComponent } from '../../../components/atoms/InputFieldComponent';
 import { faCheck, faHeading, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { PhotoFieldComponent } from '../../../components/atoms/PhotoFieldComponent';
@@ -160,7 +160,7 @@ export default function StudioGameAnnouncement() {
 
       if (!announcementCoverImage) throw new Error('Announcement cover image is required.');
 
-      const createData: CreateAnnouncementTypes = {
+      const createData: CreateAnnouncementPayload = {
         headline: headline,
         content: content,
         coverImage: announcementCoverImage,
@@ -169,7 +169,7 @@ export default function StudioGameAnnouncement() {
       };
 
       await createAnnouncement({
-        createAnnouncementTypes: createData,
+        payload: createData,
         wallet: wallet,
         gameId: gameId!,
       });

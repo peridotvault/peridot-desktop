@@ -9,14 +9,15 @@ import React, {
   useState,
 } from 'react';
 import { OSKey } from '../../interfaces/CoreInterface';
-import { upsertInstalledEntry } from '../../lib/utils/installedStorage';
+import { upsertInstalledEntry } from '@shared/lib/utils/installedStorage';
 // Gunakan tipe dari service.did.d
-import {
-  PGLMeta,
-  NativeBuild as NativeBuildDid,
-  Manifest as ManifestDid,
+import type {
+  OffChainGameMetadata,
+  NativeDistribution,
+  Manifest,
   StorageRef,
-} from '../../blockchain/icp/vault/service.did.d';
+  Distribution,
+} from '@shared/blockchain/icp/types/game.types';
 
 // Gunakan tipe yang sesuai dengan .did
 type ResolvedBuild = {
@@ -47,7 +48,7 @@ type QueueItem = {
 // Definisikan DownloadContextValue type
 type DownloadContextValue = {
   queue: QueueItem[];
-  openInstallModal: (app: PGLMeta) => void;
+  openInstallModal: (app: OffChainGameMetadata) => void;
   removeFromQueue: (id: string) => void;
   cancelActive: () => void;
 };
@@ -146,10 +147,7 @@ function extractPathFromStorageRef(storageRef: StorageRef): string | null {
   return null;
 }
 
-async function resolveManifest(
-  manifest: ManifestDid, // <-- Menggunakan Manifest dari .did
-  os: OSKey,
-): Promise<ResolvedBuild | null> {
+async function resolveManifest(manifest: Manifest, os: OSKey): Promise<ResolvedBuild | null> {
   // Gunakan helper untuk ekstrak path dari storageRef
   const basePath = extractPathFromStorageRef(manifest.storageRef);
   if (!basePath) {
@@ -192,38 +190,26 @@ async function resolveManifest(
   };
 }
 
-async function resolveFromApp(app: PGLMeta): Promise<ResolvedBuild[]> {
+async function resolveFromApp(app: OffChainGameMetadata): Promise<ResolvedBuild[]> {
   const out: ResolvedBuild[] = [];
 
   // Ambil distribusi dari PGLMeta (baru)
   // Karena struktur saat ini adalah Array<Array<Distribution>>, kita perlu menyesuaikan
-  // Asumsikan app.pgl1_distribution adalah Array<Array<Distribution>>
-  const rawDists = app.pgl1_distribution; // Array<Array<Distribution>>
+  const distributions: Distribution[] = Array.isArray(app.distribution) ? app.distribution : [];
 
-  // Iterasi melalui Array luar
-  for (const innerDistArray of rawDists) {
-    // Iterasi melalui Array dalam untuk mendapatkan objek Distribution
-    for (const d of innerDistArray) {
-      if ('native' in d) {
-        const nb: NativeBuildDid = d.native; // <-- Gunakan NativeBuild dari .did
-        // Konversi OS dari string ke OSKey menggunakan fungsi baru
-        const osk = osKeyFromString(nb.os);
+  for (const dist of distributions) {
+    if ('native' in dist) {
+      const nb: NativeDistribution = dist.native;
+      const osk = osKeyFromString(nb.os);
+      const manifests = nb.manifests ?? [];
+      console.log('[DM] native OS =', osk, 'manifests len =', manifests.length);
 
-        // Gunakan unwrapOptVec untuk additionalNotes jika perlu
-        // const notes = unwrapOptVec<string>(nb.additionalNotes);
-
-        const manifests = nb.manifests; // <-- Ambil manifests langsung dari NativeBuildDid
-        console.log('[DM] native OS =', osk, 'manifests len =', manifests.length);
-
-        for (const mf of manifests) {
-          // <-- mf adalah ManifestDid
-          const r = await resolveManifest(mf, osk); // <-- Kirim ManifestDid ke resolveManifest baru
-          if (r) out.push(r);
-        }
+      for (const mf of manifests) {
+        const r = await resolveManifest(mf as Manifest, osk);
+        if (r) out.push(r);
       }
-      // Jika Anda ingin menangani distribusi 'web' di masa deku:
-      // if ('web' in d) { ... }
     }
+    // TODO: support direct web builds when download flow is ready.
   }
 
   // sort newest (by createdAt, then by version string)
@@ -309,20 +295,19 @@ export const DownloadProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   /** buka modal dari halaman game */
-  const openInstallModal = useCallback(async (app: PGLMeta) => {
-    // Gunakan appId dari pgl1_game_id
-    const appIdStr = app.pgl1_game_id;
-
-    // Ambil cover image dari pgl1_cover_image
-    const coverRaw = app.pgl1_cover_image; // [] | [string]
-    const cover = Array.isArray(coverRaw) && coverRaw.length > 0 ? coverRaw[0] : undefined;
+  const openInstallModal = useCallback(async (app: OffChainGameMetadata) => {
+    const appIdStr = app.game_id;
+    const cover =
+      app.metadata?.cover_vertical_image ??
+      app.metadata?.cover_horizontal_image ??
+      app.metadata?.banner_image;
 
     const builds = await resolveFromApp(app);
     const latestBuilds = latestPerOS(builds);
     const osPref = detectOS();
     const first = latestBuilds.find((b) => b.os === osPref) || latestBuilds[0];
 
-    setModalMeta({ appId: appIdStr, title: app.pgl1_name, cover });
+    setModalMeta({ appId: appIdStr, title: app.name, cover });
     setResolves(latestBuilds); // ⬅️ gunakan latestBuilds
     setSelectedBuild(first || null); // ⬅️ preselect latest utk OS user
     setShow(true);

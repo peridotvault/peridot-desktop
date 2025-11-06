@@ -18,9 +18,9 @@ import { AnnouncementContainer } from '../../features/announcement/components/an
 import {
   createAnnouncement,
   getAllAnnouncementsByGameId,
-  CreateAnnouncementTypes,
-} from '../../blockchain/icp/vault/services/ICPAnnouncementService';
-import { GameAnnouncementType } from '../../blockchain/icp/vault/service.did.d';
+  CreateAnnouncementPayload,
+} from '@features/game/services/announcement.service';
+import { GameAnnouncementType } from '@shared/blockchain/icp/types/legacy.types';
 
 export default function EditAnnouncementPage() {
   const { wallet } = useWallet();
@@ -159,7 +159,7 @@ export default function EditAnnouncementPage() {
 
       if (!announcementCoverImage) throw new Error('Announcement cover image is required.');
 
-      const createData: CreateAnnouncementTypes = {
+      const createData: CreateAnnouncementPayload = {
         headline: headline,
         content: content,
         coverImage: announcementCoverImage,
@@ -168,7 +168,7 @@ export default function EditAnnouncementPage() {
       };
 
       await createAnnouncement({
-        createAnnouncementTypes: createData,
+        payload: createData,
         wallet: wallet,
         gameId: gameId!,
       });

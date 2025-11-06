@@ -19,3 +19,5 @@ export async function register_game_with_fee({ meta }: { meta: CreateGameRecord 
         throw new Error('Error Service Registered Game : ' + error);
     }
 }
+
+export const register_game = register_game_with_fee;

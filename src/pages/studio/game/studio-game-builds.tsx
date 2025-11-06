@@ -10,15 +10,15 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faAndroid, faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import { formatMDY } from '../../../lib/helpers/helper-date';
+import { formatMDY } from '@shared/lib/helpers/helper-date';
 import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
-import type { Manifest, WebBuild } from '../../../blockchain/icp/vault/service.did.d';
+import type { Manifest, WebBuild } from '@shared/blockchain/icp/types/legacy.types';
 import type { Platform, ViewMode } from '@shared/blockchain/icp/types/game.types';
 import { InputTextarea } from '../../../shared/components/ui/input-textarea';
 import { InputFloating } from '../../../shared/components/ui/input-floating';
 import { setHardware, setLive } from '../../../features/game/api/game-draft.api';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
-import { Distribution, SetHardwarePayload } from '../../../lib/interfaces/game-draft.types';
+import { Distribution, SetHardwarePayload } from '@shared/lib/interfaces/game-draft.types';
 import toast from 'react-hot-toast';
 import { fetchDraftBuildsCombined } from '@features/game/services/draft.service';
 

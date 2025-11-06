@@ -6,7 +6,7 @@ import {
   getWalletInfo,
   saveCurrencyToWallet,
   saveRatesByCode,
-} from '../../../lib/utils/IndexedDb';
+} from '@shared/lib/utils/IndexedDb';
 import { WalletInfo } from '../interfaces/Wallet';
 import { Currency } from '../interfaces/Currency';
 // import { faCircleInfo, faContactBook } from "@fortawesome/free-solid-svg-icons";

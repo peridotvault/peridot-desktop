@@ -20,11 +20,11 @@ import allCategories from '../../assets/json/app/categories.json';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { BannerFieldComponent } from '../../components/atoms/BannerFieldComponent';
 import { OSKey } from '../../interfaces/CoreInterface';
-import { hasDist, nowNs, nsToDateStr, toOSKey, dateStrToNs } from '../../lib/utils/Additional';
+import { hasDist, nowNs, nsToDateStr, toOSKey, dateStrToNs } from '@shared/lib/utils/Additional';
 import { useParams } from 'react-router-dom'; // Import useParams
 import { EditGameService as EGS } from '../../services/studio/EditGameService';
-import { getGameByDeveloperId } from '../../blockchain/icp/vault/services/ICPGameService'; // Pastikan path benar
-import { Manifest, PGLMeta, StorageRef } from '../../blockchain/icp/vault/service.did.d'; // Pastikan path benar
+import { getGameByDeveloperId } from '@features/game/services/game-legacy.service'; // Pastikan path benar
+import { Manifest, PGLMeta, StorageRef } from '@shared/blockchain/icp/types/legacy.types'; // Pastikan path benar
 import {
   HydratedGameInterface,
   MediaItem,

@@ -1,7 +1,7 @@
 // @ts-ignore
 import React, { useState, useRef, useEffect } from 'react';
 import { InputField } from '../../../components/atoms/InputField';
-import { copyToClipboard } from '../../../lib/utils/Additional';
+import { copyToClipboard } from '@shared/lib/utils/Additional';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClone } from '@fortawesome/free-solid-svg-icons';
 import { validateMnemonic, wordlists } from 'bip39';

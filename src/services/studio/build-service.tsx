@@ -1,7 +1,6 @@
-import { isNativeBuild, isWebBuild } from '../../lib/helpers/helper-pgl1';
 import type { Platform, ViewMode } from '@shared/blockchain/icp/types/game.types';
-import type { Distribution, Opt } from '../../lib/interfaces/game.types';
-import { DraftService } from '../../local-db/game/services/draft-services';
+import type { Distribution } from '@shared/lib/interfaces/game.types';
+import { DraftService } from '@features/game/local-db/services/draft-services';
 
 type WebBuildForm = {
   url: string;
@@ -20,15 +19,17 @@ type HardwareForm = {
   additionalNotes: string;
 };
 
-const toOpt = <T,>(value: T | undefined | null): Opt<T> =>
-  value === undefined || value === null ? [] : [value];
+const isNativeBuild = (dist: Distribution): dist is { native: Distribution['native'] } =>
+  'native' in dist;
+
+const isWebBuild = (dist: Distribution): dist is { web: Distribution['web'] } => 'web' in dist;
 
 export const BuildService = {
   async setLiveVersion(gameId: string, platform: Platform, version: string) {
     const draft = await DraftService.get(gameId);
-    if (!draft?.pgl1_distribution || !draft.pgl1_game_id) return;
+    if (!draft?.distribution || !draft.gameId) return;
 
-    const updated = draft.pgl1_distribution.map((dist): Distribution => {
+    const updated = draft.distribution.map((dist): Distribution => {
       if (isNativeBuild(dist) && dist.native.os === platform) {
         return { native: { ...dist.native, liveVersion: version } };
       }
@@ -37,19 +38,17 @@ export const BuildService = {
 
     await DraftService.upsertFull({
       ...draft,
-      pgl1_game_id: draft.pgl1_game_id,
-      pgl1_distribution: updated,
+      gameId: draft.gameId,
+      distribution: updated,
     });
   },
 
   async saveWebBuild(gameId: string, webBuildForm: WebBuildForm) {
     const draft = await DraftService.get(gameId);
-    if (!draft?.pgl1_game_id) return;
+    if (!draft?.gameId) return;
 
     // Filter out existing web build
-    const filtered = (draft.pgl1_distribution ?? []).filter(
-      (dist: Distribution) => !isWebBuild(dist),
-    );
+    const filtered = (draft.distribution ?? []).filter((dist: Distribution) => !isWebBuild(dist));
     const updated: Distribution[] = [
       ...filtered,
       {
@@ -59,19 +58,16 @@ export const BuildService = {
           graphics: webBuildForm.graphics,
           memory: Number(webBuildForm.memory) || 0,
           storage: Number(webBuildForm.storage) || 0,
-          additionalNotes: toOpt(
-            webBuildForm.additionalNotes?.trim()
-              ? webBuildForm.additionalNotes.trim()
-              : undefined,
-          ),
+          additionalNotes:
+            webBuildForm.additionalNotes?.trim() ?? undefined,
         },
       },
     ];
 
     await DraftService.upsertFull({
       ...draft,
-      pgl1_game_id: draft.pgl1_game_id,
-      pgl1_distribution: updated,
+      gameId: draft.gameId,
+      distribution: updated,
     });
   },
 
@@ -83,12 +79,12 @@ export const BuildService = {
     if (viewMode === 'live' || viewMode === 'web') return;
 
     const draft = await DraftService.get(gameId!);
-    if (!draft?.pgl1_game_id) return;
+    if (!draft?.gameId) return;
 
     const currentForm = hardwareForms[viewMode];
 
     const updatedDistributions =
-      (draft.pgl1_distribution ?? []).map((dist: Distribution): Distribution => {
+      (draft.distribution ?? []).map((dist: Distribution): Distribution => {
         if (isNativeBuild(dist) && dist.native.os === viewMode) {
           return {
             native: {
@@ -97,9 +93,9 @@ export const BuildService = {
               graphics: currentForm.graphics,
               memory: Number(currentForm.memory) || 0,
               storage: Number(currentForm.storage) || 0,
-              additionalNotes: toOpt(
-                currentForm.additionalNotes.trim() ? currentForm.additionalNotes.trim() : undefined,
-              ),
+              additionalNotes: currentForm.additionalNotes.trim()
+                ? currentForm.additionalNotes.trim()
+                : undefined,
             },
           };
         }
@@ -108,8 +104,8 @@ export const BuildService = {
 
     await DraftService.upsertFull({
       ...draft,
-      pgl1_game_id: draft.pgl1_game_id,
-      pgl1_distribution: updatedDistributions,
+      gameId: draft.gameId,
+      distribution: updatedDistributions,
     });
   },
 };

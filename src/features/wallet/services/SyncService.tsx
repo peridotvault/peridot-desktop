@@ -1,9 +1,9 @@
 // services/SyncService.ts
 import { Principal } from '@dfinity/principal';
-import { CoinService } from '../../../local-db/wallet/services/coinService';
-import { UserProgressService } from '../../../local-db/wallet/services/userProgressService';
-import { Block } from '../../../local-db/wallet/models/Block';
-import { BlockService } from '../../../local-db/wallet/services/blockService';
+import { CoinService } from '@features/wallet/local-db/services/coinService';
+import { UserProgressService } from '@features/wallet/local-db/services/userProgressService';
+import { Block } from '@features/wallet/local-db/models/Block';
+import { BlockService } from '@features/wallet/local-db/services/blockService';
 import {
   getArchiveBlockLength,
   getLedgerBlockLength,

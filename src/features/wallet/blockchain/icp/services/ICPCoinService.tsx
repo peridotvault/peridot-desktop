@@ -5,7 +5,7 @@ import { hexToArrayBuffer } from '../../../../../shared/utils/crypto';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { tokenIdlFactory } from '../types/token';
 import { ArchiveInfo, ICRC1Metadata } from '../../../interfaces/Coin';
-import { Block, ICRC3BlockResponse } from '../../../../../local-db/wallet/models/Block';
+import { Block, ICRC3BlockResponse } from '@features/wallet/local-db/models/Block';
 
 export async function transferTokenICRC1(
   to: Principal,

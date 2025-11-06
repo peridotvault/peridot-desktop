@@ -8,7 +8,7 @@ import { InputDropdown } from '../../../shared/components/ui/input-dropdown';
 import { useParams } from 'react-router-dom';
 import { handleAssetChange } from '../../../services/studio/detail-service';
 import { fetchCategories, fetchTags, updateGeneral } from '../../../features/game/api/game-draft.api';
-import { CategoryDb, TagDb } from '../../../lib/interfaces/game-draft.types';
+import { CategoryDb, TagDb } from '@shared/lib/interfaces/game-draft.types';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
 import { fetchDraftGeneralCombined } from '@features/game/services/draft.service';
 

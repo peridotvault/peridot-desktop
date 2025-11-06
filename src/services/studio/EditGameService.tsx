@@ -13,8 +13,8 @@ import {
   PGLMeta,
   Value,
   WebBuild,
-} from '../../blockchain/icp/vault/service.did.d';
-import { updateGame } from '../../blockchain/icp/vault/services/ICPGameService';
+} from '@shared/blockchain/icp/types/legacy.types';
+import { updateGame } from '@features/game/services/game-legacy.service';
 import type {
   HydratedGameInterface,
   MediaItem,
@@ -25,7 +25,7 @@ import type {
 } from '../../interfaces/app/GameInterface';
 import { OSKey } from '../../interfaces/CoreInterface';
 import { asArray, asMap, asText, mdGet, ToOpt } from '../../interfaces/helpers/icp.helpers';
-import { hasDist, nowNs } from '../../lib/utils/Additional';
+import { hasDist, nowNs } from '@shared/lib/utils/Additional';
 
 type BuildPrefixKey = 'builds/web' | 'builds/windows' | 'builds/macos' | 'builds/linux';
 

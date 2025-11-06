@@ -7,7 +7,7 @@ import {
   faImage,
   faBoxArchive,
   faUpload,
-  faBullhorn,
+  // faBullhorn,
 } from '@fortawesome/free-solid-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
@@ -28,7 +28,7 @@ const items: Item[] = [
   { segment: 'builds', label: 'Builds', icon: faBoxArchive },
   // { segment: 'market', label: 'Items Market', icon: faStore },
   { segment: 'publish', label: 'Publish', icon: faUpload },
-  { segment: 'announcements', label: 'Announcements', icon: faBullhorn },
+  // { segment: 'announcements', label: 'Announcements', icon: faBullhorn },
 ];
 
 export const StudioGameSidebar: React.FC<GameProps> = ({ leftClassName = 'left-20' }) => {

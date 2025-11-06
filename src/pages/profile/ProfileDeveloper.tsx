@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { LoadingScreen } from '../../components/organisms/LoadingScreen';
-import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
+import { getUserData } from '@features/profile/services/user.service';
 import { UserInterface } from '../../interfaces/user/UserInterface';
 import { GetOpt } from '../../interfaces/CoreInterface';
 

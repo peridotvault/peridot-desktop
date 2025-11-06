@@ -4,7 +4,7 @@ import { useWallet } from '@shared/contexts/WalletContext';
 import { Principal } from '@dfinity/principal';
 import { ICRC1Metadata } from '../interfaces/Coin';
 import { WalletInfo } from '../interfaces/Wallet';
-import { getWalletInfo } from '../../../lib/utils/IndexedDb';
+import { getWalletInfo } from '@shared/lib/utils/IndexedDb';
 import { checkBalance } from '../blockchain/icp/services/ICPCoinService';
 
 interface ICRC1CoinProps {

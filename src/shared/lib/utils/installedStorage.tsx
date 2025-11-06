@@ -1,4 +1,4 @@
-import { OSKey } from '../../interfaces/CoreInterface';
+import { OSKey } from '@shared/api/wasabi.api';
 
 export type InstalledEntry = {
   version: string;

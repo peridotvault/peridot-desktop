@@ -6,15 +6,15 @@ import { faPlus, faUpLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import { Alert } from '../../components/molecules/Alert';
-import { getGameByDeveloperId } from '../../blockchain/icp/vault/services/ICPGameService';
-import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
+import { getGameByDeveloperId } from '@features/game/services/game-legacy.service';
+import { PGLMeta } from '@shared/blockchain/icp/types/legacy.types';
 import { optGetOr } from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
 import { NewGame } from '@features/game/components/new-game.modal';
-import { getGameUnRegistered } from '../../blockchain/icp/factory/services/ICPFactoryService';
+import { getGameUnRegistered } from '@features/game/services/factory.service';
 import { Principal } from '@dfinity/principal';
-import { register_game } from '../../blockchain/icp/registry/services/ICPRegistryService';
-import { CreateGameRecord } from '../../blockchain/icp/registry/service.did.d';
+import { register_game } from '@shared/blockchain/icp/services/registry.service';
+import type { CreateGameRecord } from '@shared/blockchain/icp/sdk/canisters/registry.did.d';
 
 // ✅ Skeleton Component untuk Game Item
 const GameSkeleton = () => (

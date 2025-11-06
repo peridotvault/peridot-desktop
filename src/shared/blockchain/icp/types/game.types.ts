@@ -102,6 +102,25 @@ export interface OffChainGameMetadata {
     distribution: Distribution[];
 }
 
+export interface PGCGame {
+    gameId: string;
+    name: string;
+    description: string;
+    published: boolean;
+    price: number;
+    tokenPayment: string;
+    totalPurchased: number;
+    maxSupply: number;
+    requiredAge?: number;
+    coverVerticalImage?: string;
+    coverHorizontalImage?: string;
+    bannerImage?: string;
+    website?: string;
+    metadata: Metadata | null;
+    distribution: Distribution[];
+    previews: MediaItem[];
+}
+
 export interface OnChainGameMetadata {
     gameId: string;
     maxSupply: number;
@@ -118,3 +137,13 @@ export type PublishInfo = {
     isPublished: boolean;
     releaseDate?: Timestamp;
 };
+
+export interface GameAnnouncement {
+    announcementId: string;
+    headline: string;
+    content: string;
+    coverImage?: string;
+    pinned?: boolean;
+    createdAt?: number;
+    status?: string;
+}

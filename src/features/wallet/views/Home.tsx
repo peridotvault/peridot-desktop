@@ -25,12 +25,12 @@ import {
   getWalletInfo,
   saveCurrencyToWallet,
   saveRatesByCode,
-} from '../../../lib/utils/IndexedDb';
+} from '@shared/lib/utils/IndexedDb';
 import { Currency } from '../../../features/wallet/interfaces/Currency';
 import { WalletInfo } from '../../../features/wallet/interfaces/Wallet';
 import { InputField } from '../../../components/atoms/InputField';
-import { CoinService } from '../../../local-db/wallet/services/coinService';
-import { Coin } from '../../../local-db/wallet/models/Coin';
+import { CoinService } from '@features/wallet/local-db/services/coinService';
+import { Coin } from '@features/wallet/local-db/models/Coin';
 import { clearWalletData } from '@shared/services/store.service';
 
 interface HomeProps {

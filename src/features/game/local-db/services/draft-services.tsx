@@ -1,27 +1,26 @@
 // services/draft-service.ts
 
 import {
-  readPublishInfo,
-  writePreviews,
-  writePublishInfo,
-  writeStringArray,
-} from '../../../lib/helpers/helper-pgl1';
-import {
   Category,
   Distribution,
-  DraftPGL,
+  DraftPGC,
   DraftStatus,
   Manifest,
   MediaItem,
   PublishInfo,
   Tag,
-} from '../../../lib/interfaces/game.types';
+} from '@shared/lib/interfaces/game.types';
 import { dbGame } from '../database';
 
 /** Util: pastikan draft ada */
-function ensureSeed(gameId: string): DraftPGL {
+function ensureSeed(gameId: string): DraftPGC {
   return {
-    pgl1_game_id: gameId,
+    gameId,
+    distribution: [],
+    previews: [],
+    categories: [],
+    tags: [],
+    publishInfo: { isPublished: false },
   };
 }
 
@@ -40,22 +39,20 @@ export const DraftService = {
   async list(status: DraftStatus = 'draft') {
     return dbGame.game_drafts
       .filter((draft) => {
-        const metaStatus = readPublishInfo(draft?.pgl1_metadata);
-        const currentStatus = metaStatus.isPublished ? 'published' : 'draft';
+        const currentStatus = draft?.publishInfo?.isPublished ? 'published' : 'draft';
         return currentStatus === status;
       })
       .toArray();
   },
 
   /** Upsert draft penuh */
-  async upsertFull(payload: DraftPGL & { pgl1_game_id: string }) {
-    const prev =
-      (await dbGame.game_drafts.get(payload.pgl1_game_id)) ?? ensureSeed(payload.pgl1_game_id);
+  async upsertFull(payload: DraftPGC & { gameId: string }) {
+    const prev = (await dbGame.game_drafts.get(payload.gameId)) ?? ensureSeed(payload.gameId);
 
-    const merged: DraftPGL = {
+    const merged: DraftPGC = {
       ...prev,
       ...payload,
-      pgl1_game_id: payload.pgl1_game_id,
+      gameId: payload.gameId,
     };
     return dbGame.game_drafts.put(merged);
   },
@@ -67,41 +64,32 @@ export const DraftService = {
   async updateGeneral(
     gameId: string,
     data: {
-      pgl1_name?: string;
-      pgl1_description?: string;
-      pgl1_required_age?: number;
-      pgl1_price?: number;
-      pgl1_website?: string;
-      pgl1_cover_vertical_image?: string;
-      pgl1_cover_horizontal_image?: string;
-      pgl1_banner_image?: string;
+      name?: string;
+      description?: string;
+      requiredAge?: number;
+      price?: number;
+      website?: string;
+      coverVerticalImage?: string;
+      coverHorizontalImage?: string;
+      bannerImage?: string;
       categories?: Category[];
       tags?: Tag[];
     },
   ) {
     const prev = (await dbGame.game_drafts.get(gameId)) ?? ensureSeed(gameId);
 
-    // Merge metadata untuk categories/tags
-    let meta = prev.pgl1_metadata;
-    if (data.categories !== undefined) {
-      meta = writeStringArray(meta, 'pgl1_categories', data.categories);
-    }
-    if (data.tags !== undefined) {
-      meta = writeStringArray(meta, 'pgl1_tags', data.tags);
-    }
-
-    const next: DraftPGL = {
+    const next: DraftPGC = {
       ...prev,
-      pgl1_name: data.pgl1_name ?? prev.pgl1_name,
-      pgl1_description: data.pgl1_description ?? prev.pgl1_description,
-      pgl1_required_age: data.pgl1_required_age ?? prev.pgl1_required_age,
-      pgl1_price: data.pgl1_price ?? prev.pgl1_price,
-      pgl1_website: data.pgl1_website ?? prev.pgl1_website,
-      pgl1_cover_vertical_image: data.pgl1_cover_vertical_image ?? prev.pgl1_cover_vertical_image,
-      pgl1_cover_horizontal_image:
-        data.pgl1_cover_horizontal_image ?? prev.pgl1_cover_horizontal_image,
-      pgl1_banner_image: data.pgl1_banner_image ?? prev.pgl1_banner_image,
-      pgl1_metadata: meta,
+      name: data.name ?? prev.name,
+      description: data.description ?? prev.description,
+      requiredAge: data.requiredAge ?? prev.requiredAge,
+      price: data.price ?? prev.price,
+      website: data.website ?? prev.website,
+      coverVerticalImage: data.coverVerticalImage ?? prev.coverVerticalImage,
+      coverHorizontalImage: data.coverHorizontalImage ?? prev.coverHorizontalImage,
+      bannerImage: data.bannerImage ?? prev.bannerImage,
+      categories: data.categories ?? prev.categories,
+      tags: data.tags ?? prev.tags,
     };
     return dbGame.game_drafts.put(next);
   },
@@ -113,26 +101,21 @@ export const DraftService = {
   async updatePreviews(gameId: string, previews?: MediaItem[]) {
     const prev = (await dbGame.game_drafts.get(gameId)) ?? ensureSeed(gameId);
 
-    let meta = prev.pgl1_metadata;
-    if (previews !== undefined) {
-      meta = writePreviews(meta, previews);
-    }
-
-    const next: DraftPGL = {
+    const next: DraftPGC = {
       ...prev,
-      pgl1_metadata: meta,
+      previews: previews ?? [],
     };
     return dbGame.game_drafts.put(next);
   },
 
   // ---------- UPDATE 3: BUILDS ----------
   /**
-   * Update pgl1_distribution (array of {web}|{native})
+   * Update distribution (array of {web}|{native})
    */
   async updateBuilds(gameId: string, newDistributions: Array<Distribution>) {
     const prev = (await dbGame.game_drafts.get(gameId)) ?? ensureSeed(gameId);
 
-    const existingDistributions = prev.pgl1_distribution || [];
+    const existingDistributions = prev.distribution || [];
     const platformMap = new Map<string, Distribution>();
 
     // Load existing distributions
@@ -183,9 +166,9 @@ export const DraftService = {
       }
     }
 
-    const next: DraftPGL = {
+    const next: DraftPGC = {
       ...prev,
-      pgl1_distribution: Array.from(platformMap.values()),
+      distribution: Array.from(platformMap.values()),
     };
     return dbGame.game_drafts.put(next);
   },
@@ -200,11 +183,10 @@ export const DraftService = {
     info: PublishInfo = { isPublished: true, releaseDate: Date.now() },
   ) {
     const prev = (await dbGame.game_drafts.get(gameId)) ?? ensureSeed(gameId);
-    const meta = writePublishInfo(prev.pgl1_metadata, info);
 
-    const next: DraftPGL = {
+    const next: DraftPGC = {
       ...prev,
-      pgl1_metadata: meta,
+      publishInfo: info,
     };
     return dbGame.game_drafts.put(next);
   },

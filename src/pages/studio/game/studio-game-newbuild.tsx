@@ -6,7 +6,7 @@ import { faAndroid, faApple, faLinux, faWindows } from '@fortawesome/free-brands
 import { InputDropdown } from '../../../shared/components/ui/input-dropdown';
 import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
 import { InputFloating } from '../../../shared/components/ui/input-floating';
-import { Manifest, Platform } from '../../../lib/interfaces/game.types';
+import { Manifest, Platform } from '@shared/lib/interfaces/game.types';
 import { initAppStorage, uploadToPrefix } from '../../../shared/api/wasabi.api';
 import { appendManifest } from '../../../features/game/api/game-draft.api';
 import { fetchDraftBuildsCombined } from '@features/game/services/draft.service';

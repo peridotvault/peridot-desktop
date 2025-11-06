@@ -1,19 +1,17 @@
 import React from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { Link } from 'react-router-dom';
-import { getMyGames } from '../../blockchain/icp/vault/services/ICPGameService';
-import { PGLMeta } from '../../blockchain/icp/vault/service.did.d';
-import { optGetOr } from '../../interfaces/helpers/icp.helpers';
+import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
+import { getMyGames } from '@shared/blockchain/icp/services/game.service';
 import { ImageLoading } from '../../constants/lib.const';
 
 export default function LibraryPage() {
   const { wallet } = useWallet();
-  const [myGames, setMyGames] = React.useState<PGLMeta[] | null>();
+  const [myGames, setMyGames] = React.useState<PGCGame[] | null>();
 
   React.useEffect(() => {
     async function fetchData() {
       const resAllGames = await getMyGames({ wallet: wallet });
-      console.log('RESS :', resAllGames);
       setMyGames(resAllGames);
     }
 
@@ -41,12 +39,16 @@ export default function LibraryPage() {
           <div className="flex flex-wrap gap-8">
             {myGames?.map((item) => (
               <Link
-                to={`/library/${formatTitle(item.pgl1_name)}/${item.pgl1_game_id}`}
-                key={item.pgl1_game_id}
+                to={`/library/${formatTitle(item.name)}/${item.gameId}`}
+                key={item.gameId}
                 className="w-[170px] aspect-3/4 bg-card rounded-xl overflow-hidden"
               >
                 <img
-                  src={optGetOr(item.pgl1_cover_image, ImageLoading)}
+                  src={
+                    item.metadata?.cover_vertical_image ??
+                    item.metadata?.cover_horizontal_image ??
+                    ImageLoading
+                  }
                   alt=""
                   className="w-full h-full object-cover hover:scale-110 duration-300"
                 />

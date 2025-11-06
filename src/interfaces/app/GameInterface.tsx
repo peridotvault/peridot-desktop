@@ -1,10 +1,10 @@
-import {
+import type {
   Distribution,
   Manifest,
   MediaItem,
   NativeBuild,
   WebBuild,
-} from '../../blockchain/icp/vault/service.did.d';
+} from '@shared/blockchain/icp/types/legacy.types';
 export type { MediaItem };
 import { OSKey, Timestamp, UserId } from '../CoreInterface';
 

@@ -1,6 +1,6 @@
 // utils/classifier.ts
 
-import { TrainedDataInterface } from '../../features/wallet/interfaces/History';
+import { TrainedDataInterface } from '@features/wallet/interfaces/History';
 
 export function groupByDay(data: TrainedDataInterface[]) {
   // 1) Grouping seperti biasa

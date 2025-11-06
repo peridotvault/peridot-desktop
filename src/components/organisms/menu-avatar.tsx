@@ -14,7 +14,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 import { clearWalletData } from '@shared/services/store.service';
 import { useWallet } from '@shared/contexts/WalletContext';
-import { shortenAddress } from '../../lib/utils/short-address';
+import { shortenAddress } from '@shared/lib/utils/short-address';
 
 type Props = {
   open: boolean;

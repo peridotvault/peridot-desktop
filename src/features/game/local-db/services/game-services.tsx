@@ -1,9 +1,9 @@
-import { GameId, PGLContractMeta } from '../../../lib/interfaces/game.types';
+import { GameId, PGCContractMeta } from '@shared/lib/interfaces/game.types';
 import { dbGame } from '../database';
 
 export const gameService = {
   // Create
-  async create(game: PGLContractMeta) {
+  async create(game: PGCContractMeta) {
     return await dbGame.game.put(game);
   },
 
@@ -13,7 +13,7 @@ export const gameService = {
   },
 
   // Update
-  async update(game: Partial<PGLContractMeta>, gameId: GameId) {
+  async update(game: Partial<PGCContractMeta>, gameId: GameId) {
     return await dbGame.game.update(gameId, game);
   },
 

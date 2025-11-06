@@ -1,4 +1,4 @@
-import { ImagePERCoin } from '../../lib/constants/const-url';
+import { ImagePERCoin } from '@shared/lib/constants/const-url';
 
 export type TokenDisplayInfo = {
   principal: string;

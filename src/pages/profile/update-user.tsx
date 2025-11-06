@@ -21,10 +21,10 @@ import {
   getIsUsernameValid,
   getUserData,
   updateUser,
-} from '../../blockchain/icp/directory/services/ICPUserService';
+} from '@features/profile/services/user.service';
 import { optGet, ToOpt } from '../../interfaces/helpers/icp.helpers';
-import { saveUserInfo } from '../../lib/utils/IndexedDb';
-import { getCoverImage, getProfileImage } from '../../lib/utils/Additional';
+import { saveUserInfo } from '@shared/lib/utils/IndexedDb';
+import { getCoverImage, getProfileImage } from '@shared/lib/utils/Additional';
 
 /** Utils — konversi tanggal (ns <-> YYYY-MM-DD UTC) */
 function unixNsToDateStr(ns: bigint): string {

@@ -7,13 +7,13 @@ import { TransactionProof } from './TransactionProof';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons';
 import { FilterHistory } from '../components/FilterHistory';
-import { BlockService } from '../../../local-db/wallet/services/blockService';
-import { filterByType, groupByDay } from '../../../lib/utils/classifier';
-import { transformBlockToTrained } from '../../../lib/utils/transformBlockToTrainedData';
-import { CoinService } from '../../../local-db/wallet/services/coinService';
-import { UserProgressService } from '../../../local-db/wallet/services/userProgressService';
+import { BlockService } from '@features/wallet/local-db/services/blockService';
+import { filterByType, groupByDay } from '@shared/lib/utils/classifier';
+import { transformBlockToTrained } from '@shared/lib/utils/transformBlockToTrainedData';
+import { CoinService } from '@features/wallet/local-db/services/coinService';
+import { UserProgressService } from '@features/wallet/local-db/services/userProgressService';
 import { Principal } from '@dfinity/principal';
-import { formatShortEn } from '../../../lib/utils/Additional';
+import { formatShortEn } from '@shared/lib/utils/Additional';
 import {
   getArchiveBlockLength,
   getLedgerBlockLength,

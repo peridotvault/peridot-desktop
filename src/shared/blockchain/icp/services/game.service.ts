@@ -11,6 +11,7 @@ import type {
     Distribution,
     OffChainGameMetadata,
     OnChainGameMetadata,
+    PGCGame,
 } from '../types/game.types';
 import type { InitCreateGame } from '../types/factory.types';
 
@@ -103,7 +104,11 @@ export async function getGamesByDeveloper({ dev }: { dev: string }): Promise<Gam
     }
 }
 
-export async function getPublishedGames({
+const PUBLISHED_CACHE_TTL_MS = 60_000;
+let cachedPublished: OffChainGameMetadata[] | null = null;
+let cachedPublishedAt = 0;
+
+async function fetchPublishedCatalog({
     start,
     limit,
 }: {
@@ -158,6 +163,65 @@ export async function getPublishedGames({
     return meta.filter(Boolean) as OffChainGameMetadata[];
 }
 
+const loadPublishedCatalog = async (): Promise<OffChainGameMetadata[]> => {
+    const now = Date.now();
+    if (cachedPublished && now - cachedPublishedAt < PUBLISHED_CACHE_TTL_MS) {
+        return cachedPublished;
+    }
+    const list = await fetchPublishedCatalog({ start: 0, limit: 200 });
+    cachedPublished = list;
+    cachedPublishedAt = now;
+    return list;
+};
+
+const mapOffChainToPGC = (game: OffChainGameMetadata): PGCGame => {
+    const metadata = game.metadata ?? null;
+    const previews = metadata?.previews ?? [];
+
+    return {
+        gameId: game.game_id,
+        name: game.name,
+        description: game.description,
+        published: game.published,
+        price: game.price,
+        tokenPayment: game.token_payment,
+        totalPurchased: game.total_purchased,
+        maxSupply: game.max_supply,
+        requiredAge: metadata?.required_age,
+        coverVerticalImage: metadata?.cover_vertical_image ?? undefined,
+        coverHorizontalImage: metadata?.cover_horizontal_image ?? undefined,
+        bannerImage: metadata?.banner_image ?? undefined,
+        website: metadata?.website ?? undefined,
+        metadata,
+        distribution: game.distribution ?? [],
+        previews,
+    };
+};
+
+export const mapCatalogToPGCGames = (games: OffChainGameMetadata[]): PGCGame[] =>
+    games.map(mapOffChainToPGC);
+
+export async function getPublishedGames({
+    start,
+    limit,
+}: {
+    start: number;
+    limit: number;
+}): Promise<PGCGame[]> {
+    const raw = await fetchPublishedCatalog({ start, limit });
+    return mapCatalogToPGCGames(raw);
+}
+
+export async function getGameByGameId({
+    gameId,
+}: {
+    gameId: string;
+}): Promise<PGCGame | null> {
+    const catalog = await loadPublishedCatalog();
+    const found = catalog.find((game) => game.game_id === gameId) ?? null;
+    return found ? mapOffChainToPGC(found) : null;
+}
+
 export async function getGameByCanister({
     canister_id,
 }: {
@@ -190,5 +254,60 @@ export async function getGameByCanister({
         };
     } catch (error) {
         throw new Error('Error Service Get Game By Canister : ' + error);
+    }
+}
+
+export async function getMyGames({ wallet }: { wallet: any }): Promise<PGCGame[]> {
+    const principalText = wallet?.principalId?.trim();
+    if (!principalText) {
+        return [];
+    }
+
+    let principal: Principal;
+    try {
+        principal = Principal.fromText(principalText);
+    } catch (error) {
+        console.warn('Invalid principal id provided for getMyGames lookup.', error);
+        return [];
+    }
+
+    try {
+        const agent = ICPPublicAgent;
+        const registry = createActorRegistry(ICP_REGISTRY_CANISTER, { agent });
+        const response = (await registry.getAllGameRecordLimit(0n, 200n)) as ApiResponse_4;
+
+        if ('err' in response) {
+            const [code, message] = Object.entries(response.err)[0] as [string, string];
+            console.warn(`Unable to fetch game records for library lookup: ${code} ${message ?? ''}`.trim());
+            return [];
+        }
+
+        const records = response.ok as GameRecordType[];
+        if (!records.length) {
+            return [];
+        }
+
+        const ownedIds = await runPool(records, 8, async (record): Promise<string | null> => {
+            try {
+                const pgc = createActorPGC1(record.canister_id, { agent });
+                const hasGame = await pgc.hasAccess(principal);
+                return hasGame ? record.game_id : null;
+            } catch (err) {
+                console.warn('Unable to verify ownership for game', record.game_id, err);
+                return null;
+            }
+        });
+
+        const ownedGameIds = ownedIds.filter((id): id is string => Boolean(id));
+        if (ownedGameIds.length === 0) {
+            return [];
+        }
+
+        const ownedSet = new Set(ownedGameIds);
+        const catalog = await loadPublishedCatalog();
+        return mapCatalogToPGCGames(catalog.filter((game) => ownedSet.has(game.game_id)));
+    } catch (error) {
+        console.warn('Failed to resolve owned games for wallet.', error);
+        return [];
     }
 }

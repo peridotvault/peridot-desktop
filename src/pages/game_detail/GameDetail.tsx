@@ -9,20 +9,17 @@ import { useParams } from 'react-router-dom';
 import { useWallet } from '@shared/contexts/WalletContext';
 import CarouselPreview from '../../features/game/components/carousel-preview';
 import { VerticalCard } from '../../components/cards/VerticalCard';
-import { PriceCoin } from '../../lib/constants/const-price';
+import { PriceCoin } from '@shared/lib/constants/const-price';
 import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
 import Modal from '@mui/material/Modal';
 import { InputFieldComponent } from '../../components/atoms/InputFieldComponent';
-import {
-  getPublishedGames,
-  getGameByGameId,
-} from '../../blockchain/icp/vault/services/ICPGameService';
-import { GameAnnouncementType, Metadata, PGLMeta, Value } from '../../blockchain/icp/vault/service.did.d';
+import { getPublishedGames, getGameByGameId } from '@features/game/services/game-legacy.service';
+import { GameAnnouncementType, Metadata, PGLMeta, Value } from '@shared/blockchain/icp/types/legacy.types';
 import {
   commentByAnnouncementId,
   getAllAnnouncementsByGameId,
   getAnnouncementsByAnnouncementId,
-} from '../../blockchain/icp/vault/services/ICPAnnouncementService';
+} from '@features/game/services/announcement.service';
 import {
   asArray,
   asBigInt,
@@ -38,11 +35,11 @@ import {
   WebSpec,
 } from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
-import { buyGame } from '../../blockchain/icp/vault/services/ICPPurchaseService';
+import { buyGame } from '@features/game/services/purchase.service';
 import type { PurchaseResult } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
 import { getGameRecordById } from '../../features/game/services/record.service';
 import { MediaItem } from '../../interfaces/app/GameInterface';
-import { Distribution } from '../../blockchain/icp/pgc/service.did.d';
+import { Distribution } from '@shared/blockchain/icp/types/legacy.types';
 import {
   isZeroTokenAmount,
   resolveTokenInfo,

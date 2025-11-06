@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
-import { PriceCoin } from '../../lib/constants/const-price';
+import { PriceCoin } from '@shared/lib/constants/const-price';
 
 export default function StudioDashboard() {
   const traffic = [

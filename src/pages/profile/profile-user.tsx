@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { LoadingScreen } from '../../components/organisms/LoadingScreen';
 import { UserInterface } from '../../interfaces/user/UserInterface';
-import { getUserData } from '../../blockchain/icp/directory/services/ICPUserService';
+import { getUserData } from '@features/profile/services/user.service';
 import { optGet, optGetOr } from '../../interfaces/helpers/icp.helpers';
 import { ImageLoading } from '../../constants/lib.const';
-import { getProfileImage } from '../../lib/utils/Additional';
+import { getProfileImage } from '@shared/lib/utils/Additional';
 
 export default function ProfileUser() {
   const { wallet } = useWallet();

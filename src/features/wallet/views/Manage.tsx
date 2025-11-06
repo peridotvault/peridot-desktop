@@ -4,8 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputField } from '../../../components/atoms/InputField';
 import { AddCoin } from '../components/AddCoin';
 import theCoin from '../../../assets/json/coins.json';
-import { Coin } from '../../../local-db/wallet/models/Coin';
-import { CoinService } from '../../../local-db/wallet/services/coinService';
+import { Coin } from '@features/wallet/local-db/models/Coin';
+import { CoinService } from '@features/wallet/local-db/services/coinService';
 
 interface Props {
   onClose: () => void;

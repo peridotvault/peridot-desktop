@@ -2,20 +2,20 @@ import Dexie, { Table } from 'dexie';
 import { schema } from './schema';
 import {
   DraftCompositeKey,
-  DraftPGL,
+  DraftPGC,
   GameId,
   GamePublish,
-  PGLContractMeta,
-} from '../../lib/interfaces/game.types';
+  PGCContractMeta,
+} from '@shared/lib/interfaces/game.types';
 
 class GameDatabase extends Dexie {
-  game!: Table<PGLContractMeta, GameId>;
-  game_drafts!: Table<DraftPGL, GameId>;
+  game!: Table<PGCContractMeta, GameId>;
+  game_drafts!: Table<DraftPGC, GameId>;
   game_publish!: Table<GamePublish, DraftCompositeKey>;
 
   constructor() {
     super('GameDatabase');
-    this.version(3).stores(schema);
+    this.version(4).stores(schema);
   }
 }
 
