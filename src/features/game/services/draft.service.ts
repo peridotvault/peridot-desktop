@@ -49,7 +49,12 @@ const loadCatalog = async (gameId: string): Promise<GameMetadataResponse | null>
   try {
     return await fetchGameMetadata(gameId);
   } catch (error) {
-    console.warn(`[draft.service] Unable to load catalog metadata for ${gameId}:`, error);
+    const statusCode = (error as any)?.statusCode;
+    // A catalog 404 is expected for games that have not been published yet,
+    // so skip the noisy warning in that scenario.
+    if (statusCode !== 404) {
+      console.warn(`[draft.service] Unable to load catalog metadata for ${gameId}:`, error);
+    }
     return null;
   }
 };

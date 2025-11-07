@@ -63,11 +63,22 @@ export const InputDropdown = React.forwardRef<HTMLDivElement, InputDropdownProps
     // normalisasi opsi (tags & categories sama)
     const opts: Prepared[] = React.useMemo(
       () =>
-        options.map((o, i) =>
-          typeof o === 'string'
-            ? ({ _id: `${i}-${o}`, value: o, label: o } as Prepared)
-            : ({ _id: `${i}-${o.value}`, ...o } as Prepared),
-        ),
+        options.map((o, i) => {
+          if (typeof o === 'string') {
+            return { _id: `${i}-${o}`, value: o, label: o } as Prepared;
+          }
+          const fallbackLabel = o.label ?? String(o.value ?? i);
+          const normalizedValue =
+            typeof o.value === 'string' && o.value.trim().length > 0
+              ? o.value
+              : fallbackLabel ?? `${i}`;
+          return {
+            _id: `${i}-${normalizedValue}`,
+            ...o,
+            value: normalizedValue,
+            label: fallbackLabel,
+          } as Prepared;
+        }),
       [options],
     );
 
@@ -87,7 +98,8 @@ export const InputDropdown = React.forwardRef<HTMLDivElement, InputDropdownProps
     const [query, setQuery] = React.useState('');
     const [activeIdx, setActiveIdx] = React.useState(-1);
 
-    const canAddMore = maxSelected ? selected.length < maxSelected : true;
+    const hasLimit = typeof maxSelected === 'number' && maxSelected > 0;
+    const canAddMore = hasLimit ? selected.length < maxSelected : true;
     const isSelected = (v: string) => selected.includes(v);
 
     const filtered: Prepared[] = React.useMemo(() => {
@@ -273,7 +285,7 @@ export const InputDropdown = React.forwardRef<HTMLDivElement, InputDropdownProps
                 }}
                 onKeyDown={onInputKeyDown}
                 placeholder={selected.length ? '' : placeholder}
-                disabled={disabled}
+                disabled={disabled || (hasLimit && selected.length >= (maxSelected ?? 0))}
                 className={inputCls}
                 aria-autocomplete="list"
                 aria-expanded={open}

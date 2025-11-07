@@ -4,7 +4,7 @@ import { MainNavbar } from './main-navbar';
 import { Outlet } from 'react-router-dom';
 import { Wallet } from '../../features/wallet/views/Wallet';
 import { MainSidebar } from './main-sidebar';
-import { MenuAvatar } from '../../components/organisms/menu-avatar';
+import { MenuAvatar } from '../../shared/components/menu-avatar';
 import AIChatbot from '@features/ai/components/ai-chatbot';
 
 export default function MainLayout() {

@@ -1,17 +1,16 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Avatar } from '../../shared/components/ui/avatar';
+import { Avatar } from './ui/avatar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowRightFromBracket,
   faGamepad,
   faGear,
   faUser,
-  faUserEdit,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
+import { ButtonWithSound } from './ui/button-with-sound';
 import { clearWalletData } from '@shared/services/store.service';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { shortenAddress } from '@shared/lib/utils/short-address';
@@ -33,11 +32,11 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
       label: 'View Profile',
       icon: faUser,
     },
-    {
-      href: '/update-profile',
-      label: 'Update Profile',
-      icon: faUserEdit,
-    },
+    // {
+    //   href: '/update-profile',
+    //   label: 'Update Profile',
+    //   icon: faUserEdit,
+    // },
     {
       href: '/studio',
       label: 'Studio',

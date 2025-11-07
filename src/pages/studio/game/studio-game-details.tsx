@@ -130,10 +130,52 @@ export default function StudioGameDetails() {
     loadDraft();
   }, [gameId]);
 
+  const resolveSelectedIds = <T extends Record<string, any>>(
+    values: string[],
+    options: T[],
+    getId: (opt: T) => string,
+    getLabel: (opt: T) => string,
+  ): string[] => {
+    if (!values.length || !options.length) return [];
+    const idMap = new Map(options.map((opt) => [getId(opt), getId(opt)]));
+    const labelMap = new Map(
+      options
+        .map((opt) => [getLabel(opt)?.toLowerCase(), getId(opt)] as const)
+        .filter(([label]) => typeof label === 'string' && label.length),
+    );
+
+    const resolved: string[] = [];
+    values.forEach((value) => {
+      const key = value?.trim();
+      if (!key) return;
+      const exact = idMap.get(key);
+      if (exact && !resolved.includes(exact)) {
+        resolved.push(exact);
+        return;
+      }
+      const byLabel = labelMap.get(key.toLowerCase());
+      if (byLabel && !resolved.includes(byLabel)) {
+        resolved.push(byLabel);
+      }
+    });
+    return resolved;
+  };
+
   // --- Simpan ke draft ---
   const handleSaveDraft = async () => {
     try {
-      // await DraftService.updateGeneral(gameId!, {
+      const cleanTags = resolveSelectedIds(tags, listTagOptions, (tag) => tag.tagId, (tag) => tag.name);
+      const cleanCategories = resolveSelectedIds(
+        categories,
+        listCategoryOptions,
+        (cat) => cat.categoryId,
+        (cat) => cat.name,
+      );
+
+      setTags(cleanTags);
+      setCategories(cleanCategories);
+
+      setLoading(true);
       await updateGeneral(gameId!, {
         name: name || undefined,
         description: description || undefined,
@@ -143,14 +185,18 @@ export default function StudioGameDetails() {
         coverVerticalImage: coverVerticalUrl || undefined,
         coverHorizontalImage: coverHorizontalUrl || undefined,
         bannerImage: bannerUrl || undefined,
-        categories: categories.filter((cat) => !!cat),
-        tags: tags.filter((tag) => !!tag),
+        categories: cleanCategories,
+        tags: cleanTags,
       });
+
+      await loadDraft();
 
       alert('Draft saved successfully!');
     } catch (err) {
       console.error('Failed to save draft:', err);
       alert('Failed to save draft');
+    } finally {
+      setLoading(false);
     }
   };
 

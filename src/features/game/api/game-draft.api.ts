@@ -1,12 +1,14 @@
 import {
   AppendManifestPayload,
   CategoriesResponse,
+  CategoryDb,
   GameBuilds,
   GameDraft,
   GameGeneral,
   GamePreview,
   SetHardwarePayload,
-  TagsResponse
+  TagDb,
+  TagsResponse,
 } from '../types/game-draft.type';
 
 // api/gameDraftApi.ts
@@ -68,11 +70,41 @@ export const fetchGeneral = async (gameId: string) => {
   return handleResponse(res) as Promise<GameGeneral>;
 };
 
+const pickDefined = <T>(...values: (T | undefined)[]): T | undefined => {
+  for (const value of values) {
+    if (value !== undefined) return value;
+  }
+  return undefined;
+};
+
 export const updateGeneral = async (gameId: string, data: GameGeneral) => {
+  const payload: Record<string, unknown> = {};
+
+  const assign = (key: string, value: unknown) => {
+    if (value !== undefined) payload[key] = value;
+  };
+
+  assign('name', pickDefined(data.name));
+  assign('description', pickDefined(data.description));
+  assign('price', pickDefined(data.price));
+  assign('website', pickDefined(data.website));
+  assign('required_age', pickDefined(data.required_age, data.requiredAge));
+  assign(
+    'cover_vertical_image',
+    pickDefined(data.cover_vertical_image, data.coverVerticalImage),
+  );
+  assign(
+    'cover_horizontal_image',
+    pickDefined(data.cover_horizontal_image, data.coverHorizontalImage),
+  );
+  assign('banner_image', pickDefined(data.banner_image, data.bannerImage));
+  assign('categories', pickDefined(data.categories));
+  assign('tags', pickDefined(data.tags));
+
   const res = await fetch(`${API_BASE}/${gameId}/drafts/general`, {
-    method: 'POST', // sesuai controller-mu: @Post('general')
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
   return handleResponse(res) as Promise<GameGeneral>;
 };
@@ -130,12 +162,49 @@ export const setLive = async (gameId: string, data: { platformId: string; versio
 };
 
 // ===== ADDITIONAL =====
+type RawCategory = Partial<CategoryDb> & { category_id?: string | number; name?: string | null };
+type RawTag = Partial<TagDb> & { tag_id?: string | number; name?: string | null };
+
+const normalizeCategories = (raw?: RawCategory[] | null): CategoryDb[] => {
+  if (!Array.isArray(raw)) return [];
+  const mapped = raw
+    .map((entry) => {
+      const categoryId =
+        (typeof entry.categoryId === 'string' && entry.categoryId.trim()) ||
+        (typeof entry.category_id === 'string' && entry.category_id.trim()) ||
+        (typeof entry.category_id === 'number' ? String(entry.category_id) : undefined);
+      const name = entry.name?.trim();
+      if (!categoryId || !name) return null;
+      return { categoryId, name };
+    })
+    .filter((entry): entry is CategoryDb => entry !== null);
+  return mapped;
+};
+
+const normalizeTags = (raw?: RawTag[] | null): TagDb[] => {
+  if (!Array.isArray(raw)) return [];
+  const mapped = raw
+    .map((entry) => {
+      const tagId =
+        (typeof entry.tagId === 'string' && entry.tagId.trim()) ||
+        (typeof entry.tag_id === 'string' && entry.tag_id.trim()) ||
+        (typeof entry.tag_id === 'number' ? String(entry.tag_id) : undefined);
+      const name = entry.name?.trim();
+      if (!tagId || !name) return null;
+      return { tagId, name };
+    })
+    .filter((entry): entry is TagDb => entry !== null);
+  return mapped;
+};
+
 export const fetchCategories = async () => {
   const res = await fetch(`${API_BASE}/categories`);
-  return handleResponse(res) as Promise<CategoriesResponse>;
+  const payload = (await handleResponse(res)) as { categories?: RawCategory[] };
+  return { categories: normalizeCategories(payload.categories) } as CategoriesResponse;
 };
 
 export const fetchTags = async () => {
   const res = await fetch(`${API_BASE}/tags`);
-  return handleResponse(res) as Promise<TagsResponse>;
+  const payload = (await handleResponse(res)) as { tags?: RawTag[] };
+  return { tags: normalizeTags(payload.tags) } as TagsResponse;
 };
