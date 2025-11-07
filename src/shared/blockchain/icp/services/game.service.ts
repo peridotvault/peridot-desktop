@@ -2,6 +2,7 @@ import { Principal } from '@dfinity/principal';
 import { ICPPrivateAgent, ICPPublicAgent } from '../sdk/actors';
 import { createActorFactory, createActorPGC1, createActorRegistry } from '../sdk/agents';
 import type { ApiResponse_4, GameRecordType } from '../sdk/canisters/registry.did.d';
+import type { Manifest as PGCLiveManifest } from '../sdk/canisters/pgc1.did.d';
 import { ICP_FACTORY_CANISTER, ICP_REGISTRY_CANISTER } from '../../../constants/url.const';
 import { walletService } from '@shared/services/wallet.service';
 import { arrayStringToPrincipal } from '@shared/utils/icp.helper';
@@ -13,6 +14,7 @@ import type {
     OffChainGameMetadata,
     OnChainGameMetadata,
     PGCGame,
+    Platform,
 } from '../types/game.types';
 import type { InitCreateGame } from '../types/factory.types';
 
@@ -28,6 +30,26 @@ const toPrincipalOpt = (controllers: string[] | null | undefined): PrincipalList
 const toDistribution = (): Distribution[] => {
     // TODO: Map manifests/hardware into Distribution when backend schema is finalised.
     return [];
+};
+
+const toPlatformVariant = (platform: Platform) => {
+    switch (platform) {
+        case 'windows':
+            return { windows: null } as const;
+        case 'macos':
+            return { macos: null } as const;
+        case 'linux':
+            return { linux: null } as const;
+        case 'android':
+            return { android: null } as const;
+        case 'ios':
+            return { ios: null } as const;
+        case 'other':
+            return { other: null } as const;
+        case 'web':
+        default:
+            return { web: null } as const;
+    }
 };
 
 export async function createGamePaid({
@@ -199,6 +221,15 @@ const composePGCGame = ({
     distribution: Distribution[];
 }): PGCGame => {
     const previews = Array.isArray(metadata?.previews) ? metadata?.previews ?? [] : [];
+    const metadataDistribution =
+        Array.isArray(metadata?.distribution) && metadata.distribution.length
+            ? (metadata.distribution as Distribution[])
+            : Array.isArray((metadata as any)?.distributions) && (metadata as any).distributions.length
+              ? ((metadata as any).distributions as Distribution[])
+              : [];
+
+    const mergedDistribution =
+        distribution && distribution.length ? distribution : metadataDistribution;
 
     return {
         gameId,
@@ -216,7 +247,7 @@ const composePGCGame = ({
         bannerImage: metadata?.bannerImage ?? metadata?.banner_image ?? undefined,
         website: metadata?.website ?? undefined,
         metadata,
-        distribution,
+        distribution: mergedDistribution,
         previews,
     };
 };
@@ -400,4 +431,22 @@ export async function getMyGames({ wallet }: { wallet: any }): Promise<PGCGame[]
         console.warn('Failed to resolve owned games for wallet.', error);
         return [];
     }
+}
+
+export async function getLiveManifestForPlatform({
+    canisterId,
+    platform,
+}: {
+    canisterId: string | Principal;
+    platform: Platform;
+}): Promise<PGCLiveManifest | null> {
+    const agent = ICPPublicAgent;
+    const principal = typeof canisterId === 'string' ? Principal.fromText(canisterId) : canisterId;
+    const actor = createActorPGC1(principal, { agent });
+    const variant = toPlatformVariant(platform);
+    const result = await actor.getLiveManifest(variant);
+    if (!result || result.length === 0) {
+        return null;
+    }
+    return result[0] ?? null;
 }

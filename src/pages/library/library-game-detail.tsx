@@ -2,7 +2,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getGameByGameId } from '@shared/blockchain/icp/services/game.service';
+import {
+  getGameByGameId,
+  getLiveManifestForPlatform,
+} from '@shared/blockchain/icp/services/game.service';
 // import { isNative, isWeb } dari GameInterface mungkin perlu disesuaikan jika tipe berubah
 // import { isNative, isWeb } from '../../interfaces/app/GameInterface'; // Tidak digunakan karena struktur berbeda
 import { useParams } from 'react-router-dom';
@@ -10,7 +13,7 @@ import { useWallet } from '@shared/contexts/WalletContext';
 import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
 import { useInstalled } from '../../features/download/hooks/useInstalled';
 import { useDownloadManager } from '../../components/molecules/DownloadManager';
-import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
+import type { Distribution, PGCGame } from '@shared/blockchain/icp/types/game.types';
 import type { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
 import { getAllAnnouncementsByGameId } from '@features/game/services/announcement.service';
 // import { optGetOr } from '../../interfaces/helpers/icp.helpers'; // Tidak digunakan di sini
@@ -18,6 +21,9 @@ import { ImageLoading } from '../../constants/lib.const';
 import { getInstalledRecord } from '@shared/lib/utils/installedStorage';
 import { PriceCoin } from '@shared/lib/constants/const-price';
 import { isZeroTokenAmount, resolveTokenInfo } from '@shared/utils/token-info';
+import { getGameRecordById } from '@features/game/services/record.service';
+import type { Manifest as PGCLiveManifest } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
+import { ButtonWithSound } from '@shared/components/ui/button-with-sound';
 
 // helper deteksi OSKey
 function detectOSKey(): 'windows' | 'macos' | 'linux' {
@@ -42,6 +48,7 @@ export default function LibraryGameDetail() {
   const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
 
   const [theGame, setTheGame] = useState<PGCGame | null>(null);
+  const [chainWebUrl, setChainWebUrl] = useState<string | null>(null);
 
   const tokenCanister = theGame?.tokenPayment;
   const rawPrice = theGame?.price ?? 0;
@@ -62,6 +69,46 @@ export default function LibraryGameDetail() {
     openInstallModal(theGame);
   };
 
+  const normalizeStringValue = (value: unknown): string => {
+    if (Array.isArray(value)) {
+      const first = value[0];
+      return typeof first === 'string' ? first : '';
+    }
+    return typeof value === 'string' ? value : '';
+  };
+
+  const storageRefToUrl = (manifest: PGCLiveManifest | null): string | null => {
+    if (!manifest) return null;
+    const storage = (manifest as any).storage ?? (manifest as any).storageRef;
+    if (!storage) return null;
+    if ('url' in storage) {
+      const url = storage.url?.url;
+      return typeof url === 'string' ? url : null;
+    }
+    return null;
+  };
+
+  const resolvedDistributions: Distribution[] = useMemo(() => {
+    const game = theGame;
+    if (!game) return [];
+    if (Array.isArray(game.distribution) && game.distribution.length) {
+      return game.distribution;
+    }
+    const meta = game.metadata as
+      | { distribution?: Distribution[]; distributions?: Distribution[] }
+      | null
+      | undefined;
+    if (meta) {
+      if (Array.isArray(meta.distribution) && meta.distribution.length) {
+        return meta.distribution;
+      }
+      if (Array.isArray(meta.distributions) && meta.distributions.length) {
+        return meta.distributions;
+      }
+    }
+    return [];
+  }, [theGame]);
+
   // pilih OS aktif (untuk native)
   const osKey = useMemo(() => detectOSKey(), []);
   const { installed, latest } = useInstalled(appIdKey!, osKey); // status ter-install untuk OS ini
@@ -69,22 +116,25 @@ export default function LibraryGameDetail() {
   // apakah ada native dist utk OS ini?
   // Perubahan: Gunakan unwrapOptVec dan sesuaikan dengan struktur array dalam array
   const hasNativeForOS = useMemo(() => {
-    if (!theGame) return false;
-    return (theGame.distribution ?? []).some(
+    if (!resolvedDistributions.length) return false;
+    return resolvedDistributions.some(
       (dist) => 'native' in dist && dist.native.os.toLowerCase() === osKey,
     );
-  }, [theGame, osKey]);
+  }, [resolvedDistributions, osKey]);
 
   const webUrl = useMemo(() => {
-    if (!theGame) return null;
-    const distEntry = (theGame.distribution ?? []).find((dist) => 'web' in dist && !!dist.web.url);
-    if (distEntry && 'web' in distEntry) {
-      const url = distEntry.web.url ?? distEntry.web.url;
-      if (url?.trim()) return url.trim();
+    const game = theGame;
+    if (!game) return null;
+    if (resolvedDistributions.length) {
+      const distEntry = resolvedDistributions.find((dist) => 'web' in dist && !!dist.web.url);
+      if (distEntry && 'web' in distEntry) {
+        const url = normalizeStringValue(distEntry.web.url);
+        if (url.trim()) return url.trim();
+      }
     }
-    const fallback = theGame.metadata?.website ?? '';
+    const fallback = chainWebUrl ?? game.metadata?.website ?? '';
     return fallback.trim() ? fallback.trim() : null;
-  }, [theGame]);
+  }, [resolvedDistributions, theGame, chainWebUrl]);
 
   const hasWeb = useMemo(() => !!webUrl, [webUrl]);
 
@@ -187,6 +237,36 @@ export default function LibraryGameDetail() {
     };
   }, [gameId, wallet]);
 
+  useEffect(() => {
+    if (!gameId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const record = await getGameRecordById({ gameId });
+        if (!record || cancelled) return;
+        const canisterId =
+          typeof record.canister_id === 'string'
+            ? record.canister_id
+            : record.canister_id?.toText();
+        if (!canisterId) return;
+        const manifest = await getLiveManifestForPlatform({
+          canisterId,
+          platform: 'web',
+        });
+        if (cancelled) return;
+        const url = storageRefToUrl(manifest);
+        if (url?.trim()) {
+          setChainWebUrl(url.trim());
+        }
+      } catch (error) {
+        console.warn('[Library] Unable to resolve live web manifest', error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [gameId]);
+
   const openWebApp = (url?: string | null) => {
     const target = url ?? webUrl;
     if (!target) {
@@ -264,29 +344,29 @@ export default function LibraryGameDetail() {
             {/* CTAs */}
             <div className="flex flex-col gap-4">
               {(hasWeb || installed) && (
-                <button
+                <ButtonWithSound
                   onClick={() => onLaunch()}
                   className="bg-accent px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
                 >
                   <FontAwesomeIcon icon={faPlay} />
                   {hasWeb && !installed ? 'Play Now (Web)' : 'Launch'}
-                </button>
+                </ButtonWithSound>
               )}
 
               {!installed && hasNativeForOS && (
-                <button
+                <ButtonWithSound
                   onClick={installHere}
                   className="border border-foreground/20 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
                 >
                   <FontAwesomeIcon icon={faDownload} />
                   Download for {osKey === 'macos' ? 'macOS' : osKey}
-                </button>
+                </ButtonWithSound>
               )}
 
-              <button className="border border-foreground/20 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
+              <ButtonWithSound className="border border-foreground/20 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
                 <FontAwesomeIcon icon={faStore} />
                 Item Market
-              </button>
+              </ButtonWithSound>
             </div>
 
             {/* detail kecil status */}

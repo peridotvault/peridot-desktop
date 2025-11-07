@@ -99,6 +99,7 @@ export interface Metadata {
     cover_image?: string;
     previews?: MediaItem[];
     distribution?: Distribution[];
+    distributions?: Distribution[];
     categories?: Category[];
     tags?: Tag[];
     publishInfo?: PublishInfo;
