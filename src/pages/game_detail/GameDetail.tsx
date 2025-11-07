@@ -558,16 +558,10 @@ export default function GameDetail(): React.ReactElement {
             <div className="rounded-lg shadow-arise-sm p-6 space-y-6">
               <div className="flex gap-4">
                 <img
-                  src={coverImage}
+                  src={game.coverHorizontalImage}
                   alt={game.name}
-                  className="w-24 h-32 object-cover rounded-md border border-border"
+                  className="w-full aspect-video object-cover rounded-md"
                 />
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-lg font-semibold">{game.name}</h3>
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {game.description ?? metadata?.description}
-                  </p>
-                </div>
               </div>
               <div className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
