@@ -1,106 +1,112 @@
-import { Distribution, Metadata, Value } from '@shared/blockchain/icp/types/legacy.types';
+import { Distribution, Opt } from '@shared/blockchain/icp/types/game.types';
 
-export type Opt<T> = [] | [T];
-export const optGet = <T,>(o: [] | [T]) => (o.length ? o[0] : undefined);
-export const optGetOr = <T,>(o: [] | [T], fallback: T) => (o.length ? o[0] : fallback);
-export function ToOpt<T>(v: T | null | undefined): Opt<T> {
-  return v == null ? [] : [v];
+export const optGet = <T,>(o: Opt<T>): T | undefined => (o.length ? o[0] : undefined);
+
+export const optGetOr = <T,>(o: Opt<T>, fallback: T): T => (o.length ? o[0] : fallback);
+
+export function ToOpt<T>(value: T | null | undefined): Opt<T> {
+    return value == null ? [] : [value];
 }
-export const unwrapOpt = <T,>(o: [] | [T] | undefined): T | undefined =>
-  Array.isArray(o) ? (o.length ? o[0] : undefined) : undefined;
-
-export const mdGet = (metaOpt: [] | [Metadata] | undefined, key: string): Value | undefined => {
-  const md = unwrapOpt(metaOpt) ?? [];
-  for (const [k, v] of md) if (k === key) return v;
-  return undefined;
-};
-
-export const asText = (v?: Value): string | undefined => (v && (v as any).text) as any;
-export const asBigInt = (v?: Value): bigint | undefined => (v && (v as any).text) as any;
-export const asArray = (v?: Value): Value[] | undefined => (v && (v as any).array) as any;
-export const asMap = (v?: Value): Array<[string, Value]> | undefined =>
-  (v && (v as any).map) as any;
 
 export const fmtBytes = (n?: number | bigint): string | undefined => {
-  if (n === undefined) return undefined;
-  const num = Number(n);
-  if (Number.isNaN(num)) return String(n);
-  const KB = 1024;
-  const MB = KB ** 2;
-  const GB = KB ** 3;
-  if (num >= GB) return `${(num / GB).toFixed(1)} GB`;
-  if (num >= MB) return `${(num / MB).toFixed(0)} MB`;
-  if (num >= KB) return `${(num / KB).toFixed(0)} KB`;
-  return `${num} B`;
+    if (n === undefined || n === null) return undefined;
+    const num = Number(n);
+    if (Number.isNaN(num)) return String(n);
+    const KB = 1024;
+    const MB = KB ** 2;
+    const GB = KB ** 3;
+    if (num >= GB) return `${(num / GB).toFixed(1)} GB`;
+    if (num >= MB) return `${(num / MB).toFixed(0)} MB`;
+    if (num >= KB) return `${(num / KB).toFixed(0)} KB`;
+    return `${num} B`;
 };
 
-export const unopt = <T,>(v: [] | [T] | undefined | null): T | undefined =>
-  Array.isArray(v) && v.length ? v[0] : undefined;
-
-export type PlatformKey = 'Website' | 'Windows' | 'macOS' | 'Linux' | 'Other';
-
-export const normalizeOsToPlatform = (osRaw: string | undefined): PlatformKey => {
-  const os = (osRaw || '').toLowerCase();
-  if (os.includes('win')) return 'Windows';
-  if (os.includes('mac') || os.includes('os x') || os.includes('darwin')) return 'macOS';
-  if (os.includes('linux') || os.includes('ubuntu') || os.includes('debian')) return 'Linux';
-  return 'Other';
-};
-
-export type NormalizedDist = {
-  Website?: WebSpec[]; // bisa lebih dari satu web build
-  Windows?: NativeSpec[];
-  macOS?: NativeSpec[];
-  Linux?: NativeSpec[];
-  Other?: NativeSpec[];
+export const normalizeOsToPlatform = (osRaw: string | undefined): 'Website' | 'Windows' | 'macOS' | 'Linux' | 'Other' => {
+    const os = (osRaw || '').toLowerCase();
+    if (os.includes('web')) return 'Website';
+    if (os.includes('win')) return 'Windows';
+    if (os.includes('mac') || os.includes('darwin')) return 'macOS';
+    if (os.includes('linux') || os.includes('ubuntu') || os.includes('debian')) return 'Linux';
+    return 'Other';
 };
 
 export type NativeSpec = {
-  os: string;
-  processor: string;
-  graphics: string;
-  memory?: string; // formatted
-  storage?: string; // formatted
-  notes?: string;
+    os: string;
+    processor?: string;
+    graphics?: string;
+    memory?: string;
+    storage?: string;
+    notes?: string;
 };
 
 export type WebSpec = {
-  processor: string;
-  graphics: string;
-  memory?: string; // formatted
-  storage?: string; // formatted
-  notes?: string;
+    processor?: string;
+    graphics?: string;
+    memory?: string;
+    storage?: string;
+    notes?: string;
+    url?: string;
+};
+
+export type NormalizedDist = {
+    Website?: WebSpec[];
+    Windows?: NativeSpec[];
+    macOS?: NativeSpec[];
+    Linux?: NativeSpec[];
+    Other?: NativeSpec[];
+};
+
+const toNote = (notes: unknown): string | undefined => {
+    if (Array.isArray(notes)) {
+        return notes.length ? String(notes[0] ?? '').trim() || undefined : undefined;
+    }
+    if (typeof notes === 'string') return notes.trim() || undefined;
+    return undefined;
 };
 
 export const normalizeDistribution = (
-  distOpt: [] | [Array<Distribution>] | undefined,
+    dist: Opt<Distribution[]> | Distribution[] | null | undefined,
 ): NormalizedDist => {
-  const out: NormalizedDist = {};
-  const dist = unopt(distOpt) ?? [];
-  for (const d of dist) {
-    if ('web' in d) {
-      const w = d.web;
-      const webSpec: WebSpec = {
-        processor: w.processor,
-        graphics: w.graphics,
-        memory: fmtBytes(w.memory),
-        storage: fmtBytes(w.storage),
-        notes: unopt(w.additionalNotes),
-      };
-      (out.Website ??= []).push(webSpec);
-    } else if ('native' in d) {
-      const n = d.native;
-      const pf: PlatformKey = normalizeOsToPlatform(n.os);
-      const nat: NativeSpec = {
-        os: n.os,
-        processor: n.processor,
-        graphics: n.graphics,
-        memory: fmtBytes(n.memory),
-        storage: fmtBytes(n.storage),
-        notes: unopt(n.additionalNotes),
-      };
-      (out[pf] ??= []).push(nat);
+    const out: NormalizedDist = {};
+    const list: Distribution[] = (() => {
+        if (!dist) return [];
+        if (Array.isArray(dist)) {
+            if (dist.length === 0) return [];
+            const first = dist[0] as unknown;
+            if (Array.isArray(first)) {
+                return first as Distribution[];
+            }
+            if (first && typeof first === 'object') {
+                return dist as Distribution[];
+            }
+        }
+        return [];
+    })();
+
+    for (const entry of list) {
+        if ('web' in entry) {
+            const spec: WebSpec = {
+                processor: entry.web.processor,
+                graphics: entry.web.graphics,
+                memory: fmtBytes(entry.web.memory),
+                storage: fmtBytes(entry.web.storage),
+                notes: toNote(entry.web.additionalNotes),
+                url: entry.web.url,
+            };
+            (out.Website ??= []).push(spec);
+        } else if ('native' in entry) {
+            const spec: NativeSpec = {
+                os: entry.native.os,
+                processor: entry.native.processor,
+                graphics: entry.native.graphics,
+                memory: fmtBytes(entry.native.memory),
+                storage: fmtBytes(entry.native.storage),
+                notes: toNote(entry.native.additionalNotes),
+            };
+            const key = normalizeOsToPlatform(entry.native.os);
+            (out[key] ??= []).push(spec);
+        }
     }
-  }
-  return out;
+
+    return out;
 };

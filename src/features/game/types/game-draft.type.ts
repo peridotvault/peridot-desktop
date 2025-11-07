@@ -1,46 +1,58 @@
-export * from '@shared/blockchain/icp/types/legacy.types';
-
 import type {
-  Category,
   GameId,
   Platform,
-  Tag,
-} from '@shared/blockchain/icp/types/legacy.types';
-import type {
   Distribution,
   Manifest,
   MediaItem,
+  Tag,
+  Category,
 } from '@shared/blockchain/icp/types/game.types';
 
+export type { Distribution };
+
 export interface GameDraft {
+  gameId?: GameId;
   game_id?: GameId;
   name?: string;
   description?: string;
+  requiredAge?: number;
   required_age?: number;
   price?: number;
   website?: string;
+  bannerImage?: string;
   banner_image?: string;
+  coverVerticalImage?: string;
   cover_vertical_image?: string;
+  coverHorizontalImage?: string;
   cover_horizontal_image?: string;
+  isPublished?: boolean;
   is_published?: boolean;
+  releaseDate?: number;
   release_date?: number;
+  draftStatus?: string;
   draft_status?: string;
   previews?: MediaItem[];
   distributions?: Array<Distribution>;
   categories?: Category[];
   tags?: Tag[];
+  createdAt?: string;
   created_at?: string;
+  updatedAt?: string;
   updated_at?: string;
 }
 
 export interface GameGeneral {
   name?: string;
   description?: string;
+  requiredAge?: number;
   required_age?: number;
   price?: number;
   website?: string;
+  coverVerticalImage?: string;
   cover_vertical_image?: string;
+  coverHorizontalImage?: string;
   cover_horizontal_image?: string;
+  bannerImage?: string;
   banner_image?: string;
   categories?: Category[];
   tags?: Tag[];
@@ -54,46 +66,49 @@ export interface GameBuilds {
   distributions?: Array<Distribution>;
 }
 
-export type GameWhole = Omit<GameDraft, 'created_at' | 'updated_at'> & {
-  created_at: string;
-  updated_at?: string;
+export type GameWhole = Omit<GameDraft, 'createdAt' | 'updatedAt'> & {
+  createdAt: string;
+  updatedAt?: string;
 };
 
 export interface GameMetadataResponse {
   categories: string[];
   tags: string[];
   previews: MediaItem[];
+  name?: string;
+  description?: string;
+  price?: number;
+  requiredAge?: number;
   required_age?: number;
   website?: string;
   banner_image?: string;
+  bannerImage?: string;
   cover_vertical_image?: string;
+  coverVerticalImage?: string;
   cover_horizontal_image?: string;
+  coverHorizontalImage?: string;
+  releaseDate?: number;
   release_date?: number;
+  draftStatus?: string;
   draft_status?: string;
-  created_at: string;
+  createdAt: string;
+  created_at?: string;
+  updatedAt?: string;
   updated_at?: string;
 }
 
-export type GameWholeUpsertPayload = Partial<Omit<GameWhole, 'updated_at'>> & {
-  /**
-   * Optional ISO timestamp used when creating a new row.
-   * When omitted the service will reuse the current stored value or now().
-   */
-  created_at?: string;
-  /**
-   * Optional ISO timestamp representing the latest update time.
-   * When omitted the service will assign the current time.
-   */
-  updated_at?: string;
+export type GameWholeUpsertPayload = Partial<Omit<GameWhole, 'updatedAt'>> & {
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export interface CategoryDb {
-  category_id: string;
+  categoryId: string;
   name: string;
 }
 
 export interface TagDb {
-  tag_id: string;
+  tagId: string;
   name: string;
 }
 
@@ -105,7 +120,6 @@ export interface TagsResponse {
   tags: TagDb[];
 }
 
-// DTO
 export interface HardwarePatch {
   processor?: string;
   graphics?: string;
@@ -120,13 +134,13 @@ export type SetHardwarePayload =
       hardware: HardwarePatch;
     }
   | {
-      platform: Exclude<Platform, 'web'>; // windows/macos/linux/android/ios
-      os: string; // wajib utk native
+      platform: Exclude<Platform, 'web'>;
+      os: string;
       hardware: HardwarePatch;
     };
 
 export interface AppendManifestPayload {
   setLive?: boolean;
-  os: string; // target OS native
-  manifest: Manifest; // 1 manifest yang ingin di-append
+  os: string;
+  manifest: Manifest;
 }

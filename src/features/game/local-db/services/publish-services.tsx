@@ -7,10 +7,10 @@ export const PublishService = {
   /** Publish game ke chain tertentu */
   async publishToChain(gameId: string, chainId: number, releaseDate?: number) {
     const publishRecord: GamePublish = {
-      game_id: gameId,
-      chain_id: chainId,
-      is_published: true,
-      release_date: releaseDate ?? Date.now(),
+      gameId: gameId,
+      chainId: chainId,
+      isPublished: true,
+      releaseDate: releaseDate ?? Date.now(),
     };
     return dbGame.game_publish.put(publishRecord);
   },
@@ -18,7 +18,7 @@ export const PublishService = {
   /** Cek apakah game sudah dipublish ke chain tertentu */
   async isPublishedToChain(gameId: string, chainId: number): Promise<boolean> {
     const record = await dbGame.game_publish.get([gameId, chainId]);
-    return record?.is_published ?? false;
+    return record?.isPublished ?? false;
   },
 
   /** Dapatkan semua chain yang didukung oleh game */

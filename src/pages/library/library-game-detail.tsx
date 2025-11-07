@@ -10,8 +10,8 @@ import { useWallet } from '@shared/contexts/WalletContext';
 import { AnnouncementContainer } from '../../features/announcement/components/ann-container.component';
 import { useInstalled } from '../../features/download/hooks/useInstalled';
 import { useDownloadManager } from '../../components/molecules/DownloadManager';
-import type { OffChainGameMetadata } from '@shared/blockchain/icp/types/game.types';
-import type { GameAnnouncementType } from '@shared/blockchain/icp/types/legacy.types';
+import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
+import type { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
 import { getAllAnnouncementsByGameId } from '@features/game/services/announcement.service';
 // import { optGetOr } from '../../interfaces/helpers/icp.helpers'; // Tidak digunakan di sini
 import { ImageLoading } from '../../constants/lib.const';
@@ -41,9 +41,9 @@ export default function LibraryGameDetail() {
   const { wallet } = useWallet();
   const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
 
-  const [theGame, setTheGame] = useState<OffChainGameMetadata | null>(null);
+  const [theGame, setTheGame] = useState<PGCGame | null>(null);
 
-  const tokenCanister = theGame?.token_payment;
+  const tokenCanister = theGame?.tokenPayment;
   const rawPrice = theGame?.price ?? 0;
   const tokenInfo = resolveTokenInfo(tokenCanister);
   const priceIsFree = isZeroTokenAmount(rawPrice, tokenInfo.decimals);
@@ -58,7 +58,7 @@ export default function LibraryGameDetail() {
   }, [gameId]);
 
   const installHere = () => {
-    if (!theGame) return;
+    if (!theGame || !hasNativeForOS) return;
     openInstallModal(theGame);
   };
 
@@ -75,19 +75,33 @@ export default function LibraryGameDetail() {
     );
   }, [theGame, osKey]);
 
-  const hasWeb = useMemo(() => {
-    if (!theGame) return false;
-    return (theGame.distribution ?? []).some((dist) => 'web' in dist && !!dist.web.url);
+  const webUrl = useMemo(() => {
+    if (!theGame) return null;
+    const distEntry = (theGame.distribution ?? []).find((dist) => 'web' in dist && !!dist.web.url);
+    if (distEntry && 'web' in distEntry) {
+      const url = distEntry.web.url ?? distEntry.web.url;
+      if (url?.trim()) return url.trim();
+    }
+    const fallback = theGame.metadata?.website ?? '';
+    return fallback.trim() ? fallback.trim() : null;
   }, [theGame]);
 
+  const hasWeb = useMemo(() => !!webUrl, [webUrl]);
+
   const heroImage =
-    theGame?.metadata?.banner_image ??
-    theGame?.metadata?.cover_horizontal_image ??
-    theGame?.metadata?.cover_vertical_image ??
+    theGame?.bannerImage ??
+    theGame?.coverHorizontalImage ??
+    theGame?.coverVerticalImage ??
+    theGame?.metadata?.bannerImage ??
+    theGame?.metadata?.coverHorizontalImage ??
+    theGame?.metadata?.coverVerticalImage ??
     ImageLoading;
 
   const onLaunch = async () => {
-    if (hasWeb) return openWebApp();
+    if (hasWeb && webUrl) {
+      openWebApp(webUrl);
+      return;
+    }
 
     const rec = appIdKey ? getInstalledRecord(appIdKey) : null;
     const entry = latest || rec?.entries[0];
@@ -142,7 +156,6 @@ export default function LibraryGameDetail() {
             gameId: gameId!,
             wallet,
           })) ?? [];
-        // Sort: pinned first, then by createdAt descending
         // Filter only published announcements
         listAnnouncement = listAnnouncement.filter(
           (item) =>
@@ -174,28 +187,33 @@ export default function LibraryGameDetail() {
     };
   }, [gameId, wallet]);
 
-  // Ambil url web pertama dari distributions
-  // Perubahan: Gunakan unwrapOptVec dan sesuaikan dengan struktur array dalam array
-  function getWebUrlFromApp(app?: OffChainGameMetadata | null): string | null {
-    if (!app) return null;
-    const entry = (app.distribution ?? []).find((dist) => 'web' in dist && !!dist.web.url);
-    return entry && 'web' in entry ? entry.web.url ?? null : null;
-  }
-
-  const openWebApp = () => {
-    const url = getWebUrlFromApp(theGame);
-    if (!url) {
+  const openWebApp = (url?: string | null) => {
+    const target = url ?? webUrl;
+    if (!target) {
       alert('Web build URL tidak tersedia untuk app ini.');
       return;
     }
-    // Jika jalan di Electron + preload expose electronAPI
+
     if ((window as any).electronAPI?.openWebGame) {
-      (window as any).electronAPI.openWebGame(url);
+      (window as any).electronAPI.openWebGame(target);
     } else {
-      // fallback browser biasa
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(target, '_blank', 'noopener,noreferrer');
     }
   };
+
+  const getWebStatus = () => {
+    if (installed) {
+      return `Installed${latest?.version ? ` v${latest.version}` : ''}`;
+    }
+    if (hasWeb) {
+      return 'Playable instantly via browser';
+    }
+    if (hasNativeForOS) {
+      return 'Download required before playing';
+    }
+    return 'No build for this OS';
+  };
+
   return (
     <main className="flex flex-col items-center gap-5 mb-32">
       <div className="bg-foreground w-full h-96 relative">
@@ -245,15 +263,15 @@ export default function LibraryGameDetail() {
 
             {/* CTAs */}
             <div className="flex flex-col gap-4">
-              {installed || hasWeb ? (
+              {(hasWeb || installed) && (
                 <button
-                  onClick={onLaunch}
+                  onClick={() => onLaunch()}
                   className="bg-accent px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
                 >
                   <FontAwesomeIcon icon={faPlay} />
-                  {hasWeb && !installed ? 'Play (Web)' : 'Launch'}
+                  {hasWeb && !installed ? 'Play Now (Web)' : 'Launch'}
                 </button>
-              ) : null}
+              )}
 
               {!installed && hasNativeForOS && (
                 <button
@@ -261,7 +279,7 @@ export default function LibraryGameDetail() {
                   className="border border-foreground/20 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
                 >
                   <FontAwesomeIcon icon={faDownload} />
-                  Install for {osKey === 'macos' ? 'macOS' : osKey}
+                  Download for {osKey === 'macos' ? 'macOS' : osKey}
                 </button>
               )}
 
@@ -272,17 +290,7 @@ export default function LibraryGameDetail() {
             </div>
 
             {/* detail kecil status */}
-            <div className="text-sm opacity-70">
-              {installed ? (
-                <>Installed {latest?.version ? <>v{latest.version}</> : null}</>
-              ) : hasWeb ? (
-                'Playable via Web'
-              ) : hasNativeForOS ? (
-                'Not installed'
-              ) : (
-                'No build for this OS'
-              )}
-            </div>
+            <div className="text-sm opacity-70">{getWebStatus()}</div>
           </section>
 
           <div className="my-32" />

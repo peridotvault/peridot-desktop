@@ -185,7 +185,7 @@ export const StudioGameNewBuild: React.FC = () => {
         const manifest: Manifest = {
           listing: fileName,
           createdAt: Date.now(),
-          size_bytes: data.file.size,
+          sizeBytes: data.file.size,
           version: data.version.trim(),
           checksum: 'temp-checksum',
           storageRef: {

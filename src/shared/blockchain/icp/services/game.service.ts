@@ -9,6 +9,7 @@ import { fetchMetadata } from '@shared/api/metadata.api';
 import { runPool } from '@shared/utils/run-pool';
 import type {
     Distribution,
+    Metadata,
     OffChainGameMetadata,
     OnChainGameMetadata,
     PGCGame,
@@ -174,11 +175,54 @@ const loadPublishedCatalog = async (): Promise<OffChainGameMetadata[]> => {
     return list;
 };
 
-const mapOffChainToPGC = (game: OffChainGameMetadata): PGCGame => {
-    const metadata = game.metadata ?? null;
-    const previews = metadata?.previews ?? [];
+const composePGCGame = ({
+    gameId,
+    name,
+    description,
+    published,
+    price,
+    tokenPayment,
+    totalPurchased,
+    maxSupply,
+    metadata,
+    distribution,
+}: {
+    gameId: string;
+    name: string;
+    description: string;
+    published: boolean;
+    price: number;
+    tokenPayment: string;
+    totalPurchased: number;
+    maxSupply: number;
+    metadata: Metadata | null;
+    distribution: Distribution[];
+}): PGCGame => {
+    const previews = Array.isArray(metadata?.previews) ? metadata?.previews ?? [] : [];
 
     return {
+        gameId,
+        name,
+        description,
+        published,
+        price,
+        tokenPayment,
+        totalPurchased,
+        maxSupply,
+        requiredAge: metadata?.requiredAge ?? metadata?.required_age,
+        coverVerticalImage: metadata?.coverVerticalImage ?? metadata?.cover_vertical_image ?? undefined,
+        coverHorizontalImage:
+            metadata?.coverHorizontalImage ?? metadata?.cover_horizontal_image ?? undefined,
+        bannerImage: metadata?.bannerImage ?? metadata?.banner_image ?? undefined,
+        website: metadata?.website ?? undefined,
+        metadata,
+        distribution,
+        previews,
+    };
+};
+
+const mapOffChainToPGC = (game: OffChainGameMetadata): PGCGame =>
+    composePGCGame({
         gameId: game.game_id,
         name: game.name,
         description: game.description,
@@ -187,19 +231,48 @@ const mapOffChainToPGC = (game: OffChainGameMetadata): PGCGame => {
         tokenPayment: game.token_payment,
         totalPurchased: game.total_purchased,
         maxSupply: game.max_supply,
-        requiredAge: metadata?.required_age,
-        coverVerticalImage: metadata?.cover_vertical_image ?? undefined,
-        coverHorizontalImage: metadata?.cover_horizontal_image ?? undefined,
-        bannerImage: metadata?.banner_image ?? undefined,
-        website: metadata?.website ?? undefined,
-        metadata,
+        metadata: game.metadata ?? null,
         distribution: game.distribution ?? [],
-        previews,
-    };
-};
+    });
 
 export const mapCatalogToPGCGames = (games: OffChainGameMetadata[]): PGCGame[] =>
     games.map(mapOffChainToPGC);
+
+const readPGCGameFromCanister = async (
+    canister: Principal,
+    agent = ICPPublicAgent,
+): Promise<PGCGame | null> => {
+    try {
+        const actor = createActorPGC1(canister, { agent });
+        const metadataURI = await actor.getMetadataURI();
+        const metadata = await fetchMetadata(metadataURI).catch(() => null);
+
+        const gameId = await actor.getGameId();
+        const maxSupply = await actor.getMaxSupply();
+        const name = await actor.getName();
+        const description = await actor.getDescription();
+        const published = await actor.isPublished();
+        const price = await actor.getPrice();
+        const tokenPayment = await actor.getTokenCanister();
+        const totalPurchased = await actor.getTotalPurchased();
+
+        return composePGCGame({
+            gameId,
+            name,
+            description,
+            published,
+            price: Number(price),
+            tokenPayment: tokenPayment.toString(),
+            totalPurchased: Number(totalPurchased),
+            maxSupply: Number(maxSupply),
+            metadata,
+            distribution: toDistribution(),
+        });
+    } catch (error) {
+        console.warn('Unable to read PGC game from canister', canister.toText(), error);
+        return null;
+    }
+};
 
 export async function getPublishedGames({
     start,
@@ -220,6 +293,23 @@ export async function getGameByGameId({
     const catalog = await loadPublishedCatalog();
     const found = catalog.find((game) => game.game_id === gameId) ?? null;
     return found ? mapOffChainToPGC(found) : null;
+}
+
+export async function getDeveloperGames({
+    dev,
+}: {
+    dev: string;
+}): Promise<PGCGame[]> {
+    const records = await getGamesByDeveloper({ dev });
+
+    const games = await runPool(
+        records,
+        6,
+        async (record): Promise<PGCGame | null> =>
+            readPGCGameFromCanister(record.canister_id, ICPPublicAgent),
+    );
+
+    return games.filter(Boolean) as PGCGame[];
 }
 
 export async function getGameByCanister({

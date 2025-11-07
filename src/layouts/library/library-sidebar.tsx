@@ -4,7 +4,7 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLocation, Link } from 'react-router-dom';
 import { useWallet } from '@shared/contexts/WalletContext';
-import { PGCGame } from '@features/game/types/game.type';
+import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
 import { getMyGames } from '@features/game/services/dto.service';
 import { ImageLoading } from '../../constants/lib.const';
 
@@ -66,7 +66,14 @@ export const LibrarySidebar = () => {
               ${isActive ? 'shadow-flat-sm scale-110' : 'hover:shadow-arise-sm '}`}
               >
                 <img
-                  src={item.metadata?.cover_vertical_image ?? ImageLoading}
+                  src={
+                    item.coverVerticalImage ??
+                    item.coverHorizontalImage ??
+                    item.bannerImage ??
+                    item.metadata?.coverVerticalImage ??
+                    item.metadata?.coverHorizontalImage ??
+                    ImageLoading
+                  }
                   className="w-6 h-6 object-cover rounded-md"
                   alt={item.name}
                 />

@@ -18,7 +18,12 @@ import { fetchDraftSummaryCombined } from '@features/game/services/draft.service
 import type { OnChainGameMetadata } from '@features/game/types/game.type';
 import { setGameWhole } from '@features/game/api/game.api';
 import type { GameWhole } from '@features/game/types/game-draft.type';
-import { publishGameOnChain } from '@features/game/services/publish.service';
+import {
+  publishGameOnChain,
+  type HardwareUpdatePayload,
+  type LiveVersionPayload,
+  type PublishManifestPayload,
+} from '@features/game/services/publish.service';
 import { useWallet } from '@shared/contexts/WalletContext';
 
 type PlatformBuildInfo = {
@@ -54,11 +59,15 @@ const unwrapOptString = (value: unknown): string => {
   return typeof value === 'string' ? value : '';
 };
 
+const normalizeNotesText = (value: unknown): string | undefined => {
+  const text = unwrapOptString(value).trim();
+  return text.length ? text : undefined;
+};
+
 const isWebDistribution = (dist: Distribution): dist is { web: WebDistribution } => 'web' in dist;
 
-const isNativeDistribution = (
-  dist: Distribution,
-): dist is { native: NativeDistribution } => 'native' in dist;
+const isNativeDistribution = (dist: Distribution): dist is { native: NativeDistribution } =>
+  'native' in dist;
 
 export const StudioGamePublish: FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -129,6 +138,56 @@ export const StudioGamePublish: FC = () => {
     return normalized.length ? normalized : undefined;
   };
 
+  const createWebManifest = (web: WebDistribution): Manifest | null => {
+    const url = web.url?.trim();
+    if (!url) return null;
+    const now = Date.now();
+    let listing = url;
+    try {
+      const parsed = new URL(url);
+      const candidate = parsed.pathname.split('/').filter(Boolean).pop();
+      listing = candidate || url;
+    } catch {
+      listing = url;
+    }
+    return {
+      listing,
+      version: url,
+      size_bytes: 0,
+      sizeBytes: 0,
+      createdAt: now,
+      checksum: [],
+      storageRef: { url: { url } },
+    };
+  };
+
+  const toNumberValue = (value: unknown): number | undefined => {
+    if (value === null || value === undefined) return undefined;
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : undefined;
+    }
+    if (typeof value === 'bigint') {
+      return Number(value);
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) return undefined;
+      const parsed = Number(trimmed);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    return undefined;
+  };
+
+  const shouldApplyHardware = (payload: HardwareUpdatePayload): boolean => {
+    return Boolean(
+      payload.processor?.trim() ||
+        payload.graphics?.trim() ||
+        (payload.memoryMB !== undefined && payload.memoryMB > 0) ||
+        (payload.storageMB !== undefined && payload.storageMB > 0) ||
+        payload.additionalNotes?.trim(),
+    );
+  };
+
   const toTimestamp = (value: number | string | undefined): number | undefined => {
     if (typeof value === 'number' && !Number.isNaN(value)) return value;
     if (typeof value === 'string' && value.trim()) {
@@ -148,9 +207,9 @@ export const StudioGamePublish: FC = () => {
   const [processedData, setProcessedData] = useState<{
     details: any;
     media: {
-      cover_vertical_image: string;
-      cover_horizontal_image: string;
-      banner_image: string;
+      coverVerticalImage: string;
+      coverHorizontalImage: string;
+      bannerImage: string;
       previews: any[];
     };
     builds: PlatformBuildInfo[];
@@ -207,10 +266,10 @@ export const StudioGamePublish: FC = () => {
     try {
       // Ekstrak details
       const details: GameDraft = {
-        game_id: draftData.game_id,
+        gameId: draftData.gameId,
         name: draftData.name,
         description: draftData.description,
-        required_age: draftData.required_age,
+        requiredAge: draftData.requiredAge,
         price: draftData.price,
         website: draftData.website,
         categories: draftData.categories,
@@ -219,9 +278,9 @@ export const StudioGamePublish: FC = () => {
 
       // ✅ Ekstrak media — GUNAKAN FIELD YANG BENAR
       const media = {
-        cover_vertical_image: draftData.cover_vertical_image || '',
-        cover_horizontal_image: draftData.cover_horizontal_image || '',
-        banner_image: draftData.banner_image || '',
+        coverVerticalImage: draftData.coverVerticalImage || '',
+        coverHorizontalImage: draftData.coverHorizontalImage || '',
+        bannerImage: draftData.bannerImage || '',
         previews: draftData.previews || [],
       };
 
@@ -235,12 +294,14 @@ export const StudioGamePublish: FC = () => {
             liveBuilds.push({
               key: 'web',
               info: {
-                webUrl: dist.web.url,
+                webUrl: dist.web.url ?? '',
                 requirement: {
-                  processor: dist.web.processor,
-                  graphics: dist.web.graphics,
-                  memory: dist.web.memory.toString(),
-                  storage: dist.web.storage.toString(),
+                  processor: dist.web.processor ?? '',
+                  graphics: dist.web.graphics ?? '',
+                  memory:
+                    dist.web.memory === undefined ? '0' : String(dist.web.memory),
+                  storage:
+                    dist.web.storage === undefined ? '0' : String(dist.web.storage),
                   notes: unwrapOptString(dist.web.additionalNotes),
                 },
               },
@@ -258,12 +319,14 @@ export const StudioGamePublish: FC = () => {
                   key: dist.native.os as Platform,
                   info: {
                     fileName: liveManifest.listing,
-                    fileSizeMB: Number(liveManifest.size_bytes ?? 0) / (1024 * 1024),
+                    fileSizeMB: Number(liveManifest.sizeBytes ?? 0) / (1024 * 1024),
                     requirement: {
-                      processor: dist.native.processor,
-                      graphics: dist.native.graphics,
-                      memory: dist.native.memory.toString(),
-                      storage: dist.native.storage.toString(),
+                      processor: dist.native.processor ?? '',
+                      graphics: dist.native.graphics ?? '',
+                      memory:
+                        dist.native.memory === undefined ? '0' : String(dist.native.memory),
+                      storage:
+                        dist.native.storage === undefined ? '0' : String(dist.native.storage),
                       notes: unwrapOptString(dist.native.additionalNotes),
                     },
                   },
@@ -308,8 +371,8 @@ export const StudioGamePublish: FC = () => {
   const checkMedia = () => {
     const missing: string[] = [];
     // ✅ Periksa cover vertical (atau horizontal — sesuaikan kebutuhan)
-    if (!processedData?.media.cover_vertical_image) missing.push('Cover Image (Vertical)');
-    if (!processedData?.media.banner_image) missing.push('Banner Image');
+    if (!processedData?.media.coverVerticalImage) missing.push('Cover Image (Vertical)');
+    if (!processedData?.media.bannerImage) missing.push('Banner Image');
     if (!processedData?.media.previews?.length) missing.push('Previews (min. 1)');
     return { ok: missing.length === 0, missing };
   };
@@ -356,8 +419,8 @@ export const StudioGamePublish: FC = () => {
     try {
       const nowMs = Date.now();
       const releaseDate =
-        typeof draftData.release_date === 'number' && !Number.isNaN(draftData.release_date)
-          ? draftData.release_date
+        typeof draftData.releaseDate === 'number' && !Number.isNaN(draftData.releaseDate)
+          ? draftData.releaseDate
           : nowMs;
 
       const categories = normalizeStringArray(draftData.categories as unknown[] | undefined);
@@ -368,38 +431,87 @@ export const StudioGamePublish: FC = () => {
           ? draftData.distributions
           : undefined;
 
-      const createdAtIso = toIsoString(draftData.created_at, nowMs);
+      const hardwareUpdates: HardwareUpdatePayload[] = [];
+      const liveVersionUpdates: LiveVersionPayload[] = [];
+      const manifestPayloads: PublishManifestPayload[] = [];
+
+      (draftData.distributions ?? []).forEach((dist) => {
+        if ('web' in dist) {
+          const webHardware: HardwareUpdatePayload = {
+            platform: 'web',
+            processor: dist.web.processor?.trim() || undefined,
+            graphics: dist.web.graphics?.trim() || undefined,
+            memoryMB: toNumberValue(dist.web.memory),
+            storageMB: toNumberValue(dist.web.storage),
+            additionalNotes: normalizeNotesText(dist.web.additionalNotes),
+          };
+          if (shouldApplyHardware(webHardware)) {
+            hardwareUpdates.push(webHardware);
+          }
+          const webManifest = createWebManifest(dist.web);
+          if (webManifest) {
+            manifestPayloads.push({
+              platform: 'web',
+              manifest: webManifest,
+            });
+          }
+        } else if ('native' in dist) {
+          const nativeHardware: HardwareUpdatePayload = {
+            platform: dist.native.os as Platform,
+            processor: dist.native.processor?.trim() || undefined,
+            graphics: dist.native.graphics?.trim() || undefined,
+            memoryMB: toNumberValue(dist.native.memory),
+            storageMB: toNumberValue(dist.native.storage),
+            additionalNotes: normalizeNotesText(dist.native.additionalNotes),
+          };
+          if (shouldApplyHardware(nativeHardware)) {
+            hardwareUpdates.push(nativeHardware);
+          }
+          dist.native.manifests?.forEach((manifest: Manifest) => {
+            manifestPayloads.push({
+              platform: dist.native.os as Platform,
+              manifest,
+            });
+          });
+          if (dist.native.liveVersion) {
+            liveVersionUpdates.push({
+              platform: dist.native.os as Platform,
+              version: dist.native.liveVersion,
+            });
+          }
+        }
+      });
+
+      const createdAtIso = toIsoString(draftData.createdAt, nowMs);
       const updatedAtIso = new Date(nowMs).toISOString();
       const createdAtMs = toTimestamp(createdAtIso) ?? nowMs;
       const updatedAtMs = toTimestamp(updatedAtIso) ?? nowMs;
 
       const payload: GameWhole = {
-        game_id: draftData.game_id ?? gameId,
+        gameId: draftData.gameId ?? gameId,
         name: draftData.name?.trim() || undefined,
         description: draftData.description?.trim() || undefined,
-        required_age:
-          typeof draftData.required_age === 'number' ? draftData.required_age : undefined,
+        requiredAge: typeof draftData.requiredAge === 'number' ? draftData.requiredAge : undefined,
         price: typeof draftData.price === 'number' ? draftData.price : undefined,
         website: draftData.website?.trim() || undefined,
-        banner_image: draftData.banner_image?.trim() || undefined,
-        cover_vertical_image: draftData.cover_vertical_image?.trim() || undefined,
-        cover_horizontal_image: draftData.cover_horizontal_image?.trim() || undefined,
+        bannerImage: draftData.bannerImage?.trim() || undefined,
+        coverVerticalImage: draftData.coverVerticalImage?.trim() || undefined,
+        coverHorizontalImage: draftData.coverHorizontalImage?.trim() || undefined,
         previews: previews && previews.length ? previews : undefined,
         distributions,
         categories,
         tags,
-        is_published: true,
-        release_date: releaseDate,
-        draft_status: 'published',
-        created_at: createdAtIso,
-        updated_at: updatedAtIso,
+        isPublished: true,
+        releaseDate: releaseDate,
+        draftStatus: 'published',
+        createdAt: createdAtIso,
+        updatedAt: updatedAtIso,
       };
 
       const saved = await setGameWhole(gameId, payload);
 
       let chainUpdated = false;
-      const metadataURI =
-        gameId && apiBase ? `${apiBase}/api/games/${gameId}/metadata` : '';
+      const metadataURI = gameId && apiBase ? `${apiBase}/api/games/${gameId}/metadata` : '';
 
       if (metadataURI && wallet) {
         try {
@@ -409,6 +521,9 @@ export const StudioGamePublish: FC = () => {
             name: payload.name,
             description: payload.description,
             published: true,
+            hardware: hardwareUpdates,
+            liveVersions: liveVersionUpdates,
+            manifests: manifestPayloads,
             wallet,
           });
           chainUpdated = true;
@@ -435,11 +550,11 @@ export const StudioGamePublish: FC = () => {
         console.warn('Wallet not available – skipping on-chain publish.');
       }
 
-      const nextCreatedAt = toTimestamp(saved.created_at) ?? createdAtMs;
-      const nextUpdatedAt = toTimestamp(saved.updated_at) ?? updatedAtMs;
+      const nextCreatedAt = toTimestamp(saved.createdAt) ?? createdAtMs;
+      const nextUpdatedAt = toTimestamp(saved.updatedAt) ?? updatedAtMs;
 
-      const nextCreatedAtIso = toIsoString(saved.created_at ?? payload.created_at, nextCreatedAt);
-      const nextUpdatedAtIso = toIsoString(saved.updated_at ?? payload.updated_at, nextUpdatedAt);
+      const nextCreatedAtIso = toIsoString(saved.createdAt ?? payload.createdAt, nextCreatedAt);
+      const nextUpdatedAtIso = toIsoString(saved.updatedAt ?? payload.updatedAt, nextUpdatedAt);
 
       const nextDraft: GameDraft = {
         ...(draftData ?? {}),
@@ -448,11 +563,11 @@ export const StudioGamePublish: FC = () => {
         distributions: saved.distributions ?? payload.distributions ?? draftData.distributions,
         categories: saved.categories ?? payload.categories ?? draftData.categories,
         tags: saved.tags ?? payload.tags ?? draftData.tags,
-        is_published: true,
-        release_date: releaseDate,
-        draft_status: 'published',
-        created_at: nextCreatedAtIso,
-        updated_at: nextUpdatedAtIso,
+        isPublished: true,
+        releaseDate: releaseDate,
+        draftStatus: 'published',
+        createdAt: nextCreatedAtIso,
+        updatedAt: nextUpdatedAtIso,
       };
 
       setDraftData(nextDraft);
@@ -530,12 +645,16 @@ export const StudioGamePublish: FC = () => {
             <ButtonWithSound
               disabled={!allOk || publishing}
               onClick={handlePublish}
-              className={`bg-card-foreground text-card font-bold py-2 px-6 rounded-md ${(!allOk || publishing) ? 'cursor-not-allowed opacity-40' : ''}`}
+              className={`bg-card-foreground text-card font-bold py-2 px-6 rounded-md ${!allOk || publishing ? 'cursor-not-allowed opacity-40' : ''}`}
             >
               <span>{publishing ? 'Publishing...' : 'Publish'}</span>
             </ButtonWithSound>
-            {publishError && <span className="text-sm text-chart-5 text-right max-w-sm">{publishError}</span>}
-            {publishMessage && <span className="text-sm text-success text-right max-w-sm">{publishMessage}</span>}
+            {publishError && (
+              <span className="text-sm text-chart-5 text-right max-w-sm">{publishError}</span>
+            )}
+            {publishMessage && (
+              <span className="text-sm text-success text-right max-w-sm">{publishMessage}</span>
+            )}
           </div>
         </section>
 
@@ -559,9 +678,7 @@ export const StudioGamePublish: FC = () => {
               <div className="flex flex-col gap-1 rounded-md bg-background/60 p-3">
                 <span className="text-muted-foreground">Price</span>
                 <span className="font-medium">
-                  {typeof processedData.chain.price === 'number'
-                    ? processedData.chain.price
-                    : '—'}
+                  {typeof processedData.chain.price === 'number' ? processedData.chain.price : '—'}
                 </span>
               </div>
               <div className="flex flex-col gap-1 rounded-md bg-background/60 p-3">
@@ -655,9 +772,9 @@ export const StudioGamePublish: FC = () => {
           <div className="grid grid-cols-3 gap-4">
             {/* Banner */}
             <div className="rounded-lg border border-muted-foreground/30 aspect-[4/1] overflow-hidden col-span-full">
-              {processedData.media.banner_image ? (
+              {processedData.media.bannerImage ? (
                 <img
-                  src={processedData.media.banner_image.trim()} // ✅ trim whitespace
+                  src={processedData.media.bannerImage.trim()} // ✅ trim whitespace
                   alt="banner"
                   className="w-full h-full object-cover"
                 />
@@ -672,9 +789,9 @@ export const StudioGamePublish: FC = () => {
             <div className="col-span-1">
               <div className="">
                 <div className="text-sm mb-2 text-muted-foreground">Cover (Vertical)</div>
-                {processedData.media.cover_vertical_image ? (
+                {processedData.media.coverVerticalImage ? (
                   <img
-                    src={processedData.media.cover_vertical_image.trim()} // ✅ trim whitespace
+                    src={processedData.media.coverVerticalImage.trim()} // ✅ trim whitespace
                     alt="cover vertical"
                     className="rounded-lg border border-muted-foreground/30 w-full aspect-[3/4] object-cover"
                   />
@@ -690,9 +807,9 @@ export const StudioGamePublish: FC = () => {
               {/* ✅ Tampilkan cover Horizontal */}
               <div className="col-span-1">
                 <div className="text-sm mb-2 text-muted-foreground">Cover (Horizontal)</div>
-                {processedData.media.cover_horizontal_image ? (
+                {processedData.media.coverHorizontalImage ? (
                   <img
-                    src={processedData.media.cover_horizontal_image.trim()} // ✅ trim whitespace
+                    src={processedData.media.coverHorizontalImage.trim()} // ✅ trim whitespace
                     alt="cover horizontal"
                     className="rounded-lg border border-muted-foreground/30 w-full aspect-video object-cover"
                   />

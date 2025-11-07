@@ -14,7 +14,7 @@ import {
   safeFileName,
   uploadToPrefix,
 } from '../../../shared/api/wasabi.api';
-import { GameAnnouncementType } from '@shared/blockchain/icp/types/legacy.types';
+import { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
 import { InputFieldComponent } from '../../../components/atoms/InputFieldComponent';
 import { faCheck, faHeading, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { PhotoFieldComponent } from '../../../components/atoms/PhotoFieldComponent';

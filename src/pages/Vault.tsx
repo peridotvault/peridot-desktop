@@ -5,12 +5,12 @@ import { TypographyH2 } from '../shared/components/ui/typography-h2';
 import { categories } from '../assets/json/app/categories.json';
 import { VaultCarousel } from '../features/game/components/vault-carousel';
 import { VaultTopGames } from '../features/game/components/vault-top-games';
-import { OffChainGameMetadata } from '../features/game/types/game.type';
 import { getPublishedGames } from '../features/game/services/dto.service';
 import { ImageLoading } from '../constants/lib.const';
+import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
 
 export default function Vault() {
-  const [allGames, setAllGames] = useState<OffChainGameMetadata[] | null>();
+  const [allGames, setAllGames] = useState<PGCGame[] | null>(null);
   const welcomeGame = [
     {
       gameId: 'SADC1',
@@ -45,7 +45,7 @@ export default function Vault() {
       const resAllGames = await getPublishedGames({ start: 0, limit: 200 });
       const publishedOnly = Array.isArray(resAllGames)
         ? resAllGames.filter((game) => game?.published)
-        : resAllGames;
+        : [];
       setAllGames(publishedOnly);
     }
 
@@ -69,11 +69,16 @@ export default function Vault() {
             {allGames?.slice(0, 5).map((item, idx) => (
               <VerticalCard
                 key={idx}
-                gameId={item.game_id}
+                gameId={item.gameId}
                 gameName={item.name}
-                imgUrl={item.metadata?.cover_vertical_image ?? ImageLoading}
-                price={item.price}
-                tokenCanister={item.token_payment}
+                imgUrl={
+                  item.coverVerticalImage ??
+                  item.metadata?.coverVerticalImage ??
+                  item.metadata?.cover_vertical_image ??
+                  ImageLoading
+                }
+                price={item.price ?? 0}
+                tokenCanister={item.tokenPayment}
               />
             ))}
           </div>
@@ -111,11 +116,16 @@ export default function Vault() {
             {allGames?.map((item, idx) => (
               <VerticalCard
                 key={idx}
-                gameId={item.game_id}
+                gameId={item.gameId}
                 gameName={item.name}
-                imgUrl={item.metadata?.cover_vertical_image ?? ImageLoading}
-                price={item.price}
-                tokenCanister={item.token_payment}
+                imgUrl={
+                  item.coverVerticalImage ??
+                  item.metadata?.coverVerticalImage ??
+                  item.metadata?.cover_vertical_image ??
+                  ImageLoading
+                }
+                price={item.price ?? 0}
+                tokenCanister={item.tokenPayment}
               />
             ))}
           </div>

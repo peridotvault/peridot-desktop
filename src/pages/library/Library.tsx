@@ -45,8 +45,11 @@ export default function LibraryPage() {
               >
                 <img
                   src={
-                    item.metadata?.cover_vertical_image ??
-                    item.metadata?.cover_horizontal_image ??
+                    item.coverVerticalImage ??
+                    item.coverHorizontalImage ??
+                    item.bannerImage ??
+                    item.metadata?.coverVerticalImage ??
+                    item.metadata?.coverHorizontalImage ??
                     ImageLoading
                   }
                   alt=""

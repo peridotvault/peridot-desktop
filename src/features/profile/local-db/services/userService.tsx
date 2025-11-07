@@ -1,4 +1,4 @@
-import { UserInterface } from '../../../interfaces/user/UserInterface';
+import { UserInterface } from '../../../../interfaces/user/UserInterface';
 import { dbUser } from '../database';
 
 export const userService = {

@@ -12,7 +12,7 @@ import { OSKey } from '../../interfaces/CoreInterface';
 import { upsertInstalledEntry } from '@shared/lib/utils/installedStorage';
 // Gunakan tipe dari service.did.d
 import type {
-  OffChainGameMetadata,
+  PGCGame,
   NativeDistribution,
   Manifest,
   StorageRef,
@@ -48,7 +48,7 @@ type QueueItem = {
 // Definisikan DownloadContextValue type
 type DownloadContextValue = {
   queue: QueueItem[];
-  openInstallModal: (app: OffChainGameMetadata) => void;
+  openInstallModal: (app: PGCGame) => void;
   removeFromQueue: (id: string) => void;
   cancelActive: () => void;
 };
@@ -148,10 +148,15 @@ function extractPathFromStorageRef(storageRef: StorageRef): string | null {
 }
 
 async function resolveManifest(manifest: Manifest, os: OSKey): Promise<ResolvedBuild | null> {
-  // Gunakan helper untuk ekstrak path dari storageRef
-  const basePath = extractPathFromStorageRef(manifest.storageRef);
+  const storageRef = manifest.storage ?? manifest.storageRef;
+  if (!storageRef) {
+    console.warn('[DM] Manifest missing storage reference', manifest);
+    return null;
+  }
+
+  const basePath = extractPathFromStorageRef(storageRef);
   if (!basePath) {
-    console.warn('[DM] Cannot resolve basePath from storageRef', manifest.storageRef);
+    console.warn('[DM] Cannot resolve basePath from storageRef', storageRef);
     return null;
   }
 
@@ -166,21 +171,31 @@ async function resolveManifest(manifest: Manifest, os: OSKey): Promise<ResolvedB
   // listing dalam output console: "31DBAB8Q-macos-v0.0.1-2025-10-08T00-44-03-177Z.zip"
   // basePath dalam output console: "icp/apps/31DBAB8Q/builds/macos/0.0.1/"
   // Path final: "icp/apps/31DBAB8Q/builds/macos/0.0.1/31DBAB8Q-macos-v0.0.1-2025-10-08T00-44-03-177Z.zip"
-  const fullFilePath = `${basePath}${manifest.listing}`.replace('//', '/'); // Pastikan tidak ada // ganda
+  const listing = (manifest.listing ?? '').trim();
+  const fullFilePath = `${basePath}${listing}`.replace('//', '/'); // Pastikan tidak ada // ganda
 
   // Bangun URL final menggunakan base API dan path dari StorageRef + listing
   const url = `${base}/files/${fullFilePath}`;
 
   // Ambil fileName dari listing (atau gunakan listing langsung)
-  const fileName = manifest.listing; // listing sudah berisi nama file lengkap
+  const fileName = listing || basePath.split('/').filter(Boolean).pop() || 'build.bin';
+
+  const checksumValue = (() => {
+    const raw = manifest.checksum;
+    if (typeof raw === 'string') return raw;
+    const arr = raw instanceof Uint8Array ? Array.from(raw) : Array.isArray(raw) ? raw : [];
+    return arr.map((b) => b.toString(16).padStart(2, '0')).join('');
+  })();
+
+  const sizeBytes = manifest.sizeBytes ?? manifest.size_bytes;
 
   return {
     os,
     version: manifest.version,
     fileName,
     url, // <-- URL yang akan digunakan untuk download
-    checksum: manifest.checksum,
-    sizeMB: manifest.size_bytes ? Number(manifest.size_bytes) / (1024 * 1024) : undefined,
+    checksum: checksumValue || undefined,
+    sizeMB: sizeBytes ? Number(sizeBytes) / (1024 * 1024) : undefined,
     createdAt:
       manifest.createdAt === undefined
         ? undefined
@@ -190,7 +205,7 @@ async function resolveManifest(manifest: Manifest, os: OSKey): Promise<ResolvedB
   };
 }
 
-async function resolveFromApp(app: OffChainGameMetadata): Promise<ResolvedBuild[]> {
+async function resolveFromApp(app: PGCGame): Promise<ResolvedBuild[]> {
   const out: ResolvedBuild[] = [];
 
   // Ambil distribusi dari PGLMeta (baru)
@@ -295,9 +310,12 @@ export const DownloadProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   /** buka modal dari halaman game */
-  const openInstallModal = useCallback(async (app: OffChainGameMetadata) => {
-    const appIdStr = app.game_id;
+  const openInstallModal = useCallback(async (app: PGCGame) => {
+    const appIdStr = app.gameId;
     const cover =
+      app.coverVerticalImage ??
+      app.coverHorizontalImage ??
+      app.bannerImage ??
       app.metadata?.cover_vertical_image ??
       app.metadata?.cover_horizontal_image ??
       app.metadata?.banner_image;

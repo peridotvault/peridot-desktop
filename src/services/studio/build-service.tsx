@@ -1,5 +1,10 @@
-import type { Platform, ViewMode } from '@shared/blockchain/icp/types/game.types';
-import type { Distribution } from '@shared/lib/interfaces/game.types';
+import type {
+  Distribution,
+  NativeDistribution,
+  Platform,
+  ViewMode,
+  WebDistribution,
+} from '@shared/blockchain/icp/types/game.types';
 import { DraftService } from '@features/game/local-db/services/draft-services';
 
 type WebBuildForm = {
@@ -19,10 +24,10 @@ type HardwareForm = {
   additionalNotes: string;
 };
 
-const isNativeBuild = (dist: Distribution): dist is { native: Distribution['native'] } =>
+const isNativeBuild = (dist: Distribution): dist is { native: NativeDistribution } =>
   'native' in dist;
 
-const isWebBuild = (dist: Distribution): dist is { web: Distribution['web'] } => 'web' in dist;
+const isWebBuild = (dist: Distribution): dist is { web: WebDistribution } => 'web' in dist;
 
 export const BuildService = {
   async setLiveVersion(gameId: string, platform: Platform, version: string) {

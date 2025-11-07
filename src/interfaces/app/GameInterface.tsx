@@ -2,9 +2,9 @@ import type {
   Distribution,
   Manifest,
   MediaItem,
-  NativeBuild,
-  WebBuild,
-} from '@shared/blockchain/icp/types/legacy.types';
+  NativeDistribution,
+  WebDistribution,
+} from '@shared/blockchain/icp/types/game.types';
 export type { MediaItem };
 import { OSKey, Timestamp, UserId } from '../CoreInterface';
 
@@ -65,21 +65,21 @@ export type PublishInfo = { status: GameStatusCode; releasedAt?: Timestamp };
 
 export interface HydratedGameInterface {
   // ===== general
-  pgl1_game_id: string;
-  pgl1_name: string;
-  pgl1_description: string;
-  pgl1_cover_image?: string;
-  pgl1_banner_image?: string;
-  pgl1_price?: string;
-  pgl1_required_age?: string;
-  pgl1_website?: string;
-  pgl1_distribution?: Option[]; // { value: 'web'|'windows'|'macos'|'linux', label: string }[]
+  gameId: string;
+  name: string;
+  description: string;
+  coverImage?: string;
+  bannerImage?: string;
+  price?: string;
+  requiredAge?: string;
+  website?: string;
+  distribution?: Option[]; // { value: 'web'|'windows'|'macos'|'linux', label: string }[]
 
-  // inside pgl1_metadata
-  pgl1_tags?: Tag[];
-  pgl1_categories?: Category[];
-  pgl1_previews?: MediaItem[];
-  pgl1_published?: PublishInfo; //{isPublished : true , releaseDate : Timestamp}
+  // inside metadata
+  tags?: Tag[];
+  categories?: Category[];
+  previews?: MediaItem[];
+  publishInfo?: PublishInfo; // { isPublished: true, releaseDate: Timestamp }
 
   manifestsByOS?: Record<OSKey, Manifest[]>;
   webHardware?: WebHardwareFields | null;
@@ -89,5 +89,5 @@ export interface HydratedGameInterface {
 /** =========================
  *  Type Guards
  *  ========================= */
-export const isWeb = (d: Distribution): d is { web: WebBuild } => 'web' in d;
-export const isNative = (d: Distribution): d is { native: NativeBuild } => 'native' in d;
+export const isWeb = (d: Distribution): d is { web: WebDistribution } => 'web' in d;
+export const isNative = (d: Distribution): d is { native: NativeDistribution } => 'native' in d;

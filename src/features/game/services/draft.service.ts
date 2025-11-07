@@ -17,6 +17,15 @@ type SettledResult<T> = PromiseSettledResult<T>;
 const settledValue = <T,>(res: SettledResult<T>): T | null =>
   res.status === 'fulfilled' ? res.value : null;
 
+const pick = <T,>(...values: (T | null | undefined)[]): T | undefined => {
+  for (const value of values) {
+    if (value !== null && value !== undefined) {
+      return value;
+    }
+  }
+  return undefined;
+};
+
 const loadOnChain = async (gameId: string): Promise<OnChainGameMetadata | null> => {
   try {
     return await getGameByGameId({ gameId });
@@ -83,22 +92,40 @@ export const fetchDraftGeneralCombined = async (gameId: string): Promise<DraftGe
         : metadata?.tags ?? [];
 
   const data: GameGeneral = {
-    name: offChain?.name ?? onChain?.name ?? '',
-    description: offChain?.description ?? onChain?.description ?? '',
-    required_age: offChain?.required_age ?? metadata?.required_age ?? undefined,
-    price: offChain?.price ?? onChain?.price ?? undefined,
-    website: offChain?.website ?? catalog?.website ?? metadata?.website ?? undefined,
-    cover_vertical_image:
-      offChain?.cover_vertical_image ??
-      catalog?.cover_vertical_image ??
-      metadata?.cover_vertical_image ??
-      undefined,
-    cover_horizontal_image:
-      offChain?.cover_horizontal_image ??
-      catalog?.cover_horizontal_image ??
-      metadata?.cover_horizontal_image ??
-      undefined,
-    banner_image: offChain?.banner_image ?? catalog?.banner_image ?? metadata?.banner_image ?? undefined,
+    name: pick(offChain?.name, onChain?.name, catalog?.name, metadata?.name) ?? '',
+    description: pick(offChain?.description, onChain?.description, catalog?.description, metadata?.description) ?? '',
+    requiredAge: pick(
+      offChain?.requiredAge,
+      offChain?.required_age,
+      metadata?.requiredAge,
+      metadata?.required_age,
+    ),
+    price: pick(offChain?.price, onChain?.price, catalog?.price, metadata?.price),
+    website: pick(offChain?.website, catalog?.website, metadata?.website),
+    coverVerticalImage: pick(
+      offChain?.coverVerticalImage,
+      offChain?.cover_vertical_image,
+      catalog?.coverVerticalImage,
+      catalog?.cover_vertical_image,
+      metadata?.coverVerticalImage,
+      metadata?.cover_vertical_image,
+    ),
+    coverHorizontalImage: pick(
+      offChain?.coverHorizontalImage,
+      offChain?.cover_horizontal_image,
+      catalog?.coverHorizontalImage,
+      catalog?.cover_horizontal_image,
+      metadata?.coverHorizontalImage,
+      metadata?.cover_horizontal_image,
+    ),
+    bannerImage: pick(
+      offChain?.bannerImage,
+      offChain?.banner_image,
+      catalog?.bannerImage,
+      catalog?.banner_image,
+      metadata?.bannerImage,
+      metadata?.banner_image,
+    ),
     categories,
     tags,
   };
@@ -230,23 +257,41 @@ export const fetchDraftSummaryCombined = async (
         : metadata?.tags ?? [];
 
   const data: GameDraft = {
-    game_id: offChain?.game_id ?? onChain?.gameId ?? gameId,
-    name: offChain?.name ?? onChain?.name ?? '',
-    description: offChain?.description ?? onChain?.description ?? '',
-    required_age: offChain?.required_age ?? metadata?.required_age ?? undefined,
-    price: offChain?.price ?? onChain?.price ?? undefined,
-    website: offChain?.website ?? catalog?.website ?? metadata?.website ?? undefined,
-    banner_image: offChain?.banner_image ?? catalog?.banner_image ?? metadata?.banner_image ?? undefined,
-    cover_vertical_image:
-      offChain?.cover_vertical_image ??
-      catalog?.cover_vertical_image ??
-      metadata?.cover_vertical_image ??
-      undefined,
-    cover_horizontal_image:
-      offChain?.cover_horizontal_image ??
-      catalog?.cover_horizontal_image ??
-      metadata?.cover_horizontal_image ??
-      undefined,
+    gameId: pick(offChain?.gameId, offChain?.game_id, onChain?.gameId, gameId) ?? gameId,
+    name: pick(offChain?.name, onChain?.name, catalog?.name, metadata?.name) ?? '',
+    description: pick(offChain?.description, onChain?.description, catalog?.description, metadata?.description) ?? '',
+    requiredAge: pick(
+      offChain?.requiredAge,
+      offChain?.required_age,
+      metadata?.requiredAge,
+      metadata?.required_age,
+    ),
+    price: pick(offChain?.price, onChain?.price, catalog?.price, metadata?.price),
+    website: pick(offChain?.website, catalog?.website, metadata?.website),
+    bannerImage: pick(
+      offChain?.bannerImage,
+      offChain?.banner_image,
+      catalog?.bannerImage,
+      catalog?.banner_image,
+      metadata?.bannerImage,
+      metadata?.banner_image,
+    ),
+    coverVerticalImage: pick(
+      offChain?.coverVerticalImage,
+      offChain?.cover_vertical_image,
+      catalog?.coverVerticalImage,
+      catalog?.cover_vertical_image,
+      metadata?.coverVerticalImage,
+      metadata?.cover_vertical_image,
+    ),
+    coverHorizontalImage: pick(
+      offChain?.coverHorizontalImage,
+      offChain?.cover_horizontal_image,
+      catalog?.coverHorizontalImage,
+      catalog?.cover_horizontal_image,
+      metadata?.coverHorizontalImage,
+      metadata?.cover_horizontal_image,
+    ),
     previews:
       offChain?.previews && offChain.previews.length
         ? offChain.previews
@@ -261,15 +306,26 @@ export const fetchDraftSummaryCombined = async (
         : metadataDistributions ?? [],
     categories,
     tags,
-    is_published: offChain?.is_published ?? onChain?.published ?? undefined,
-    release_date:
-      offChain?.release_date ??
-      catalog?.release_date ??
-      metadata?.release_date ??
-      undefined,
-    draft_status: offChain?.draft_status ?? catalog?.draft_status ?? metadata?.draft_status ?? undefined,
-    created_at: offChain?.created_at ?? catalog?.created_at ?? metadata?.created_at ?? undefined,
-    updated_at: offChain?.updated_at ?? catalog?.updated_at ?? metadata?.updated_at ?? undefined,
+    isPublished: pick(
+      offChain?.isPublished,
+      offChain?.is_published,
+      metadata?.publishInfo?.isPublished,
+      onChain?.published,
+    ),
+    releaseDate: pick(
+      offChain?.releaseDate,
+      offChain?.release_date,
+      catalog?.releaseDate,
+      catalog?.release_date,
+      typeof metadata?.releaseDate === 'number' ? metadata?.releaseDate : undefined,
+      metadata?.release_date !== undefined ? Number(metadata?.release_date) : undefined,
+      metadata?.release_date_ns !== undefined
+        ? Number(metadata?.release_date_ns) / 1_000_000
+        : undefined,
+    ),
+    draftStatus: pick(offChain?.draftStatus, offChain?.draft_status, catalog?.draftStatus, catalog?.draft_status, metadata?.draftStatus),
+    createdAt: pick(offChain?.createdAt, offChain?.created_at, catalog?.createdAt, catalog?.created_at, metadata?.createdAt, metadata?.created_at),
+    updatedAt: pick(offChain?.updatedAt, offChain?.updated_at, catalog?.updatedAt, catalog?.updated_at, metadata?.updatedAt, metadata?.updated_at),
   };
 
   return {

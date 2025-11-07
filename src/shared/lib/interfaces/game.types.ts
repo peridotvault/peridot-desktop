@@ -1,9 +1,4 @@
-export type {
-  GameAnnouncement,
-  PGCGame,
-  ViewMode,
-  Hardware as GameHardware,
-} from '@shared/blockchain/icp/types/game.types';
+export * from '@shared/blockchain/icp/types/game.types';
 
 export type {
   DraftPGC,

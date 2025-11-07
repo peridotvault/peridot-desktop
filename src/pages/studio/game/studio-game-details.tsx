@@ -7,7 +7,11 @@ import { InputImage } from '../../../components/atoms/input-image';
 import { InputDropdown } from '../../../shared/components/ui/input-dropdown';
 import { useParams } from 'react-router-dom';
 import { handleAssetChange } from '../../../services/studio/detail-service';
-import { fetchCategories, fetchTags, updateGeneral } from '../../../features/game/api/game-draft.api';
+import {
+  fetchCategories,
+  fetchTags,
+  updateGeneral,
+} from '../../../features/game/api/game-draft.api';
 import { CategoryDb, TagDb } from '@shared/lib/interfaces/game-draft.types';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
 import { fetchDraftGeneralCombined } from '@features/game/services/draft.service';
@@ -59,9 +63,7 @@ export default function StudioGameDetails() {
         if (!incoming?.length || !options.length) return [];
 
         const idSet = new Set(options.map((opt) => getId(opt)));
-        const labelMap = new Map(
-          options.map((opt) => [getLabel(opt).toLowerCase(), getId(opt)]),
-        );
+        const labelMap = new Map(options.map((opt) => [getLabel(opt).toLowerCase(), getId(opt)]));
 
         const extractRaw = (value: unknown): string | null => {
           if (value === null || value === undefined) return null;
@@ -69,7 +71,7 @@ export default function StudioGameDetails() {
           if (typeof value === 'number') return value.toString();
           if (typeof value === 'object') {
             const obj = value as Record<string, unknown>;
-            const possibleKeys = ['id', 'value', 'category_id', 'tag_id', 'name'];
+            const possibleKeys = ['id', 'value', 'categoryId', 'tagId', 'name'];
             for (const key of possibleKeys) {
               const raw = obj[key];
               if (typeof raw === 'string' && raw.trim()) return raw.trim();
@@ -96,16 +98,16 @@ export default function StudioGameDetails() {
       setName(data.name ?? '');
       setDescription(data.description ?? '');
       setPrice(typeof data.price === 'number' ? data.price : '');
-      setAge(typeof data.required_age === 'number' ? data.required_age : '');
+      setAge(typeof data.requiredAge === 'number' ? data.requiredAge : '');
       setWebsite(data.website ?? '');
-      setBannerUrl(data.banner_image ?? '');
-      setCoverVerticalUrl(data.cover_vertical_image ?? '');
-      setCoverHorizontalUrl(data.cover_horizontal_image ?? '');
+      setBannerUrl(data.bannerImage ?? '');
+      setCoverVerticalUrl(data.coverVerticalImage ?? '');
+      setCoverHorizontalUrl(data.coverHorizontalImage ?? '');
       setTags(
         normalizeSelection(
           Array.isArray(data.tags) ? (data.tags as unknown[]) : [],
           tagOptions,
-          (tag) => tag.tag_id,
+          (tag) => tag.tagId,
           (tag) => tag.name,
         ),
       );
@@ -113,7 +115,7 @@ export default function StudioGameDetails() {
         normalizeSelection(
           Array.isArray(data.categories) ? (data.categories as unknown[]) : [],
           categoryOptions,
-          (cat) => cat.category_id,
+          (cat) => cat.categoryId,
           (cat) => cat.name,
         ),
       );
@@ -136,11 +138,11 @@ export default function StudioGameDetails() {
         name: name || undefined,
         description: description || undefined,
         price: price === '' ? undefined : Number(price),
-        required_age: age === '' ? undefined : Number(age),
+        requiredAge: age === '' ? undefined : Number(age),
         website: website || undefined,
-        cover_vertical_image: coverVerticalUrl || undefined,
-        cover_horizontal_image: coverHorizontalUrl || undefined,
-        banner_image: bannerUrl || undefined,
+        coverVerticalImage: coverVerticalUrl || undefined,
+        coverHorizontalImage: coverHorizontalUrl || undefined,
+        bannerImage: bannerUrl || undefined,
         categories: categories.filter((cat) => !!cat),
         tags: tags.filter((tag) => !!tag),
       });
@@ -363,7 +365,7 @@ export default function StudioGameDetails() {
                   label="Tags"
                   placeholder="Search Tags..."
                   options={listTagOptions.map((tag) => ({
-                    value: tag.tag_id,
+                    value: tag.tagId,
                     label: tag.name,
                   }))} // string[]
                   value={tags}
@@ -375,7 +377,7 @@ export default function StudioGameDetails() {
                   label="Categories"
                   placeholder="Search Categories..."
                   options={listCategoryOptions.map((cat) => ({
-                    value: cat.category_id,
+                    value: cat.categoryId,
                     label: cat.name,
                   }))} // grouped
                   required

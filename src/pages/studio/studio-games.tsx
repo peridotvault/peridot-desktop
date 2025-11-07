@@ -6,9 +6,8 @@ import { faPlus, faUpLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import { Alert } from '../../components/molecules/Alert';
-import { getGameByDeveloperId } from '@features/game/services/game-legacy.service';
-import { PGLMeta } from '@shared/blockchain/icp/types/legacy.types';
-import { optGetOr } from '../../interfaces/helpers/icp.helpers';
+import { getDeveloperGames } from '@shared/blockchain/icp/services/game.service';
+import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
 import { ImageLoading } from '../../constants/lib.const';
 import { NewGame } from '@features/game/components/new-game.modal';
 import { getGameUnRegistered } from '@features/game/services/factory.service';
@@ -43,7 +42,7 @@ const UnregisteredGameSkeleton = () => (
 export default function StudioGames() {
   const { wallet } = useWallet();
 
-  const [games, setGames] = useState<PGLMeta[] | null>(null);
+  const [games, setGames] = useState<PGCGame[] | null>(null);
   const [unRegisteredGame, setUnRegisteredGame] = useState<
     { name: string; canister_id: Principal; game_id: string; registered: boolean }[]
   >([]);
@@ -64,7 +63,7 @@ export default function StudioGames() {
     setLoading(true); // ✅ Mulai loading
     try {
       const [listGame, listUnRegistered] = await Promise.all([
-        getGameByDeveloperId({ dev: wallet.principalId, start: 0, limit: 200 }),
+        getDeveloperGames({ dev: wallet.principalId }),
         getGameUnRegistered({ wallet }),
       ]);
       // console.log(listGame);
@@ -140,28 +139,39 @@ export default function StudioGames() {
             <GameSkeleton />
           </>
         ) : games?.length ? (
-          games.map((item, index) => (
-            <Link
-              key={index}
-              className="px-8 py-4 hover:bg-card flex gap-6 items-center justify-between"
-              to={'/studio/game/' + item.pgl1_game_id.toString()}
-            >
-              <div className="flex gap-6 items-start">
-                <div className="w-12 aspect-3/4">
-                  <img
-                    src={optGetOr(item.pgl1_cover_image, ImageLoading)}
-                    alt={item.pgl1_name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => (e.currentTarget.src = ImageLoading)}
-                  />
+          games.map((item, index) => {
+            const coverImage =
+              item.coverVerticalImage ??
+              item.coverHorizontalImage ??
+              item.bannerImage ??
+              item.metadata?.coverVerticalImage ??
+              item.metadata?.coverHorizontalImage ??
+              item.metadata?.bannerImage ??
+              ImageLoading;
+
+            return (
+              <Link
+                key={index}
+                className="px-8 py-4 hover:bg-card flex gap-6 items-center justify-between"
+                to={'/studio/game/' + item.gameId.toString()}
+              >
+                <div className="flex gap-6 items-start">
+                  <div className="w-12 aspect-3/4">
+                    <img
+                      src={coverImage}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => (e.currentTarget.src = ImageLoading)}
+                    />
+                  </div>
+                  <div className="">
+                    <p className="">{item.name}</p>
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                  </div>
                 </div>
-                <div className="">
-                  <p className="">{item.pgl1_name}</p>
-                  <p className="text-sm text-muted-foreground">{item.pgl1_description}</p>
-                </div>
-              </div>
-            </Link>
-          ))
+              </Link>
+            );
+          })
         ) : (
           <section className="flex flex-col items justify-center text-center my-8">
             <h2 className="font-bold text-lg">No Games</h2>

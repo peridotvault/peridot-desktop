@@ -12,13 +12,19 @@ import { faAndroid, faApple, faLinux, faWindows } from '@fortawesome/free-brands
 import { useNavigate, useParams } from 'react-router-dom';
 import { formatMDY } from '@shared/lib/helpers/helper-date';
 import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
-import type { Manifest, WebBuild } from '@shared/blockchain/icp/types/legacy.types';
-import type { Platform, ViewMode } from '@shared/blockchain/icp/types/game.types';
+import type {
+  Distribution,
+  Manifest,
+  NativeDistribution,
+  Platform,
+  ViewMode,
+  WebDistribution,
+} from '@shared/blockchain/icp/types/game.types';
 import { InputTextarea } from '../../../shared/components/ui/input-textarea';
 import { InputFloating } from '../../../shared/components/ui/input-floating';
 import { setHardware, setLive } from '../../../features/game/api/game-draft.api';
 import { LoadingComponent } from '../../../components/atoms/loading.component';
-import { Distribution, SetHardwarePayload } from '@shared/lib/interfaces/game-draft.types';
+import { SetHardwarePayload } from '@shared/lib/interfaces/game-draft.types';
 import toast from 'react-hot-toast';
 import { fetchDraftBuildsCombined } from '@features/game/services/draft.service';
 
@@ -106,10 +112,16 @@ export const StudioGameBuilds: React.FC = () => {
       platform: Platform;
       manifest: Manifest;
       isLive: boolean;
-      hardware: any;
+      hardware: {
+        processor: string;
+        graphics: string;
+        memory: number;
+        storage: number;
+        additionalNotes?: string;
+      };
     }>
   >([]);
-  const [webBuild, setWebBuild] = React.useState<WebBuild | null>(null);
+  const [webBuild, setWebBuild] = React.useState<WebDistribution | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [search, setSearch] = React.useState('');
   const [viewMode, setViewMode] = React.useState<ViewMode>('live');
@@ -162,53 +174,69 @@ export const StudioGameBuilds: React.FC = () => {
       }
 
       // Ekstrak data
-      let webBuildData: WebBuild | null = null;
+      let webBuildData: WebDistribution | null = null;
       const nativeBuildsData: Array<{
         platform: Platform;
         manifest: Manifest;
         isLive: boolean;
-        hardware: any;
+        hardware: {
+          processor: string;
+          graphics: string;
+          memory: number;
+          storage: number;
+          additionalNotes?: string;
+        };
       }> = [];
+
+      const normalizeNotes = (notes: NativeDistribution['additionalNotes']) => {
+        if (Array.isArray(notes)) return notes[0] ?? '';
+        return notes ?? '';
+      };
+
+      const normalizeWebNotes = (notes: WebDistribution['additionalNotes']) => {
+        if (Array.isArray(notes)) return notes[0] ?? '';
+        return notes ?? '';
+      };
 
       for (const dist of distributionsPayload) {
         if ('native' in dist) {
           const native = dist.native;
           const liveVersion = native.liveVersion;
-          const nativeNotes = Array.isArray(native.additionalNotes)
-            ? native.additionalNotes[0] ?? ''
-            : native.additionalNotes ?? '';
+          const nativeNotes = normalizeNotes(native.additionalNotes);
+
           native.manifests.forEach((manifest: Manifest) => {
             nativeBuildsData.push({
               platform: native.os as Platform,
               manifest,
               isLive: liveVersion ? manifest.version === liveVersion : false,
               hardware: {
-                processor: native.processor,
-                graphics: native.graphics,
-                memory: native.memory,
-                storage: native.storage,
-                additionalNotes: nativeNotes,
+                processor: native.processor ?? '',
+                graphics: native.graphics ?? '',
+                memory: native.memory ? Number(native.memory) : 0,
+                storage: native.storage ? Number(native.storage) : 0,
+                additionalNotes: nativeNotes || undefined,
               },
             });
           });
         } else if ('web' in dist) {
-          webBuildData = dist.web;
+          webBuildData = {
+            ...dist.web,
+            additionalNotes: normalizeWebNotes(dist.web.additionalNotes) || undefined,
+          };
         }
       }
 
       setNativeBuilds(nativeBuildsData);
       setWebBuild(webBuildData);
       if (webBuildData) {
-        const noteVal = Array.isArray(webBuildData.additionalNotes)
-          ? webBuildData.additionalNotes[0]
-          : undefined;
         setWebBuildForm({
-          url: webBuildData.url,
-          processor: webBuildData.processor,
-          graphics: webBuildData.graphics,
-          memory: webBuildData.memory?.toString() ?? '',
-          storage: webBuildData.storage?.toString() ?? '',
-          additionalNotes: noteVal ?? '',
+          url: webBuildData.url ?? '',
+          processor: webBuildData.processor ?? '',
+          graphics: webBuildData.graphics ?? '',
+          memory: Number(webBuildData.memory ?? 0).toString(),
+          storage: Number(webBuildData.storage ?? 0).toString(),
+          additionalNotes:
+            typeof webBuildData.additionalNotes === 'string' ? webBuildData.additionalNotes : '',
         });
       }
     } catch (err: any) {
@@ -235,8 +263,8 @@ export const StudioGameBuilds: React.FC = () => {
     if (dist && 'native' in dist) {
       const native = dist.native;
       const nativeNotes = Array.isArray(native.additionalNotes)
-        ? native.additionalNotes[0] ?? ''
-        : native.additionalNotes ?? '';
+        ? (native.additionalNotes[0] ?? '')
+        : (native.additionalNotes ?? '');
       setHardwareForms((prev) => ({
         ...prev,
         [viewMode]: {
@@ -666,7 +694,7 @@ export const StudioGameBuilds: React.FC = () => {
                                   {formatMDY(Number(build.manifest.createdAt ?? 0))}
                                 </td>
                                 <td className="px-4 py-3 align-top">
-                                  {bytesToHuman(build.manifest.size_bytes)}
+                                  {bytesToHuman(build.manifest.sizeBytes)}
                                 </td>
                                 <td className="px-4 py-3 align-top">
                                   <ButtonWithSound
@@ -707,7 +735,7 @@ export const StudioGameBuilds: React.FC = () => {
                                 {formatMDY(Number(build.manifest.createdAt ?? 0))}
                               </td>
                               <td className="px-4 py-3 align-top">
-                                {bytesToHuman(build.manifest.size_bytes)}
+                                {bytesToHuman(build.manifest.sizeBytes)}
                               </td>
                               <td className="px-4 py-3 align-top">
                                 <div className="flex justify-end gap-2">
