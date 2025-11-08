@@ -22,9 +22,9 @@ import { getGameByGameId, getPublishedGames } from '@features/game/services/dto.
 import { Distribution, Metadata, PGCGame } from '@shared/blockchain/icp/types/game.types';
 import { isZeroTokenAmount, resolveTokenInfo, subunitsToNumber } from '@shared/utils/token-info';
 import type { MediaItem } from '../../interfaces/app/GameInterface';
-import { AnnouncementContainer } from '@features/announcement/components/ann-container.component';
-import type { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
-import { getAllAnnouncementsByGameId } from '@features/game/services/announcement.service';
+// import { AnnouncementContainer } from '@features/announcement/components/ann-container.component';
+// import type { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
+// import { getAllAnnouncementsByGameId } from '@features/game/services/announcement.service';
 import { TypographyH2 } from '@shared/components/ui/typography-h2';
 
 type PlatformTab = keyof Pick<NormalizedDist, 'Website' | 'Windows' | 'macOS' | 'Linux' | 'Other'>;
@@ -92,46 +92,46 @@ const resolveReleaseDate = (metadata: Metadata | null | undefined): number | und
   return undefined;
 };
 
-const useAnnouncements = (gameId: string | undefined, wallet: any) => {
-  const [announcements, setAnnouncements] = useState<GameAnnouncementType[]>([]);
+// const useAnnouncements = (gameId: string | undefined, wallet: any) => {
+//   const [announcements, setAnnouncements] = useState<GameAnnouncementType[]>([]);
 
-  useEffect(() => {
-    let mounted = true;
-    if (!gameId || !wallet) return;
-    (async () => {
-      try {
-        const list =
-          (await getAllAnnouncementsByGameId({
-            gameId,
-            wallet,
-          })) ?? [];
-        if (!mounted) return;
-        const filtered = list
-          .filter((item) => {
-            if (!item.status || typeof item.status !== 'object') return true;
-            const statusKey = Object.keys(item.status)[0];
-            return statusKey === 'published';
-          })
-          .sort((a, b) => {
-            const aPinned = a.pinned ? 1 : 0;
-            const bPinned = b.pinned ? 1 : 0;
-            if (aPinned !== bPinned) return bPinned - aPinned;
-            const aCreated = a.createdAt ? Number(a.createdAt) : 0;
-            const bCreated = b.createdAt ? Number(b.createdAt) : 0;
-            return bCreated - aCreated;
-          });
-        setAnnouncements(filtered);
-      } catch (err) {
-        console.error('[GameDetail] Unable to fetch announcements', err);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [gameId, wallet]);
+//   useEffect(() => {
+//     let mounted = true;
+//     if (!gameId || !wallet) return;
+//     (async () => {
+//       try {
+//         const list =
+//           (await getAllAnnouncementsByGameId({
+//             gameId,
+//             wallet,
+//           })) ?? [];
+//         if (!mounted) return;
+//         const filtered = list
+//           .filter((item) => {
+//             if (!item.status || typeof item.status !== 'object') return true;
+//             const statusKey = Object.keys(item.status)[0];
+//             return statusKey === 'published';
+//           })
+//           .sort((a, b) => {
+//             const aPinned = a.pinned ? 1 : 0;
+//             const bPinned = b.pinned ? 1 : 0;
+//             if (aPinned !== bPinned) return bPinned - aPinned;
+//             const aCreated = a.createdAt ? Number(a.createdAt) : 0;
+//             const bCreated = b.createdAt ? Number(b.createdAt) : 0;
+//             return bCreated - aCreated;
+//           });
+//         setAnnouncements(filtered);
+//       } catch (err) {
+//         console.error('[GameDetail] Unable to fetch announcements', err);
+//       }
+//     })();
+//     return () => {
+//       mounted = false;
+//     };
+//   }, [gameId, wallet]);
 
-  return announcements;
-};
+//   return announcements;
+// };
 
 export default function GameDetail(): React.ReactElement {
   const { gameId } = useParams();
@@ -149,7 +149,7 @@ export default function GameDetail(): React.ReactElement {
     message: string;
   } | null>(null);
 
-  const announcements = useAnnouncements(gameId, wallet);
+  //   const announcements = useAnnouncements(gameId, wallet);
 
   useEffect(() => {
     if (!gameId) return;

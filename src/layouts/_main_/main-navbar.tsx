@@ -7,15 +7,15 @@ export const MainNavbar = () => {
   const chains = [
     {
       name: 'Internet Computer',
-      imgUrl: '/images/chains/icp.webp',
+      imgUrl: './images/chains/icp.webp',
     },
     {
       name: 'Solana',
-      imgUrl: '/images/chains/sol.webp',
+      imgUrl: './images/chains/sol.webp',
     },
     {
       name: 'Ethereum',
-      imgUrl: '/images/chains/eth.webp',
+      imgUrl: './images/chains/eth.webp',
     },
   ];
 
