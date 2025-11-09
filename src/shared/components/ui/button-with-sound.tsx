@@ -1,6 +1,6 @@
 import React from 'react';
 
-function useClickSound(url = '/sounds/click.wav', volume = 0.6) {
+function useClickSound(url = '/sounds/click.mp3', volume = 0.6) {
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
   React.useEffect(() => {
@@ -29,7 +29,7 @@ type ButtonWithSoundProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export const ButtonWithSound = React.forwardRef<HTMLButtonElement, ButtonWithSoundProps>(
   (
-    { soundUrl = '/sounds/click.wav', soundVolume = 0.6, onClick, disabled, children, ...rest },
+    { soundUrl = '/sounds/click.mp3', soundVolume = 0.6, onClick, disabled, children, ...rest },
     ref,
   ) => {
     const play = useClickSound(soundUrl, soundVolume);

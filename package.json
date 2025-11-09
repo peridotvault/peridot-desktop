@@ -16,9 +16,10 @@
     "build": "rimraf release dist dist-electron && tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "prebuild-win": "rimraf release dist dist-electron && tsc && vite build",
     "build-win": "electron-builder --win nsis --x64"
   },
-  "repository": "https://github.com/peridotvault/peridotvault-macos",
+  "repository": "https://github.com/peridotvault/peridot-desktop",
   "publish": {
     "provider": "github",
     "releaseType": "release"
@@ -172,7 +173,7 @@
           ]
         }
       ],
-      "icon": "public/assets/coin-peridot.png",
+      "icon": "build/icons/icon.ico",
       "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "nsis": {

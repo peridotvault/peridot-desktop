@@ -2,7 +2,7 @@
   "categories": [
     {
       "id": "action",
-      "coverImage": "/images/games/category-action.webp",
+      "coverImage": "./images/games/category-action.webp",
       "name": "Action",
       "subgenres": [
         "Platformer",
@@ -18,7 +18,7 @@
     },
     {
       "id": "adventure",
-      "coverImage": "/images/games/category-adventure.webp",
+      "coverImage": "./images/games/category-adventure.webp",
       "name": "Adventure",
       "subgenres": [
         "Point and Click",
@@ -31,7 +31,7 @@
     },
     {
       "id": "role_playing",
-      "coverImage": "/images/games/category-rpg.webp",
+      "coverImage": "./images/games/category-rpg.webp",
       "name": "Role-Playing (RPG)",
       "subgenres": [
         "Action RPG",
