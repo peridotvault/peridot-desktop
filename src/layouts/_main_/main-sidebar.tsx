@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import {
   faDownload,
-  faDungeon,
+  faHouse,
   faRobot,
   faStore,
   faTableCellsLarge,
@@ -10,7 +10,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ImagePeridotLogo } from '@shared/lib/constants/const-url';
 import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 import { Avatar } from '../../shared/components/ui/avatar';
 
@@ -40,7 +39,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
     {
       href: '/',
       isActive: p === '/' || isSectionActive('/vault'),
-      icon: faDungeon,
+      icon: faHouse,
       label: 'Vault',
     },
     {
@@ -64,9 +63,9 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
   ];
 
   const base =
-    'flex aspect-square rounded-lg text-xl items-center justify-center duration-300 active:-translate-y-1 hover:cursor-pointer';
-  const active = 'text-foreground text-background bg-linear-to-tr from-accent to-accent-foreground';
-  const inactive = 'hover:text-white text-muted-foreground hover:pointer-events-auto';
+    'flex aspect-5/4 w-full text-xl items-center justify-center duration-300 active:-translate-y-1 hover:cursor-pointer';
+  const active = 'text-accent-foreground border-r-2 text-2xl border-accent-foreground';
+  const inactive = 'hover:text-white/80 text-muted-foreground hover:pointer-events-auto';
 
   const ActionBtn = ({
     icon,
@@ -85,28 +84,24 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
       aria-label={label}
       aria-pressed={isActive}
       title={label}
-      className={`${base} ${isActive ? active : inactive}`}
+      className={`flex aspect-square w-full rounded text-xl items-center justify-center duration-300 active:-translate-y-1 overflow-hidden hover:cursor-pointer ${isActive ? 'text-foreground bg-linear-to-tr from-accent to-accent-foreground' : inactive}`}
     >
       <FontAwesomeIcon icon={icon} />
     </ButtonWithSound>
   );
 
   return (
-    <div className="fixed bg-background flex flex-col h-full shadow-flat-sm z-50 w-20 p-2">
+    <div className="fixed top-12 left-0 bg-card flex flex-col z-50 w-16 h-[calc(100vh-3rem)]">
       {/* List Path  */}
       <aside className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="flex flex-col p-1 gap-2 justify-between h-full">
+        <div className="flex flex-col gap-2 justify-between h-full">
           {/* Top  */}
           <div className="flex flex-col">
-            <div className="p-2 mb-10">
-              <img src={ImagePeridotLogo} alt="" draggable={false} />
-            </div>
-
             {/* Actions  */}
             {linkSidebar.map((item, index) => (
               <ButtonWithSound
                 key={index}
-                onClick={() => navigate(item.href)} // atau navigate('/')
+                onClick={() => navigate(item.href)}
                 aria-label={item.label}
                 aria-pressed={item.isActive}
                 className={`${base} ${item.isActive ? active : inactive}`}
@@ -117,8 +112,8 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
           </div>
 
           {/* Bottom  */}
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col bg-card rounded-lg border border-foreground/10 gap-2">
+          <div className="flex flex-col gap-2 px-2">
+            <div className="flex flex-col rounded border border-foreground/10">
               <ActionBtn
                 icon={faRobot}
                 label="Peri Chatbot"

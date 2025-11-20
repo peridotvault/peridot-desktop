@@ -1,11 +1,11 @@
 // @ts-ignore
 import React, { useEffect, useState } from 'react';
-import { MainNavbar } from './main-navbar';
 import { Outlet } from 'react-router-dom';
 import { Wallet } from '../../features/wallet/views/Wallet';
 import { MainSidebar } from './main-sidebar';
 import { MenuAvatar } from '../../shared/components/menu-avatar';
 import AIChatbot from '@features/ai/components/ai-chatbot';
+import { WindowNavbar } from '../window/WindowNavbar';
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
@@ -45,45 +45,47 @@ export default function MainLayout() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col">
-      <MainSidebar
-        onOpenWallet={toggleWallet}
-        onOpenPeri={togglePeri}
-        onOpenMenuAvatar={toggleAvatar}
-        walletActive={isOpenWallet}
-        periActive={isOpenPeri}
-        avatarActive={isOpenMenuAvatar}
-      />
+    <div className="h-screen flex flex-col overflow-hidden">
+      <WindowNavbar />
+      <main className="flex flex-col overflow-auto mt-12">
+        <MainSidebar
+          onOpenWallet={toggleWallet}
+          onOpenPeri={togglePeri}
+          onOpenMenuAvatar={toggleAvatar}
+          walletActive={isOpenWallet}
+          periActive={isOpenPeri}
+          avatarActive={isOpenMenuAvatar}
+        />
 
-      {/* Content Area */}
-      <div className={`flex-1 ml-20 relative`}>
-        <MainNavbar />
-        <div className={``}>
-          <Outlet />
+        {/* Content Area */}
+        <div className={`flex-1 ml-16 relative`}>
+          <div className={``}>
+            <Outlet />
+          </div>
         </div>
-      </div>
 
-      {/* Store Modal ========================= */}
-      <AIChatbot
-        open={isOpenPeri}
-        onClose={() => setIOpenPeri(false)}
-        leftClassName="left-20" // selaras dengan lebar sidebar w-20
-        title="Peri Chat"
-      />
+        {/* Store Modal ========================= */}
+        <AIChatbot
+          open={isOpenPeri}
+          onClose={() => setIOpenPeri(false)}
+          leftClassName="left-16" // selaras dengan lebar sidebar w-20
+          title="Peri Chat"
+        />
 
-      <Wallet
-        open={isOpenWallet}
-        onClose={() => setIOpenWallet(false)}
-        // onLockChanged={() => setIsRequiredPassword(true)}
-        onLockChanged={() => {}}
-        leftClassName="left-20"
-      />
+        <Wallet
+          open={isOpenWallet}
+          onClose={() => setIOpenWallet(false)}
+          // onLockChanged={() => setIsRequiredPassword(true)}
+          onLockChanged={() => {}}
+          leftClassName="left-16"
+        />
 
-      <MenuAvatar
-        open={isOpenMenuAvatar}
-        onClose={() => setIOpenMenuAvatar(false)}
-        leftClassName="left-24"
-      />
-    </main>
+        <MenuAvatar
+          open={isOpenMenuAvatar}
+          onClose={() => setIOpenMenuAvatar(false)}
+          leftClassName="left-20"
+        />
+      </main>
+    </div>
   );
 }

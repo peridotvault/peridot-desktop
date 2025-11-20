@@ -12,13 +12,18 @@
   "app": {
     "windows": [
       {
+        "label": "login",
+        "title": "PeridotVault Login & Updater",
+        "width": 680,
+        "height": 420,
+        "resizable": true
+      },
+      {
         "label": "main",
         "title": "PeridotVault",
         "width": 1280,
-        "minWidth": 1100,
         "height": 800,
-        "minHeight": 600,
-        "decorations": false
+        "visible": false
       }
     ],
     "security": {
