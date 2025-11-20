@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { InputField } from '../../../components/atoms/InputField';
-import localforage from 'localforage';
 import { Contact } from '../views/SendToken';
+import { getKvItem, setKvItem } from '@shared/storage/app-db';
+import { KV_KEYS } from '@shared/storage/kv-keys';
+import { STORAGE_EVENTS } from '@shared/storage/events';
 
 interface NavbarProps {
   onClose: () => void;
@@ -19,13 +21,13 @@ export const SaveContact: React.FC<NavbarProps> = ({ onClose, address }) => {
         username: username,
         address: address,
       };
-      const currentContacts = await localforage.getItem<Contact[]>('contacts');
-      const updatedContacts = currentContacts ? [...currentContacts, newContact] : [newContact];
+      const currentContacts = (await getKvItem<Contact[]>(KV_KEYS.contacts)) ?? [];
+      const updatedContacts = [...currentContacts, newContact];
 
-      const result = await localforage.setItem('contacts', updatedContacts);
-      console.log(result);
+      await setKvItem(KV_KEYS.contacts, updatedContacts);
+      window.dispatchEvent(new Event(STORAGE_EVENTS.contactsChanged));
       onClose();
-      return result;
+      return updatedContacts;
     } catch (error) {
       console.log(error);
     }

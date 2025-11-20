@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
-import { useNavigate } from 'react-router-dom';
 import {
   faArrowRightFromBracket,
   faBitcoinSign,
@@ -32,6 +31,7 @@ import { InputField } from '../../../components/atoms/InputField';
 import { CoinService } from '@features/wallet/local-db/services/coinService';
 import { Coin } from '@features/wallet/local-db/models/Coin';
 import { clearWalletData } from '@shared/services/store.service';
+import { useStartupStage } from '@shared/contexts/StartupStageContext';
 
 interface HomeProps {
   onLockChanged: () => void;
@@ -39,7 +39,7 @@ interface HomeProps {
 
 export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
   const { wallet, setWallet, setIsGeneratedSeedPhrase } = useWallet();
-  const navigate = useNavigate();
+  const { goToLogin } = useStartupStage();
   const [isOpenWalletAddress, setIsOpenWalletAddress] = useState(false);
   const [isModalOpenKey, setIsModalOpenKey] = useState(false);
   const [isModalOpenKeyPKSP, setIsModalOpenKeyPKSP] = useState('');
@@ -110,7 +110,7 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
         verificationData: null,
       });
       setIsGeneratedSeedPhrase(false);
-      navigate('/login');
+      goToLogin();
     } catch (error) {
       console.error('Error clearing wallet data:', error);
     }

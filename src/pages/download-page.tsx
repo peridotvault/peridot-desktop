@@ -4,7 +4,6 @@ import { useDownloadManager } from '../components/molecules/DownloadManager';
 
 export default function DownloadPage() {
   const { queue, removeFromQueue, cancelActive } = useDownloadManager();
-  console.log('electronAPI', window.electronAPI);
 
   return (
     <div className="container mx-auto max-w-4xl p-6 pb-24">

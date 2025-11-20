@@ -1,16 +1,10 @@
-import { WalletData } from "./wallet.service";
+import { WalletData } from './wallet.service';
+import { getKvItem, setKvItem, deleteKvItem } from '@shared/storage/app-db';
+import { KV_KEYS } from '@shared/storage/kv-keys';
 
 export const saveWalletData = async (data: WalletData): Promise<void> => {
   try {
-    // Properly serialize the identity
-    const serializedData = {
-      ...data,
-    };
-
-    const result = await window.electronAPI.saveWallet(serializedData);
-    if (!result.success) {
-      throw new Error(result.error);
-    }
+    await setKvItem(KV_KEYS.walletData, data);
   } catch (error) {
     console.error('Error saving wallet data:', error);
     throw error;
@@ -19,18 +13,8 @@ export const saveWalletData = async (data: WalletData): Promise<void> => {
 
 export const getWalletData = async (): Promise<WalletData | undefined> => {
   try {
-    const result = await window.electronAPI.getWallet();
-    if (result.success && result.data) {
-      const data = result.data;
-
-      // Properly deserialize the identity
-      const walletData: WalletData = {
-        ...data,
-      };
-
-      return walletData;
-    }
-    return undefined;
+    const stored = await getKvItem<WalletData>(KV_KEYS.walletData);
+    return stored ?? undefined;
   } catch (error) {
     console.error('Error getting wallet data:', error);
     return undefined;
@@ -39,10 +23,7 @@ export const getWalletData = async (): Promise<WalletData | undefined> => {
 
 export const clearWalletData = async (): Promise<void> => {
   try {
-    const result = await window.electronAPI.clearWallet();
-    if (!result.success) {
-      throw new Error(result.error);
-    }
+    await deleteKvItem(KV_KEYS.walletData);
   } catch (error) {
     console.error('Error clearing wallet data:', error);
     throw error;

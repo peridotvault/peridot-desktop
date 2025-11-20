@@ -5,8 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { shortenAddress } from '@shared/lib/utils/Additional';
 import { ButtonTransaction } from '../../../components/atoms/ButtonTransaction';
-import { ipcRenderer } from 'electron';
 import { DateTime } from 'luxon';
+import { openUrl } from '@tauri-apps/plugin-opener';
 
 export function millisecondsToTimestamp(milliseconds: number): string {
   return DateTime.fromMillis(milliseconds / 1_000_000)
@@ -61,6 +61,21 @@ export const TransactionProof = ({
     );
   }
 
+  const explorerUrl = `https://peridot-explorer.vercel.app/${parseMetadata.canisterId}/transaction/${parseMetadata.transaction_identifier}`;
+
+  const openExplorer = async () => {
+    try {
+      if ((window as any).__TAURI__) {
+        await openUrl(explorerUrl);
+      } else {
+        window.open(explorerUrl, '_blank', 'noopener,noreferrer');
+      }
+    } catch (error) {
+      console.error('Failed to open explorer', error);
+      window.open(explorerUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className="fixed left-20 w-[370px] top-0 bg-background h-full flex flex-col p-8 gap-12 justify-between">
       {/* header  */}
@@ -91,15 +106,7 @@ export const TransactionProof = ({
         </table>
       </div>
 
-      <ButtonTransaction
-        text="View On Explorer"
-        onClick={() => {
-          ipcRenderer.send(
-            'open-external-link',
-            `https://peridot-explorer.vercel.app/${parseMetadata.canisterId}/transaction/${parseMetadata.transaction_identifier}`,
-          );
-        }}
-      />
+      <ButtonTransaction text="View On Explorer" onClick={openExplorer} />
     </div>
   );
 };

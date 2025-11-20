@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { InputField } from '../../../components/atoms/InputField';
 import { shortenAddress } from '@shared/lib/utils/Additional';
 import { Principal } from '@dfinity/principal';
-import localforage from 'localforage';
 import { ICRC1Coin } from '../components/ICRC1Coin';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { SaveContact } from '../components/SaveContact';
@@ -13,6 +12,9 @@ import { AlertMessage } from '../components/AlertMessage';
 import { Coin } from '@features/wallet/local-db/models/Coin';
 import { CoinService } from '@features/wallet/local-db/services/coinService';
 import { transferTokenICRC1 } from '../blockchain/icp/services/ICPCoinService';
+import { getKvItem } from '@shared/storage/app-db';
+import { KV_KEYS } from '@shared/storage/kv-keys';
+import { STORAGE_EVENTS } from '@shared/storage/events';
 
 interface Props {
   onClose: () => void;
@@ -42,12 +44,24 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
   const [myContacts, setMyContacts] = useState<Contact[] | null>(null);
 
   useEffect(() => {
+    let active = true;
+
     async function loadContacts() {
-      const savedContact = await localforage.getItem<Contact[]>('contacts');
-      setMyContacts(savedContact);
+      const savedContact = await getKvItem<Contact[]>(KV_KEYS.contacts);
+      if (active) {
+        setMyContacts(savedContact ?? null);
+      }
     }
 
     loadContacts();
+
+    const handler = () => loadContacts();
+    window.addEventListener(STORAGE_EVENTS.contactsChanged, handler);
+
+    return () => {
+      active = false;
+      window.removeEventListener(STORAGE_EVENTS.contactsChanged, handler);
+    };
   }, []);
 
   // Coins

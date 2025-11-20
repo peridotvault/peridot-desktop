@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import { OSKey } from '../../interfaces/CoreInterface';
 import { upsertInstalledEntry } from '@shared/lib/utils/installedStorage';
+import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 // Gunakan tipe dari service.did.d
 import type {
   PGCGame,
@@ -61,7 +62,7 @@ type PickSuccess =
 
 type PickError = {
   kind: 'error';
-  reason: 'no-electron-and-no-fsaccess' | 'not-secure-context' | 'user-cancel';
+  reason: 'no-native-picker' | 'not-secure-context' | 'user-cancel';
 };
 type PickResult = PickSuccess | PickError;
 
@@ -74,10 +75,8 @@ export const useDownloadManager = () => {
 };
 
 /* ========= Helpers ========= */
-const isElectron = () => {
-  const w = window as any;
-  return !!w?.electronAPI?.showSaveDialog || !!(window as any).process?.versions?.electron;
-};
+const isDesktopRuntime = () =>
+  typeof window !== 'undefined' && Boolean((window as any).__TAURI__);
 const isZip = (name: string) => name.toLowerCase().endsWith('.zip');
 
 function latestPerOS(builds: ResolvedBuild[]): ResolvedBuild[] {
@@ -246,23 +245,27 @@ async function resolveFromApp(app: PGCGame): Promise<ResolvedBuild[]> {
 // Definisi PickSuccess, PickError, PickResult sudah dipindah ke atas
 // Fungsi pickSaveTarget sekarang bisa menggunakan tipe yang sudah didefinisikan di atas
 async function pickSaveTarget(defaultName: string, mode: 'file' | 'dir'): Promise<PickResult> {
-  const api = (window as any).electronAPI;
-
-  // Electron
-  if (api?.showSaveDialog && api?.showOpenDirDialog) {
+  if (isDesktopRuntime()) {
     try {
       if (mode === 'dir') {
-        const raw = await api.showOpenDirDialog();
-        if (raw?.canceled) return { kind: 'error', reason: 'user-cancel' };
-        if (raw?.filePath) return { kind: 'success-dir', dirPath: raw.filePath };
+        const dir = (await openDialog({
+          directory: true,
+          multiple: false,
+        })) as string | string[] | null;
+        if (typeof dir === 'string') return { kind: 'success-dir', dirPath: dir };
+        if (Array.isArray(dir) && dir.length > 0 && typeof dir[0] === 'string') {
+          return { kind: 'success-dir', dirPath: dir[0] as string };
+        }
         return { kind: 'error', reason: 'user-cancel' };
       } else {
-        const raw = await api.showSaveDialog(defaultName);
-        if (raw?.canceled) return { kind: 'error', reason: 'user-cancel' };
-        if (raw?.filePath) return { kind: 'success', filePath: raw.filePath };
+        const filePath = await saveDialog({ defaultPath: defaultName });
+        if (typeof filePath === 'string') {
+          return { kind: 'success', filePath };
+        }
         return { kind: 'error', reason: 'user-cancel' };
       }
-    } catch {
+    } catch (error) {
+      console.error('Failed to open native dialog', error);
       return { kind: 'error', reason: 'user-cancel' };
     }
   }
@@ -271,7 +274,7 @@ async function pickSaveTarget(defaultName: string, mode: 'file' | 'dir'): Promis
   // @ts-ignore
   const hasPicker = typeof window.showSaveFilePicker === 'function';
   const secure = window.isSecureContext === true;
-  if (!hasPicker) return { kind: 'error', reason: 'no-electron-and-no-fsaccess' };
+  if (!hasPicker) return { kind: 'error', reason: 'no-native-picker' };
   if (!secure) return { kind: 'error', reason: 'not-secure-context' };
 
   try {
@@ -302,11 +305,7 @@ export const DownloadProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   useEffect(() => {
-    console.log('[DownloadManager] isElectron:', isElectron());
-    console.log(
-      '[DownloadManager] electronAPI keys:',
-      Object.keys((window as any).electronAPI || {}),
-    );
+    console.log('[DownloadManager] running in desktop runtime:', isDesktopRuntime());
   }, []);
 
   /** buka modal dari halaman game */
@@ -396,7 +395,7 @@ export const DownloadProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               throw new Error(
                 picked.reason === 'not-secure-context'
                   ? 'Secure context diperlukan (https/localhost).'
-                  : picked.reason === 'no-electron-and-no-fsaccess'
+                  : picked.reason === 'no-native-picker'
                     ? 'Browser tidak mendukung pemilihan lokasi.'
                     : 'Save canceled',
               );
@@ -423,29 +422,13 @@ export const DownloadProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         let launchPath: string | undefined = undefined; // Inisialisasi sebagai undefined
 
         if (zip) {
-          // cari executable di installDir (Electron) - GAGAL TIDAK LANGSUNG ERROR
-          if ((window as any).electronAPI?.findLaunchableInDir && installDir) {
-            const res = await (window as any).electronAPI.findLaunchableInDir(installDir);
-            if (res?.path) {
-              launchPath = res.path; // Set jika ditemukan
-              console.log(`[DM] Launchable executable found: ${launchPath}`);
-            } else {
-              // JIKA TIDAK DITEMUKAN, TIDAK ERROR, CUKUP LOG
-              console.warn(
-                `[DM] Could not find executable in directory: ${installDir}. Launch path will be undefined.`,
-              );
-              // launchPath tetap undefined
-            }
-          } else if (!installDir) {
+          if (!installDir) {
             // Jika installDir tidak ada, seharusnya tidak sampai sini karena sudah diverifikasi di atas
             throw new Error('Installation directory is required for zip files.');
-          } else {
-            // Jika findLaunchableInDir tidak tersedia di Electron API, kita tidak bisa menentukan launchPath.
-            console.warn(
-              `[DM] Launchable executable finder is not available in Electron API. Launch path will be undefined.`,
-            );
-            // launchPath tetap undefined
           }
+          console.warn(
+            '[DownloadManager] Automatic executable detection is not available in this runtime.',
+          );
         } else {
           // non-zip: kalau file akhir jelas bisa dieksekusi (exe/app/appimage), jadikan launchPath
           const lower = (targetPath || '').toLowerCase();
@@ -554,24 +537,14 @@ export const DownloadProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const suggested = selectedBuild?.fileName || 'installer';
         const zip = isZip(suggested);
 
-        if (zip) {
-          // ZIP → pilih FOLDER install
-          if (!(window as any).electronAPI?.showOpenDirDialog) {
-            return;
+        const picked = await pickSaveTarget(suggested, zip ? 'dir' : 'file');
+        if (picked.kind === 'error') {
+          if (picked.reason !== 'user-cancel') {
+            alert('File picker tidak tersedia di lingkungan ini.');
           }
-          const res = await window.electronAPI!.showOpenDirDialog!();
-          if (res.canceled || !res.filePath) {
-            return;
-          }
-          setTarget({ kind: 'success-dir', dirPath: res.filePath });
-        } else {
-          // Non-ZIP → pilih FILE lokasi simpan
-          const res = await window.electronAPI!.showSaveDialog(suggested);
-          if (res.canceled || !res.filePath) {
-            return;
-          }
-          setTarget({ kind: 'success', filePath: res.filePath });
+          return;
         }
+        setTarget(picked);
       } finally {
         setPicking(false);
       }

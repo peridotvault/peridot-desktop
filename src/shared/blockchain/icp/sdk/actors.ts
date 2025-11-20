@@ -18,6 +18,6 @@ export const ICPPrivateAgent = ({ privateKey }: { privateKey: string }): HttpAge
     const secretKey = hexToArrayBuffer(privateKey);
     return new HttpAgent({
         host: HostICP,
-        identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+        identity: Secp256k1KeyIdentity.fromSecretKey(new Uint8Array(secretKey)),
     });
 };

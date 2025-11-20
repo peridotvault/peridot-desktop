@@ -120,7 +120,7 @@ export const AppPayment: React.FC<Props> = ({
 
     const agent = new HttpAgent({
       host: import.meta.env.VITE_HOST,
-      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+      identity: Secp256k1KeyIdentity.fromSecretKey(new Uint8Array(secretKey)),
     });
     // if (import.meta.env.DEV) await agent.fetchRootKey();
 

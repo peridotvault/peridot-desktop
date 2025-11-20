@@ -1,29 +1,34 @@
 // @ts-ignore
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { useNavigate } from 'react-router-dom';
 import { ImportWallet } from './ImportWallet';
 import { CreateWallet } from './CreateWallet';
 
-export default function Login() {
+export interface LoginScreenProps {
+  onAuthenticated?: () => void;
+}
+
+export function LoginScreen({ onAuthenticated }: LoginScreenProps) {
   const { wallet } = useWallet();
-  const navigate = useNavigate();
   const [isImportWallet, setIsImportWallet] = useState<boolean>(true);
 
-  useEffect(() => {
-    function checkWallet() {
-      if (
+  const hasWallet = useMemo(
+    () =>
+      Boolean(
         wallet.principalId &&
-        wallet.accountId &&
-        wallet.encryptedPrivateKey &&
-        wallet.verificationData
-      ) {
-        navigate('/');
-      }
-    }
+          wallet.accountId &&
+          wallet.encryptedPrivateKey &&
+          wallet.verificationData,
+      ),
+    [wallet],
+  );
 
-    checkWallet();
-  });
+  useEffect(() => {
+    if (hasWallet) {
+      onAuthenticated?.();
+    }
+  }, [hasWallet, onAuthenticated]);
 
   return (
     <main className="flex justify-center w-full h-dvh items-center gap-6">
@@ -42,4 +47,10 @@ export default function Login() {
       </div>
     </main>
   );
+}
+
+export default function Login() {
+  const navigate = useNavigate();
+
+  return <LoginScreen onAuthenticated={() => navigate('/')} />;
 }

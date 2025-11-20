@@ -8,7 +8,6 @@ import UpdaterPage from './pages/additional/UpdaterPage';
 import AppShell from './layouts/app-shell';
 import MainLayout from './layouts/_main_/main-layout';
 import VaultPage from './pages/Vault';
-import Login from './pages/signin/Login';
 import { LoadingScreen } from './components/organisms/LoadingScreen';
 import { StudioGameMedia } from './pages/studio/game/studio-game-media';
 import { StudioGameBuilds } from './pages/studio/game/studio-game-builds';
@@ -169,11 +168,6 @@ const router = createHashRouter([
     ],
   },
 
-  // signin
-  {
-    path: '/login',
-    element: <Login />,
-  },
   {
     path: '/*',
     element: <NotFound />,

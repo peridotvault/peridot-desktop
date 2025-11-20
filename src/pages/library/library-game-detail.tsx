@@ -24,6 +24,7 @@ import { isZeroTokenAmount, resolveTokenInfo } from '@shared/utils/token-info';
 import { getGameRecordById } from '@features/game/services/record.service';
 import type { Manifest as PGCLiveManifest } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
 import { ButtonWithSound } from '@shared/components/ui/button-with-sound';
+import { openPath, openUrl } from '@tauri-apps/plugin-opener';
 
 // helper deteksi OSKey
 function detectOSKey(): 'windows' | 'macos' | 'linux' {
@@ -55,7 +56,7 @@ export default function LibraryGameDetail() {
   const tokenInfo = resolveTokenInfo(tokenCanister);
   const priceIsFree = isZeroTokenAmount(rawPrice, tokenInfo.decimals);
 
-  // normalize appId untuk localStorage key
+  // normalize appId untuk penyimpanan lokal
   const appIdKey = useMemo(() => {
     try {
       return gameId ? gameId : undefined;
@@ -149,35 +150,37 @@ export default function LibraryGameDetail() {
 
   const onLaunch = async () => {
     if (hasWeb && webUrl) {
-      openWebApp(webUrl);
+      await openWebApp(webUrl);
       return;
     }
 
-    const rec = appIdKey ? getInstalledRecord(appIdKey) : null;
+    const rec = appIdKey ? await getInstalledRecord(appIdKey) : null;
     const entry = latest || rec?.entries[0];
     if (!entry) {
       alert('App belum terpasang.');
       return;
     }
 
-    // Gunakan launchPath jika tersedia, jika tidak, coba filePath atau installDir
     const candidate = entry.launchPath || entry.filePath || entry.installDir;
     if (!candidate) {
       alert('Lokasi aplikasi tidak ditemukan. Silakan install ulang.');
       return;
     }
 
-    if ((window as any).electronAPI?.launchApp) {
-      const res = await (window as any).electronAPI.launchApp(candidate);
-      if (!res?.ok) alert('Gagal menjalankan aplikasi: ' + (res?.error || 'unknown'));
+    if ((window as any).__TAURI__) {
+      try {
+        await openPath(candidate);
+      } catch (error) {
+        console.error('Failed to open app', error);
+        alert('Gagal menjalankan aplikasi. Silakan buka folder secara manual.');
+      }
     } else {
-      // Fallback: buka folder (browser) jika launchPath tidak tersedia
       if (entry.installDir) {
-        alert('Tidak berjalan di Electron. Buka folder: ' + entry.installDir);
+        alert('Buka folder install secara manual: ' + entry.installDir);
       } else if (entry.filePath) {
-        alert('Tidak berjalan di Electron. Buka file: ' + entry.filePath);
+        alert('Buka file secara manual: ' + entry.filePath);
       } else {
-        alert('Tidak berjalan di Electron. Tidak ada lokasi file/folder yang dikenali.');
+        alert('Tidak ada lokasi file/folder yang dikenali.');
       }
     }
   };
@@ -267,18 +270,22 @@ export default function LibraryGameDetail() {
     };
   }, [gameId]);
 
-  const openWebApp = (url?: string | null) => {
+  const openWebApp = async (url?: string | null) => {
     const target = url ?? webUrl;
     if (!target) {
       alert('Web build URL tidak tersedia untuk app ini.');
       return;
     }
 
-    if ((window as any).electronAPI?.openWebGame) {
-      (window as any).electronAPI.openWebGame(target);
-    } else {
-      window.open(target, '_blank', 'noopener,noreferrer');
+    if ((window as any).__TAURI__) {
+      try {
+        await openUrl(target);
+        return;
+      } catch (error) {
+        console.error('Failed to open web app', error);
+      }
     }
+    window.open(target, '_blank', 'noopener,noreferrer');
   };
 
   const getWebStatus = () => {

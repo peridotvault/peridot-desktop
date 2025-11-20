@@ -2,12 +2,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { walletService } from '@shared/services/wallet.service';
-import { useNavigate } from 'react-router-dom';
 import { PasswordPage } from './PasswordPage';
 import { SeedPhraseInput } from '../../features/wallet/components/input-seedphrase';
 import { RedirectPage } from '../additional/redirect-page';
 import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 import { clearWalletData } from '@shared/services/store.service';
+import { useStartupStage } from '@shared/contexts/StartupStageContext';
 
 interface ImportWalletProps {
   setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,14 +16,14 @@ interface ImportWalletProps {
 export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } = useWallet();
 
-  const navigate = useNavigate();
+  const { goToApp } = useStartupStage();
   const [tempSeedPhrase, setTempSeedPhrase] = useState('');
 
   useEffect(() => {
     async function userHandle() {
       try {
         if (wallet.encryptedPrivateKey) {
-          navigate('/');
+          goToApp();
         }
       } catch (error) {
         console.error(error);
@@ -31,7 +31,7 @@ export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
     }
 
     userHandle();
-  }, [wallet.encryptedPrivateKey, navigate]);
+  }, [wallet.encryptedPrivateKey, goToApp]);
 
   const clearSeedPhrase = async () => {
     await clearWalletData();
@@ -66,7 +66,7 @@ export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
         console.error('Error importing wallet:', result.error);
       }
     },
-    [setWallet, navigate],
+    [setWallet],
   );
 
   if (!wallet.encryptedPrivateKey) {

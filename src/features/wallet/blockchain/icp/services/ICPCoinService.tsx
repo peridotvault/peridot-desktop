@@ -22,7 +22,7 @@ export async function transferTokenICRC1(
   try {
     const agent = new HttpAgent({
       host: import.meta.env.VITE_HOST,
-      identity: Secp256k1KeyIdentity.fromSecretKey(secretKey),
+      identity: Secp256k1KeyIdentity.fromSecretKey(new Uint8Array(secretKey)),
     });
 
     const actor = Actor.createActor(tokenIdlFactory, {

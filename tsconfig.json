@@ -21,15 +21,14 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["src/shared/*"],
       "@features/*": ["src/features/*"],
       "@components/*": ["src/components/*"],
+      "@shared/*": ["src/shared/*"],
       "@shared/lib/*": ["src/shared/lib/*"],
       "@pages/*": ["src/pages/*"]
     },
     "typeRoots": ["./src/types", "./node_modules/@types"]
   },
-  // "include": ["src", "electron","**/*.ts", "**/*.tsx"],
-  "include": ["src", "electron", "**/*.tsx"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

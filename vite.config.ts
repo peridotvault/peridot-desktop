@@ -1,78 +1,47 @@
-import { defineConfig } from 'vite';
-import path from 'path';
-import electron from 'vite-plugin-electron/simple';
-import react from '@vitejs/plugin-react';
-import wasm from 'vite-plugin-wasm';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import tailwindcss from '@tailwindcss/vite'
+import wasm from "vite-plugin-wasm";
+import { fileURLToPath } from "node:url";
+import { URL } from "node:url";
 
+const host = process.env.TAURI_DEV_HOST;
 
-export default defineConfig({
+// https://vite.dev/config/
+export default defineConfig(async () => ({
   plugins: [
+    react(),
     tailwindcss(),
     wasm(),
-    nodeResolve({
-      preferBuiltins: false,
-      browser: true,
-    }),
-    react({
-      jsxRuntime: 'automatic',
-      babel: {
-        plugins: ['@babel/plugin-transform-react-jsx'],
-      },
-    }),
-    electron({
-      main: {
-        entry: 'electron/main.ts',
-      },
-      preload: {
-        input: path.join(__dirname, 'electron/preload.ts'),
-      },
-      renderer: process.env.NODE_ENV === 'test' ? undefined : {},
-    }),
   ],
   resolve: {
     alias: {
-      buffer: 'buffer/',
-      stream: 'stream-browserify',
-      crypto: 'crypto-browserify',
-      process: 'process/browser',
-      util: 'util/',
-      '@shared': path.resolve(__dirname, 'src/shared'),
-      '@features': path.resolve(__dirname, 'src/features'),
-      '@components': path.resolve(__dirname, 'src/components'),
-      '@lib': path.resolve(__dirname, 'src/lib'),
-      '@pages': path.resolve(__dirname, 'src/pages'),
-      '@dfinity/agent': path.resolve(__dirname, 'node_modules/@dfinity/agent/lib/esm/index.js'),
+      "@features": fileURLToPath(new URL("./src/features", import.meta.url)),
+      "@components": fileURLToPath(new URL("./src/components", import.meta.url)),
+      "@shared": fileURLToPath(new URL("./src/shared", import.meta.url)),
+      "@pages": fileURLToPath(new URL("./src/pages", import.meta.url)),
     },
   },
-  define: {
-    global: 'globalThis',
-    'process.env': process.env,
-    // 'process.version': '"v16.0.0"',
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      target: 'esnext',
-      supported: {
-        bigint: true,
-      },
-    },
-    include: ['buffer', 'process', '@dfinity/agent', '@dfinity/principal', '@dfinity/candid'],
-  },
-  base: './',
-  build: {
-    target: 'esnext',
-    outDir: 'dist',
-    assetsDir: 'assets',
-    rollupOptions: {
-      external: ['electron-store'],
-      output: {
-        format: 'esm',
-      },
-    },
-    commonjsOptions: {
-      transformMixedEsModules: true,
+
+  // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
+  //
+  // 1. prevent Vite from obscuring rust errors
+  clearScreen: false,
+  // 2. tauri expects a fixed port, fail if that port is not available
+  server: {
+    port: 1420,
+    strictPort: true,
+    host: host || false,
+    hmr: host
+      ? {
+        protocol: "ws",
+        host,
+        port: 1421,
+      }
+      : undefined,
+    watch: {
+      // 3. tell Vite to ignore watching `src-tauri`
+      ignored: ["**/src-tauri/**"],
     },
   },
-});
+}));

@@ -2,6 +2,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { chat } from '@shared/api/ai.api';
 import { EyeGlassesIcon } from './../../../assets/icons/MainIcons';
+import { getKvItem, setKvItem } from '@shared/storage/app-db';
+import { chatKey } from '@shared/storage/kv-keys';
 
 /* ---------- sanitize utils (sama seperti web) ---------- */
 function stripXmlBlocks(s: string) {
@@ -43,7 +45,7 @@ function sanitizeReply(raw: any, opts?: { maxSentences?: number }) {
 }
 
 /* ---------- autosize textarea ---------- */
-function useAutosizeTextArea(ref: React.RefObject<HTMLTextAreaElement>, value: string) {
+function useAutosizeTextArea(ref: React.RefObject<HTMLTextAreaElement | null>, value: string) {
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -71,13 +73,8 @@ export default function AIChatbot({
   storageKey = 'peri_chat_msgs',
 }: Props) {
   const [input, setInput] = useState('');
-  const [msgs, setMsgs] = useState<Message[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(storageKey) || '[]');
-    } catch {
-      return [];
-    }
-  });
+  const [msgs, setMsgs] = useState<Message[]>([]);
+  const [hydrated, setHydrated] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -87,10 +84,34 @@ export default function AIChatbot({
   useAutosizeTextArea(inputRef, input);
   const isEmpty = msgs.length === 0;
 
+  // hydrate messages once
+  useEffect(() => {
+    let alive = true;
+    setHydrated(false);
+    (async () => {
+      try {
+        const saved = await getKvItem<Message[]>(chatKey(storageKey));
+        if (alive) {
+          setMsgs(saved ?? []);
+        }
+      } catch (error) {
+        console.error('Failed to load chat history', error);
+      } finally {
+        if (alive) setHydrated(true);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [storageKey]);
+
   // persist
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(msgs));
-  }, [msgs, storageKey]);
+    if (!hydrated) return;
+    setKvItem(chatKey(storageKey), msgs).catch((error) =>
+      console.error('Failed to persist chat history', error),
+    );
+  }, [msgs, storageKey, hydrated]);
 
   // autoscroll
   useLayoutEffect(() => {

@@ -1,9 +1,9 @@
-import { EncryptedData } from '@antigane/encryption';
 import { OSKey } from '@shared/api/wasabi.api';
 // import { Option } from '../interfaces/Additional';
 import { resolveTokenInfo, subunitsToNumber } from '@shared/utils/token-info';
 import { Option } from 'src/interfaces/app/GameInterface';
 import { DistKey } from 'src/interfaces/CoreInterface';
+import { EncryptedData } from '@shared/security/aes';
 
 export const shortenAddress = (address: string | null, firstSlice: number, secondSlice: number) => {
   if (address) return `${address.slice(0, firstSlice)}...${address.slice(-secondSlice)}`;

@@ -1,30 +1,29 @@
 import { Currency } from '@features/wallet/interfaces/Currency';
 import { WalletInfo } from '@features/wallet/interfaces/Wallet';
-import localforage from 'localforage';
 import { UserInterface } from 'src/interfaces/user/UserInterface';
 import theCurrencies from './../../../assets/json/currencies.json';
+import { getKvItem, setKvItem } from '@shared/storage/app-db';
+import { KV_KEYS } from '@shared/storage/kv-keys';
 
 // ✅ User
 export async function saveUserInfo(user: UserInterface) {
   try {
-    await localforage.setItem('user-info', user);
-    console.log('Successfully');
+    await setKvItem(KV_KEYS.userInfo, user);
   } catch (error) {
-    console.error;
+    console.error('Failed to save user info', error);
   }
 }
 
 export async function getUserInfo(): Promise<UserInterface | null> {
-  const user = await localforage.getItem<UserInterface>('user-info');
-  return user;
+  return (await getKvItem<UserInterface>(KV_KEYS.userInfo)) ?? null;
 }
 
 // Currency
 export async function getCurrency(): Promise<Currency[] | null> {
-  let currency = await localforage.getItem<Currency[]>('currencies');
+  let currency = await getKvItem<Currency[]>(KV_KEYS.currencies);
   if (!currency) {
     currency = theCurrencies as Currency[];
-    saveCurrency(theCurrencies);
+    await saveCurrency(theCurrencies);
   }
   return currency;
 }
@@ -37,10 +36,9 @@ export async function getCurrencyByCode(code: string): Promise<Currency | undefi
 
 export async function saveCurrency(currencies: Currency[]) {
   try {
-    await localforage.setItem('currencies', currencies);
-    console.log('Successfully');
+    await setKvItem(KV_KEYS.currencies, currencies);
   } catch (error) {
-    console.error;
+    console.error('Failed to save currencies', error);
   }
 }
 
@@ -64,13 +62,12 @@ export async function saveRatesByCode(
 export async function saveCurrencyToWallet(currency: Currency) {
   try {
     const wallet = { currency: currency } as WalletInfo;
-    await localforage.setItem('wallet-info', wallet);
+    await setKvItem(KV_KEYS.walletInfo, wallet);
   } catch (error) {
-    console.error;
+    console.error('Failed to save wallet currency', error);
   }
 }
 
 export async function getWalletInfo(): Promise<WalletInfo | null> {
-  const wallet = await localforage.getItem<WalletInfo>('wallet-info');
-  return wallet;
+  return (await getKvItem<WalletInfo>(KV_KEYS.walletInfo)) ?? null;
 }

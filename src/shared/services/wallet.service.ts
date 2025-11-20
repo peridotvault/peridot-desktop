@@ -6,9 +6,9 @@ import { Principal } from '@dfinity/principal';
 import { AccountIdentifier } from '@dfinity/ledger-icp';
 import { Buffer } from 'buffer';
 import * as ecc from 'tiny-secp256k1';
-import localforage from 'localforage';
-import { createEncryptionService, EncryptedData } from '@antigane/encryption';
-import { forceToArrayBuffer } from '../utils/crypto';
+import { EncryptedData, decryptString, encryptString } from '@shared/security/aes';
+import { getKvItem, setKvItem, deleteKvItem } from '@shared/storage/app-db';
+import { KV_KEYS } from '@shared/storage/kv-keys';
 
 const bip32 = BIP32Factory(ecc);
 
@@ -150,7 +150,6 @@ async function decryptPassword(encrypted: AESEncrypted): Promise<string> {
 export type WalletGenerateResult = WalletGenerateSuccess | WalletGenerateError;
 
 class WalletService {
-    private encryption = createEncryptionService();
     // private lock: OpenLockConfig | null = null;
 
     async generateWallet(seedPhrase: string, password: string): Promise<WalletGenerateResult> {
@@ -163,17 +162,17 @@ class WalletService {
                 throw new Error('Private key is undefined');
             }
 
-            const privateKeyBuffer = forceToArrayBuffer(child.privateKey!);
-            const identity = Secp256k1KeyIdentity.fromSecretKey(privateKeyBuffer);
+            const privateKeyBytes = new Uint8Array(child.privateKey!);
+            const identity = Secp256k1KeyIdentity.fromSecretKey(privateKeyBytes);
             const principalId = identity.getPrincipal().toString();
             const accountId = this.generateAccountId(principalId);
             const privateKey = Buffer.from(identity.getKeyPair().secretKey).toString('hex');
 
             // Create verification data for lock checks
-            const verificationData = await this.encryption.encrypt('VERIFY', password);
+            const verificationData = await encryptString('VERIFY', password);
 
-            const encryptedSeedPhrase = await this.encryption.encrypt(seedPhrase, password);
-            const encryptedPrivateKey = await this.encryption.encrypt(privateKey, password);
+            const encryptedSeedPhrase = await encryptString(seedPhrase, password);
+            const encryptedPrivateKey = await encryptString(privateKey, password);
 
             return {
                 success: true,
@@ -200,7 +199,7 @@ class WalletService {
         try {
             // Verify password by attempting to decrypt verification data
             try {
-                const decrypted = await this.encryption.decrypt(verificationData, password);
+                const decrypted = await decryptString(verificationData, password);
                 if (decrypted !== 'VERIFY') {
                     throw new Error('Invalid password');
                 }
@@ -217,7 +216,7 @@ class WalletService {
                 encryptedPassword: encryptedPassword,
             };
 
-            await localforage.setItem('key-lock', lock);
+            await setKvItem(KV_KEYS.walletLock, lock);
 
             return lock;
         } catch (error) {
@@ -227,36 +226,40 @@ class WalletService {
 
     async decryptWalletData(encryptedData: EncryptedData, password?: string): Promise<string> {
         try {
-            const lock = await localforage.getItem<OpenLockConfig>('key-lock');
+            const lock = await getKvItem<OpenLockConfig>(KV_KEYS.walletLock);
             if ((await this.isLockOpen()) && lock?.encryptedPassword) {
                 // Decrypt the stored password and use it
                 const decryptedPassword = await decryptPassword(lock.encryptedPassword);
-                return await this.encryption.decrypt(encryptedData, decryptedPassword);
+                return await decryptString(encryptedData, decryptedPassword);
             } else if (!password) {
                 throw new Error('Password required when lock is not open');
             }
-            return await this.encryption.decrypt(encryptedData, password);
+            return await decryptString(encryptedData, password);
         } catch (error) {
             throw new Error('Decryption error:' + (error as Error).message);
         }
     }
 
     async isLockOpen(): Promise<Boolean> {
-        const lock = await localforage.getItem<OpenLockConfig>('key-lock');
+        const lock = await getKvItem<OpenLockConfig>(KV_KEYS.walletLock);
         return !!(lock && Date.now() <= lock.expiresAt);
     }
 
     async closeLock(): Promise<Boolean> {
-        await localforage.removeItem('key-lock');
+        await deleteKvItem(KV_KEYS.walletLock);
         return true;
     }
 
     async setLock(lock: OpenLockConfig | null): Promise<void> {
-        await localforage.setItem('key-lock', lock);
+        if (lock) {
+            await setKvItem(KV_KEYS.walletLock, lock);
+        } else {
+            await deleteKvItem(KV_KEYS.walletLock);
+        }
     }
 
     async getLock(): Promise<OpenLockConfig | null> {
-        const lock = await localforage.getItem<OpenLockConfig>('key-lock');
+        const lock = await getKvItem<OpenLockConfig>(KV_KEYS.walletLock);
         return lock;
     }
 

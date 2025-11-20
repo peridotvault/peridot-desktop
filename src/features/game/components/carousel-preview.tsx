@@ -182,7 +182,9 @@ export default function CarouselPreview({
           ) : (
             <video
               key={it.src} // force re-init saat src berubah
-              ref={(el) => (videoRefs.current[i] = el)}
+              ref={(el) => {
+                videoRefs.current[i] = el;
+              }}
               className="h-full w-full object-cover"
               muted
               playsInline

@@ -1,37 +1,129 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { check, DownloadEvent, Update } from '@tauri-apps/plugin-updater';
+import { relaunch } from '@tauri-apps/plugin-process';
 
 type Status = 'idle' | 'checking' | 'available' | 'none' | 'downloading' | 'downloaded' | 'error';
 
-export default function UpdaterPage() {
+interface UpdaterPageProps {
+  onContinue?: () => void;
+  autoContinueDelayMs?: number;
+}
+
+const isDesktopRuntime = () => typeof window !== 'undefined' && Boolean((window as any).__TAURI__);
+const isDevEnvironment = Boolean(import.meta.env?.DEV);
+const devUpdaterOverride = import.meta.env?.VITE_ENABLE_DEV_UPDATER === 'true';
+
+export default function UpdaterPage({ onContinue, autoContinueDelayMs = 800 }: UpdaterPageProps) {
   const [state, setState] = useState<Status>('idle');
   const [message, setMessage] = useState('Initializing…');
   const [percent, setPercent] = useState(0);
+  const [updateInfo, setUpdateInfo] = useState<Update | null>(null);
+  const shouldSkipUpdater = useMemo(
+    () => !devUpdaterOverride && (!isDesktopRuntime() || isDevEnvironment),
+    [],
+  );
 
   useEffect(() => {
-    const api = (window as any).electronAPI;
+    let active = true;
+    async function run() {
+      if (shouldSkipUpdater) {
+        setState('none');
+        if (!isDesktopRuntime()) {
+          setMessage('Updater hanya tersedia di aplikasi desktop.');
+        } else {
+          setMessage('Skipping update check while in development mode.');
+        }
+        return;
+      }
+      setState('checking');
+      setMessage('Checking for updates…');
+      try {
+        const result = await check();
+        if (!active) return;
+        if (result?.available) {
+          setUpdateInfo(result);
+          setState('available');
+          setMessage(`Version ${result.version} is available.`);
+        } else {
+          setState('none');
+          setMessage('You already have the latest version.');
+        }
+      } catch (error) {
+        console.error('Failed to check updates', error);
+        if (!active) return;
+        if (isDevEnvironment && !devUpdaterOverride) {
+          setState('none');
+          setMessage('Skipping update check while in development mode.');
+        } else {
+          setState('error');
+          setMessage('Failed to check for updates.');
+        }
+      }
+    }
 
-    console.log(api);
-    const offStatus = api.onStatus((p: any) => {
-      console.log('MESSAGE = ' + p);
-      setState(p.state);
-      setMessage(p.message || '');
-    });
-    const offProgress = api.onProgress((p: any) => {
-      console.log('PERCENT = ' + p);
-      setState('downloading');
-      setPercent(p?.percent ?? 0);
-    });
-    const offDownloaded = api.onDownloaded(() => {
-      setState('downloaded');
-      setMessage('Update downloaded');
-    });
-
+    run();
     return () => {
-      if (typeof offStatus === 'function') offStatus();
-      if (typeof offProgress === 'function') offProgress();
-      if (typeof offDownloaded === 'function') offDownloaded();
+      active = false;
     };
-  }, []);
+  }, [shouldSkipUpdater]);
+
+  useEffect(() => {
+    if (!onContinue) return;
+    if (state === 'none') {
+      const id = setTimeout(() => {
+        onContinue?.();
+      }, autoContinueDelayMs);
+      return () => clearTimeout(id);
+    }
+  }, [autoContinueDelayMs, onContinue, state]);
+
+  const handleDownload = async () => {
+    if (!updateInfo) return;
+    setState('downloading');
+    setMessage('Downloading update…');
+    setPercent(0);
+    try {
+      let totalBytes = 0;
+      let downloaded = 0;
+      await updateInfo.downloadAndInstall((event: DownloadEvent) => {
+        if (event.event === 'Started') {
+          totalBytes = event.data.contentLength ?? 0;
+          downloaded = 0;
+          setPercent(0);
+        } else if (event.event === 'Progress') {
+          downloaded += event.data.chunkLength;
+          if (totalBytes > 0) {
+            setPercent(Math.min(99, (downloaded / totalBytes) * 100));
+          }
+        } else if (event.event === 'Finished') {
+          setPercent(100);
+        }
+      });
+      setState('downloaded');
+      setMessage('Update downloaded. Restart to apply.');
+      setPercent(100);
+    } catch (error) {
+      console.error('Failed to download update', error);
+      setState('error');
+      setMessage('Failed to download update.');
+    }
+  };
+
+  const skipUpdate = () => {
+    setState('none');
+    setMessage('Skipping update for now.');
+    onContinue?.();
+  };
+
+  const installNow = async () => {
+    try {
+      await relaunch();
+    } catch (error) {
+      console.error('Failed to relaunch application', error);
+      setState('error');
+      setMessage('Failed to restart application.');
+    }
+  };
 
   return (
     <div
@@ -85,26 +177,23 @@ export default function UpdaterPage() {
         <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
           {state === 'available' && (
             <>
-              <button
-                onClick={() => (window as any).electronAPI.startDownload()}
-                style={btnPrimary}
-              >
+              <button onClick={handleDownload} style={btnPrimary}>
                 Download update
               </button>
-              <button onClick={() => (window as any).electronAPI.skip()} style={btnGhost}>
+              <button onClick={skipUpdate} style={btnGhost}>
                 Skip
               </button>
             </>
           )}
 
           {state === 'downloaded' && (
-            <button onClick={() => (window as any).electronAPI.installNow()} style={btnPrimary}>
+            <button onClick={installNow} style={btnPrimary}>
               Restart to Update
             </button>
           )}
 
           {state === 'error' && (
-            <button onClick={() => (window as any).electronAPI.skip()} style={btnGhost}>
+            <button onClick={() => onContinue?.()} style={btnGhost}>
               Continue to app
             </button>
           )}

@@ -118,7 +118,9 @@ export const Settings = () => {
           {currencies?.map((item, idx) => (
             <button
               key={idx}
-              ref={(el) => (buttonRefs.current[item.currency] = el)}
+              ref={(el) => {
+                buttonRefs.current[item.currency] = el;
+              }}
               className={`${
                 walletInfo?.currency.currency == item.currency
                   ? 'border border-accent-foreground'

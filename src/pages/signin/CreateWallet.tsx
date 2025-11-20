@@ -2,13 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { walletService } from '@shared/services/wallet.service';
-import { useNavigate } from 'react-router-dom';
 import { PasswordPage } from './PasswordPage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faDice } from '@fortawesome/free-solid-svg-icons';
 import { SeedPhraseInput } from '../../features/wallet/components/input-seedphrase';
 import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
 import { clearWalletData } from '@shared/services/store.service';
+import { useStartupStage } from '@shared/contexts/StartupStageContext';
 
 interface CreateWalletProps {
   setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,14 +17,14 @@ interface CreateWalletProps {
 export const CreateWallet = ({ setIsImportWallet }: CreateWalletProps) => {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } = useWallet();
 
-  const navigate = useNavigate();
+  const { goToApp } = useStartupStage();
   const [newSeedPhrase, setNewSeedPhrase] = useState('');
 
   useEffect(() => {
     async function userHandle() {
       try {
         if (wallet.encryptedPrivateKey) {
-          navigate('/');
+          goToApp();
         }
       } catch (error) {
         console.error(error);
@@ -33,7 +33,7 @@ export const CreateWallet = ({ setIsImportWallet }: CreateWalletProps) => {
 
     generateSeedPhrase();
     userHandle();
-  }, [wallet.encryptedPrivateKey, navigate]);
+  }, [wallet.encryptedPrivateKey, goToApp]);
 
   const generateSeedPhrase = () => {
     setNewSeedPhrase(walletService.generateNewSeedPhrase());

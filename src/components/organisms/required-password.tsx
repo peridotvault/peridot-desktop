@@ -1,14 +1,14 @@
 import React from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import _ from 'lodash';
-import { useNavigate } from 'react-router-dom';
 import { InputField } from '../atoms/InputField';
 import { walletService } from '@shared/services/wallet.service';
 import { LoadingPage } from '../../pages/additional/loading-page';
+import { useStartupStage } from '@shared/contexts/StartupStageContext';
 
 export const RequiredPassword = () => {
   const { wallet, isCheckingWallet, setIsCheckingWallet } = useWallet();
-  const navigate = useNavigate();
+  const { goToLogin } = useStartupStage();
   const [isRequiredPassword, setIsRequiredPassword] = React.useState(false);
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
@@ -25,7 +25,7 @@ export const RequiredPassword = () => {
         !wallet.encryptedSeedPhrase ||
         !wallet.verificationData
       ) {
-        navigate('/login');
+        goToLogin();
         return;
       }
       try {
@@ -68,7 +68,7 @@ export const RequiredPassword = () => {
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [isCheckingWallet, navigate, wallet]);
+  }, [goToLogin, isCheckingWallet, wallet]);
 
   const handleConfirm = async () => {
     try {

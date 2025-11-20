@@ -9,11 +9,12 @@ import {
   faUser,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { ButtonWithSound } from './ui/button-with-sound';
 import { clearWalletData } from '@shared/services/store.service';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { shortenAddress } from '@shared/lib/utils/short-address';
+import { useStartupStage } from '@shared/contexts/StartupStageContext';
 
 type Props = {
   open: boolean;
@@ -25,7 +26,7 @@ type Props = {
 
 export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) => {
   const { wallet, setWallet, setIsGeneratedSeedPhrase } = useWallet();
-  const navigate = useNavigate();
+  const { goToLogin } = useStartupStage();
   const list = [
     {
       href: '/profile',
@@ -101,7 +102,7 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
         verificationData: null,
       });
       setIsGeneratedSeedPhrase(false);
-      navigate('/login');
+      goToLogin();
     } catch (error) {
       console.error('Error clearing wallet data:', error);
     }
