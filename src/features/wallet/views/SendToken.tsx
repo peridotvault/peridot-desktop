@@ -18,7 +18,6 @@ import { STORAGE_EVENTS } from '@shared/storage/events';
 
 interface Props {
   onClose: () => void;
-  onLockChanged: () => void;
 }
 
 // interface Coin {
@@ -37,7 +36,7 @@ export interface Contact {
   address: string;
 }
 
-export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
+export const SendToken: React.FC<Props> = ({ onClose }) => {
   const { wallet } = useWallet();
   const [sendTokenAddress, setSendTokenAddress] = useState('');
   const [finalAddress, setFinalAddress] = useState<Principal | null>(null);
@@ -165,7 +164,6 @@ export const SendToken: React.FC<Props> = ({ onClose, onLockChanged }) => {
       setShowFailed(true);
       setTimeout(() => {
         setShowFailed(false);
-        onLockChanged();
       }, 2000);
       console.log('Error Send : ' + error);
     }

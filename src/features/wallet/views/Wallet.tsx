@@ -9,16 +9,10 @@ import { Settings } from './Settings';
 interface WalletProps {
   open: boolean;
   onClose: () => void;
-  onLockChanged: () => void;
   leftClassName?: string; // sejajarkan dg lebar sidebar: "left-20" dll
 }
 
-export const Wallet: React.FC<WalletProps> = ({
-  open,
-  onClose,
-  onLockChanged,
-  leftClassName = 'left-24',
-}) => {
+export const Wallet: React.FC<WalletProps> = ({ open, onClose, leftClassName = 'left-24' }) => {
   const [activeNav, setActiveNav] = useState<NavItem>('home');
 
   // Lock scroll belakang + ESC untuk close
@@ -72,7 +66,7 @@ export const Wallet: React.FC<WalletProps> = ({
           >
             {/* CONTENT */}
             {activeNav === 'home' ? (
-              <Home onLockChanged={onLockChanged} />
+              <Home />
             ) : activeNav === 'nft' ? (
               <Nft />
             ) : activeNav === 'history' ? (

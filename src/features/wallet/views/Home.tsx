@@ -32,12 +32,9 @@ import { CoinService } from '@features/wallet/local-db/services/coinService';
 import { Coin } from '@features/wallet/local-db/models/Coin';
 import { clearWalletData } from '@shared/services/store.service';
 import { useStartupStage } from '@shared/contexts/StartupStageContext';
+import { useWalletLockStore } from '@shared/states/wallet-lock.store';
 
-interface HomeProps {
-  onLockChanged: () => void;
-}
-
-export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
+export const Home = () => {
   const { wallet, setWallet, setIsGeneratedSeedPhrase } = useWallet();
   const { goToLogin } = useStartupStage();
   const [isOpenWalletAddress, setIsOpenWalletAddress] = useState(false);
@@ -141,9 +138,12 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
     }
   };
 
+  const { forceLock } = useWalletLockStore();
+
   const handleCloseLock = async () => {
-    await walletService.closeLock();
-    onLockChanged();
+    // await walletService.closeLock();
+    await forceLock();
+    // onLockChanged();
   };
 
   return (
@@ -360,7 +360,6 @@ export const Home: React.FC<HomeProps> = ({ onLockChanged }) => {
                 manage: false,
               })
             }
-            onLockChanged={onLockChanged}
           />
         ) : openButton.manage ? (
           <Manage

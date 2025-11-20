@@ -70,13 +70,7 @@ export default function MainLayout() {
           title="Peri Chat"
         />
 
-        <Wallet
-          open={isOpenWallet}
-          onClose={() => setIOpenWallet(false)}
-          // onLockChanged={() => setIsRequiredPassword(true)}
-          onLockChanged={() => {}}
-          leftClassName="left-16"
-        />
+        <Wallet open={isOpenWallet} onClose={() => setIOpenWallet(false)} leftClassName="left-16" />
 
         <MenuAvatar
           open={isOpenMenuAvatar}

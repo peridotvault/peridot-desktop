@@ -28,4 +28,3 @@ export const ButtonWithSound = React.forwardRef<HTMLButtonElement, ButtonWithSou
     );
   },
 );
-ButtonWithSound.displayName = 'ButtonWithSound';

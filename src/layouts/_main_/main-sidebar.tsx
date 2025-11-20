@@ -62,9 +62,7 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
     },
   ];
 
-  const base =
-    'flex aspect-5/4 w-full text-xl items-center justify-center duration-300 active:-translate-y-1 hover:cursor-pointer';
-  const active = 'text-accent-foreground border-r-2 text-2xl border-accent-foreground';
+  const active = 'text-accent-foreground text-2xl';
   const inactive = 'hover:text-white/80 text-muted-foreground hover:pointer-events-auto';
 
   const ActionBtn = ({
@@ -104,9 +102,12 @@ export const MainSidebar: React.FC<MainSidebarProps> = ({
                 onClick={() => navigate(item.href)}
                 aria-label={item.label}
                 aria-pressed={item.isActive}
-                className={`${base} ${item.isActive ? active : inactive}`}
+                className={`flex aspect-5/4 w-full text-xl items-center justify-center duration-300 active:-translate-y-1 hover:cursor-pointer relative group ${item.isActive ? active : inactive}`}
               >
                 <FontAwesomeIcon icon={item.icon} />
+                <div
+                  className={`absolute right-0 top-1/2 -translate-y-1/2 w-[3px] rounded-l-full bg-accent-foreground transition-all duration-200 ${item.isActive ? 'h-4/5 opacity-100' : 'h-0 opacity-0 group-hover:h-1/3 group-hover:opacity-100'} `}
+                />
               </ButtonWithSound>
             ))}
           </div>
