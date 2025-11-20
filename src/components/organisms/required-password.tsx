@@ -91,7 +91,7 @@ export const RequiredPassword = () => {
 
   if (isRequiredPassword) {
     return (
-      <div className="backdrop-blur-sm bg-black/50 fixed z-100 w-full h-full flex justify-center items-center">
+      <div className="backdrop-blur-sm bg-black/50 fixed z-80 w-full h-full flex justify-center items-center">
         <div className="bg-background rounded-xl p-10 w-[400px] flex flex-col gap-6 items-end">
           <div className="flex flex-col gap-3 w-full ">
             <p>Password Required</p>

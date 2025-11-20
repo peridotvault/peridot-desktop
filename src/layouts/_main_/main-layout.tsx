@@ -5,7 +5,6 @@ import { Wallet } from '../../features/wallet/views/Wallet';
 import { MainSidebar } from './main-sidebar';
 import { MenuAvatar } from '../../shared/components/menu-avatar';
 import AIChatbot from '@features/ai/components/ai-chatbot';
-import { WindowNavbar } from '../window/WindowNavbar';
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
@@ -46,7 +45,6 @@ export default function MainLayout() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <WindowNavbar />
       <main className="flex flex-col overflow-auto mt-12">
         <MainSidebar
           onOpenWallet={toggleWallet}

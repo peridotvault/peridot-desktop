@@ -53,7 +53,7 @@ export const WindowNavbar = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 h-12 w-full z-50 bg-card text-white select-none">
+    <div className="fixed top-0 left-0 h-12 w-full z-100 bg-card text-white select-none">
       {/* Main ROW: Left (drag + traffic) + Right (chain / window controls) */}
       <div className="flex h-full px-3">
         {/* LEFT = DRAG REGION + traffic lights */}
