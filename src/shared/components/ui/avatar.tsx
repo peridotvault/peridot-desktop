@@ -1,6 +1,6 @@
 // @ts-ignore
 import React from 'react';
-import { ImageAvatarNotFound } from '@shared/lib/constants/const-url';
+import { ImageAvatarNotFound } from '@shared/constants/images';
 
 export const Avatar = ({
   isOnline = true,

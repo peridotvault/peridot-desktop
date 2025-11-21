@@ -6,7 +6,7 @@ import { PasswordPage } from './PasswordPage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faDice } from '@fortawesome/free-solid-svg-icons';
 import { SeedPhraseInput } from '../../features/wallet/components/input-seedphrase';
-import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
+import { ButtonWithSound } from '../../shared/components/ui/ButtonWithSound';
 import { clearWalletData } from '@shared/services/store.service';
 import { useStartupStage } from '@shared/contexts/StartupStageContext';
 

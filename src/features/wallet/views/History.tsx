@@ -8,12 +8,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons';
 import { FilterHistory } from '../components/FilterHistory';
 import { BlockService } from '@features/wallet/local-db/services/blockService';
-import { filterByType, groupByDay } from '@shared/lib/utils/classifier';
-import { transformBlockToTrained } from '@shared/lib/utils/transformBlockToTrainedData';
+import { filterByType, groupByDay } from '@shared/utils/classifier';
+import { transformBlockToTrained } from '@shared/utils/transformBlockToTrainedData';
 import { CoinService } from '@features/wallet/local-db/services/coinService';
 import { UserProgressService } from '@features/wallet/local-db/services/userProgressService';
 import { Principal } from '@dfinity/principal';
-import { formatShortEn } from '@shared/lib/utils/Additional';
+import { formatShortEn } from '@shared/utils/Additional';
 import {
   getArchiveBlockLength,
   getLedgerBlockLength,

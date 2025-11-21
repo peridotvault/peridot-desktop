@@ -6,7 +6,7 @@ import {
   GameId,
   GamePublish,
   PGCContractMeta,
-} from '@shared/lib/interfaces/game.types';
+} from '@shared/interfaces/game.types';
 
 class GameDatabase extends Dexie {
   game!: Table<PGCContractMeta, GameId>;

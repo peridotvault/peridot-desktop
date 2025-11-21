@@ -5,7 +5,7 @@ import { walletService } from '@shared/services/wallet.service';
 import { PasswordPage } from './PasswordPage';
 import { SeedPhraseInput } from '../../features/wallet/components/input-seedphrase';
 import { RedirectPage } from '../additional/redirect-page';
-import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
+import { ButtonWithSound } from '../../shared/components/ui/ButtonWithSound';
 import { clearWalletData } from '@shared/services/store.service';
 import { useStartupStage } from '@shared/contexts/StartupStageContext';
 

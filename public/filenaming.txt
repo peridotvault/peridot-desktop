@@ -1,0 +1,85 @@
+src/
+  pages/
+    dashboard/
+      index.tsx
+      _components/
+        StatsOverview.tsx
+        RecentVaultActivity.tsx
+      _hooks/
+        useDashboardSummary.ts
+
+    library/
+      index.tsx
+      _components/
+        GameCard.tsx
+        GameGrid.tsx
+      _hooks/
+        useLibraryFilters.ts
+
+    game-detail/
+      index.tsx
+      _components/
+        GameMeta.tsx
+        ScreenshotList.tsx
+      _hooks/
+        useGameDetail.ts
+
+    user-settings/
+      index.tsx
+      profile/
+        index.tsx
+      security/
+        index.tsx
+
+  features/
+    library/
+      services/
+        games.api.ts
+        wishlist.api.ts
+      hooks/
+        useLibrary.ts
+      types/
+        game.ts
+
+    auth/
+      services/
+        auth.api.ts
+      hooks/
+        useAuth.ts
+      types/
+        auth.ts
+
+  shared/
+    ui/
+      button/
+        Button.tsx
+      layout/
+        PageContainer.tsx
+        PageHeader.tsx
+
+
+
+
+src/
+  shared/
+    constants/
+      images.ts          # path gambar/logo
+      routes.ts          # PATH/ROUTE string
+      tokens.ts          # simbol token, decimal, dll
+
+    config/
+      icp.ts             # HOST_ICP, registry canister, dll
+      solana.ts          # RPC URL, cluster, explorer
+      ethereum.ts        # RPC URL, chainId
+      env.ts             # wrapper import.meta.env
+      network.ts         # DEFAULT_CHAIN, SUPPORTED_CHAINS
+
+    lib/                 # atau utils/
+      formatters.ts      # formatBytes, formatCurrency
+      tauriBridge.ts     # wrapper invoke, open, dll
+      storage.ts         # wrapper localStorage/IndexedDB/Tauri store
+
+    contexts/
+      ThemeContext.tsx   # dark/light theme state
+      AuthContext.tsx    # user login state
+      SettingsContext.tsx# app settings global

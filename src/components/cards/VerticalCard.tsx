@@ -1,7 +1,7 @@
 // @ts-ignore
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PriceCoin } from '@shared/lib/constants/const-price';
+import { PriceCoin } from '@shared/components/ui/CoinPrice';
 
 export const VerticalCard = ({
   gameId,

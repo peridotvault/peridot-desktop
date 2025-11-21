@@ -3,7 +3,7 @@ import React from 'react';
 import { TrainedDataInterface } from '../interfaces/History';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { shortenAddress } from '@shared/lib/utils/Additional';
+import { shortenAddress } from '@shared/utils/Additional';
 import { ButtonTransaction } from '../../../components/atoms/ButtonTransaction';
 import { DateTime } from 'luxon';
 import { openUrl } from '@tauri-apps/plugin-opener';

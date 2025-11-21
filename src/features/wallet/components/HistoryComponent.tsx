@@ -1,6 +1,6 @@
 // @ts-ignore
 import React from 'react';
-import { shortenAddress } from '@shared/lib/utils/Additional';
+import { shortenAddress } from '@shared/utils/Additional';
 import { TrainedDataInterface } from '../interfaces/History';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';

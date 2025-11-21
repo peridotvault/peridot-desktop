@@ -3,7 +3,7 @@ import { ICPPrivateAgent, ICPPublicAgent } from '../sdk/actors';
 import { createActorFactory, createActorPGC1, createActorRegistry } from '../sdk/agents';
 import type { ApiResponse_4, GameRecordType } from '../sdk/canisters/registry.did.d';
 import type { Manifest as PGCLiveManifest } from '../sdk/canisters/pgc1.did.d';
-import { ICP_FACTORY_CANISTER, ICP_REGISTRY_CANISTER } from '../../../constants/url.const';
+import { ICP_FACTORY_CANISTER, ICP_REGISTRY_CANISTER } from '../../../config/icp';
 import { walletService } from '@shared/services/wallet.service';
 import { arrayStringToPrincipal } from '@shared/utils/icp.helper';
 import { fetchMetadata } from '@shared/api/metadata.api';
@@ -225,8 +225,8 @@ const composePGCGame = ({
         Array.isArray(metadata?.distribution) && metadata.distribution.length
             ? (metadata.distribution as Distribution[])
             : Array.isArray((metadata as any)?.distributions) && (metadata as any).distributions.length
-              ? ((metadata as any).distributions as Distribution[])
-              : [];
+                ? ((metadata as any).distributions as Distribution[])
+                : [];
 
     const mergedDistribution =
         distribution && distribution.length ? distribution : metadataDistribution;

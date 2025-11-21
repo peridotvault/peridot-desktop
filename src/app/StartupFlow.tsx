@@ -3,13 +3,10 @@ import type { ReactNode } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import UpdaterPage from '../pages/additional/UpdaterPage';
 import { LoginScreen } from '../pages/signin/Login';
-import router from '../routes';
+import router from './routes';
 import { useWallet } from '../shared/contexts/WalletContext';
 import { LoadingScreen } from '../components/organisms/LoadingScreen';
-import {
-  StartupStage,
-  StartupStageContext,
-} from '../shared/contexts/StartupStageContext';
+import { StartupStage, StartupStageContext } from '../shared/contexts/StartupStageContext';
 import type { WindowRole } from '../shared/desktop/windowControls';
 import {
   getWindowRole,
@@ -25,7 +22,8 @@ const isWalletReady = (wallet: ReturnType<typeof useWallet>['wallet']) =>
     wallet.principalId && wallet.accountId && wallet.encryptedPrivateKey && wallet.verificationData,
   );
 
-const getWebInitialStage = (): StartupStage => ('undefined' !== typeof window ? 'login' : 'updater');
+const getWebInitialStage = (): StartupStage =>
+  'undefined' !== typeof window ? 'login' : 'updater';
 const getInitialStageForRole = (role: WindowRole): StartupStage => {
   if (role === 'login') {
     return 'updater';
@@ -184,7 +182,9 @@ export default function StartupFlow() {
     } else if (!hasWallet) {
       content = (
         <div className="w-full h-screen flex flex-col gap-4 items-center justify-center bg-background_primary text-foreground">
-          <p className="text-lg font-semibold">Please login through the PeridotVault Login window.</p>
+          <p className="text-lg font-semibold">
+            Please login through the PeridotVault Login window.
+          </p>
         </div>
       );
     } else {
@@ -192,5 +192,7 @@ export default function StartupFlow() {
     }
   }
 
-  return <StartupStageContext.Provider value={stageContextValue}>{content}</StartupStageContext.Provider>;
+  return (
+    <StartupStageContext.Provider value={stageContextValue}>{content}</StartupStageContext.Provider>
+  );
 }

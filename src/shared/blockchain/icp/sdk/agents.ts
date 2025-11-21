@@ -11,7 +11,7 @@ import { idlFactory as pgc1_idlFactory } from './canisters/pgc1.did';
 import type { _SERVICE as FactoryService } from './canisters/factory.did.d';
 import type { _SERVICE as RegistryService } from './canisters/registry.did.d';
 import type { _SERVICE as PGC1Service } from './canisters/pgc1.did.d';
-import { ICP_FACTORY_CANISTER, ICP_REGISTRY_CANISTER } from '../../../constants/url.const';
+import { ICP_FACTORY_CANISTER, ICP_REGISTRY_CANISTER } from '../../../config/icp';
 
 // create Actor
 interface CreateActorOptions {

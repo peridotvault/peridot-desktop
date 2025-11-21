@@ -1,4 +1,4 @@
-import { ICP_REGISTRY_CANISTER } from '../../../constants/url.const';
+import { ICP_REGISTRY_CANISTER } from '../../../config/icp';
 import { ICPPublicAgent } from '../sdk/actors';
 import { createActorRegistry } from '../sdk/agents';
 import type { CreateGameRecord, GameRecordType } from '../sdk/canisters/registry.did.d';

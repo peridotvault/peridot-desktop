@@ -2,7 +2,7 @@ import { faChevronLeft, faClone } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
-import { copyToClipboard, shortenAddress } from '@shared/lib/utils/Additional';
+import { copyToClipboard, shortenAddress } from '@shared/utils/Additional';
 
 interface Props {
   onClose: () => void;

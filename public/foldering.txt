@@ -1,0 +1,203 @@
+src/
+  main.tsx                  # entry React (di-mount oleh Tauri)
+  App.tsx                   # root component (isi Router + RootLayout)
+
+  app/
+    router/
+      index.tsx             # setup BrowserRouter / MemoryRouter
+      routesConfig.tsx      # list route & lazy import (optional)
+    layouts/
+      RootLayout.tsx        # layout global (sidebar, topbar, dll)
+      AuthLayout.tsx        # layout khusus halaman auth
+      DashboardShell.tsx    # layout shell untuk dashboard (sidebar, content)
+    providers/
+      AppProvider.tsx       # gabung semua provider
+      ThemeProvider.tsx
+      QueryClientProvider.tsx
+      I18nProvider.tsx
+    config/
+      routes.ts             # konstanta path route ('/dashboard', '/library', dll)
+      env.ts                # baca ENV (API_BASE_URL, MODE, dll)
+
+  pages/
+    # ---------- AUTH PAGES ----------
+    auth/
+      index.tsx             # /auth (bisa redirect ke /auth/login)
+      components/
+        LoginForm.tsx
+        RegisterForm.tsx
+        AuthHero.tsx
+
+      login/
+        index.tsx           # /auth/login
+        components/
+          LoginIntro.tsx    # cuma dipakai di login page
+      register/
+        index.tsx           # /auth/register
+        components/
+          RegisterIntro.tsx
+
+    # ---------- DASHBOARD ----------
+    dashboard/
+      index.tsx             # /dashboard
+      layout.tsx            # layout khusus hanya untuk dashboard pages
+      components/
+        DashboardHeader.tsx
+        StatsOverview.tsx
+        RecentActivity.tsx
+        QuickActions.tsx
+      hooks/
+        useDashboardSummary.ts
+
+      analytics/
+        index.tsx           # /dashboard/analytics
+        components/
+          AnalyticsChart.tsx
+          TimeRangeSelector.tsx
+
+    # ---------- LIBRARY (GAME LIST) ----------
+    library/
+      index.tsx             # /library
+      layout.tsx            # layout khusus library (filter, search bar di atas)
+      components/
+        LibraryHeader.tsx
+        LibraryFilters.tsx
+        LibraryEmptyState.tsx
+
+      detail/
+        index.tsx           # /library/:id
+        components/
+          GameHeader.tsx
+          GameMeta.tsx
+          GameScreenshots.tsx
+
+    # ---------- SETTINGS ----------
+    settings/
+      index.tsx             # /settings (default profile misalnya)
+      components/
+        SettingsLayout.tsx  # layout hanya dipakai di folder settings/
+        SettingsSidebar.tsx
+        SettingsHeader.tsx
+
+      profile/
+        index.tsx           # /settings/profile
+        components/
+          ProfileForm.tsx
+      security/
+        index.tsx           # /settings/security
+        components/
+          ChangePasswordForm.tsx
+          TwoFactorSection.tsx
+
+    # ---------- UPDATES WINDOW (TAURI AUTO-UPDATER) ----------
+    updates/
+      index.tsx             # /updates (window khusus updater)
+      components/
+        UpdateProgress.tsx
+        Changelog.tsx
+        RestartButton.tsx
+
+    # ---------- OFFLINE WINDOW ----------
+    offline/
+      index.tsx             # /offline
+      components/
+        OfflineMessage.tsx
+        RetryConnectionButton.tsx
+
+  # ================= FEATURES (LOGIC PER FITUR) =================
+  features/
+    auth/
+      components/
+        AuthGuard.tsx            # cek login, bungkus route
+      services/
+        authApi.ts               # login, register, refresh token
+        authStorage.ts           # simpan token di localStorage / secure storage Tauri
+      hooks/
+        useAuth.ts               # return user, isAuthenticated, login, logout
+      types/
+        auth.ts                  # User, LoginPayload, dll
+
+    library/
+      components/
+        GameCard.tsx
+        GameGrid.tsx
+        GameTag.tsx
+      services/
+        libraryApi.ts            # fetch daftar game, detail game
+      hooks/
+        useLibrary.ts            # logic fetch + filter
+        useGameDetail.ts
+      types/
+        game.ts                  # Game, Genre, Platform, dll
+
+    updates/
+      services/
+        updater.ts               # wrapper ke Tauri auto-updater
+      hooks/
+        useAutoUpdater.ts        # listen event update, progress, error
+      types/
+        updater.ts               # tipe event updater
+
+    settings/
+      services/
+        settingsStorage.ts       # simpan theme, language ke storage
+      hooks/
+        useSettings.ts           # get/set settings
+      types/
+        settings.ts
+
+    ai/
+      components/
+        ChatPanel.tsx
+        MessageBubble.tsx
+        InputBar.tsx
+      hooks/
+        useAiChat.ts             # call backend / local model
+      services/
+        aiApi.ts                 # API call ke AI service
+      types/
+        ai.ts
+
+  # ================= SHARED (GLOBAL REUSABLE) =================
+  shared/
+    ui/
+      button/
+        Button.tsx
+        button.types.ts
+      input/
+        TextInput.tsx
+        PasswordInput.tsx
+      layout/
+        PageContainer.tsx    # wrapper halaman (padding, max-width)
+        PageHeader.tsx       # title + subtitle + breadcrumb
+        SplitPane.tsx        # 2 kolom fleksibel
+      feedback/
+        Spinner.tsx
+        Toast.tsx
+        EmptyState.tsx
+      overlay/
+        Modal.tsx
+        Drawer.tsx
+
+    hooks/
+      useMediaQuery.ts
+      useDebounce.ts
+      useDisclosure.ts        # open/close state (modal, drawer, dsb)
+      useEventListener.ts
+
+    lib/
+      httpClient.ts           # axios/fetch wrapper
+      storage.ts              # wrapper localStorage / IndexedDB / Tauri store
+      logger.ts
+      tauriBridge.ts          # wrapper untuk window.open, invoke, dll
+      formatters.ts           # formatDate, formatBytes, formatNumber, dll
+
+    types/
+      common.ts               # tipe generik: ID, Timestamp, Option<T>, dll
+      api.ts                  # ApiResponse<T>, Pagination, ErrorShape, dll
+
+    config/
+      theme.ts                # warna, spacing, radius, dll
+      constants.ts            # string konstan, nama window Tauri, dll
+      shortcuts.ts            # keyboard shortcut mapping
+

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons/faChevronLeft';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ButtonWithSound } from '../../shared/components/ui/button-with-sound';
+import { ButtonWithSound } from '../../shared/components/ui/ButtonWithSound';
 import { InputFloating } from '../../shared/components/ui/input-floating';
 
 interface PasswordProps {

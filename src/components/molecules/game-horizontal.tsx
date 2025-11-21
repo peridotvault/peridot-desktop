@@ -1,6 +1,6 @@
 // @ts-ignore
 import React from 'react';
-import { PriceCoin } from '@shared/lib/constants/const-price';
+import { PriceCoin } from '@shared/components/ui/CoinPrice';
 import { Link } from 'react-router-dom';
 
 export const GameHorizontal = ({

@@ -24,7 +24,7 @@ import {
   getWalletInfo,
   saveCurrencyToWallet,
   saveRatesByCode,
-} from '@shared/lib/utils/IndexedDb';
+} from '@shared/utils/IndexedDb';
 import { Currency } from '../../../features/wallet/interfaces/Currency';
 import { WalletInfo } from '../../../features/wallet/interfaces/Wallet';
 import { InputField } from '../../../components/atoms/InputField';

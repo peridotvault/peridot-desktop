@@ -12,6 +12,13 @@ const decoder = new TextDecoder();
 const PBKDF2_ITERATIONS = 150000;
 const AES_KEY_LENGTH = 256;
 
+function toArrayBuffer(view: Uint8Array | Buffer): ArrayBuffer {
+  const buffer = view.buffer as ArrayBuffer;
+  return view.byteOffset === 0 && view.byteLength === buffer.byteLength
+    ? buffer
+    : buffer.slice(view.byteOffset, view.byteOffset + view.byteLength);
+}
+
 function getRandomBytes(size: number): Uint8Array {
   const buffer = new Uint8Array(size);
   crypto.getRandomValues(buffer);
@@ -30,7 +37,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   return crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt,
+      salt: toArrayBuffer(salt),
       iterations: PBKDF2_ITERATIONS,
       hash: 'SHA-256',
     },
@@ -48,10 +55,10 @@ export async function encryptString(value: string, password: string): Promise<En
   const ciphertext = await crypto.subtle.encrypt(
     {
       name: 'AES-GCM',
-      iv,
+      iv: toArrayBuffer(iv),
     },
     key,
-    encoder.encode(value),
+    toArrayBuffer(encoder.encode(value)),
   );
 
   return {
@@ -69,10 +76,10 @@ export async function decryptString(payload: EncryptedData, password: string): P
   const plainBuffer = await crypto.subtle.decrypt(
     {
       name: 'AES-GCM',
-      iv: new Uint8Array(iv),
+      iv: toArrayBuffer(new Uint8Array(iv)),
     },
     key,
-    data,
+    toArrayBuffer(data),
   );
   return decoder.decode(plainBuffer);
 }

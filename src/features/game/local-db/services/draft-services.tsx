@@ -9,7 +9,7 @@ import {
   MediaItem,
   PublishInfo,
   Tag,
-} from '@shared/lib/interfaces/game.types';
+} from '@shared/interfaces/game.types';
 import { dbGame } from '../database';
 
 /** Util: pastikan draft ada */

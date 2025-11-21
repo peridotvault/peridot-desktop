@@ -6,7 +6,7 @@ import {
   InstalledEntry,
   INSTALLED_EVENT,
   isInstalled,
-} from '@shared/lib/utils/installedStorage';
+} from '@shared/utils/installedStorage';
 
 export function useInstalled(appId?: string | number | bigint, os?: OSKey) {
   const [installed, setInstalled] = useState(false);

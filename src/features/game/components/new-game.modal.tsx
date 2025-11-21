@@ -6,8 +6,8 @@ import { createGamePaid, createGameVoucher } from '@shared/blockchain/icp/servic
 import type { InitCreateGame } from '@shared/blockchain/icp/types/factory.types';
 import { Principal } from '@dfinity/principal';
 import { AppPayment } from '@features/wallet/views/Payment';
-import { USDT_ADDRESS } from '@shared/constants/token.const';
-import { ICP_FACTORY_CANISTER } from '@shared/constants/url.const';
+import { USDT_ADDRESS } from '@shared/constants/token';
+import { ICP_FACTORY_CANISTER } from '@shared/config/icp';
 import { InputFloating } from '@shared/components/ui/input-floating';
 
 const CROCK32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ' as const;

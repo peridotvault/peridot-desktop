@@ -1,11 +1,11 @@
 // @ts-ignore
 import React, { useState, useRef, useEffect } from 'react';
 import { InputField } from '../../../components/atoms/InputField';
-import { copyToClipboard } from '@shared/lib/utils/Additional';
+import { copyToClipboard } from '@shared/utils/Additional';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClone } from '@fortawesome/free-solid-svg-icons';
 import { validateMnemonic, wordlists } from 'bip39';
-import { ButtonWithSound } from '../../../shared/components/ui/button-with-sound';
+import { ButtonWithSound } from '../../../shared/components/ui/ButtonWithSound';
 
 interface SeedPhraseInputProps {
   onContinue: (seedPhrase: string) => void;

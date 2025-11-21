@@ -3,7 +3,7 @@ import { ICPPrivateAgent, ICPPublicAgent } from '@shared/blockchain/icp/sdk/acto
 import { createActorPGC1, createActorRegistry } from '@shared/blockchain/icp/sdk/agents';
 import type { PurchaseResult } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
 import type { ApiResponse_1 } from '@shared/blockchain/icp/sdk/canisters/registry.did.d';
-import { ICP_REGISTRY_CANISTER } from '@shared/constants/url.const';
+import { ICP_REGISTRY_CANISTER } from '@shared/config/icp';
 import { walletService } from '@shared/services/wallet.service';
 
 export async function buyGame({

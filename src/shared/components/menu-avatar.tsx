@@ -1,6 +1,6 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Avatar } from './ui/avatar';
+import { Avatar } from './ui/Avatar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowRightFromBracket,
@@ -10,10 +10,10 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import { ButtonWithSound } from './ui/button-with-sound';
+import { ButtonWithSound } from './ui/ButtonWithSound';
 import { clearWalletData } from '@shared/services/store.service';
 import { useWallet } from '@shared/contexts/WalletContext';
-import { shortenAddress } from '@shared/lib/utils/short-address';
+import { shortenAddress } from '@shared/utils/short-address';
 import { useStartupStage } from '@shared/contexts/StartupStageContext';
 
 type Props = {

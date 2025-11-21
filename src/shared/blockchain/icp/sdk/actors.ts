@@ -1,7 +1,7 @@
 import { HttpAgent } from '@dfinity/agent';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { hexToArrayBuffer } from '../../../utils/crypto';
-import { HostICP } from '../../../constants/url.const';
+import { HostICP } from '../../../config/icp';
 
 export const ICPPublicAgent = new HttpAgent({
     host: HostICP,

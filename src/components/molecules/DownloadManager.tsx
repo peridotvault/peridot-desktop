@@ -9,7 +9,7 @@ import React, {
   useState,
 } from 'react';
 import { OSKey } from '../../interfaces/CoreInterface';
-import { upsertInstalledEntry } from '@shared/lib/utils/installedStorage';
+import { upsertInstalledEntry } from '@shared/utils/installedStorage';
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 // Gunakan tipe dari service.did.d
 import type {
@@ -75,8 +75,7 @@ export const useDownloadManager = () => {
 };
 
 /* ========= Helpers ========= */
-const isDesktopRuntime = () =>
-  typeof window !== 'undefined' && Boolean((window as any).__TAURI__);
+const isDesktopRuntime = () => typeof window !== 'undefined' && Boolean((window as any).__TAURI__);
 const isZip = (name: string) => name.toLowerCase().endsWith('.zip');
 
 function latestPerOS(builds: ResolvedBuild[]): ResolvedBuild[] {
