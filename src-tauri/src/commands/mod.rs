@@ -22,7 +22,9 @@ pub fn open_main_window(app_handle: AppHandle) {
 }
 
 #[tauri::command]
-pub fn open_login_window(app_handle: AppHandle) {
+pub fn open_login_window(app_handle: AppHandle, stage: Option<String>) {
+    let _ = stage; // stage can be used later to drive UI, but is ignored for now.
+
     if let Err(e) = create_login_window(&app_handle) {
         eprintln!("failed to create login window: {e}");
         return;

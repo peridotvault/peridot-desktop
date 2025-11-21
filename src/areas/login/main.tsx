@@ -2,15 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import '@shared/assets/styles/index.css';
 import { Buffer } from 'buffer';
-import { App } from './App';
+import { WalletProvider } from '@shared/contexts/WalletContext';
+import StartupFlow from '@main/app/StartupFlow';
 
 if (typeof window !== 'undefined') {
-  window.Buffer = Buffer;
+  (window as any).Buffer = Buffer;
 }
 
-// Create a root wrapper component
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <WalletProvider>
+      <StartupFlow />
+    </WalletProvider>
   </React.StrictMode>,
 );

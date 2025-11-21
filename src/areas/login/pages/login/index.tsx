@@ -1,9 +1,8 @@
-// @ts-ignore
-import React, { useEffect, useMemo, useState } from 'react';
+// src/areas/login/pages/login.tsx (misal pathnya begini)
+import { useEffect, useMemo, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
-import { useNavigate } from 'react-router-dom';
-import { ImportWallet } from './ImportWallet';
-import { CreateWallet } from './CreateWallet';
+import { ImportWallet } from '../import';
+import { CreateWallet } from '../create';
 
 export interface LoginScreenProps {
   onAuthenticated?: () => void;
@@ -31,13 +30,15 @@ export function LoginScreen({ onAuthenticated }: LoginScreenProps) {
   }, [hasWallet, onAuthenticated]);
 
   return (
-    <main className="flex justify-center w-full h-dvh items-center gap-6">
-      <div className="flex w-full h-full max-w-[1200px]">
-        <section className="w-1/2 h-full flex items-center justify-center">
-          <h1 className="text-8xl font-bold">Welcome</h1>
+    <main data-tauri-drag-region className="flex justify-center w-full h-dvh items-center gap-6">
+      <div data-tauri-drag-region className="flex w-full h-full max-w-[1200px]">
+        <section data-tauri-drag-region className="w-1/2 h-full flex items-center justify-center">
+          <h1 data-tauri-drag-region className="text-8xl font-bold">
+            Welcome
+          </h1>
         </section>
 
-        <section className="w-1/2 h-full flex items-center justify-center">
+        <section data-tauri-drag-region className="w-1/2 h-full flex items-center justify-center">
           {isImportWallet ? (
             <ImportWallet setIsImportWallet={setIsImportWallet} />
           ) : (
@@ -47,10 +48,4 @@ export function LoginScreen({ onAuthenticated }: LoginScreenProps) {
       </div>
     </main>
   );
-}
-
-export default function Login() {
-  const navigate = useNavigate();
-
-  return <LoginScreen onAuthenticated={() => navigate('/')} />;
 }

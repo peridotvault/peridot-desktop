@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
+// src/areas/main/app/StartupFlow.tsx
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { RouterProvider } from 'react-router-dom';
+
 import UpdaterPage from '@pages/additional/UpdaterPage';
-import { LoginScreen } from '@pages/signin/Login';
+import { LoginScreen } from '@login/pages/login';
 import router from './routes';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { LoadingScreen } from '@components/organisms/LoadingScreen';
@@ -23,7 +24,8 @@ const isWalletReady = (wallet: ReturnType<typeof useWallet>['wallet']) =>
   );
 
 const getWebInitialStage = (): StartupStage =>
-  'undefined' !== typeof window ? 'login' : 'updater';
+  typeof window !== 'undefined' ? 'login' : 'updater';
+
 const getInitialStageForRole = (role: WindowRole): StartupStage => {
   if (role === 'login') {
     return 'updater';
@@ -53,6 +55,7 @@ export default function StartupFlow() {
     });
   }, [hasWallet]);
 
+  // Auto lompat ke app kalau sudah punya wallet di login/web
   useEffect(() => {
     if (!(isLoginWindow || isWebRuntime)) {
       return;
@@ -62,6 +65,7 @@ export default function StartupFlow() {
     }
   }, [hasWallet, isCheckingWallet, isLoginWindow, isWebRuntime, stage]);
 
+  // Resolve role secara async (desktop)
   useEffect(() => {
     if (!isDesktop) {
       return;
@@ -69,9 +73,7 @@ export default function StartupFlow() {
     let disposed = false;
     resolveDesktopWindowRole()
       .then((role) => {
-        if (disposed) {
-          return;
-        }
+        if (disposed) return;
         setWindowRole(role);
         if (role === 'login') {
           setStage((prev) => (prev === 'app' ? 'updater' : prev));
@@ -85,6 +87,7 @@ export default function StartupFlow() {
     };
   }, [isDesktop]);
 
+  // Di login window desktop: ketika stage == 'app' → minta buka main window
   useEffect(() => {
     if (!isDesktop || !isLoginWindow || stage !== 'app') {
       return;
@@ -92,6 +95,7 @@ export default function StartupFlow() {
     showMainWindow();
   }, [isDesktop, isLoginWindow, stage]);
 
+  // (Optional) sinkron stage via event dari login window, boleh no-op
   useEffect(() => {
     if (!isLoginWindow || !isDesktop) {
       return;
@@ -107,6 +111,7 @@ export default function StartupFlow() {
     };
   }, [isDesktop, isLoginWindow]);
 
+  // Web runtime: hapus hash updater setelah masuk app
   useEffect(() => {
     if (!isWebRuntime) {
       return;
@@ -115,6 +120,16 @@ export default function StartupFlow() {
       window.location.hash = '#/';
     }
   }, [isWebRuntime, stage]);
+
+  // Tambahan: di main window desktop, kalau wallet kosong → paksa buka login window
+  useEffect(() => {
+    if (!isDesktop) return;
+    if (isLoginWindow || isWebRuntime) return;
+
+    if (!isCheckingWallet && !hasWallet) {
+      void showLoginWindow('login');
+    }
+  }, [isDesktop, isLoginWindow, isWebRuntime, isCheckingWallet, hasWallet]);
 
   const goToLogin = useCallback(() => {
     if (isLoginWindow || !isDesktop) {
@@ -153,6 +168,7 @@ export default function StartupFlow() {
   let content: ReactNode = null;
 
   if (isLoginWindow) {
+    // LOGIN WINDOW (desktop)
     if (stage === 'updater') {
       content = <UpdaterPage onContinue={proceedToNextStage} />;
     } else if (stage === 'login' && isCheckingWallet) {
@@ -167,6 +183,7 @@ export default function StartupFlow() {
       );
     }
   } else if (isWebRuntime) {
+    // WEB
     if (stage === 'updater') {
       content = <UpdaterPage onContinue={proceedToNextStage} />;
     } else if (stage === 'login' && isCheckingWallet) {
@@ -177,14 +194,13 @@ export default function StartupFlow() {
       content = <RouterProvider router={router} />;
     }
   } else {
+    // MAIN WINDOW (desktop)
     if (isCheckingWallet) {
       content = <LoadingScreen />;
     } else if (!hasWallet) {
       content = (
         <div className="w-full h-screen flex flex-col gap-4 items-center justify-center bg-background_primary text-foreground">
-          <p className="text-lg font-semibold">
-            Please login through the PeridotVault Login window.
-          </p>
+          <p className="text-lg font-semibold">Opening PeridotVault Login window…</p>
         </div>
       );
     } else {

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { walletService } from '@shared/services/wallet.service';
-import { PasswordPage } from './PasswordPage';
+import { PasswordPage } from '../password';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faDice } from '@fortawesome/free-solid-svg-icons';
 import { SeedPhraseInput } from '@features/wallet/components/input-seedphrase';

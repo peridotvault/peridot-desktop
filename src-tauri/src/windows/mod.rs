@@ -16,10 +16,10 @@ struct WindowConfig {
 }
 
 const LOGIN_WINDOW_CONFIG: WindowConfig = WindowConfig {
-    width: 700.0,
-    height: 400.0,
-    min_width: 700.0,
-    min_height: 400.0,
+    width: 900.0,
+    height: 500.0,
+    min_width: 900.0,
+    min_height: 500.0,
     resizable: false,
     decorations: false,
 };

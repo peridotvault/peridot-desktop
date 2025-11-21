@@ -1,9 +1,7 @@
-// @ts-ignore
+// src/areas/main/app/routes.tsx
 import React, { lazy, Suspense } from 'react';
-
 import { createHashRouter } from 'react-router-dom';
 
-// EAGER (tetap biasa)
 import UpdaterPage from '@pages/additional/UpdaterPage';
 import AppShell from './layouts/app-shell';
 import VaultPage from '@pages/vault';
@@ -39,14 +37,16 @@ const withSuspense = (el: React.ReactNode) => (
 );
 
 const router = createHashRouter([
+  // updater route (web)
   {
     path: '/updater',
     element: <UpdaterPage />,
   },
 
+  // AppShell wrapper
   {
     path: '/',
-    element: <AppShell />, // ⬅️ wrapper global
+    element: <AppShell />,
     children: [
       // home
       {
@@ -164,7 +164,7 @@ const router = createHashRouter([
 
   {
     path: '/*',
-    element: <NotFound />,
+    element: withSuspense(<NotFound />),
   },
 ]);
 
