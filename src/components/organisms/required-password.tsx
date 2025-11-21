@@ -2,7 +2,7 @@ import React from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import _ from 'lodash';
 import { InputField } from '../atoms/InputField';
-import { LoadingPage } from '../../pages/additional/loading-page';
+import { LoadingPage } from '@pages/additional/loading-page';
 import { useStartupStage } from '@shared/contexts/StartupStageContext';
 import { useWalletLockStore } from '@shared/states/wallet-lock.store';
 

@@ -10,17 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [
-      {
-        "label": "main",
-        "title": "PeridotVault",
-        "width": 1280,
-        "minWidth": 1100,
-        "height": 800,
-        "minHeight": 600,
-        "decorations": false
-      }
-    ],
+    "windows": [],
     "security": {
       "csp": null
     }

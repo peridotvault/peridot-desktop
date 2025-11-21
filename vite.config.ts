@@ -16,10 +16,14 @@ export default defineConfig(async () => ({
   ],
   resolve: {
     alias: {
-      "@features": fileURLToPath(new URL("./src/features", import.meta.url)),
+      "@features": fileURLToPath(new URL("./src/areas/main/features", import.meta.url)),
+      "@pages": fileURLToPath(new URL("./src/areas/main/pages", import.meta.url)),
       "@components": fileURLToPath(new URL("./src/components", import.meta.url)),
       "@shared": fileURLToPath(new URL("./src/shared", import.meta.url)),
-      "@pages": fileURLToPath(new URL("./src/pages", import.meta.url)),
+      "@interfaces": fileURLToPath(new URL("./src/interfaces", import.meta.url)),
+      "@services": fileURLToPath(new URL("./src/services", import.meta.url)),
+      "@login": fileURLToPath(new URL("./src/areas/login", import.meta.url)),
+      "@main": fileURLToPath(new URL("./src/areas/main", import.meta.url)),
     },
   },
 

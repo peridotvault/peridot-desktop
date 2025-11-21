@@ -21,11 +21,14 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@features/*": ["src/features/*"],
+      "@features/*": ["src/areas/main/features/*"],
       "@components/*": ["src/components/*"],
       "@shared/*": ["src/shared/*"],
-      "@shared/lib/*": ["src/shared/lib/*"],
-      "@pages/*": ["src/pages/*"]
+      "@interfaces/*": ["src/interfaces/*"],
+      "@services/*": ["src/services/*"],
+      "@pages/*": ["src/areas/main/pages/*"],
+      "@login/*": ["src/areas/login/*"],
+      "@main/*": ["src/areas/main/*"]
     },
     "typeRoots": ["./src/types", "./node_modules/@types"]
   },
