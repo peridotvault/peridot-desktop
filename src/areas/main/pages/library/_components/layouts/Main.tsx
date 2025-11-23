@@ -7,12 +7,14 @@ export default function LibraryLayout() {
   return (
     <main className="flex flex-1">
       {/* Fixed sidebar with its own scroll */}
-      <div className="fixed top-20 left-20 bottom-0">
+      <div className="fixed top-12 left-16 bottom-0 border-l border-t border-white/10 rounded-t-xl overflow-hidden">
         <LibrarySidebar />
       </div>
       {/* Main content with offset and Lenis scroll */}
-      <div className="ml-[230px] flex-1 w-full">
-        <Outlet />
+      <div className="ml-[250px] flex-1 w-full  bg-card">
+        <div className="min-h-screen bg-background">
+          <Outlet />
+        </div>
       </div>
     </main>
   );

@@ -43,7 +43,7 @@ export const StudioSidebar = () => {
   const inactive = 'hover:text-white text-muted-foreground hover:pointer-events-auto';
 
   return (
-    <div className="fixed bg-background flex flex-col h-full shadow-flat-sm z-50 w-20 p-2">
+    <div className="fixed top-12 left-0 bg-card flex flex-col z-50 w-16 h-[calc(100vh-3rem)]">
       {/* List Path  */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="flex flex-col p-1 gap-2 h-full">
