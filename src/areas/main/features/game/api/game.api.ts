@@ -2,7 +2,7 @@ import type {
   GameMetadataResponse,
   GameWhole,
   GameWholeUpsertPayload,
-} from '../types/game-draft.type';
+} from '../types/game-draft';
 
 const API_BASE = import.meta.env.VITE_API_BASE + '/api/games';
 

@@ -9,7 +9,7 @@ import { InputFloating } from '@shared/components/ui/input-floating';
 import { Manifest, Platform } from '@shared/interfaces/game';
 import { initAppStorage, uploadToPrefix } from '@shared/api/wasabi.api';
 import { appendManifest } from '@features/game/api/game-draft.api';
-import { fetchDraftBuildsCombined } from '@features/game/services/draft.service';
+import { fetchDraftBuildsCombined } from '@features/game/services/draft';
 
 type PlatformBuildData = {
   version: string;

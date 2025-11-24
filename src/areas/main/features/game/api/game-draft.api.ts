@@ -9,7 +9,7 @@ import {
   SetHardwarePayload,
   TagDb,
   TagsResponse,
-} from '../types/game-draft.type';
+} from '../types/game-draft';
 
 // api/gameDraftApi.ts
 // const BASE_URL = import.meta.env.VITE_OFFCHAIN_API_BASE + '/games';

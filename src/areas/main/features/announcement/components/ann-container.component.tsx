@@ -9,7 +9,8 @@ interface AnnouncementContainerProps {
 }
 
 export const AnnouncementContainer = ({ item, onClick }: AnnouncementContainerProps) => {
-  const cover = typeof item.coverImage === 'string' && item.coverImage ? item.coverImage : ImageLoading;
+  const cover =
+    typeof item.coverImage === 'string' && item.coverImage ? item.coverImage : ImageLoading;
   const createdAtNs =
     typeof item.createdAt === 'bigint'
       ? Number(item.createdAt) / 1_000_000

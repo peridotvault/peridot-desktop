@@ -4,7 +4,7 @@ import { createActorPGC1, createActorRegistry } from '@shared/blockchain/icp/sdk
 import type { PurchaseResult } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
 import type { ApiResponse_1 } from '@shared/blockchain/icp/sdk/canisters/registry.did.d';
 import { ICP_REGISTRY_CANISTER } from '@shared/config/icp';
-import { walletService } from '@shared/services/wallet.service';
+import { walletService } from '@shared/services/wallet';
 
 export async function buyGame({
   gameId,

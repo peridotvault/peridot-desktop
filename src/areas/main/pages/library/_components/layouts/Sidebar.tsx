@@ -2,16 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useWallet } from '@shared/contexts/WalletContext';
 import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
-import { getMyGames } from '@features/game/services/dto.service';
+import { getMyGames } from '@features/game/services/dto';
 import { ImageLoading } from '@shared/constants/images';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 
 export const LibrarySidebar = () => {
   const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery] = useState('');
   const navigate = useNavigate();
 
   const { wallet } = useWallet();

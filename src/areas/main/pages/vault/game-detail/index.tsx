@@ -8,11 +8,16 @@ import CarouselPreview from '@features/game/components/carousel-preview';
 import { VerticalCard } from '@components/cards/VerticalCard';
 import { PriceCoin } from '@shared/components/ui/CoinPrice';
 import { AppPayment } from '@features/wallet/views/Payment';
-import { normalizeDistribution, NormalizedDist, NativeSpec, WebSpec } from '@interfaces/helpers/icp.helpers';
-import { buyGame } from '@features/game/services/purchase.service';
+import {
+  normalizeDistribution,
+  NormalizedDist,
+  NativeSpec,
+  WebSpec,
+} from '@interfaces/helpers/icp.helpers';
+import { buyGame } from '@features/game/services/purchase';
 import type { PurchaseResult } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
-import { getGameRecordById } from '@features/game/services/record.service';
-import { getGameByGameId, getPublishedGames } from '@features/game/services/dto.service';
+import { getGameRecordById } from '@features/game/services/record';
+import { getGameByGameId, getPublishedGames } from '@features/game/services/dto';
 import { Distribution, Metadata, PGCGame } from '@shared/blockchain/icp/types/game.types';
 import { isZeroTokenAmount, resolveTokenInfo, subunitsToNumber } from '@shared/utils/token-info';
 import type { MediaItem } from '@interfaces/app/GameInterface';

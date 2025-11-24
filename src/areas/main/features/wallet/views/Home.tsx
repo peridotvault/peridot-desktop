@@ -14,7 +14,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ICRC1Coin } from '@features/wallet/components/ICRC1Coin';
-import { walletService } from '@shared/services/wallet.service';
+import { walletService } from '@shared/services/wallet';
 import { Manage } from '@features/wallet/views/Manage';
 import { Receive } from '@features/wallet/views/Receive';
 import { SendToken } from '@features/wallet/views/SendToken';
@@ -30,7 +30,7 @@ import { WalletInfo } from '@features/wallet/interfaces/Wallet';
 import { InputField } from '@components/atoms/InputField';
 import { CoinService } from '@features/wallet/local-db/services/coinService';
 import { Coin } from '@features/wallet/local-db/models/Coin';
-import { clearWalletData } from '@shared/services/store.service';
+import { clearWalletData } from '@shared/services/store';
 import { useStartupStage } from '@shared/contexts/StartupStageContext';
 import { useWalletLockStore } from '@shared/states/wallet-lock.store';
 

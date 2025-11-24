@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { WalletData } from '../services/wallet.service';
-import { getWalletData, saveWalletData } from '../services/store.service';
+import { WalletData } from '../services/wallet';
+import { getWalletData, saveWalletData } from '../services/store';
 import { EncryptedData } from '@shared/security/aes';
 
 interface WalletContextData {

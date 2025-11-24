@@ -7,19 +7,14 @@ import { PhotoFieldComponent } from '@components/atoms/PhotoFieldComponent';
 import { DropDownComponent } from '@components/atoms/DropDownComponent';
 import { AppStatus } from '@interfaces/app/GameInterface';
 import { useWallet } from '@shared/contexts/WalletContext';
-import {
-  initAppStorage,
-  InitResp,
-  safeFileName,
-  uploadToPrefix,
-} from '@shared/api/wasabi.api';
+import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '@shared/api/wasabi.api';
 import { useParams } from 'react-router-dom';
 import { AnnouncementContainer } from '@features/announcement/components/ann-container.component';
 import {
   createAnnouncement,
   getAllAnnouncementsByGameId,
   CreateAnnouncementPayload,
-} from '@features/game/services/announcement.service';
+} from '@features/game/services/announcement';
 import { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
 
 export default function EditAnnouncementPage() {

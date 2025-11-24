@@ -21,7 +21,7 @@ import type {
 } from '@shared/blockchain/icp/types/game.types';
 import { SetHardwarePayload } from '@shared/interfaces/gameDraft';
 import toast from 'react-hot-toast';
-import { fetchDraftBuildsCombined } from '@features/game/services/draft.service';
+import { fetchDraftBuildsCombined } from '@features/game/services/draft';
 import { LoadingComponent } from '@components/atoms/loading.component';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { InputFloating } from '@shared/components/ui/input-floating';

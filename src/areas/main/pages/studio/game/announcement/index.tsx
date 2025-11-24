@@ -7,7 +7,7 @@ import {
   createAnnouncement,
   getAllAnnouncementsByGameId,
   CreateAnnouncementPayload,
-} from '@features/game/services/announcement.service';
+} from '@features/game/services/announcement';
 
 import { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
 import { faCheck, faHeading, faMessage } from '@fortawesome/free-solid-svg-icons';

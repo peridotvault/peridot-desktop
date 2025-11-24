@@ -2,8 +2,8 @@ import { ICPPublicAgent } from '@shared/blockchain/icp/sdk/actors';
 import { createActorRegistry } from '@shared/blockchain/icp/sdk/agents';
 import type { GameRecordType } from '@shared/blockchain/icp/sdk/canisters/registry.did.d';
 import { ICP_REGISTRY_CANISTER } from '@shared/config/icp';
-import { OnChainGameMetadata } from '../types/game.type';
-import { getGameByCanister } from './dto.service';
+import { OnChainGameMetadata } from '../types/game';
+import { getGameByCanister } from './dto';
 
 export async function getGameRecordById({ gameId }: { gameId: string }): Promise<GameRecordType> {
   try {

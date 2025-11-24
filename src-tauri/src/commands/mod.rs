@@ -1,6 +1,6 @@
 use tauri::{AppHandle, Manager};
 
-use crate::windows::{create_login_window, create_main_window};
+use crate::windows::{create_game_window, create_login_window, create_main_window};
 
 #[tauri::command]
 pub fn greet(name: &str) -> String {
@@ -34,5 +34,12 @@ pub fn open_login_window(app_handle: AppHandle, stage: Option<String>) {
         if let Err(e) = main_win.close() {
             eprintln!("failed to close main window: {e}");
         }
+    }
+}
+
+#[tauri::command]
+pub fn open_game_window(app_handle: AppHandle, url: String, label: Option<String>, title: Option<String>) {
+    if let Err(e) = create_game_window(&app_handle, &url, label.as_deref(), title.as_deref()) {
+        eprintln!("failed to create game window: {e}");
     }
 }

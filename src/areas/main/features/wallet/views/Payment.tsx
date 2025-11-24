@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ButtonTransaction } from '@components/atoms/ButtonTransaction';
 import { ICRC1Coin } from '../components/ICRC1Coin';
 import { AlertMessage } from '../components/AlertMessage';
-import { walletService } from '@shared/services/wallet.service';
+import { walletService } from '@shared/services/wallet';
 import { hexToArrayBuffer } from '@shared/utils/crypto';
 import { Actor, ActorSubclass, HttpAgent } from '@dfinity/agent';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
@@ -369,9 +369,7 @@ export const AppPayment: React.FC<Props> = ({
             text={busy ? 'Processing...' : 'Pay Now'}
             onClick={handlePayment}
             disabled={
-              busy ||
-              balanceLeft < 0 ||
-              (requiresPayment && (!!configError || !spenderPrincipal))
+              busy || balanceLeft < 0 || (requiresPayment && (!!configError || !spenderPrincipal))
             }
           />
         </section>

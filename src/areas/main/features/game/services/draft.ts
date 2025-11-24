@@ -6,11 +6,11 @@ import type {
   GameMetadataResponse,
   GameGeneral,
   GamePreview,
-} from '@features/game/types/game-draft.type';
-import type { OnChainGameMetadata } from '@features/game/types/game.type';
+} from '@features/game/types/game-draft';
+import type { OnChainGameMetadata } from '@features/game/types/game';
 import type { Metadata } from '@shared/blockchain/icp/types/game.types';
 import { fetchMetadata } from '@shared/api/metadata.api';
-import { getGameByGameId } from './record.service';
+import { getGameByGameId } from './record';
 
 type SettledResult<T> = PromiseSettledResult<T>;
 

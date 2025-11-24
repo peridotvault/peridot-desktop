@@ -6,8 +6,6 @@ import {
   getGameByGameId,
   getLiveManifestForPlatform,
 } from '@shared/blockchain/icp/services/game.service';
-// import { isNative, isWeb } dari GameInterface mungkin perlu disesuaikan jika tipe berubah
-// import { isNative, isWeb } from '../../interfaces/app/GameInterface'; // Tidak digunakan karena struktur berbeda
 import { useParams } from 'react-router-dom';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { AnnouncementContainer } from '@features/announcement/components/ann-container.component';
@@ -15,32 +13,20 @@ import { useInstalled } from '@features/download/hooks/useInstalled';
 import { useDownloadManager } from '@components/molecules/DownloadManager';
 import type { Distribution, PGCGame } from '@shared/blockchain/icp/types/game.types';
 import type { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
-import { getAllAnnouncementsByGameId } from '@features/game/services/announcement.service';
-// import { optGetOr } from '../../interfaces/helpers/icp.helpers'; // Tidak digunakan di sini
-import { getInstalledRecord } from '@shared/utils/installedStorage';
+import { getAllAnnouncementsByGameId } from '@features/game/services/announcement';
 import { PriceCoin } from '@shared/components/ui/CoinPrice';
 import { isZeroTokenAmount, resolveTokenInfo } from '@shared/utils/token-info';
-import { getGameRecordById } from '@features/game/services/record.service';
+import { getGameRecordById } from '@features/game/services/record';
 import type { Manifest as PGCLiveManifest } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
-import { openPath, openUrl } from '@tauri-apps/plugin-opener';
 import { ImageLoading } from '@shared/constants/images';
-
-// helper deteksi OSKey
-function detectOSKey(): 'windows' | 'macos' | 'linux' {
-  const p = (navigator.platform || '').toLowerCase();
-  const ua = (navigator.userAgent || '').toLowerCase();
-  if (p.includes('win') || ua.includes('windows')) return 'windows';
-  if (p.includes('mac') || ua.includes('mac') || ua.includes('darwin')) return 'macos';
-  return 'linux';
-}
-
-// Fungsi helper untuk mengecek apakah distribusi adalah NativeBuild
-// Karena struktur data sekarang adalah Array<Array<Distribution>>, kita periksa dalam resolveFromApp
-// Tapi jika Anda perlu di sini, Anda harus mengiterasi struktur yang salah terlebih dahulu
-// Lebih baik tetap di DownloadManager.tsx
-// function isNative(d: any): d is { native: NativeBuild } { return 'native' in d; }
-// function isWeb(d: any): d is { web: WebBuild } { return 'web' in d; }
+import {
+  buildLaunchState,
+  launchGame,
+  resolveDistributions,
+  resolveWebBuildUrl,
+} from '@features/game/services/launchGame';
+import { detectOSKey } from '@shared/utils/os';
 
 export default function LibraryGameDetail() {
   const { gameId } = useParams();
@@ -70,14 +56,6 @@ export default function LibraryGameDetail() {
     openInstallModal(theGame);
   };
 
-  const normalizeStringValue = (value: unknown): string => {
-    if (Array.isArray(value)) {
-      const first = value[0];
-      return typeof first === 'string' ? first : '';
-    }
-    return typeof value === 'string' ? value : '';
-  };
-
   const storageRefToUrl = (manifest: PGCLiveManifest | null): string | null => {
     if (!manifest) return null;
     const storage = (manifest as any).storage ?? (manifest as any).storageRef;
@@ -89,55 +67,41 @@ export default function LibraryGameDetail() {
     return null;
   };
 
-  const resolvedDistributions: Distribution[] = useMemo(() => {
-    const game = theGame;
-    if (!game) return [];
-    if (Array.isArray(game.distribution) && game.distribution.length) {
-      return game.distribution;
-    }
-    const meta = game.metadata as
-      | { distribution?: Distribution[]; distributions?: Distribution[] }
-      | null
-      | undefined;
-    if (meta) {
-      if (Array.isArray(meta.distribution) && meta.distribution.length) {
-        return meta.distribution;
-      }
-      if (Array.isArray(meta.distributions) && meta.distributions.length) {
-        return meta.distributions;
-      }
-    }
-    return [];
-  }, [theGame]);
+  const resolvedDistributions: Distribution[] = useMemo(
+    () => resolveDistributions(theGame),
+    [theGame],
+  );
 
   // pilih OS aktif (untuk native)
   const osKey = useMemo(() => detectOSKey(), []);
-  const { installed, latest } = useInstalled(appIdKey!, osKey); // status ter-install untuk OS ini
+  const { installed, latest } = useInstalled(appIdKey, osKey); // status ter-install untuk OS ini
 
-  // apakah ada native dist utk OS ini?
-  // Perubahan: Gunakan unwrapOptVec dan sesuaikan dengan struktur array dalam array
-  const hasNativeForOS = useMemo(() => {
-    if (!resolvedDistributions.length) return false;
-    return resolvedDistributions.some(
-      (dist) => 'native' in dist && dist.native.os.toLowerCase() === osKey,
-    );
-  }, [resolvedDistributions, osKey]);
+  const webUrl = useMemo(
+    () =>
+      resolveWebBuildUrl({
+        game: theGame,
+        distributions: resolvedDistributions,
+        chainWebUrl,
+      }),
+    [chainWebUrl, resolvedDistributions, theGame],
+  );
 
-  const webUrl = useMemo(() => {
-    const game = theGame;
-    if (!game) return null;
-    if (resolvedDistributions.length) {
-      const distEntry = resolvedDistributions.find((dist) => 'web' in dist && !!dist.web.url);
-      if (distEntry && 'web' in distEntry) {
-        const url = normalizeStringValue(distEntry.web.url);
-        if (url.trim()) return url.trim();
-      }
-    }
-    const fallback = chainWebUrl ?? game.metadata?.website ?? '';
-    return fallback.trim() ? fallback.trim() : null;
-  }, [resolvedDistributions, theGame, chainWebUrl]);
+  const launchState = useMemo(
+    () =>
+      buildLaunchState({
+        game: theGame,
+        gameId: appIdKey,
+        distributions: resolvedDistributions,
+        osKey,
+        webUrl,
+        installedEntry: latest,
+        installed,
+      }),
+    [appIdKey, installed, latest, osKey, resolvedDistributions, theGame, webUrl],
+  );
 
-  const hasWeb = useMemo(() => !!webUrl, [webUrl]);
+  const hasNativeForOS = launchState?.hasNativeForOS ?? false;
+  const hasWeb = launchState?.hasWeb ?? false;
 
   const heroImage =
     theGame?.bannerImage ??
@@ -149,40 +113,10 @@ export default function LibraryGameDetail() {
     ImageLoading;
 
   const onLaunch = async () => {
-    if (hasWeb && webUrl) {
-      await openWebApp(webUrl);
-      return;
-    }
-
-    const rec = appIdKey ? await getInstalledRecord(appIdKey) : null;
-    const entry = latest || rec?.entries[0];
-    if (!entry) {
-      alert('App belum terpasang.');
-      return;
-    }
-
-    const candidate = entry.launchPath || entry.filePath || entry.installDir;
-    if (!candidate) {
-      alert('Lokasi aplikasi tidak ditemukan. Silakan install ulang.');
-      return;
-    }
-
-    if ((window as any).__TAURI__) {
-      try {
-        await openPath(candidate);
-      } catch (error) {
-        console.error('Failed to open app', error);
-        alert('Gagal menjalankan aplikasi. Silakan buka folder secara manual.');
-      }
-    } else {
-      if (entry.installDir) {
-        alert('Buka folder install secara manual: ' + entry.installDir);
-      } else if (entry.filePath) {
-        alert('Buka file secara manual: ' + entry.filePath);
-      } else {
-        alert('Tidak ada lokasi file/folder yang dikenali.');
-      }
-    }
+    await launchGame(launchState, {
+      preferGameWindow: true,
+      notify: (msg) => alert(msg),
+    });
   };
 
   useEffect(() => {
@@ -269,24 +203,6 @@ export default function LibraryGameDetail() {
       cancelled = true;
     };
   }, [gameId]);
-
-  const openWebApp = async (url?: string | null) => {
-    const target = url ?? webUrl;
-    if (!target) {
-      alert('Web build URL tidak tersedia untuk app ini.');
-      return;
-    }
-
-    if ((window as any).__TAURI__) {
-      try {
-        await openUrl(target);
-        return;
-      } catch (error) {
-        console.error('Failed to open web app', error);
-      }
-    }
-    window.open(target, '_blank', 'noopener,noreferrer');
-  };
 
   const getWebStatus = () => {
     if (installed) {

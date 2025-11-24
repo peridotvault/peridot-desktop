@@ -14,16 +14,16 @@ import type {
   WebDistribution,
 } from '@shared/blockchain/icp/types/game.types';
 import { GameDraft } from '@shared/interfaces/gameDraft';
-import { fetchDraftSummaryCombined } from '@features/game/services/draft.service';
-import type { OnChainGameMetadata } from '@features/game/types/game.type';
+import { fetchDraftSummaryCombined } from '@features/game/services/draft';
+import type { OnChainGameMetadata } from '@features/game/types/game';
 import { setGameWhole } from '@features/game/api/game.api';
-import type { GameWhole } from '@features/game/types/game-draft.type';
+import type { GameWhole } from '@features/game/types/game-draft';
 import {
   publishGameOnChain,
   type HardwareUpdatePayload,
   type LiveVersionPayload,
   type PublishManifestPayload,
-} from '@features/game/services/publish.service';
+} from '@features/game/services/publish';
 import { useWallet } from '@shared/contexts/WalletContext';
 
 type PlatformBuildInfo = {

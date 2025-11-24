@@ -10,7 +10,7 @@ import { handleAssetChange } from '@services/studio/detail-service';
 import { fetchCategories, fetchTags, updateGeneral } from '@features/game/api/game-draft.api';
 import { CategoryDb, TagDb } from '@shared/interfaces/gameDraft';
 import { LoadingComponent } from '@components/atoms/loading.component';
-import { fetchDraftGeneralCombined } from '@features/game/services/draft.service';
+import { fetchDraftGeneralCombined } from '@features/game/services/draft';
 
 export default function StudioGameDetails() {
   const { gameId } = useParams<{ gameId: string }>();

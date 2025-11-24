@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { walletService } from '@shared/services/wallet.service';
+import { walletService } from '@shared/services/wallet';
 import type { EncryptedData } from '@shared/security/aes';
 
 type LockStatus = 'checking' | 'locked' | 'unlocked';

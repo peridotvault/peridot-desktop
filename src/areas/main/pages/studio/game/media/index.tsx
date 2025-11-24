@@ -8,7 +8,7 @@ import { LoadingPage } from '@pages/additional/loading-page';
 import { updatePreviews } from '@features/game/api/game-draft.api';
 import { GamePreview } from '@shared/interfaces/gameDraft';
 import { LoadingComponent } from '@components/atoms/loading.component';
-import { fetchDraftPreviewsCombined } from '@features/game/services/draft.service';
+import { fetchDraftPreviewsCombined } from '@features/game/services/draft';
 
 export const StudioGameMedia = () => {
   const { gameId } = useParams<{ gameId: string }>();

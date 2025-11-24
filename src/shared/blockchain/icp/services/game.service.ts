@@ -4,7 +4,7 @@ import { createActorFactory, createActorPGC1, createActorRegistry } from '../sdk
 import type { ApiResponse_4, GameRecordType } from '../sdk/canisters/registry.did.d';
 import type { Manifest as PGCLiveManifest } from '../sdk/canisters/pgc1.did.d';
 import { ICP_FACTORY_CANISTER, ICP_REGISTRY_CANISTER } from '../../../config/icp';
-import { walletService } from '@shared/services/wallet.service';
+import { walletService } from '@shared/services/wallet';
 import { arrayStringToPrincipal } from '@shared/utils/icp.helper';
 import { fetchMetadata } from '@shared/api/metadata.api';
 import { runPool } from '@shared/utils/run-pool';

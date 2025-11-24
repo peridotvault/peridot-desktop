@@ -1,1 +1,1 @@
-export * from '@features/game/types/game-draft.type';
+export * from '@features/game/types/game-draft';

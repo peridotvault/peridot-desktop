@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { ButtonWithSound } from './ui/ButtonWithSound';
-import { clearWalletData } from '@shared/services/store.service';
+import { clearWalletData } from '@shared/services/store';
 import { useWallet, useWalletUpdate } from '@shared/contexts/WalletContext';
 import { shortenAddress } from '@shared/utils/short-address';
 import { useStartupStage } from '@shared/contexts/StartupStageContext';

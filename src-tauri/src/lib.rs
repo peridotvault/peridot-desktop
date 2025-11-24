@@ -12,7 +12,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::greet,
             commands::open_main_window,
-            commands::open_login_window
+            commands::open_login_window,
+            commands::open_game_window
         ])
         .setup(|app| {
             let handle = app.handle();

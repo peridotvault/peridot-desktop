@@ -9,7 +9,7 @@ import { Alert } from '@components/molecules/Alert';
 import { getDeveloperGames } from '@shared/blockchain/icp/services/game.service';
 import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
 import { NewGame } from '@features/game/components/new-game.modal';
-import { getGameUnRegistered } from '@features/game/services/factory.service';
+import { getGameUnRegistered } from '@features/game/services/factory';
 import { Principal } from '@dfinity/principal';
 import { register_game } from '@shared/blockchain/icp/services/registry.service';
 import type { CreateGameRecord } from '@shared/blockchain/icp/sdk/canisters/registry.did.d';

@@ -1,6 +1,6 @@
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { walletService } from '@shared/services/wallet.service';
+import { walletService } from '@shared/services/wallet';
 import { hexToArrayBuffer } from '@shared/utils/crypto';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { tokenIdlFactory } from '../types/token';

@@ -9,7 +9,7 @@ import { faLock, faUnlock } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { AnimatePresence, motion } from 'framer-motion';
-import { clearWalletData } from '@shared/services/store.service';
+import { clearWalletData } from '@shared/services/store';
 
 export const RequiredPassword = () => {
   const { wallet } = useWallet();

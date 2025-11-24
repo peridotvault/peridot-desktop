@@ -5,7 +5,7 @@ import { TypographyH2 } from '@shared/components/ui/typography-h2';
 import { categories } from '@shared/assets/json/app/categories.json';
 import { VaultCarousel } from '@features/game/components/vault-carousel';
 import { VaultTopGames } from '@features/game/components/vault-top-games';
-import { getPublishedGames } from '@features/game/services/dto.service';
+import { getPublishedGames } from '@features/game/services/dto';
 import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
 import { ImageLoading } from '@shared/constants/images';
 

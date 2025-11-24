@@ -2,7 +2,7 @@ import { ICPPrivateAgent } from '@shared/blockchain/icp/sdk/actors';
 import { createActorPGC1, createActorRegistry } from '@shared/blockchain/icp/sdk/agents';
 import type { Result as PgcResult } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
 import type { ApiResponse_1 } from '@shared/blockchain/icp/sdk/canisters/registry.did.d';
-import { walletService } from '@shared/services/wallet.service';
+import { walletService } from '@shared/services/wallet';
 import type { Manifest, Platform, StorageRef } from '@shared/blockchain/icp/types/game.types';
 import type { StorageRef as PgcStorageRef } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
 

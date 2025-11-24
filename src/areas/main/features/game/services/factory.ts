@@ -2,7 +2,7 @@ import type { Principal } from '@dfinity/principal';
 import { ICPPrivateAgent } from '@shared/blockchain/icp/sdk/actors';
 import { createActorFactory } from '@shared/blockchain/icp/sdk/agents';
 import { ICP_FACTORY_CANISTER } from '@shared/config/icp';
-import { walletService } from '@shared/services/wallet.service';
+import { walletService } from '@shared/services/wallet';
 
 export async function getGameUnRegistered({ wallet }: { wallet: any }): Promise<
   {

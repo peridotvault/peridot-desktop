@@ -8,4 +8,4 @@ export type {
   DraftCompositeKey,
   PGCContractMeta,
   PreviewItem,
-} from '@features/game/types/game.type';
+} from '@features/game/types/game';

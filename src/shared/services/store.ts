@@ -1,4 +1,4 @@
-import { WalletData } from './wallet.service';
+import { WalletData } from './wallet';
 import { getKvItem, setKvItem, deleteKvItem } from '@shared/storage/app-db';
 import { KV_KEYS } from '@shared/storage/kv-keys';
 

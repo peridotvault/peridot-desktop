@@ -1,8 +1,10 @@
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 
+mod game;
 mod login;
 mod main;
 
+pub use game::create_game_window;
 pub use login::create_login_window;
 pub use main::create_main_window;
 
@@ -31,6 +33,16 @@ const MAIN_WINDOW_CONFIG: WindowConfig = WindowConfig {
     min_height: 600.0,
     resizable: true,
     decorations: false,
+};
+
+// Dedicated window for web builds so players can get a focused gameplay surface.
+const GAME_WINDOW_CONFIG: WindowConfig = WindowConfig {
+    width: 1400.0,
+    height: 900.0,
+    min_width: 1100.0,
+    min_height: 700.0,
+    resizable: true,
+    decorations: true,
 };
 
 pub fn build_login_window(app: &AppHandle) -> tauri::Result<()> {
