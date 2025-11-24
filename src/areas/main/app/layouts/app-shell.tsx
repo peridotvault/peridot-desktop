@@ -1,7 +1,7 @@
 // @ts-ignore
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { RequiredPassword } from '@components/organisms/required-password';
+import { RequiredPassword } from '@components/organisms/RequiredPassword';
 import { WindowNavbar } from './WindowNavbar';
 
 export default function AppShell() {

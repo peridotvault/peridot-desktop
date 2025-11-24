@@ -205,7 +205,7 @@ export default function AIChatbot({
           {/* Panel (slide from left) */}
           <motion.div
             className={[
-              'fixed bottom-0 h-full w-[448px] bg-background border-x border-foreground/10 shadow-2xl',
+              'fixed bottom-0 h-full w-md bg-background border-x border-foreground/10 shadow-2xl',
               'flex flex-col z-40',
               leftClassName,
             ].join(' ')}
@@ -218,7 +218,7 @@ export default function AIChatbot({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header (sticky) */}
-            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-foreground/10">
+            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/60 border-b border-foreground/10">
               <div className="px-4 py-3 flex items-center justify-between">
                 <span className="text-sm font-semibold opacity-90">{title}</span>
                 <button
@@ -269,7 +269,7 @@ export default function AIChatbot({
                         )}
                         <div
                           className={[
-                            'rounded-xl px-3 py-2 leading-relaxed border border-foreground/10 whitespace-pre-wrap break-words',
+                            'rounded-xl px-3 py-2 leading-relaxed border border-foreground/10 whitespace-pre-wrap wrap-break-word',
                             m.role === 'user'
                               ? 'bg-foreground/10 text-foreground'
                               : 'bg-background/80 text-foreground/90',

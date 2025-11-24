@@ -9,11 +9,22 @@ type InputFloatingProps = Omit<
   error?: string;
   helperText?: string;
   showAsterisk?: boolean;
+  bgColor?: string;
 };
 
 export const InputFloating = React.forwardRef<HTMLInputElement, InputFloatingProps>(
   (
-    { id, placeholder, error, helperText, className = '', type = 'text', showAsterisk, ...rest },
+    {
+      id,
+      placeholder,
+      error,
+      helperText,
+      className = '',
+      type = 'text',
+      showAsterisk,
+      bgColor = 'bg-background',
+      ...rest
+    },
     ref,
   ) => {
     const autoId = React.useId();
@@ -35,9 +46,9 @@ export const InputFloating = React.forwardRef<HTMLInputElement, InputFloatingPro
       'duration-300 transform ' +
       '-translate-y-4 scale-95 ' +
       (hasError ? 'text-chart-5 ' : 'text-foreground/50 ') +
-      'bg-background ' +
+      bgColor +
       // Saat kosong (letakkan dulu, biar bisa ditimpa oleh focus/value)
-      'peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 ' +
+      ' peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 ' +
       // Saat sudah ada value
       'peer-[&:not(:placeholder-shown)]:top-2 ' +
       'peer-[&:not(:placeholder-shown)]:-translate-y-4 ' +
