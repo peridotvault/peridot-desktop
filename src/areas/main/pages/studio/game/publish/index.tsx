@@ -13,7 +13,7 @@ import type {
   NativeDistribution,
   WebDistribution,
 } from '@shared/blockchain/icp/types/game.types';
-import { GameDraft } from '@shared/interfaces/game-draft.types';
+import { GameDraft } from '@shared/interfaces/gameDraft';
 import { fetchDraftSummaryCombined } from '@features/game/services/draft.service';
 import type { OnChainGameMetadata } from '@features/game/types/game.type';
 import { setGameWhole } from '@features/game/api/game.api';

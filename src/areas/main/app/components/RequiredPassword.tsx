@@ -114,7 +114,7 @@ export const RequiredPassword = () => {
             <ButtonWithSound
               onClick={handleConfirm}
               disabled={!password}
-              className={`${password ? 'opacity-100 hover:scale-105' : 'opacity-50'} bg-accent py-3 px-6 w-full rounded-md duration-300 flex gap-1 items-center justify-center text-card`}
+              className={`${password ? 'opacity-100 hover:scale-105' : 'opacity-50'} bg-accent py-3 px-6 w-full rounded-md duration-300 flex gap-1 items-center justify-center text-card  cursor-pointer`}
             >
               <FontAwesomeIcon icon={faUnlock} />
               <span>Unlock</span>

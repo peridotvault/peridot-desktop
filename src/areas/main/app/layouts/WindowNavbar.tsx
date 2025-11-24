@@ -11,6 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { NotificationComponent } from '@shared/components/Notification';
 import { ImagePeridotLogo } from '@shared/constants/images';
+import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 
 type OsType = 'mac' | 'windows' | 'linux' | 'other';
 
@@ -52,8 +53,30 @@ export const WindowNavbar = () => {
     maximize: '#00CA4E',
   };
 
+  const handleBack = () => {
+    // versi react-router
+    // navigate(-1);
+
+    // atau, kalau mau pakai native history:
+    window.history.back();
+  };
+
+  const handleForward = () => {
+    // navigate(1);
+    // atau:
+    window.history.forward();
+  };
+
+  const handleRefresh = () => {
+    // React Router 6.4+ (data router / createHashRouter) support navigate(0)
+    // navigate(0);
+
+    // kalau ada masalah, bisa fallback ke:
+    window.location.reload();
+  };
+
   return (
-    <div className="fixed top-0 left-0 h-12 w-full z-100 bg-card text-white select-none">
+    <div className="fixed top-0 left-0 h-12 w-full z-100 bg-card text-foreground select-none">
       {/* Main ROW: Left (drag + traffic) + Right (chain / window controls) */}
       <div className="flex h-full px-3">
         {/* LEFT = DRAG REGION + traffic lights */}
@@ -145,12 +168,18 @@ export const WindowNavbar = () => {
         <div className="flex items-center gap-3 pointer-events-auto w-full max-w-[500px] px-4">
           {/* arrows */}
           <div className="flex gap-2 shrink-0">
-            <button className="text-muted-foreground hover:text-foreground duration-200">
+            <ButtonWithSound
+              onClick={handleBack}
+              className="text-muted-foreground hover:text-foreground duration-200 cursor-pointer"
+            >
               <FontAwesomeIcon icon={faArrowLeft} />
-            </button>
-            <button className="text-muted-foreground hover:text-foreground duration-200">
+            </ButtonWithSound>
+            <ButtonWithSound
+              onClick={handleForward}
+              className="text-muted-foreground hover:text-foreground duration-200 cursor-pointer"
+            >
               <FontAwesomeIcon icon={faArrowRight} />
-            </button>
+            </ButtonWithSound>
           </div>
 
           {/* address bar */}
@@ -158,14 +187,17 @@ export const WindowNavbar = () => {
             type="text"
             readOnly
             value="https://app.peridotvault.com/"
-            className="flex-1 min-w-0 border border-white/20 bg-muted rounded py-1 text-sm text-center outline-none cursor-pointer"
+            className="flex-1 min-w-0 border border-white/10 bg-background rounded py-1 text-sm text-center outline-none cursor-pointer"
           />
 
           {/* refresh */}
           <div className="shrink-0">
-            <button className="text-muted-foreground hover:text-foreground duration-200">
+            <ButtonWithSound
+              onClick={handleRefresh}
+              className="text-muted-foreground hover:text-foreground duration-200 cursor-pointer"
+            >
               <FontAwesomeIcon icon={faArrowsRotate} />
-            </button>
+            </ButtonWithSound>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import React, { lazy, Suspense } from 'react';
 import { createHashRouter } from 'react-router-dom';
 
 import UpdaterPage from '@pages/additional/UpdaterPage';
-import AppShell from './layouts/app-shell';
+import AppShell from './layouts/AppShell';
 import VaultPage from '@pages/vault';
 import { LoadingScreen } from '@components/organisms/LoadingScreen';
 import { StudioGameMedia } from '@pages/studio/game/media';

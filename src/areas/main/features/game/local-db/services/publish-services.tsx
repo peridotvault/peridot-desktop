@@ -1,7 +1,7 @@
 // services/publish-service.ts
 
 import { dbGame } from '../database';
-import { GamePublish } from '@shared/interfaces/game.types';
+import { GamePublish } from '@shared/interfaces/game';
 
 export const PublishService = {
   /** Publish game ke chain tertentu */

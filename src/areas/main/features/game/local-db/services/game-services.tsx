@@ -1,4 +1,4 @@
-import { GameId, PGCContractMeta } from '@shared/interfaces/game.types';
+import { GameId, PGCContractMeta } from '@shared/interfaces/game';
 import { dbGame } from '../database';
 
 export const gameService = {
