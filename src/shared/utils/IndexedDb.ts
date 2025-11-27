@@ -1,7 +1,7 @@
 import { UserInterface } from 'src/interfaces/user/UserInterface';
 import theCurrencies from '../assets/json/currencies.json';
-import { getKvItem, setKvItem } from '@shared/storage/app-db';
-import { KV_KEYS } from '@shared/storage/kv-keys';
+import { getKvItem, setKvItem } from '@shared/database/app-db';
+import { KV_KEYS } from '@shared/database/kv-keys';
 import { Currency } from '@main/features/wallet/interfaces/Currency';
 import { WalletInfo } from '@main/features/wallet/interfaces/Wallet';
 

@@ -1,5 +1,5 @@
 import { OSKey } from '@shared/api/wasabi.api';
-import { deleteKvItem, getKvItem, setKvItem } from '@shared/storage/app-db';
+import { deleteKvItem, getKvItem, setKvItem } from '@shared/database/app-db';
 
 export type InstalledEntry = {
   version: string;
@@ -31,9 +31,7 @@ function keyFor(appId: string | number | bigint) {
 
 function emitInstalledChanged(appId: string | number | bigint) {
   if (typeof window === 'undefined') return;
-  window.dispatchEvent(
-    new CustomEvent(INSTALLED_EVENT, { detail: { appId: String(appId) } }),
-  );
+  window.dispatchEvent(new CustomEvent(INSTALLED_EVENT, { detail: { appId: String(appId) } }));
 }
 
 export async function getInstalledRecord(

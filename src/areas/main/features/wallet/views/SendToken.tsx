@@ -12,9 +12,9 @@ import { AlertMessage } from '../components/AlertMessage';
 import { Coin } from '@features/wallet/local-db/models/Coin';
 import { CoinService } from '@features/wallet/local-db/services/coinService';
 import { transferTokenICRC1 } from '../blockchain/icp/services/ICPCoinService';
-import { getKvItem } from '@shared/storage/app-db';
-import { KV_KEYS } from '@shared/storage/kv-keys';
-import { STORAGE_EVENTS } from '@shared/storage/events';
+import { getKvItem } from '@shared/database/app-db';
+import { KV_KEYS } from '@shared/database/kv-keys';
+import { STORAGE_EVENTS } from '@shared/database/events';
 
 interface Props {
   onClose: () => void;

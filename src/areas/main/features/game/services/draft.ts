@@ -6,8 +6,8 @@ import type {
   GameMetadataResponse,
   GameGeneral,
   GamePreview,
-} from '@features/game/types/game-draft';
-import type { OnChainGameMetadata } from '@features/game/types/game';
+} from '@shared/interfaces/gameDraft';
+import type { OnChainGameMetadata } from '@shared/interfaces/game';
 import type { Metadata } from '@shared/blockchain/icp/types/game.types';
 import { fetchMetadata } from '@shared/api/metadata.api';
 import { getGameByGameId } from './record';

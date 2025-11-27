@@ -6,7 +6,7 @@ import { InputTextarea } from '@shared/components/ui/input-textarea';
 import { InputImage } from '@components/atoms/input-image';
 import { InputDropdown } from '@shared/components/ui/input-dropdown';
 import { useParams } from 'react-router-dom';
-import { handleAssetChange } from '@services/studio/detail-service';
+import { handleAssetChange } from '@features/game/services/detail-service';
 import { fetchCategories, fetchTags, updateGeneral } from '@features/game/api/game-draft.api';
 import { CategoryDb, TagDb } from '@shared/interfaces/gameDraft';
 import { LoadingComponent } from '@components/atoms/loading.component';

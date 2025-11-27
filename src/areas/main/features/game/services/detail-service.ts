@@ -3,7 +3,7 @@ import {
   initAppStorage,
   safeFileName,
   uploadToPrefix,
-} from '../../shared/api/wasabi.api';
+} from '../../../../../shared/api/wasabi.api';
 
 export async function handleAssetChange({
   file,

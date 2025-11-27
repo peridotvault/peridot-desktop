@@ -2,8 +2,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { chat } from '@shared/api/ai.api';
 import { EyeGlassesIcon } from '@shared/assets/icons/MainIcons';
-import { getKvItem, setKvItem } from '@shared/storage/app-db';
-import { chatKey } from '@shared/storage/kv-keys';
+import { getKvItem, setKvItem } from '@shared/database/app-db';
+import { chatKey } from '@shared/database/kv-keys';
 
 /* ---------- sanitize utils (sama seperti web) ---------- */
 function stripXmlBlocks(s: string) {

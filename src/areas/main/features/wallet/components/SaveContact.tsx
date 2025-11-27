@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { InputField } from '@components/atoms/InputField';
 import { Contact } from '../views/SendToken';
-import { getKvItem, setKvItem } from '@shared/storage/app-db';
-import { KV_KEYS } from '@shared/storage/kv-keys';
-import { STORAGE_EVENTS } from '@shared/storage/events';
+import { getKvItem, setKvItem } from '@shared/database/app-db';
+import { KV_KEYS } from '@shared/database/kv-keys';
+import { STORAGE_EVENTS } from '@shared/database/events';
 
 interface NavbarProps {
   onClose: () => void;
