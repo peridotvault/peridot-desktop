@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { ImportWallet } from '../import';
 import { CreateWallet } from '../create';
+import { useStartupStage } from '@shared/contexts/StartupStageContext';
 
 export interface LoginScreenProps {
   onAuthenticated?: () => void;
@@ -11,6 +12,7 @@ export interface LoginScreenProps {
 export function LoginScreen({ onAuthenticated }: LoginScreenProps) {
   const { wallet } = useWallet();
   const [isImportWallet, setIsImportWallet] = useState<boolean>(true);
+  const { goToApp } = useStartupStage();
 
   const hasWallet = useMemo(
     () =>
@@ -26,8 +28,9 @@ export function LoginScreen({ onAuthenticated }: LoginScreenProps) {
   useEffect(() => {
     if (hasWallet) {
       onAuthenticated?.();
+      goToApp();
     }
-  }, [hasWallet, onAuthenticated]);
+  }, [goToApp, hasWallet, onAuthenticated]);
 
   return (
     <main data-tauri-drag-region className="flex justify-center w-full h-dvh items-center gap-6">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useWallet, useWalletUpdate } from '@shared/contexts/WalletContext';
 import _ from 'lodash';
 import { LoadingPage } from '@pages/additional/loading-page';
@@ -12,31 +12,36 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { clearWalletData } from '@shared/services/store';
 
 export const RequiredPassword = () => {
-  const { wallet } = useWallet();
+  const { wallet, isCheckingWallet } = useWallet();
   const { goToLogin } = useStartupStage();
   const { status, error, unlockWithPassword } = useWalletLockStore();
   const updateWallet = useWalletUpdate();
+  const redirectRequestedRef = useRef(false);
 
   const [password, setPassword] = React.useState('');
   const [isForgotPassword, setForgotPassword] = React.useState(false);
 
   // inisialisasi lock di awal
   React.useEffect(() => {
-    // cek kalau wallet belum lengkap → lempar ke login
+    if (isCheckingWallet) return;
+
+    // cek kalau wallet belum lengkap → lempar ke login (sekali saja)
     if (
-      !wallet.principalId ||
-      !wallet.accountId ||
-      !wallet.encryptedPrivateKey ||
-      !wallet.encryptedSeedPhrase ||
-      !wallet.verificationData
+      (!wallet.principalId ||
+        !wallet.accountId ||
+        !wallet.encryptedPrivateKey ||
+        !wallet.encryptedSeedPhrase ||
+        !wallet.verificationData) &&
+      !redirectRequestedRef.current
     ) {
+      redirectRequestedRef.current = true;
       goToLogin();
       return;
     }
 
     // init lock state dari KV
     useWalletLockStore.getState().initFromStorage();
-  }, [wallet, goToLogin]);
+  }, [wallet, goToLogin, isCheckingWallet]);
 
   const handleConfirm = async () => {
     if (!wallet.verificationData) return;
