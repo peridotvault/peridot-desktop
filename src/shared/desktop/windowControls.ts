@@ -1,7 +1,6 @@
-import type { StartupStage } from '../contexts/StartupStageContext';
 import { getCurrentWebviewWindowSafe, isTauriRuntime } from './runtime';
 
-type LoginWindowStage = Extract<StartupStage, 'updater' | 'login'>;
+type LoginWindowStage = 'updater' | 'login';
 
 export const isDesktopRuntime = () => isTauriRuntime();
 
@@ -32,4 +31,25 @@ export const hideCurrentWindow = async () => {
   if (!isDesktopRuntime()) return;
   const currentWindow = await getCurrentWebviewWindowSafe();
   await currentWindow?.hide();
+};
+
+export const redirectToLogin = (stage: LoginWindowStage = 'login') => {
+  if (isDesktopRuntime()) {
+    void showLoginWindow(stage);
+    return;
+  }
+  if (typeof window !== 'undefined') {
+    const hash = stage === 'updater' ? '#/updater' : '';
+    window.location.assign(`/login.html${hash}`);
+  }
+};
+
+export const redirectToMain = () => {
+  if (isDesktopRuntime()) {
+    void showMainWindow();
+    return;
+  }
+  if (typeof window !== 'undefined') {
+    window.location.assign('/');
+  }
 };

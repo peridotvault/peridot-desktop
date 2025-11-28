@@ -5,7 +5,6 @@ import '@shared/assets/styles/index.css';
 import { Buffer } from 'buffer';
 import { WalletProvider } from '@shared/contexts/WalletContext';
 import router from './app/routes';
-import { StartupStageProvider } from '@shared/contexts/StartupStageContext';
 
 if (typeof window !== 'undefined') {
   (window as any).Buffer = Buffer;
@@ -14,9 +13,7 @@ if (typeof window !== 'undefined') {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <WalletProvider>
-      <StartupStageProvider stage="login">
-        <RouterProvider router={router} />
-      </StartupStageProvider>
+      <RouterProvider router={router} />
     </WalletProvider>
   </React.StrictMode>,
 );

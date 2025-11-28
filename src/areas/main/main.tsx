@@ -6,7 +6,6 @@ import { WalletProvider } from '@shared/contexts/WalletContext';
 import { Buffer } from 'buffer';
 import { DownloadProvider } from '@components/molecules/DownloadManager';
 import router from './app/routes';
-import { StartupStageProvider } from '@shared/contexts/StartupStageContext';
 
 if (typeof window !== 'undefined') {
   window.Buffer = Buffer;
@@ -17,9 +16,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <WalletProvider>
       <DownloadProvider>
-        <StartupStageProvider stage="app">
-          <RouterProvider router={router} />
-        </StartupStageProvider>
+        <RouterProvider router={router} />
       </DownloadProvider>
     </WalletProvider>
   </React.StrictMode>,

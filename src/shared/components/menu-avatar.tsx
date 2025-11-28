@@ -14,7 +14,7 @@ import { ButtonWithSound } from './ui/ButtonWithSound';
 import { clearWalletData } from '@shared/services/store';
 import { useWallet, useWalletUpdate } from '@shared/contexts/WalletContext';
 import { shortenAddress } from '@shared/utils/short-address';
-import { useStartupStage } from '@shared/contexts/StartupStageContext';
+import { redirectToLogin } from '@shared/desktop/windowControls';
 
 type Props = {
   open: boolean;
@@ -27,7 +27,6 @@ type Props = {
 export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) => {
   const { wallet } = useWallet();
   const updateWallet = useWalletUpdate();
-  const { goToLogin } = useStartupStage();
 
   const list = [
     {
@@ -105,7 +104,7 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
       onClose();
 
       // 4. Pindah ke login window (di desktop: invoke open_login_window)
-      goToLogin();
+      redirectToLogin();
     } catch (error) {
       console.error('Error clearing wallet data:', error);
     }

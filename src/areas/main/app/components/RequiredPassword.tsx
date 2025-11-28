@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import { useWallet, useWalletUpdate } from '@shared/contexts/WalletContext';
 import _ from 'lodash';
 import { LoadingPage } from '@pages/additional/loading-page';
-import { useStartupStage } from '@shared/contexts/StartupStageContext';
 import { useWalletLockStore } from '@shared/states/wallet-lock.store';
 import { InputFloating } from '@shared/components/ui/input-floating';
 import { faLock, faUnlock } from '@fortawesome/free-solid-svg-icons';
@@ -10,10 +9,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { AnimatePresence, motion } from 'framer-motion';
 import { clearWalletData } from '@shared/services/store';
+import { redirectToLogin } from '@shared/desktop/windowControls';
 
 export const RequiredPassword = () => {
   const { wallet, isCheckingWallet } = useWallet();
-  const { goToLogin } = useStartupStage();
   const { status, error, unlockWithPassword } = useWalletLockStore();
   const updateWallet = useWalletUpdate();
   const redirectRequestedRef = useRef(false);
@@ -35,13 +34,13 @@ export const RequiredPassword = () => {
       !redirectRequestedRef.current
     ) {
       redirectRequestedRef.current = true;
-      goToLogin();
+      redirectToLogin();
       return;
     }
 
     // init lock state dari KV
     useWalletLockStore.getState().initFromStorage();
-  }, [wallet, goToLogin, isCheckingWallet]);
+  }, [wallet, isCheckingWallet]);
 
   const handleConfirm = async () => {
     if (!wallet.verificationData) return;
@@ -69,7 +68,7 @@ export const RequiredPassword = () => {
       });
 
       // 4. Pindah ke login window (di desktop: invoke open_login_window)
-      goToLogin();
+      redirectToLogin();
     } catch (error) {
       console.error('Error clearing wallet data:', error);
     }

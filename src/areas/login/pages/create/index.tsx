@@ -8,7 +8,7 @@ import { faChevronLeft, faDice } from '@fortawesome/free-solid-svg-icons';
 import { SeedPhraseInput } from '@features/wallet/components/input-seedphrase';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { clearWalletData } from '@shared/services/store';
-import { useStartupStage } from '@shared/contexts/StartupStageContext';
+import { redirectToMain } from '@shared/desktop/windowControls';
 
 interface CreateWalletProps {
   setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,14 +17,13 @@ interface CreateWalletProps {
 export const CreateWallet = ({ setIsImportWallet }: CreateWalletProps) => {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } = useWallet();
 
-  const { goToApp } = useStartupStage();
   const [newSeedPhrase, setNewSeedPhrase] = useState('');
 
   useEffect(() => {
     async function userHandle() {
       try {
         if (wallet.encryptedPrivateKey) {
-          goToApp();
+          redirectToMain();
         }
       } catch (error) {
         console.error(error);
@@ -33,7 +32,7 @@ export const CreateWallet = ({ setIsImportWallet }: CreateWalletProps) => {
 
     generateSeedPhrase();
     userHandle();
-  }, [wallet.encryptedPrivateKey, goToApp]);
+  }, [wallet.encryptedPrivateKey]);
 
   const generateSeedPhrase = () => {
     setNewSeedPhrase(walletService.generateNewSeedPhrase());

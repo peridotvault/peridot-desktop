@@ -7,7 +7,7 @@ import { SeedPhraseInput } from '@features/wallet/components/input-seedphrase';
 import { RedirectPage } from '../../../main/pages/additional/redirect-page';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { clearWalletData } from '@shared/services/store';
-import { useStartupStage } from '@shared/contexts/StartupStageContext';
+import { redirectToMain } from '@shared/desktop/windowControls';
 
 interface ImportWalletProps {
   setIsImportWallet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,14 +16,13 @@ interface ImportWalletProps {
 export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
   const { setWallet, wallet, isGeneratedSeedPhrase, setIsGeneratedSeedPhrase } = useWallet();
 
-  const { goToApp } = useStartupStage();
   const [tempSeedPhrase, setTempSeedPhrase] = useState('');
 
   useEffect(() => {
     async function userHandle() {
       try {
         if (wallet.encryptedPrivateKey) {
-          goToApp();
+          redirectToMain();
         }
       } catch (error) {
         console.error(error);
@@ -31,7 +30,7 @@ export const ImportWallet = ({ setIsImportWallet }: ImportWalletProps) => {
     }
 
     userHandle();
-  }, [wallet.encryptedPrivateKey, goToApp]);
+  }, [wallet.encryptedPrivateKey]);
 
   const clearSeedPhrase = async () => {
     await clearWalletData();

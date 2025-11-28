@@ -31,12 +31,11 @@ import { InputField } from '@components/atoms/InputField';
 import { CoinService } from '@features/wallet/local-db/services/coinService';
 import { Coin } from '@features/wallet/local-db/models/Coin';
 import { clearWalletData } from '@shared/services/store';
-import { useStartupStage } from '@shared/contexts/StartupStageContext';
+import { redirectToLogin } from '@shared/desktop/windowControls';
 import { useWalletLockStore } from '@shared/states/wallet-lock.store';
 
 export const Home = () => {
   const { wallet, setWallet, setIsGeneratedSeedPhrase } = useWallet();
-  const { goToLogin } = useStartupStage();
   const [isOpenWalletAddress, setIsOpenWalletAddress] = useState(false);
   const [isModalOpenKey, setIsModalOpenKey] = useState(false);
   const [isModalOpenKeyPKSP, setIsModalOpenKeyPKSP] = useState('');
@@ -107,7 +106,7 @@ export const Home = () => {
         verificationData: null,
       });
       setIsGeneratedSeedPhrase(false);
-      goToLogin();
+      redirectToLogin();
     } catch (error) {
       console.error('Error clearing wallet data:', error);
     }
