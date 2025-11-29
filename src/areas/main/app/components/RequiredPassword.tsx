@@ -98,7 +98,7 @@ export const RequiredPassword = () => {
             transition={{ type: 'spring', stiffness: 480, damping: 42, mass: 0.8 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <span className="text-2xl pb-4 ">Unlock your Wallet</span>
+            <span className="text-2xl pb-4 font-bold">Unlock your Wallet</span>
             <div className="flex flex-col gap-4 w-full ">
               <InputFloating
                 type="password"
@@ -118,7 +118,7 @@ export const RequiredPassword = () => {
             <ButtonWithSound
               onClick={handleConfirm}
               disabled={!password}
-              className={`${password ? 'opacity-100 hover:scale-105' : 'opacity-50'} bg-accent py-3 px-6 w-full rounded-md duration-300 flex gap-1 items-center justify-center text-card  cursor-pointer`}
+              className={`${password ? 'bg-accent hover:scale-105 cursor-pointer' : 'bg-muted text-muted-foreground cursor-not-allowed'}  py-3 px-6 w-full rounded-md duration-300 flex gap-1 items-center justify-center`}
             >
               <FontAwesomeIcon icon={faUnlock} />
               <span>Unlock</span>
@@ -177,7 +177,7 @@ const ModalForgotPassword = ({
           <div className="bg-muted rounded-full aspect-square p-8 flex items-center justify-center">
             <FontAwesomeIcon icon={faLock} className="text-muted-foreground text-5xl" />
           </div>
-          <span className="text-3xl">Forgot Password</span>
+          <span className="text-3xl font-bold">Forgot Password</span>
           <p className="text-center ">
             By continuing you will be logged out and all your settings will be reset to defaults,
             PeridotVault cannot recover your SeedPhrase or Password for you.
