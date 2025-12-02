@@ -15,8 +15,8 @@ import type {
     OnChainGameMetadata,
     PGCGame,
     Platform,
-} from '../types/game.types';
-import type { InitCreateGame } from '../types/factory.types';
+} from '../types/game';
+import type { InitCreateGame } from '../types/factory';
 
 type PrincipalListOpt = [] | [Principal[]];
 

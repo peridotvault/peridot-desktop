@@ -26,8 +26,10 @@ export interface LibraryEntry {
     gameId: GameId;
     gameName: string;
     description: string;
-    coverVerticalImage: Blob;
-    bannerImage: Blob;
+    coverVerticalImage: string;
+    bannerImage: string;
+    // metadataHash?: string;
+    // assetsHash?: string;
 
     launchType: LaunchType;
     install?: InstallInfo;
@@ -45,8 +47,8 @@ export interface CreateLibraryEntryInput {
     gameId: GameId;
     gameName: string;
     description: string;
-    coverVerticalImage: Blob;
-    bannerImage: Blob;
+    coverVerticalImage: string;
+    bannerImage: string;
 
     launchType: LaunchType;
     install?: InstallInfo;
@@ -60,8 +62,8 @@ export interface CreateLibraryEntryInput {
 export interface UpdateLibraryEntryInput {
     gameName?: string;
     description?: string;
-    coverImage?: Blob;
-    bannerImage?: Blob;
+    coverVerticalImage?: string;
+    bannerImage?: string;
 
     launchType?: LaunchType;
     install?: Partial<InstallInfo>;

@@ -8,7 +8,7 @@ import type {
   GamePreview,
 } from '@shared/interfaces/gameDraft';
 import type { OnChainGameMetadata } from '@shared/interfaces/game';
-import type { Metadata } from '@shared/blockchain/icp/types/game.types';
+import type { Metadata } from '@shared/blockchain/icp/types/game';
 import { fetchMetadata } from '@shared/api/metadata.api';
 import { getGameByGameId } from './record';
 

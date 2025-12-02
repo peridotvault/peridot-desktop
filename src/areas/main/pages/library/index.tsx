@@ -1,26 +1,28 @@
-import React from 'react';
-import { useWallet } from '@shared/contexts/WalletContext';
-import { Link } from 'react-router-dom';
-import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
-import { getMyGames } from '@shared/blockchain/icp/services/game';
-import { ImageLoading } from '@shared/constants/images';
+import { useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { formatTitle } from '@features/library/utils/formatTitle';
+import { useLibraryStore } from '@features/library/hooks/useLibraryStore';
+import { LibraryEntry } from '@shared/interfaces/library';
+import { LibraryGameCard } from '@features/library/components/GameCard';
 
 export default function LibraryPage() {
-  const { wallet } = useWallet();
-  const [myGames, setMyGames] = React.useState<PGCGame[] | null>();
+  const navigate = useNavigate();
 
-  React.useEffect(() => {
-    async function fetchData() {
-      const resAllGames = await getMyGames({ wallet: wallet });
-      setMyGames(resAllGames);
-    }
+  const { entries, isLoading, error, loadAll } = useLibraryStore();
+  useEffect(() => {
+    loadAll();
+  }, [loadAll]);
 
-    fetchData();
-  }, []);
+  const recentGames: LibraryEntry[] = useMemo(() => {
+    return entries
+      .filter((e) => e.stats.lastLaunchedAt) // hanya yang pernah dimainkan
+      .sort((a, b) => (b.stats.lastLaunchedAt ?? 0) - (a.stats.lastLaunchedAt ?? 0))
+      .slice(0, 8);
+  }, [entries]);
 
-  const formatTitle = (title: string): string => {
-    return title.toLowerCase().replace(/\s+/g, '_');
-  };
+  const allGames: LibraryEntry[] = useMemo(() => {
+    return [...entries].sort((a, b) => b.createdAt - a.createdAt);
+  }, [entries]);
 
   return (
     <div className="flex justify-center">
@@ -35,28 +37,19 @@ export default function LibraryPage() {
 
         {/* Library  */}
         <section className="px-6 py-4 flex flex-col gap-4">
-          <p className="text-xl font-medium">My Games ({myGames?.length})</p>
+          <p className="text-xl font-medium">My Games ({allGames?.length})</p>
           <div className="flex flex-wrap gap-8">
-            {myGames?.map((item) => (
-              <Link
-                to={`/library/${formatTitle(item.name)}/${item.gameId}`}
-                key={item.gameId}
-                className="w-[170px] aspect-3/4 bg-card rounded-xl overflow-hidden"
-              >
-                <img
-                  src={
-                    item.coverVerticalImage ??
-                    item.coverHorizontalImage ??
-                    item.bannerImage ??
-                    item.metadata?.coverVerticalImage ??
-                    item.metadata?.coverHorizontalImage ??
-                    ImageLoading
-                  }
-                  alt=""
-                  className="w-full h-full object-cover hover:scale-110 duration-300"
+            {allGames?.map((entry) => {
+              const slug = formatTitle(entry.gameName);
+              const pathForItem = `/library/${slug}/${entry.gameId}`;
+              return (
+                <LibraryGameCard
+                  key={entry.gameId}
+                  entry={entry}
+                  onClick={() => navigate(pathForItem)}
                 />
-              </Link>
-            ))}
+              );
+            })}
           </div>
         </section>
       </div>

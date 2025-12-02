@@ -15,7 +15,7 @@ import {
   getAllAnnouncementsByGameId,
   CreateAnnouncementPayload,
 } from '@features/game/services/announcement';
-import { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
+import { GameAnnouncementType } from '@shared/blockchain/icp/types/game';
 
 export default function EditAnnouncementPage() {
   const { wallet } = useWallet();

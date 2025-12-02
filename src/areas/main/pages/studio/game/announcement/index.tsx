@@ -9,7 +9,7 @@ import {
   CreateAnnouncementPayload,
 } from '@features/game/services/announcement';
 
-import { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
+import { GameAnnouncementType } from '@shared/blockchain/icp/types/game';
 import { faCheck, faHeading, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '@shared/api/wasabi.api';
 import { InputFieldComponent } from '@components/atoms/InputFieldComponent';

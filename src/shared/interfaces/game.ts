@@ -1,4 +1,4 @@
-export * from '@shared/blockchain/icp/types/game.types';
+export * from '@shared/blockchain/icp/types/game';
 
 import type {
   Category,
@@ -7,7 +7,7 @@ import type {
   MediaItem,
   PublishInfo,
   Tag,
-} from '@shared/blockchain/icp/types/game.types';
+} from '@shared/blockchain/icp/types/game';
 
 export type GameId = string;
 

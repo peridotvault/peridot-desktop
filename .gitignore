@@ -12,6 +12,11 @@ dist
 dist-ssr
 dist-electron
 release
+package-lock.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
+yarn.lock
+bun.lockb
 *.local
 
 # Editor directories and files

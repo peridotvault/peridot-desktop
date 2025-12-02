@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { initAppStorage } from '@shared/api/wasabi.api';
 import { createGamePaid, createGameVoucher } from '@shared/blockchain/icp/services/game';
-import type { InitCreateGame } from '@shared/blockchain/icp/types/factory.types';
+import type { InitCreateGame } from '@shared/blockchain/icp/types/factory';
 import { Principal } from '@dfinity/principal';
 import { AppPayment } from '@features/wallet/views/Payment';
 import { USDT_ADDRESS } from '@shared/constants/token';

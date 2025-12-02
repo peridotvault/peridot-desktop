@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import { Alert } from '@components/molecules/Alert';
 import { getDeveloperGames } from '@shared/blockchain/icp/services/game';
-import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
+import type { PGCGame } from '@shared/blockchain/icp/types/game';
 import { NewGame } from '@features/game/components/new-game.modal';
 import { getGameUnRegistered } from '@features/game/services/factory';
 import { Principal } from '@dfinity/principal';
