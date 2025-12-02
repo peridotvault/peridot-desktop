@@ -2,7 +2,7 @@ import React from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { Link } from 'react-router-dom';
 import type { PGCGame } from '@shared/blockchain/icp/types/game.types';
-import { getMyGames } from '@shared/blockchain/icp/services/game.service';
+import { getMyGames } from '@shared/blockchain/icp/services/game';
 import { ImageLoading } from '@shared/constants/images';
 
 export default function LibraryPage() {

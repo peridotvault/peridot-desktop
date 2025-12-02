@@ -2,10 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  getGameByGameId,
-  getLiveManifestForPlatform,
-} from '@shared/blockchain/icp/services/game.service';
+import { getGameByGameId, getLiveManifestForPlatform } from '@shared/blockchain/icp/services/game';
 import { useParams } from 'react-router-dom';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { AnnouncementContainer } from '@features/announcement/components/ann-container.component';

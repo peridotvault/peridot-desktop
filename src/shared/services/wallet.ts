@@ -7,8 +7,8 @@ import { AccountIdentifier } from '@dfinity/ledger-icp';
 import { Buffer } from 'buffer';
 import * as ecc from 'tiny-secp256k1';
 import { EncryptedData, decryptString, encryptString } from '@shared/security/aes';
-import { getKvItem, setKvItem, deleteKvItem } from '@shared/database/app-db';
 import { KV_KEYS } from '@shared/database/kv-keys';
+import { getKvItem, setKvItem, deleteKvItem } from './local-db/kv-key';
 
 const bip32 = BIP32Factory(ecc);
 

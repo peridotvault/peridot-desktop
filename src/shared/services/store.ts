@@ -1,5 +1,5 @@
+import { deleteKvItem, getKvItem, setKvItem } from './local-db/kv-key';
 import { WalletData } from './wallet';
-import { getKvItem, setKvItem, deleteKvItem } from '@shared/database/app-db';
 import { KV_KEYS } from '@shared/database/kv-keys';
 
 export const saveWalletData = async (data: WalletData): Promise<void> => {

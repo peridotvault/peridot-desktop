@@ -1,5 +1,5 @@
 import { OSKey } from '@shared/api/wasabi.api';
-import { deleteKvItem, getKvItem, setKvItem } from '@shared/database/app-db';
+import { deleteKvItem, getKvItem, setKvItem } from '@shared/services/local-db/kv-key';
 
 export type InstalledEntry = {
   version: string;

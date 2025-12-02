@@ -3,7 +3,7 @@ import React, { ChangeEventHandler } from 'react';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Gender } from '../../interfaces/user/UserInterface';
-import { Distribution } from '@features/game/types/game-draft';
+import { Distribution } from '@shared/interfaces/game';
 
 export const DropDownComponent = ({
   name,

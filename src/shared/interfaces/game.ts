@@ -3,12 +3,13 @@ export * from '@shared/blockchain/icp/types/game.types';
 import type {
   Category,
   Distribution,
-  GameId,
   Metadata,
   MediaItem,
   PublishInfo,
   Tag,
 } from '@shared/blockchain/icp/types/game.types';
+
+export type GameId = string;
 
 export interface DraftPGC {
   gameId?: GameId;

@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { initAppStorage } from '@shared/api/wasabi.api';
-import { createGamePaid, createGameVoucher } from '@shared/blockchain/icp/services/game.service';
+import { createGamePaid, createGameVoucher } from '@shared/blockchain/icp/services/game';
 import type { InitCreateGame } from '@shared/blockchain/icp/types/factory.types';
 import { Principal } from '@dfinity/principal';
 import { AppPayment } from '@features/wallet/views/Payment';
