@@ -5,10 +5,12 @@ import { Wallet } from '../../features/wallet/views/Wallet';
 import { MenuAvatar } from '@shared/components/menu-avatar';
 import { Sidebar } from './Sidebar';
 import AIChatbot from '@main/features/ai/components/ai-chatbot';
+import DownloadModal from '@features/download/components/DownloadModal';
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
   const [isOpenPeri, setIOpenPeri] = useState(false);
+  const [isOpenDownload, setIOpenDownload] = useState(false);
   const [isOpenMenuAvatar, setIOpenMenuAvatar] = useState(false);
 
   const togglePeri = () => {
@@ -17,6 +19,7 @@ export default function MainLayout() {
       if (next) {
         setIOpenMenuAvatar(false);
         setIOpenWallet(false);
+        setIOpenDownload(false);
       }
       return next;
     });
@@ -27,6 +30,19 @@ export default function MainLayout() {
       if (next) {
         setIOpenPeri(false);
         setIOpenMenuAvatar(false);
+        setIOpenDownload(false);
+      }
+      return next;
+    });
+  };
+
+  const toggleDownload = () => {
+    setIOpenDownload((prev) => {
+      const next = !prev;
+      if (next) {
+        setIOpenPeri(false);
+        setIOpenMenuAvatar(false);
+        setIOpenWallet(false);
       }
       return next;
     });
@@ -45,13 +61,15 @@ export default function MainLayout() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      <main className="flex flex-col overflow-auto mt-12">
+      <main className="flex flex-col overflow-auto mt-12 ">
         <Sidebar
           onOpenWallet={toggleWallet}
           onOpenPeri={togglePeri}
+          onOpenDownload={toggleDownload}
           onOpenMenuAvatar={toggleAvatar}
           walletActive={isOpenWallet}
           periActive={isOpenPeri}
+          downloadActive={isOpenDownload}
           avatarActive={isOpenMenuAvatar}
         />
 
@@ -66,8 +84,15 @@ export default function MainLayout() {
         <AIChatbot
           open={isOpenPeri}
           onClose={() => setIOpenPeri(false)}
-          leftClassName="left-16" // selaras dengan lebar sidebar w-20
+          leftClassName="left-16"
           title="Peri Chat"
+        />
+
+        <DownloadModal
+          open={isOpenDownload}
+          onClose={() => setIOpenDownload(false)}
+          leftClassName="left-16"
+          title="Download Modal"
         />
 
         <Wallet open={isOpenWallet} onClose={() => setIOpenWallet(false)} leftClassName="left-16" />

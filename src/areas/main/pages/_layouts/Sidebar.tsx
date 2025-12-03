@@ -16,18 +16,22 @@ import { Avatar } from '@shared/components/ui/Avatar';
 interface MainSidebarProps {
   onOpenWallet: () => void;
   onOpenPeri: () => void;
+  onOpenDownload: () => void;
   onOpenMenuAvatar: () => void;
   walletActive?: boolean;
   periActive?: boolean;
+  downloadActive?: boolean;
   avatarActive?: boolean;
 }
 
 export const Sidebar: React.FC<MainSidebarProps> = ({
   onOpenWallet,
   onOpenPeri,
+  onOpenDownload,
   onOpenMenuAvatar,
   walletActive = false,
   periActive = false,
+  downloadActive = false,
   avatarActive = false,
 }) => {
   const location = useLocation();
@@ -53,12 +57,6 @@ export const Sidebar: React.FC<MainSidebarProps> = ({
       isActive: isSectionActive('/market'),
       icon: faStore,
       label: 'Market',
-    },
-    {
-      href: '/download',
-      isActive: isSectionActive('/download'),
-      icon: faDownload,
-      label: 'Download',
     },
   ];
 
@@ -115,6 +113,12 @@ export const Sidebar: React.FC<MainSidebarProps> = ({
           {/* Bottom  */}
           <div className="flex flex-col gap-2 px-2">
             <div className="flex flex-col rounded border border-foreground/10">
+              <ActionBtn
+                icon={faDownload}
+                label="Download Modal"
+                onClick={onOpenDownload}
+                isActive={downloadActive}
+              />
               <ActionBtn
                 icon={faRobot}
                 label="Peri Chatbot"

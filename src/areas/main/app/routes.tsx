@@ -18,7 +18,6 @@ const LibraryLayout = lazy(() => import('@pages/library/_components/layouts/Main
 const LibraryPage = lazy(() => import('@pages/library'));
 const LibraryGameDetail = lazy(() => import('@pages/library/game-detail'));
 const Market = lazy(() => import('@pages/market'));
-const DownloadPage = lazy(() => import('@pages/download-page'));
 const GameDetail = lazy(() => import('@pages/vault/game-detail'));
 const ProfileUser = lazy(() => import('@pages/user'));
 const ProfileDeveloper = lazy(() => import('@pages/profile/ProfileDeveloper'));
@@ -73,10 +72,6 @@ const router = createHashRouter([
           {
             path: 'market',
             element: withSuspense(<Market />),
-          },
-          {
-            path: 'download',
-            element: withSuspense(<DownloadPage />),
           },
           {
             path: 'vault/:gameName/:gameId',
