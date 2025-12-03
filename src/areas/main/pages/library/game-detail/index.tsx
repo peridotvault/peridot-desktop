@@ -2,19 +2,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getGameByGameId, getLiveManifestForPlatform } from '@shared/blockchain/icp/services/game';
+import { getGameByGameId } from '@shared/blockchain/icp/services/game';
 import { useParams } from 'react-router-dom';
-import { useWallet } from '@shared/contexts/WalletContext';
-import { AnnouncementContainer } from '@features/announcement/components/ann-container.component';
-import { useInstalled } from '@features/download/hooks/useInstalled';
 import { useDownloadManager } from '@components/molecules/DownloadManager';
 import type { Distribution, PGCGame } from '@shared/blockchain/icp/types/game';
-import type { GameAnnouncementType } from '@shared/blockchain/icp/types/game';
-import { getAllAnnouncementsByGameId } from '@features/game/services/announcement';
 import { PriceCoin } from '@shared/components/ui/CoinPrice';
 import { isZeroTokenAmount, resolveTokenInfo } from '@shared/utils/token-info';
-import { getGameRecordById } from '@features/game/services/record';
-import type { Manifest as PGCLiveManifest } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { ImageLoading } from '@shared/constants/images';
 import {
@@ -24,20 +17,18 @@ import {
   resolveWebBuildUrl,
 } from '@features/game/services/launchGame';
 import { detectOSKey } from '@shared/utils/os';
+import { useInstalled } from '@features/download/hooks/useInstalled';
+
+import type { GameId } from '@shared/interfaces/game';
+import type { LibraryEntry } from '@shared/interfaces/library';
+import { libraryService } from '@features/library/services/localDb';
 
 export default function LibraryGameDetail() {
   const { gameId } = useParams();
   const { openInstallModal } = useDownloadManager();
-  const { wallet } = useWallet();
-  const [announcements, setAnnouncements] = useState<GameAnnouncementType[] | null>(null);
 
   const [theGame, setTheGame] = useState<PGCGame | null>(null);
-  const [chainWebUrl, setChainWebUrl] = useState<string | null>(null);
-
-  const tokenCanister = theGame?.tokenPayment;
-  const rawPrice = theGame?.price ?? 0;
-  const tokenInfo = resolveTokenInfo(tokenCanister);
-  const priceIsFree = isZeroTokenAmount(rawPrice, tokenInfo.decimals);
+  const [libraryEntry, setLibraryEntry] = useState<LibraryEntry | null>(null);
 
   // normalize appId untuk penyimpanan lokal
   const appIdKey = useMemo(() => {
@@ -48,40 +39,89 @@ export default function LibraryGameDetail() {
     }
   }, [gameId]);
 
-  const installHere = () => {
-    if (!theGame || !hasNativeForOS) return;
-    openInstallModal(theGame);
-  };
+  // ====== DATA FETCHING ======
 
-  const storageRefToUrl = (manifest: PGCLiveManifest | null): string | null => {
-    if (!manifest) return null;
-    const storage = (manifest as any).storage ?? (manifest as any).storageRef;
-    if (!storage) return null;
-    if ('url' in storage) {
-      const url = storage.url?.url;
-      return typeof url === 'string' ? url : null;
+  // 1) Fetch on-chain/off-chain game (price, metadata, dsb)
+  useEffect(() => {
+    if (!gameId) {
+      setTheGame(null);
+      return;
     }
-    return null;
-  };
+
+    window.scrollTo(0, 0);
+
+    let cancelled = false;
+    (async () => {
+      try {
+        setTheGame(null);
+        const res = await getGameByGameId({ gameId });
+        if (!cancelled) setTheGame(res);
+      } catch (e) {
+        if (!cancelled) setTheGame(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [gameId]);
+
+  // 2) Fetch local library entry (image + stats + webUrl)
+  useEffect(() => {
+    if (!gameId) {
+      setLibraryEntry(null);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const entry = await libraryService.getById(gameId as GameId);
+        if (!cancelled) {
+          setLibraryEntry(entry ?? null);
+        }
+      } catch (err) {
+        console.warn('[LibraryDetail] Failed to load library entry', err);
+        if (!cancelled) setLibraryEntry(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [gameId]);
+
+  // ====== TOKEN / PRICE ======
+
+  const tokenCanister = theGame?.tokenPayment;
+  const rawPrice = theGame?.price ?? 0;
+  const tokenInfo = resolveTokenInfo(tokenCanister);
+  const priceIsFree = isZeroTokenAmount(rawPrice, tokenInfo.decimals);
+
+  // ====== DISTRIBUTIONS & INSTALL STATE ======
 
   const resolvedDistributions: Distribution[] = useMemo(
     () => resolveDistributions(theGame),
     [theGame],
   );
 
-  // pilih OS aktif (untuk native)
   const osKey = useMemo(() => detectOSKey(), []);
-  const { installed, latest } = useInstalled(appIdKey, osKey); // status ter-install untuk OS ini
+  const { installed, latest } = useInstalled(appIdKey, osKey);
 
-  const webUrl = useMemo(
-    () =>
+  // webUrl:
+  // 1) prefer dari local library (hasil sync getMyGames + distribution)
+  // 2) fallback ke resolveWebBuildUrl (metadata/distribution on-chain)
+  const webUrl = useMemo(() => {
+    const fromLibrary = libraryEntry?.webUrl;
+    const fromGame =
       resolveWebBuildUrl({
         game: theGame,
         distributions: resolvedDistributions,
-        chainWebUrl,
-      }),
-    [chainWebUrl, resolvedDistributions, theGame],
-  );
+        chainWebUrl: undefined,
+      }) ?? undefined;
+
+    return fromLibrary || fromGame;
+  }, [libraryEntry?.webUrl, theGame, resolvedDistributions]);
 
   const launchState = useMemo(
     () =>
@@ -90,7 +130,7 @@ export default function LibraryGameDetail() {
         gameId: appIdKey,
         distributions: resolvedDistributions,
         osKey,
-        webUrl,
+        webUrl: webUrl ?? null,
         installedEntry: latest,
         installed,
       }),
@@ -100,14 +140,52 @@ export default function LibraryGameDetail() {
   const hasNativeForOS = launchState?.hasNativeForOS ?? false;
   const hasWeb = launchState?.hasWeb ?? false;
 
+  // ====== HERO IMAGE ======
+
   const heroImage =
-    theGame?.bannerImage ??
-    theGame?.coverHorizontalImage ??
-    theGame?.coverVerticalImage ??
-    theGame?.metadata?.bannerImage ??
-    theGame?.metadata?.coverHorizontalImage ??
-    theGame?.metadata?.coverVerticalImage ??
+    // prefer dari local library (sudah di-compress / dataURL)
+    libraryEntry?.bannerImage ||
+    libraryEntry?.coverVerticalImage ||
+    // fallback on-chain
+    theGame?.bannerImage ||
+    theGame?.coverHorizontalImage ||
+    theGame?.coverVerticalImage ||
+    theGame?.metadata?.bannerImage ||
+    theGame?.metadata?.coverHorizontalImage ||
+    theGame?.metadata?.coverVerticalImage ||
     ImageLoading;
+
+  // ====== STATS LABELS (local play stats) ======
+
+  const playTimeLabel = useMemo(() => {
+    const seconds = libraryEntry?.stats.totalPlayTimeSeconds ?? 0;
+    if (!seconds) return '—';
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  }, [libraryEntry?.stats.totalPlayTimeSeconds]);
+
+  const lastLaunchLabel = useMemo(() => {
+    const ts = libraryEntry?.stats.lastLaunchedAt;
+    if (!ts) return 'Never';
+
+    const d = new Date(ts);
+    return d.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }, [libraryEntry?.stats.lastLaunchedAt]);
+
+  // ====== ACTIONS ======
+
+  const installHere = () => {
+    if (!theGame || !hasNativeForOS) return;
+    openInstallModal(theGame);
+  };
 
   const onLaunch = async () => {
     await launchGame(launchState, {
@@ -115,91 +193,6 @@ export default function LibraryGameDetail() {
       notify: (msg) => alert(msg),
     });
   };
-
-  useEffect(() => {
-    // scroll ke atas tiap ganti game (opsional)
-    window.scrollTo(0, 0);
-
-    // validasi appId
-    const idNum = gameId;
-    if (!gameId || Number.isNaN(idNum)) {
-      setTheGame(null);
-      return;
-    }
-
-    let cancelled = false;
-    async function fetchData() {
-      let isMounted = true;
-      try {
-        setTheGame(null); // reset agar tidak menampilkan data lama
-        const res = await getGameByGameId({ gameId: gameId! });
-        if (!cancelled) setTheGame(res);
-
-        let listAnnouncement =
-          (await getAllAnnouncementsByGameId({
-            gameId: gameId!,
-            wallet,
-          })) ?? [];
-        // Filter only published announcements
-        listAnnouncement = listAnnouncement.filter(
-          (item) =>
-            item.status &&
-            typeof item.status === 'object' &&
-            Object.keys(item.status)[0] === 'published',
-        );
-        // Sort: pinned first, then by createdAt descending
-        listAnnouncement = listAnnouncement.sort((a, b) => {
-          // Pinned first
-          if (a.pinned && !b.pinned) return -1;
-          if (!a.pinned && b.pinned) return 1;
-          // Then by createdAt descending
-          const aCreated = a.createdAt ? Number(a.createdAt) : 0;
-          const bCreated = b.createdAt ? Number(b.createdAt) : 0;
-          return bCreated - aCreated;
-        });
-
-        if (isMounted) setAnnouncements(listAnnouncement);
-      } catch (e) {
-        if (!cancelled) setTheGame(null);
-        // optionally: tampilkan notifikasi error
-      }
-    }
-
-    fetchData();
-    return () => {
-      cancelled = true;
-    };
-  }, [gameId, wallet]);
-
-  useEffect(() => {
-    if (!gameId) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const record = await getGameRecordById({ gameId });
-        if (!record || cancelled) return;
-        const canisterId =
-          typeof record.canister_id === 'string'
-            ? record.canister_id
-            : record.canister_id?.toText();
-        if (!canisterId) return;
-        const manifest = await getLiveManifestForPlatform({
-          canisterId,
-          platform: 'web',
-        });
-        if (cancelled) return;
-        const url = storageRefToUrl(manifest);
-        if (url?.trim()) {
-          setChainWebUrl(url.trim());
-        }
-      } catch (error) {
-        console.warn('[Library] Unable to resolve live web manifest', error);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [gameId]);
 
   const getWebStatus = () => {
     if (installed) {
@@ -214,11 +207,13 @@ export default function LibraryGameDetail() {
     return 'No build for this OS';
   };
 
+  // ====== RENDER ======
+
   return (
     <main className="flex flex-col items-center gap-5 mb-32">
       <div className="bg-foreground w-full h-96 relative">
         <img src={heroImage} className="object-cover w-full h-120 bg-card" alt="" />
-        <div className="bg-linear-to-t from-background via-background/50 w-full h-28 absolute bottom-0 translate-y-[6.2rem]"></div>
+        <div className="bg-linear-to-t from-background via-background/50 w-full h-28 absolute bottom-0 translate-y-[6.2rem]" />
       </div>
 
       {/* column */}
@@ -227,25 +222,23 @@ export default function LibraryGameDetail() {
         <div className="flex flex-col gap-8 w-2/3">
           {/* Header  */}
           <section className="flex flex-col gap-4">
-            <p className="text-3xl font-medium">{theGame?.name ?? 'Untitled Game'}</p>
+            <p className="text-3xl font-medium">
+              {theGame?.name ?? libraryEntry?.gameName ?? 'Untitled Game'}
+            </p>
             <div className="flex gap-4">
               <p className="flex gap-2 items-center">
                 <FontAwesomeIcon icon={faClock} className="text-muted-foreground" />
-                <label className="text-muted-foreground">Play Time : </label> 2038 hours
+                <label className="text-muted-foreground">Play Time :</label> {playTimeLabel}
               </p>
-              <div className="border border-muted"></div>
+              <div className="border border-muted" />
               <p className="flex gap-2 items-center">
                 <FontAwesomeIcon icon={faRocket} className="text-muted-foreground" />
-                <label className="text-muted-foreground">Last Launched : </label> Nov 29, 2024
+                <label className="text-muted-foreground">Last Launched :</label> {lastLaunchLabel}
               </p>
             </div>
           </section>
-
-          {/* Announcements  */}
-          {announcements?.map((item, index) => (
-            <AnnouncementContainer key={index} item={item} />
-          ))}
         </div>
+
         {/* right column ========================================== */}
         <div className="w-1/3 min-w-[300px] flex flex-col gap-8">
           <section className="bg-background shadow-flat-sm w-full p-6 rounded-2xl flex flex-col gap-6">
@@ -263,9 +256,9 @@ export default function LibraryGameDetail() {
 
             {/* CTAs */}
             <div className="flex flex-col gap-4">
-              {(hasWeb || installed) && (
+              {(hasWeb || installed) && webUrl && (
                 <ButtonWithSound
-                  onClick={() => onLaunch()}
+                  onClick={onLaunch}
                   className="bg-accent px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
                 >
                   <FontAwesomeIcon icon={faPlay} />

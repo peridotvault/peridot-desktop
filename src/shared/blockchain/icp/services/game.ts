@@ -20,6 +20,80 @@ import type { InitCreateGame } from '../types/factory';
 
 type PrincipalListOpt = [] | [Principal[]];
 
+const storageRefToUrl = (manifest: PGCLiveManifest | null): string | undefined => {
+    if (!manifest) return undefined;
+
+    const storage = (manifest as any).storage ?? (manifest as any).storageRef;
+    if (!storage) return undefined;
+
+    if ("url" in storage) {
+        const raw = storage.url?.url;
+        if (typeof raw === "string" && raw.trim()) {
+            return raw.trim();
+        }
+    }
+
+    return undefined;
+};
+
+/**
+ * Enrich PGCGame[] dengan distribution web berdasarkan live manifest.
+ * Dipakai hanya di getMyGames (library), jadi nggak ganggu flow lain.
+ */
+async function enrichOwnedGamesWithWebDistribution(
+    games: PGCGame[],
+    records: GameRecordType[],
+): Promise<PGCGame[]> {
+    // map gameId -> record (agar tahu canister_id-nya)
+    const recordByGameId = new Map<string, GameRecordType>();
+    for (const rec of records) {
+        recordByGameId.set(rec.game_id, rec);
+    }
+
+    return runPool(
+        games,
+        6, // concurrency
+        async (game): Promise<PGCGame> => {
+            try {
+                const rec = recordByGameId.get(game.gameId);
+                if (!rec) return game;
+
+                const manifest = await getLiveManifestForPlatform({
+                    canisterId: rec.canister_id,
+                    platform: "web",
+                });
+
+                const url = storageRefToUrl(manifest);
+                if (!url) return game;
+
+                const webDist: Distribution = {
+                    web: {
+                        url,
+                        processor: undefined,
+                        graphics: undefined,
+                        memory: undefined,
+                        storage: undefined,
+                        additionalNotes: undefined,
+                    },
+                };
+
+                // merge dengan distribution existing (kalau nanti ada di metadata)
+                const nonWebDists = Array.isArray(game.distribution)
+                    ? game.distribution.filter((d) => !("web" in d))
+                    : [];
+
+                return {
+                    ...game,
+                    distribution: [...nonWebDists, webDist],
+                };
+            } catch (err) {
+                console.warn("[getMyGames] enrich web distribution failed", game.gameId, err);
+                return game;
+            }
+        },
+    );
+}
+
 const toPrincipalOpt = (controllers: string[] | null | undefined): PrincipalListOpt => {
     if (!controllers || controllers.length === 0) {
         return [];
@@ -425,13 +499,20 @@ export async function getMyGames({ wallet }: { wallet: any }): Promise<PGCGame[]
         }
 
         const ownedSet = new Set(ownedGameIds);
+
         const catalog = await loadPublishedCatalog();
-        return mapCatalogToPGCGames(catalog.filter((game) => ownedSet.has(game.game_id)));
+        const ownedCatalog = catalog.filter((game) => ownedSet.has(game.game_id));
+        const baseGames = mapCatalogToPGCGames(ownedCatalog);
+
+        const enrichedGames = await enrichOwnedGamesWithWebDistribution(baseGames, records);
+
+        return enrichedGames;
     } catch (error) {
         console.warn('Failed to resolve owned games for wallet.', error);
         return [];
     }
 }
+
 
 export async function getLiveManifestForPlatform({
     canisterId,

@@ -16,8 +16,6 @@ export const LibrarySidebarItem: React.FC<LibrarySidebarItemProps> = ({
   // pilih cover: vertical > banner
   const coverUrl = entry.coverVerticalImage || entry.bannerImage || ImageLoading;
 
-  console.log('[SidebarItem] gameId', entry.gameId, 'coverUrl', coverUrl);
-
   return (
     <ButtonWithSound
       key={entry.gameId}

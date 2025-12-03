@@ -9,6 +9,7 @@ import {
     createEmptyImageDataUrl,
     downloadAndCompressToDataUrl,
 } from "../utils/imageCompression";
+import { resolveWebBuildUrlFromGame } from "../utils/formatDistribution";
 
 // pilih URL cover terbaik
 function resolveCoverUrl(game: PGCGame): string | undefined {
@@ -68,7 +69,8 @@ async function mapPGCGameToLibraryInput(game: PGCGame): Promise<CreateLibraryEnt
         bannerImage = coverVerticalImage;
     }
 
-    const webUrl = game.website ?? undefined;
+    const webUrl = resolveWebBuildUrlFromGame(game);
+    console.log("[sync] resolved webUrl", { gameId: game.gameId, webUrl });
 
     return {
         gameId,
@@ -98,6 +100,7 @@ export async function syncLibraryFromRemote(wallet: any) {
     if (!wallet) return;
 
     const remoteGames = await getMyGames({ wallet });
+    console.log(remoteGames);
 
     for (const game of remoteGames) {
         const gameId = game.gameId as GameId;
@@ -105,10 +108,8 @@ export async function syncLibraryFromRemote(wallet: any) {
         const mapped = await mapPGCGameToLibraryInput(game);
 
         if (!existing) {
-            // game baru → create
             await libraryService.create(mapped);
         } else {
-            // game sudah ada → update metadata saja
             await libraryService.update(gameId, {
                 gameName: mapped.gameName,
                 description: mapped.description,
@@ -116,7 +117,6 @@ export async function syncLibraryFromRemote(wallet: any) {
                 bannerImage: mapped.bannerImage,
                 launchType: mapped.launchType,
                 webUrl: mapped.webUrl,
-                // stats/install/status TIDAK disentuh, biar local tetap aman
             });
         }
     }
