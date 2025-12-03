@@ -18,7 +18,7 @@ import type {
   Platform,
   ViewMode,
   WebDistribution,
-} from '@shared/blockchain/icp/types/game.types';
+} from '@shared/blockchain/icp/types/game';
 import { SetHardwarePayload } from '@shared/interfaces/gameDraft';
 import toast from 'react-hot-toast';
 import { fetchDraftBuildsCombined } from '@features/game/services/draft';

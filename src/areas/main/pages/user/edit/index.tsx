@@ -17,11 +17,7 @@ import { DropDownComponent } from '@components/atoms/DropDownComponent';
 import { AlertMessage } from '@features/wallet/components/AlertMessage';
 
 import { Gender, UserInterface, UpdateUserInterface } from '@interfaces/user/UserInterface';
-import {
-  getIsUsernameValid,
-  getUserData,
-  updateUser,
-} from '@features/profile/services/user.service';
+import { getIsUsernameValid, getUserData, updateUser } from '@features/profile/services/user';
 import { optGet, ToOpt } from '@interfaces/helpers/icp.helpers';
 import { saveUserInfo } from '@shared/utils/IndexedDb';
 import { getCoverImage, getProfileImage } from '@shared/utils/Additional';

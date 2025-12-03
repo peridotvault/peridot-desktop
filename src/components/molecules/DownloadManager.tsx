@@ -18,7 +18,7 @@ import type {
   Manifest,
   StorageRef,
   Distribution,
-} from '@shared/blockchain/icp/types/game.types';
+} from '@shared/blockchain/icp/types/game';
 
 // Gunakan tipe yang sesuai dengan .did
 type ResolvedBuild = {

@@ -12,7 +12,7 @@ import type {
   Distribution,
   NativeDistribution,
   WebDistribution,
-} from '@shared/blockchain/icp/types/game.types';
+} from '@shared/blockchain/icp/types/game';
 import { GameDraft } from '@shared/interfaces/gameDraft';
 import { fetchDraftSummaryCombined } from '@features/game/services/draft';
 import type { OnChainGameMetadata } from '@features/game/types/game';
