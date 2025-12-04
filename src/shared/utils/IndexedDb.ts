@@ -1,4 +1,4 @@
-import { UserInterface } from 'src/interfaces/user/UserInterface';
+import { UserInterface } from '@shared/interfaces/user/UserInterface';
 import theCurrencies from '../assets/json/currencies.json';
 import { getKvItem, setKvItem } from '@shared/services/local-db/kv-key';
 import { KV_KEYS } from '@shared/database/kv-keys';

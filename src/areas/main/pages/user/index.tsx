@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { LoadingScreen } from '@components/organisms/LoadingScreen';
-import { UserInterface } from '@interfaces/user/UserInterface';
+import { UserInterface } from '@shared/interfaces/user/UserInterface';
 import { getUserData } from '@features/profile/services/user';
-import { optGet, optGetOr } from '@interfaces/helpers/icp.helpers';
+import { optGet, optGetOr } from '@shared/interfaces/helpers/icp.helpers';
 import { getProfileImage } from '@shared/utils/Additional';
 import { ImageLoading } from '@shared/constants/images';
 

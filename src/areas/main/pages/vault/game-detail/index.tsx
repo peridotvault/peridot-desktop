@@ -13,14 +13,14 @@ import {
   NormalizedDist,
   NativeSpec,
   WebSpec,
-} from '@interfaces/helpers/icp.helpers';
+} from '@shared/interfaces/helpers/icp.helpers';
 import { buyGame } from '@features/game/services/purchase';
 import type { PurchaseResult } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
 import { getGameRecordById } from '@features/game/services/record';
 import { getGameByGameId, getPublishedGames } from '@features/game/services/dto';
 import { Distribution, Metadata, PGCGame } from '@shared/blockchain/icp/types/game';
 import { isZeroTokenAmount, resolveTokenInfo, subunitsToNumber } from '@shared/utils/token-info';
-import type { MediaItem } from '@interfaces/app/GameInterface';
+import type { MediaItem } from '@shared/interfaces/app/GameInterface';
 // import { AnnouncementContainer } from '@features/announcement/components/ann-container.component';
 // import type { GameAnnouncementType } from '@shared/blockchain/icp/types/game.types';
 // import { getAllAnnouncementsByGameId } from '@features/game/services/announcement.service';

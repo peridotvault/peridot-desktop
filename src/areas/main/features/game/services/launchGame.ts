@@ -3,7 +3,7 @@ import type { Distribution, PGCGame } from '@shared/blockchain/icp/types/game';
 import type { InstalledEntry, InstalledRecord } from '@shared/utils/installedStorage';
 import { getInstalledRecord } from '@shared/utils/installedStorage';
 import { detectOSKey, normalizeOSKey } from '@shared/utils/os';
-import type { OSKey } from '@interfaces/CoreInterface';
+import type { OSKey } from '@shared/interfaces/CoreInterface';
 
 export type LaunchEnvironment = 'desktop' | 'web';
 

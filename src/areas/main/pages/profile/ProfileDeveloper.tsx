@@ -13,8 +13,8 @@ import { Link } from 'react-router-dom';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { LoadingScreen } from '@components/organisms/LoadingScreen';
 import { getUserData } from '@features/profile/services/user';
-import { UserInterface } from '@interfaces/user/UserInterface';
-import { GetOpt } from '@interfaces/CoreInterface';
+import { UserInterface } from '@shared/interfaces/user/UserInterface';
+import { GetOpt } from '@shared/interfaces/CoreInterface';
 
 export default function ProfileDeveloper() {
   const { wallet } = useWallet();

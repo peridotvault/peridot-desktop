@@ -1,7 +1,7 @@
 import { OSKey } from '@shared/api/wasabi.api';
 import { resolveTokenInfo, subunitsToNumber } from '@shared/utils/token-info';
-import { Option } from 'src/interfaces/app/GameInterface';
-import { DistKey } from 'src/interfaces/CoreInterface';
+import { Option } from '@shared/interfaces/app/GameInterface';
+import { DistKey } from '@shared/interfaces/CoreInterface';
 import { EncryptedData } from '@shared/security/aes';
 
 export const shortenAddress = (address: string | null, firstSlice: number, secondSlice: number) => {

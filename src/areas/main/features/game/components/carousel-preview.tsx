@@ -1,5 +1,5 @@
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MediaItem } from '@interfaces/app/GameInterface';
+import { MediaItem } from '@shared/interfaces/app/GameInterface';
 
 export interface CarouselPreviewProps {
   items: MediaItem[];

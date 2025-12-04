@@ -4,8 +4,8 @@ import { Outlet } from 'react-router-dom';
 import { Wallet } from '../../features/wallet/views/Wallet';
 import { MenuAvatar } from '@shared/components/menu-avatar';
 import { Sidebar } from './Sidebar';
-import DownloadModal from '@features/download/components/DownloadModal';
-import AIChatbot from '@features/ai/components/AiChatbot';
+import DownloadModal from '@features/download/components/layouts/DownloadModal';
+import AIChatbot from '@features/ai/components/AIChatbot';
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);

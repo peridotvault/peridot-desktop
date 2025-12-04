@@ -1,4 +1,4 @@
-import { OSKey } from '@interfaces/CoreInterface';
+import { OSKey } from '@shared/interfaces/CoreInterface';
 
 // Detects the current OS in a browser-friendly way.
 // Falls back to linux when a platform cannot be inferred (e.g., SSR).

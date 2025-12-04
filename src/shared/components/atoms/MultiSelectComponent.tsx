@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useEffect, useRef, useState } from 'react';
-import { Option } from '../../interfaces/app/GameInterface';
+import { Option } from '../../shared/interfaces/app/GameInterface';
 
 type MultiSelectProps = {
   maxValue: number;

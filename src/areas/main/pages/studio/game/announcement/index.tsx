@@ -15,7 +15,7 @@ import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '@shared/
 import { InputFieldComponent } from '@components/atoms/InputFieldComponent';
 import { PhotoFieldComponent } from '@components/atoms/PhotoFieldComponent';
 import { DropDownComponent } from '@components/atoms/DropDownComponent';
-import { AppStatus } from '@interfaces/app/GameInterface';
+import { AppStatus } from '@shared/interfaces/app/GameInterface';
 import { AnnouncementContainer } from '@features/announcement/components/ann-container.component';
 
 export default function StudioGameAnnouncement() {

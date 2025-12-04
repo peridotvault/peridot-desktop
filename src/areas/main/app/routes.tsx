@@ -5,13 +5,13 @@ import { createHashRouter } from 'react-router-dom';
 import UpdaterPage from '@pages/additional/UpdaterPage';
 import AppShell from './layouts/AppShell';
 import VaultPage from '@pages/vault';
-import { LoadingScreen } from '@components/organisms/LoadingScreen';
 import { StudioGameMedia } from '@pages/studio/game/media';
 import { StudioGameBuilds } from '@pages/studio/game/build';
 import { StudioGameMarket } from '@pages/studio/game/market';
 import { StudioGameNewBuild } from '@pages/studio/game/build/create';
 import StudioGamePublish from '@pages/studio/game/publish';
 import MainLayout from '@pages/_layouts/Main';
+import { LoadingScreen } from '@shared/components/organisms/LoadingScreen';
 
 // LAZY (split)
 const LibraryLayout = lazy(() => import('@pages/library/_components/layouts/Main'));

@@ -1,6 +1,6 @@
 // src/hooks/useInstalled.ts
 import { useEffect, useState } from 'react';
-import { OSKey } from '@interfaces/CoreInterface';
+import { OSKey } from '@shared/interfaces/CoreInterface';
 import {
   getLatestInstalled,
   InstalledEntry,
