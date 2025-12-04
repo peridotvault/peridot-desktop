@@ -1,4 +1,3 @@
-import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 type Props = {
@@ -12,7 +11,7 @@ export default function DownloadModal({
   open,
   onClose,
   leftClassName = 'left-24',
-  title = 'Peri Chat',
+  title = 'Download Modal',
 }: Props) {
   return (
     <AnimatePresence>
@@ -30,12 +29,12 @@ export default function DownloadModal({
           {/* Panel (slide from left) */}
           <motion.div
             className={[
-              'fixed bottom-0 h-full w-2xl bg-background border-x border-foreground/10 shadow-2xl top-12',
+              'fixed top-12 bottom-0 w-2xl bg-background border-x border-foreground/10 shadow-2xl',
               'flex flex-col z-40',
               leftClassName,
             ].join(' ')}
             role="dialog"
-            aria-label="Download Modal"
+            aria-label={title}
             initial={{ x: '-100%', opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '-100%', opacity: 0 }}

@@ -4,7 +4,7 @@ import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/fre
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getGameByGameId } from '@shared/blockchain/icp/services/game';
 import { useParams } from 'react-router-dom';
-import { useDownloadManager } from '@components/molecules/DownloadManager';
+import { useDownloadManager } from '@features/download/components/DownloadManager';
 import type { Distribution, PGCGame } from '@shared/blockchain/icp/types/game';
 import { PriceCoin } from '@shared/components/ui/CoinPrice';
 import { isZeroTokenAmount, resolveTokenInfo } from '@shared/utils/token-info';

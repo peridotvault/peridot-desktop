@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { OSKey } from '../../interfaces/CoreInterface';
+import { OSKey } from '../../../../../interfaces/CoreInterface';
 import { upsertInstalledEntry } from '@shared/utils/installedStorage';
 import { open as openDialog, save as saveDialog } from '@tauri-apps/plugin-dialog';
 // Gunakan tipe dari service.did.d

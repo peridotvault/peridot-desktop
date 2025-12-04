@@ -205,12 +205,12 @@ export default function AIChatbot({
           {/* Panel (slide from left) */}
           <motion.div
             className={[
-              'fixed bottom-0 h-full w-md bg-background border-x border-foreground/10 shadow-2xl',
+              'fixed bottom-0 top-12 w-md bg-background border-x border-foreground/10 shadow-2xl',
               'flex flex-col z-40',
               leftClassName,
             ].join(' ')}
             role="dialog"
-            aria-label="AI Chat"
+            aria-label={title}
             initial={{ x: '-100%', opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '-100%', opacity: 0 }}

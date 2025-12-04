@@ -4,7 +4,7 @@ import { RouterProvider } from 'react-router-dom';
 import '@shared/assets/styles/index.css';
 import { WalletProvider } from '@shared/contexts/WalletContext';
 import { Buffer } from 'buffer';
-import { DownloadProvider } from '@components/molecules/DownloadManager';
+import { DownloadProvider } from '@features/download/components/DownloadManager';
 import router from './app/routes';
 
 if (typeof window !== 'undefined') {
