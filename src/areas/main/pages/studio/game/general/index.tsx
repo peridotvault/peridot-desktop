@@ -100,7 +100,7 @@ export default function StudioGameDetails() {
       setCoverVerticalUrl(data.coverVerticalImage ?? '');
       setCoverHorizontalUrl(data.coverHorizontalImage ?? '');
       setTags(
-        normalizeSelection(
+        normalizeSelection<TagDb>(
           Array.isArray(data.tags) ? (data.tags as unknown[]) : [],
           tagOptions,
           (tag) => tag.tagId,
@@ -108,7 +108,7 @@ export default function StudioGameDetails() {
         ),
       );
       setCategories(
-        normalizeSelection(
+        normalizeSelection<CategoryDb>(
           Array.isArray(data.categories) ? (data.categories as unknown[]) : [],
           categoryOptions,
           (cat) => cat.categoryId,
