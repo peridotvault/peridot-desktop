@@ -12,12 +12,11 @@ import type {
   Distribution,
   NativeDistribution,
   WebDistribution,
+  OnChainGameMetadata,
 } from '@shared/blockchain/icp/types/game';
-import { GameDraft } from '@shared/interfaces/gameDraft';
+import { GameDraft, GameWhole } from '@shared/interfaces/gameDraft';
 import { fetchDraftSummaryCombined } from '@features/game/services/draft';
-import type { OnChainGameMetadata } from '@features/game/types/game';
 import { setGameWhole } from '@features/game/api/game.api';
-import type { GameWhole } from '@features/game/types/game-draft';
 import {
   publishGameOnChain,
   type HardwareUpdatePayload,

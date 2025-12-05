@@ -1,10 +1,9 @@
 // @ts-ignore
 import React, { useEffect, useMemo, useState } from 'react';
-import { faClock, faDownload, faPlay, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
+import { faClock, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getGameByGameId } from '@shared/blockchain/icp/services/game';
 import { useParams } from 'react-router-dom';
-import { useDownloadManager } from '@features/download/components/DownloadManager';
 import type { Distribution, PGCGame } from '@shared/blockchain/icp/types/game';
 import { PriceCoin } from '@shared/components/ui/CoinPrice';
 import { isZeroTokenAmount, resolveTokenInfo } from '@shared/utils/token-info';
@@ -18,6 +17,9 @@ import {
 } from '@features/game/services/launchGame';
 import { detectOSKey } from '@shared/utils/os';
 import { useInstalled } from '@features/download/hooks/useInstalled';
+import { resolveNativeDownload } from '@features/download/lib/resolveNativeDownload';
+import { GameActionButton } from '@features/download/components/GameActionButton';
+import type { PlatformType } from '@features/download/interfaces/download';
 
 import type { GameId } from '@shared/interfaces/game';
 import type { LibraryEntry } from '@shared/interfaces/library';
@@ -25,7 +27,6 @@ import { libraryService } from '@features/library/services/localDb';
 
 export default function LibraryGameDetail() {
   const { gameId } = useParams();
-  const { openInstallModal } = useDownloadManager();
 
   const [theGame, setTheGame] = useState<PGCGame | null>(null);
   const [libraryEntry, setLibraryEntry] = useState<LibraryEntry | null>(null);
@@ -139,6 +140,11 @@ export default function LibraryGameDetail() {
 
   const hasNativeForOS = launchState?.hasNativeForOS ?? false;
   const hasWeb = launchState?.hasWeb ?? false;
+  const nativeDownloadInfo = useMemo(
+    () => (hasNativeForOS ? resolveNativeDownload(resolvedDistributions, osKey) : null),
+    [hasNativeForOS, osKey, resolvedDistributions],
+  );
+  const primaryPlatform: PlatformType = hasNativeForOS ? 'native' : 'web';
 
   // ====== HERO IMAGE ======
 
@@ -181,11 +187,6 @@ export default function LibraryGameDetail() {
   }, [libraryEntry?.stats.lastLaunchedAt]);
 
   // ====== ACTIONS ======
-
-  const installHere = () => {
-    if (!theGame || !hasNativeForOS) return;
-    openInstallModal(theGame);
-  };
 
   const onLaunch = async () => {
     await launchGame(launchState, {
@@ -256,25 +257,15 @@ export default function LibraryGameDetail() {
 
             {/* CTAs */}
             <div className="flex flex-col gap-4">
-              {(hasWeb || installed) && webUrl && (
-                <ButtonWithSound
-                  onClick={onLaunch}
-                  className="bg-accent px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
-                >
-                  <FontAwesomeIcon icon={faPlay} />
-                  {hasWeb && !installed ? 'Play Now (Web)' : 'Launch'}
-                </ButtonWithSound>
-              )}
-
-              {!installed && hasNativeForOS && (
-                <ButtonWithSound
-                  onClick={installHere}
-                  className="border border-foreground/20 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center"
-                >
-                  <FontAwesomeIcon icon={faDownload} />
-                  Download for {osKey === 'macos' ? 'macOS' : osKey}
-                </ButtonWithSound>
-              )}
+              <GameActionButton
+                gameId={appIdKey ?? gameId ?? 'unknown'}
+                title={theGame?.name ?? libraryEntry?.gameName ?? 'Untitled Game'}
+                platform={primaryPlatform}
+                downloadInfo={nativeDownloadInfo}
+                webUrl={webUrl}
+                onPlay={onLaunch}
+                className="w-full justify-center"
+              />
 
               <ButtonWithSound className="border border-foreground/20 px-6 py-2 rounded-lg flex gap-2 items-center w-full justify-center">
                 <FontAwesomeIcon icon={faStore} />

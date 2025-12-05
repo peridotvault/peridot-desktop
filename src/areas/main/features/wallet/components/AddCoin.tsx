@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { InputField } from '@components/atoms/InputField';
+import { InputField } from '@shared/components/atoms/InputField';
 import { Principal } from '@dfinity/principal';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { Coin } from '@features/wallet/local-db/models/Coin';

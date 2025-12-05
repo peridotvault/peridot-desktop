@@ -22,11 +22,11 @@ import type {
 import { SetHardwarePayload } from '@shared/interfaces/gameDraft';
 import toast from 'react-hot-toast';
 import { fetchDraftBuildsCombined } from '@features/game/services/draft';
-import { LoadingComponent } from '@components/atoms/loading.component';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { InputFloating } from '@shared/components/ui/input-floating';
 import { InputTextarea } from '@shared/components/ui/input-textarea';
 import { setHardware, setLive } from '@features/game/api/game-draft.api';
+import { LoadingComponent } from '@shared/components/atoms/loading.component';
 
 type HardwareForm = {
   processor: string;

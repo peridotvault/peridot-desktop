@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { InputField } from '@components/atoms/InputField';
+import { InputField } from '@shared/components/atoms/InputField';
 import { Contact } from '../views/SendToken';
 import { KV_KEYS } from '@shared/database/kv-keys';
 import { STORAGE_EVENTS } from '@shared/database/events';

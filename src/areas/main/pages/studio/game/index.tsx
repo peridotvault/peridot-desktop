@@ -5,7 +5,6 @@ import { useWallet } from '@shared/contexts/WalletContext';
 import { faPlus, faUpLong } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
-import { Alert } from '@components/molecules/Alert';
 import { getDeveloperGames } from '@shared/blockchain/icp/services/game';
 import type { PGCGame } from '@shared/blockchain/icp/types/game';
 import { NewGame } from '@features/game/components/new-game.modal';
@@ -14,6 +13,7 @@ import { Principal } from '@dfinity/principal';
 import { register_game } from '@shared/blockchain/icp/services/registry';
 import type { CreateGameRecord } from '@shared/blockchain/icp/sdk/canisters/registry.did.d';
 import { ImageLoading } from '@shared/constants/images';
+import { Alert } from '@shared/components/molecules/Alert';
 
 // ✅ Skeleton Component untuk Game Item
 const GameSkeleton = () => (

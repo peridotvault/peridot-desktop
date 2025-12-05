@@ -1,7 +1,7 @@
 import { faAddressBook, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
-import { InputField } from '@components/atoms/InputField';
+import { InputField } from '@shared/components/atoms/InputField';
 import { shortenAddress } from '@shared/utils/Additional';
 import { Principal } from '@dfinity/principal';
 import { ICRC1Coin } from '../components/ICRC1Coin';

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWallet } from '@shared/contexts/WalletContext';
 import { motion } from 'framer-motion';
-import { ButtonTransaction } from '@components/atoms/ButtonTransaction';
 import { ICRC1Coin } from '../components/ICRC1Coin';
 import { AlertMessage } from '../components/AlertMessage';
 import { walletService } from '@shared/services/wallet';
@@ -11,6 +10,7 @@ import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { ICPLedgerFactory } from '../blockchain/icp/ICPLedgerFactory';
 import { Principal } from '@dfinity/principal';
 import { ICRCLedgerActor } from '../blockchain/icp/ICRCLedgerFactory';
+import { ButtonTransaction } from '@shared/components/atoms/ButtonTransaction';
 
 interface Props {
   onClose: () => void;

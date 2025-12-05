@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
-import { InputPreviews } from '@components/atoms/input-previews';
 import { useParams } from 'react-router-dom';
 import { PreviewItem } from '@shared/interfaces/game';
 import { API_BASE_STORAGE, initAppStorage, uploadToPrefix } from '@shared/api/wasabi.api'; // ✅
 import { LoadingPage } from '@pages/additional/loading-page';
 import { updatePreviews } from '@features/game/api/game-draft.api';
 import { GamePreview } from '@shared/interfaces/gameDraft';
-import { LoadingComponent } from '@components/atoms/loading.component';
 import { fetchDraftPreviewsCombined } from '@features/game/services/draft';
+import { LoadingComponent } from '@shared/components/atoms/loading.component';
+import { InputPreviews } from '@shared/components/atoms/input-previews';
 
 export const StudioGameMedia = () => {
   const { gameId } = useParams<{ gameId: string }>();

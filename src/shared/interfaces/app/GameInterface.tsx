@@ -84,6 +84,12 @@ export interface HydratedGameInterface {
   manifestsByOS?: Record<OSKey, Manifest[]>;
   webHardware?: WebHardwareFields | null;
   hardwareByOS?: Record<OSKey, HardwareFields>;
+
+  // Launcher-specific metadata
+  platformType?: 'web' | 'native';
+  isWeb?: boolean;
+  downloadUrl?: string;
+  installPath?: string;
 }
 
 /** =========================

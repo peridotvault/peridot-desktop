@@ -4,9 +4,9 @@ import { TrainedDataInterface } from '../interfaces/History';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { shortenAddress } from '@shared/utils/Additional';
-import { ButtonTransaction } from '@components/atoms/ButtonTransaction';
 import { DateTime } from 'luxon';
 import { openUrl } from '@tauri-apps/plugin-opener';
+import { ButtonTransaction } from '@shared/components/atoms/ButtonTransaction';
 
 export function millisecondsToTimestamp(milliseconds: number): string {
   return DateTime.fromMillis(milliseconds / 1_000_000)

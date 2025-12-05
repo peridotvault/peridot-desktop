@@ -12,11 +12,11 @@ import {
 import { GameAnnouncementType } from '@shared/blockchain/icp/types/game';
 import { faCheck, faHeading, faMessage } from '@fortawesome/free-solid-svg-icons';
 import { initAppStorage, InitResp, safeFileName, uploadToPrefix } from '@shared/api/wasabi.api';
-import { InputFieldComponent } from '@components/atoms/InputFieldComponent';
-import { PhotoFieldComponent } from '@components/atoms/PhotoFieldComponent';
-import { DropDownComponent } from '@components/atoms/DropDownComponent';
 import { AppStatus } from '@shared/interfaces/app/GameInterface';
 import { AnnouncementContainer } from '@features/announcement/components/ann-container.component';
+import { InputFieldComponent } from '@shared/components/atoms/InputFieldComponent';
+import { PhotoFieldComponent } from '@shared/components/atoms/PhotoFieldComponent';
+import { DropDownComponent } from '@shared/components/atoms/DropDownComponent';
 
 export default function StudioGameAnnouncement() {
   const { wallet } = useWallet();

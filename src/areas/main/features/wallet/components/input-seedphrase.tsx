@@ -1,6 +1,6 @@
 // @ts-ignore
 import React, { useState, useRef, useEffect } from 'react';
-import { InputField } from '@components/atoms/InputField';
+import { InputField } from '@shared/components/atoms/InputField';
 import { copyToClipboard } from '@shared/utils/Additional';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClone } from '@fortawesome/free-solid-svg-icons';

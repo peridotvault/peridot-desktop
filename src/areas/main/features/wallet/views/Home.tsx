@@ -27,12 +27,12 @@ import {
 } from '@shared/utils/IndexedDb';
 import { Currency } from '@features/wallet/interfaces/Currency';
 import { WalletInfo } from '@features/wallet/interfaces/Wallet';
-import { InputField } from '@components/atoms/InputField';
 import { CoinService } from '@features/wallet/local-db/services/coinService';
 import { Coin } from '@features/wallet/local-db/models/Coin';
 import { clearWalletData } from '@shared/services/store';
 import { redirectToLogin } from '@shared/desktop/windowControls';
 import { useWalletLockStore } from '@shared/states/wallet-lock.store';
+import { InputField } from '@shared/components/atoms/InputField';
 
 export const Home = () => {
   const { wallet, setWallet, setIsGeneratedSeedPhrase } = useWallet();

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { faChevronLeft, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { InputField } from '@components/atoms/InputField';
+import { InputField } from '@shared/components/atoms/InputField';
 import { AddCoin } from '../components/AddCoin';
 import theCoin from '@shared/assets/json/coins.json';
 import { Coin } from '@features/wallet/local-db/models/Coin';
