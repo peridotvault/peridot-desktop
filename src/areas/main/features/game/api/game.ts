@@ -1,8 +1,5 @@
-import type {
-  GameMetadataResponse,
-  GameWhole,
-  GameWholeUpsertPayload,
-} from '../types/game-draft';
+import { GameWholeUpsertPayload, GameWhole, GameMetadataResponse } from '@shared/interfaces/gameDraft';
+
 
 const API_BASE = import.meta.env.VITE_API_BASE + '/api/games';
 

@@ -16,7 +16,7 @@ import type {
 } from '@shared/blockchain/icp/types/game';
 import { GameDraft, GameWhole } from '@shared/interfaces/gameDraft';
 import { fetchDraftSummaryCombined } from '@features/game/services/draft';
-import { setGameWhole } from '@features/game/api/game.api';
+import { setGameWhole } from '@features/game/api/game';
 import {
   publishGameOnChain,
   type HardwareUpdatePayload,

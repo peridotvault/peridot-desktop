@@ -1,17 +1,5 @@
-import {
-  AppendManifestPayload,
-  CategoriesResponse,
-  CategoryDb,
-  GameBuilds,
-  GameDraft,
-  GameGeneral,
-  GamePreview,
-  SetHardwarePayload,
-  TagDb,
-  TagsResponse,
-} from '../types/game-draft';
+import { GameDraft, GameGeneral, GamePreview, GameBuilds, SetHardwarePayload, AppendManifestPayload, CategoryDb, TagDb, CategoriesResponse, TagsResponse } from "@shared/interfaces/gameDraft";
 
-// api/gameDraftApi.ts
 // const BASE_URL = import.meta.env.VITE_OFFCHAIN_API_BASE + '/games';
 const API_BASE = import.meta.env.VITE_API_BASE + '/api/games';
 

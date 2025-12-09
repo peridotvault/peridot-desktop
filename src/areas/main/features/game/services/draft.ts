@@ -1,5 +1,5 @@
 import { fetchBuilds, fetchGeneral, fetchPreviews, fetchWholeDraft } from '@features/game/api/game-draft.api';
-import { fetchGameMetadata } from '@features/game/api/game.api';
+import { fetchGameMetadata } from '@features/game/api/game';
 import type {
   GameBuilds,
   GameDraft,
