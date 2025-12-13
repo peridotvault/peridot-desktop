@@ -60,49 +60,47 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <main className="flex flex-col overflow-auto mt-12 ">
-        <Sidebar
-          onOpenWallet={toggleWallet}
-          onOpenPeri={togglePeri}
-          onOpenDownload={toggleDownload}
-          onOpenMenuAvatar={toggleAvatar}
-          walletActive={isOpenWallet}
-          periActive={isOpenPeri}
-          downloadActive={isOpenDownload}
-          avatarActive={isOpenMenuAvatar}
-        />
+    <div className="h-screen w-screen flex flex-col overflow-hidden">
+      <Sidebar
+        onOpenWallet={toggleWallet}
+        onOpenPeri={togglePeri}
+        onOpenDownload={toggleDownload}
+        onOpenMenuAvatar={toggleAvatar}
+        walletActive={isOpenWallet}
+        periActive={isOpenPeri}
+        downloadActive={isOpenDownload}
+        avatarActive={isOpenMenuAvatar}
+      />
 
-        {/* Content Area */}
-        <div className={`flex-1 ml-16 relative`}>
-          <div className={``}>
-            <Outlet />
-          </div>
+      {/* Content Area */}
+      <main className="h-full w-full pl-16 pt-12 relative">
+        <div className="w-full h-full">
+          <Outlet />
         </div>
-
-        {/* Store Modal ========================= */}
-        <AIChatbot
-          open={isOpenPeri}
-          onClose={() => setIOpenPeri(false)}
-          leftClassName="left-16"
-          title="Peri Chat"
-        />
-
-        <DownloadModal
-          open={isOpenDownload}
-          onClose={() => setIOpenDownload(false)}
-          leftClassName="left-16"
-          title="Download Modal"
-        />
-
-        <Wallet open={isOpenWallet} onClose={() => setIOpenWallet(false)} leftClassName="left-16" />
-
-        <MenuAvatar
-          open={isOpenMenuAvatar}
-          onClose={() => setIOpenMenuAvatar(false)}
-          leftClassName="left-20"
-        />
       </main>
+
+      {/* Store Modal ========================= */}
+      <AIChatbot
+        open={isOpenPeri}
+        onClose={() => setIOpenPeri(false)}
+        leftClassName="left-16"
+        title="Peri Chat"
+      />
+
+      <DownloadModal
+        open={isOpenDownload}
+        onClose={() => setIOpenDownload(false)}
+        leftClassName="left-16"
+        title="Download Modal"
+      />
+
+      <Wallet open={isOpenWallet} onClose={() => setIOpenWallet(false)} leftClassName="left-16" />
+
+      <MenuAvatar
+        open={isOpenMenuAvatar}
+        onClose={() => setIOpenMenuAvatar(false)}
+        leftClassName="left-20"
+      />
     </div>
   );
 }

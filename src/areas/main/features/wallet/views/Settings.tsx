@@ -9,22 +9,10 @@ import {
 } from '@shared/utils/IndexedDb';
 import { WalletInfo } from '../interfaces/Wallet';
 import { Currency } from '../interfaces/Currency';
-// import { faCircleInfo, faContactBook } from "@fortawesome/free-solid-svg-icons";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export const Settings = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<{ [currency: string]: HTMLButtonElement | null }>({});
-  // const settingLists = [
-  //   {
-  //     title: "Contact",
-  //     icon: faContactBook,
-  //   },
-  //   {
-  //     title: "About Peridot Wallet",
-  //     icon: faCircleInfo,
-  //   },
-  // ];
 
   const isDragging = useRef(false);
   const startX = useRef(0);
