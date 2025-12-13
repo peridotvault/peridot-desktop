@@ -11,9 +11,6 @@ import {
   faVenusMars,
 } from '@fortawesome/free-solid-svg-icons';
 import countriesData from '@shared/assets/json/countries.json';
-import { LoadingScreen } from '@components/organisms/LoadingScreen';
-import { InputFieldComponent } from '@components/atoms/InputFieldComponent';
-import { DropDownComponent } from '@components/atoms/DropDownComponent';
 import { AlertMessage } from '@features/wallet/components/AlertMessage';
 
 import { Gender, UserInterface, UpdateUserInterface } from '@shared/interfaces/user/UserInterface';
@@ -21,6 +18,9 @@ import { getIsUsernameValid, getUserData, updateUser } from '@features/profile/s
 import { optGet, ToOpt } from '@shared/interfaces/helpers/icp.helpers';
 import { saveUserInfo } from '@shared/utils/IndexedDb';
 import { getCoverImage, getProfileImage } from '@shared/utils/Additional';
+import { InputFieldComponent } from '@shared/components/atoms/InputFieldComponent';
+import { LoadingScreen } from '@shared/components/organisms/LoadingScreen';
+import { DropDownComponent } from '@shared/components/atoms/DropDownComponent';
 
 /** Utils — konversi tanggal (ns <-> YYYY-MM-DD UTC) */
 function unixNsToDateStr(ns: bigint): string {

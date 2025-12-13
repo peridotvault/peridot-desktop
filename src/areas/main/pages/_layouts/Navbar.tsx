@@ -1,7 +1,7 @@
 // @ts-ignore
 import React from 'react';
-import { SearchInput } from '@components/organisms/search-input';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
+import { SearchInput } from '@shared/components/organisms/search-input';
 
 export const MainNavbar = () => {
   const chains = [

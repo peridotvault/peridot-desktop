@@ -11,7 +11,7 @@ import {
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
-import { Avatar } from '@shared/components/ui/Avatar';
+import { Avatar } from '@shared/components/ui/avatar';
 
 interface MainSidebarProps {
   onOpenWallet: () => void;

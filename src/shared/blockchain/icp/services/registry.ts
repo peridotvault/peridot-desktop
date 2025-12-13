@@ -1,7 +1,7 @@
 import { ICP_REGISTRY_CANISTER } from '../../../config/icp';
 import { ICPPublicAgent } from '../sdk/actors';
 import { createActorRegistry } from '../sdk/agents';
-import type { CreateGameRecord, GameRecordType } from '../sdk/canisters/registry.did';
+import type { CreateGameRecord, GameRecordType } from '../sdk/canisters/registry.did.d';
 
 export async function register_game_with_fee({ meta }: { meta: CreateGameRecord }): Promise<GameRecordType> {
     try {

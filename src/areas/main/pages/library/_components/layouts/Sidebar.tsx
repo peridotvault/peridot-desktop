@@ -14,8 +14,8 @@ export const LibrarySidebar = () => {
   const navigate = useNavigate();
   const { wallet } = useWallet();
 
-  const { entries, isLoading, error, loadAll } = useLibraryStore();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { entries, isLoading, loadAll } = useLibraryStore();
+  const [searchQuery] = useState('');
 
   useEffect(() => {
     loadAll();

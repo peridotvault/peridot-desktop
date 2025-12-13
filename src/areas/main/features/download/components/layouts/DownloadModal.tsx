@@ -15,7 +15,7 @@ export default function DownloadModal({
   leftClassName = 'left-24',
   title = 'Download Modal',
 }: Props) {
-  const [queue, setQueue] = useState<DownloadItem[]>([]);
+  const [queue] = useState<DownloadItem[]>([]);
 
   return (
     <AnimatePresence>

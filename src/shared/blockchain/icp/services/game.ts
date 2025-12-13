@@ -1,8 +1,8 @@
 import { Principal } from '@dfinity/principal';
 import { ICPPrivateAgent, ICPPublicAgent } from '../sdk/actors';
 import { createActorFactory, createActorPGC1, createActorRegistry } from '../sdk/agents';
-import type { ApiResponse_4, GameRecordType } from '../sdk/canisters/registry.did';
-import type { Manifest as PGCLiveManifest } from '../sdk/canisters/pgc1.did';
+import type { ApiResponse_4, GameRecordType } from '../sdk/canisters/registry.did.d';
+import type { Manifest } from '../sdk/canisters/pgc1.did.d';
 import { ICP_FACTORY_CANISTER, ICP_REGISTRY_CANISTER } from '../../../config/icp';
 import { walletService } from '@shared/services/wallet';
 import { arrayStringToPrincipal } from '@shared/utils/icp.helper';
@@ -20,7 +20,7 @@ import type { InitCreateGame } from '../types/factory';
 
 type PrincipalListOpt = [] | [Principal[]];
 
-const storageRefToUrl = (manifest: PGCLiveManifest | null): string | undefined => {
+const storageRefToUrl = (manifest: Manifest | null): string | undefined => {
     if (!manifest) return undefined;
 
     const storage = (manifest as any).storage ?? (manifest as any).storageRef;
@@ -520,7 +520,7 @@ export async function getLiveManifestForPlatform({
 }: {
     canisterId: string | Principal;
     platform: Platform;
-}): Promise<PGCLiveManifest | null> {
+}): Promise<Manifest | null> {
     const agent = ICPPublicAgent;
     const principal = typeof canisterId === 'string' ? Principal.fromText(canisterId) : canisterId;
     const actor = createActorPGC1(principal, { agent });

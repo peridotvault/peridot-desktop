@@ -1,6 +1,5 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Avatar } from './ui/Avatar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowRightFromBracket,
@@ -15,6 +14,7 @@ import { clearWalletData } from '@shared/services/store';
 import { useWallet, useWalletUpdate } from '@shared/contexts/WalletContext';
 import { shortenAddress } from '@shared/utils/short-address';
 import { redirectToLogin } from '@shared/desktop/windowControls';
+import { Avatar } from '@shared/components/ui/avatar';
 
 type Props = {
   open: boolean;
