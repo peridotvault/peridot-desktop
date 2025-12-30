@@ -128,9 +128,9 @@ export const StudioGameMedia = () => {
     </div>
   );
 
-  if (loading) {
-    <LoadingPage />;
-  }
+  // if (loading) {
+  // <LoadingPage />;
+  // }
 
   return (
     <div className="flex justify-center w-full">
@@ -149,26 +149,26 @@ export const StudioGameMedia = () => {
           </ButtonWithSound>
         </section>
 
-        {loading ? (
+        {/* {loading ? (
           <LoadingComponent />
-        ) : (
-          <section className="grid gap-8">
-            <HeaderContainer
-              title="Upload Previews"
-              description="Upload cover for your game page on PeridotVault"
-            />
-            <InputPreviews
-              label="Previews"
-              multiple
-              className="h-72"
-              maxFiles={20}
-              maxSize={8 * 1024 * 1024}
-              helperText="Dukungan gambar & video. Rekomendasi rasio 16:9. Urutan akan dipakai untuk tampilan."
-              value={previews}
-              onChange={handlePreviewsChange}
-            />
-          </section>
-        )}
+        ) : ( */}
+        <section className="grid gap-8">
+          <HeaderContainer
+            title="Upload Previews"
+            description="Upload cover for your game page on PeridotVault"
+          />
+          <InputPreviews
+            label="Previews"
+            multiple
+            className="h-72"
+            maxFiles={20}
+            maxSize={8 * 1024 * 1024}
+            helperText="Dukungan gambar & video. Rekomendasi rasio 16:9. Urutan akan dipakai untuk tampilan."
+            value={previews}
+            onChange={handlePreviewsChange}
+          />
+        </section>
+        {/* )} */}
       </div>
     </div>
   );

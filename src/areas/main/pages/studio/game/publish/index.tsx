@@ -584,33 +584,33 @@ export const StudioGamePublish: FC = () => {
   const mdy = (t: number) =>
     new Date(t).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
 
-  if (loading) {
-    return (
-      <div className="flex justify-center w-full">
-        <div className="w-full max-w-[1400px] flex flex-col p-10 gap-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-muted rounded w-64 mb-4"></div>
-            <div className="h-4 bg-muted rounded w-96 mb-8"></div>
-            <div className="space-y-6">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="bg-background rounded-xl border border-muted-foreground/40 p-5"
-                >
-                  <div className="h-6 bg-muted rounded w-32 mb-4"></div>
-                  <div className="space-y-3">
-                    <div className="h-4 bg-muted rounded w-full"></div>
-                    <div className="h-4 bg-muted rounded w-3/4"></div>
-                    <div className="h-4 bg-muted rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center w-full">
+  //       <div className="w-full max-w-[1400px] flex flex-col p-10 gap-8">
+  //         <div className="animate-pulse">
+  //           <div className="h-8 bg-muted rounded w-64 mb-4"></div>
+  //           <div className="h-4 bg-muted rounded w-96 mb-8"></div>
+  //           <div className="space-y-6">
+  //             {[1, 2, 3].map((i) => (
+  //               <div
+  //                 key={i}
+  //                 className="bg-background rounded-xl border border-muted-foreground/40 p-5"
+  //               >
+  //                 <div className="h-6 bg-muted rounded w-32 mb-4"></div>
+  //                 <div className="space-y-3">
+  //                   <div className="h-4 bg-muted rounded w-full"></div>
+  //                   <div className="h-4 bg-muted rounded w-3/4"></div>
+  //                   <div className="h-4 bg-muted rounded w-1/2"></div>
+  //                 </div>
+  //               </div>
+  //             ))}
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (

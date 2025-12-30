@@ -385,9 +385,9 @@ export const StudioGameBuilds: React.FC = () => {
     );
   });
 
-  if (loading) {
-    return <div className="flex justify-center p-10">Loading builds...</div>;
-  }
+  // if (loading) {
+  //   return <div className="flex justify-center p-10">Loading builds...</div>;
+  // }
 
   return (
     <div className="flex justify-center w-full">
@@ -416,13 +416,13 @@ export const StudioGameBuilds: React.FC = () => {
           </div>
         </section>
 
-        {loading ? (
+        {/* {loading ? (
           error ? (
             <div className="flex justify-center p-10 text-red-500">{error}</div>
           ) : (
             <LoadingComponent />
           )
-        ) : (
+        ) : ( */}
           <div className="flex flex-col gap-10">
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-3">
@@ -783,7 +783,7 @@ export const StudioGameBuilds: React.FC = () => {
               </div>
             )}
           </div>
-        )}
+        {/* )} */}
       </div>
     </div>
   );

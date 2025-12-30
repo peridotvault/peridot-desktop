@@ -276,166 +276,166 @@ export default function StudioGameDetails() {
           </ButtonWithSound>
         </section>
 
-        {loading ? (
+        {/* {loading ? (
           <LoadingComponent />
-        ) : (
-          <div className="flex flex-col gap-14">
-            {/* General  */}
-            <section className="grid gap-8">
-              <HeaderContainer
-                title="General"
-                description="Information General your game. all fields are mandatory"
-              />
-              <div className="grid grid-cols-2 gap-6">
-                <div className="">
-                  <div className="grid grid-cols-2 gap-6">
-                    <InputFloating
-                      placeholder="Game Id"
-                      type="text"
-                      value={gameId}
-                      className="col-span-2"
-                      required
-                      disabled
-                    />
-                    <InputFloating
-                      placeholder="Game Name"
-                      className="col-span-2"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
-                    <InputFloating
-                      placeholder="Price (PER)"
-                      type="number"
-                      value={price}
-                      // onChange={(e) => setPrice(e.target.valueAsNumber || '')}
-                      onChange={(e) => {
-                        const val = e.target.valueAsNumber;
-                        setPrice(isNaN(val) ? '' : val);
-                      }}
-                      required
-                    />
-                    <InputFloating
-                      placeholder="Minimum Age"
-                      type="number"
-                      value={age}
-                      onChange={(e) => {
-                        const val = e.target.valueAsNumber;
-                        setAge(isNaN(val) ? '' : val);
-                      }}
-                      required
-                    />
-                    <InputFloating
-                      placeholder="Website link"
-                      type="text"
-                      className="col-span-2"
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="grid gap-6">
-                    <InputTextarea
-                      placeholder="Game Full Description"
-                      helperText="More in depth description of your game."
-                      autoGrow
-                      rows={5}
-                      maxRows={10}
-                      showCharCount
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Game Cover and Banner  */}
-            <section className="grid gap-8">
-              <HeaderContainer
-                title="Game Cover and Banner"
-                description="Upload cover for your game page on PeridotVault"
-              />
-              <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-3">
-                  <InputImage
-                    key={bannerUrl}
-                    label="Banner Image"
-                    accept="image/png,image/jpeg"
-                    className="aspect-[4/1]"
+        ) : ( */}
+        <div className="flex flex-col gap-14">
+          {/* General  */}
+          <section className="grid gap-8">
+            <HeaderContainer
+              title="General"
+              description="Information General your game. all fields are mandatory"
+            />
+            <div className="grid grid-cols-2 gap-6">
+              <div className="">
+                <div className="grid grid-cols-2 gap-6">
+                  <InputFloating
+                    placeholder="Game Id"
+                    type="text"
+                    value={gameId}
+                    className="col-span-2"
                     required
-                    multiple={false}
-                    helperText="Preferably image but gif is also acceptable. Upload must be a 4:1 aspect ratio."
-                    onChange={handleBannerChange}
-                    previewUrl={bannerUrl}
+                    disabled
+                  />
+                  <InputFloating
+                    placeholder="Game Name"
+                    className="col-span-2"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                  <InputFloating
+                    placeholder="Price (PER)"
+                    type="number"
+                    value={price}
+                    // onChange={(e) => setPrice(e.target.valueAsNumber || '')}
+                    onChange={(e) => {
+                      const val = e.target.valueAsNumber;
+                      setPrice(isNaN(val) ? '' : val);
+                    }}
+                    required
+                  />
+                  <InputFloating
+                    placeholder="Minimum Age"
+                    type="number"
+                    value={age}
+                    onChange={(e) => {
+                      const val = e.target.valueAsNumber;
+                      setAge(isNaN(val) ? '' : val);
+                    }}
+                    required
+                  />
+                  <InputFloating
+                    placeholder="Website link"
+                    type="text"
+                    className="col-span-2"
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
+                    required
                   />
                 </div>
+              </div>
+              <div>
+                <div className="grid gap-6">
+                  <InputTextarea
+                    placeholder="Game Full Description"
+                    helperText="More in depth description of your game."
+                    autoGrow
+                    rows={5}
+                    maxRows={10}
+                    showCharCount
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Game Cover and Banner  */}
+          <section className="grid gap-8">
+            <HeaderContainer
+              title="Game Cover and Banner"
+              description="Upload cover for your game page on PeridotVault"
+            />
+            <div className="grid grid-cols-3 gap-6">
+              <div className="col-span-3">
                 <InputImage
-                  key={coverVerticalUrl}
-                  label="Cover Vertical"
+                  key={bannerUrl}
+                  label="Banner Image"
                   accept="image/png,image/jpeg"
-                  className="aspect-[3/4]"
+                  className="aspect-[4/1]"
                   required
                   multiple={false}
-                  helperText="Image must in 3:4 aspect ratio format."
-                  onChange={handleCoverVerticalChange}
-                  previewUrl={coverVerticalUrl}
+                  helperText="Preferably image but gif is also acceptable. Upload must be a 4:1 aspect ratio."
+                  onChange={handleBannerChange}
+                  previewUrl={bannerUrl}
                 />
-                <div className="col-span-2">
-                  <InputImage
-                    key={coverHorizontalUrl}
-                    label="Cover Horizontal"
-                    accept="image/png,image/jpeg"
-                    className="aspect-video"
-                    required
-                    multiple={false}
-                    helperText="Preferably image but gif is also acceptable. Upload must be a 16:9 aspect ratio."
-                    onChange={handleCoverHorizontalChange}
-                    previewUrl={coverHorizontalUrl}
-                  />
-                </div>
               </div>
-            </section>
-
-            {/* Discovery Metadata  */}
-            <section className="grid gap-8">
-              <HeaderContainer
-                title="Discovery Metadata"
-                description="Tag your game to make it easier to find on PeridotVault"
+              <InputImage
+                key={coverVerticalUrl}
+                label="Cover Vertical"
+                accept="image/png,image/jpeg"
+                className="aspect-[3/4]"
+                required
+                multiple={false}
+                helperText="Image must in 3:4 aspect ratio format."
+                onChange={handleCoverVerticalChange}
+                previewUrl={coverVerticalUrl}
               />
-              <div className="grid grid-cols-2 gap-6">
-                <InputDropdown
-                  label="Tags"
-                  placeholder="Search Tags..."
-                  options={listTagOptions.map((tag) => ({
-                    value: tag.tagId,
-                    label: tag.name,
-                  }))} // string[]
-                  value={tags}
+              <div className="col-span-2">
+                <InputImage
+                  key={coverHorizontalUrl}
+                  label="Cover Horizontal"
+                  accept="image/png,image/jpeg"
+                  className="aspect-video"
                   required
-                  onChange={setTags}
-                  maxSelected={6}
-                />
-                <InputDropdown
-                  label="Categories"
-                  placeholder="Search Categories..."
-                  options={listCategoryOptions.map((cat) => ({
-                    value: cat.categoryId,
-                    label: cat.name,
-                  }))} // grouped
-                  required
-                  value={categories}
-                  onChange={setCategories}
-                  maxSelected={3}
+                  multiple={false}
+                  helperText="Preferably image but gif is also acceptable. Upload must be a 16:9 aspect ratio."
+                  onChange={handleCoverHorizontalChange}
+                  previewUrl={coverHorizontalUrl}
                 />
               </div>
-            </section>
-          </div>
-        )}
+            </div>
+          </section>
+
+          {/* Discovery Metadata  */}
+          <section className="grid gap-8">
+            <HeaderContainer
+              title="Discovery Metadata"
+              description="Tag your game to make it easier to find on PeridotVault"
+            />
+            <div className="grid grid-cols-2 gap-6">
+              <InputDropdown
+                label="Tags"
+                placeholder="Search Tags..."
+                options={listTagOptions.map((tag) => ({
+                  value: tag.tagId,
+                  label: tag.name,
+                }))} // string[]
+                value={tags}
+                required
+                onChange={setTags}
+                maxSelected={6}
+              />
+              <InputDropdown
+                label="Categories"
+                placeholder="Search Categories..."
+                options={listCategoryOptions.map((cat) => ({
+                  value: cat.categoryId,
+                  label: cat.name,
+                }))} // grouped
+                required
+                value={categories}
+                onChange={setCategories}
+                maxSelected={3}
+              />
+            </div>
+          </section>
+        </div>
+        {/* )} */}
 
         <div className="mb-8"></div>
       </div>
