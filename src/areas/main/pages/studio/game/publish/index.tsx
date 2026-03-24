@@ -15,15 +15,15 @@ import type {
   OnChainGameMetadata,
 } from '@shared/blockchain/icp/types/game';
 import { GameDraft, GameWhole } from '@shared/interfaces/gameDraft';
-import { fetchDraftSummaryCombined } from '@features/game/services/draft';
-import { setGameWhole } from '@features/game/api/game';
-import {
-  publishGameOnChain,
-  type HardwareUpdatePayload,
-  type LiveVersionPayload,
-  type PublishManifestPayload,
-} from '@features/game/services/publish';
 import { useWallet } from '@shared/contexts/WalletContext';
+import {
+  HardwareUpdatePayload,
+  LiveVersionPayload,
+  publishGameOnChain,
+  PublishManifestPayload,
+} from '@main/features/game/services/publish';
+import { setGameWhole } from '@main/features/game/api/game';
+import { fetchDraftSummaryCombined } from '@main/features/game/services/draft';
 
 type PlatformBuildInfo = {
   key: Platform;
@@ -180,10 +180,10 @@ export const StudioGamePublish: FC = () => {
   const shouldApplyHardware = (payload: HardwareUpdatePayload): boolean => {
     return Boolean(
       payload.processor?.trim() ||
-        payload.graphics?.trim() ||
-        (payload.memoryMB !== undefined && payload.memoryMB > 0) ||
-        (payload.storageMB !== undefined && payload.storageMB > 0) ||
-        payload.additionalNotes?.trim(),
+      payload.graphics?.trim() ||
+      (payload.memoryMB !== undefined && payload.memoryMB > 0) ||
+      (payload.storageMB !== undefined && payload.storageMB > 0) ||
+      payload.additionalNotes?.trim(),
     );
   };
 
@@ -767,7 +767,7 @@ export const StudioGamePublish: FC = () => {
         <SectionCard title="Media" ok={vMedia.ok} missing={vMedia.missing}>
           <div className="grid grid-cols-3 gap-4">
             {/* Banner */}
-            <div className="rounded-lg border border-muted-foreground/30 aspect-[4/1] overflow-hidden col-span-full">
+            <div className="rounded-lg border border-muted-foreground/30 aspect-4/1 overflow-hidden col-span-full">
               {processedData.media.bannerImage ? (
                 <img
                   src={processedData.media.bannerImage.trim()} // ✅ trim whitespace
@@ -789,10 +789,10 @@ export const StudioGamePublish: FC = () => {
                   <img
                     src={processedData.media.coverVerticalImage.trim()} // ✅ trim whitespace
                     alt="cover vertical"
-                    className="rounded-lg border border-muted-foreground/30 w-full aspect-[3/4] object-cover"
+                    className="rounded-lg border border-muted-foreground/30 w-full aspect-3/4 object-cover"
                   />
                 ) : (
-                  <div className="rounded-lg border border-muted-foreground/30 w-full aspect-[3/4] flex items-center justify-center text-muted-foreground">
+                  <div className="rounded-lg border border-muted-foreground/30 w-full aspect-3/4 flex items-center justify-center text-muted-foreground">
                     No cover
                   </div>
                 )}

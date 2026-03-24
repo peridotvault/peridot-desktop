@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { formatTitle } from '@features/library/utils/formatTitle';
-import { useLibraryStore } from '@features/library/hooks/useLibraryStore';
 import { LibraryEntry } from '@shared/interfaces/library';
-import { LibraryGameCard } from '@features/library/components/GameCard';
+import { LibraryGameCard } from '@main/features/library/components/GameCard';
+import { useLibraryStore } from '@main/features/library/hooks/useLibraryStore';
+import { formatTitle } from '@main/features/library/utils/formatTitle';
 
 export default function LibraryPage() {
   const navigate = useNavigate();

@@ -14,7 +14,7 @@ import { CoinService } from '@features/wallet/local-db/services/coinService';
 import { transferTokenICRC1 } from '../blockchain/icp/services/ICPCoinService';
 import { KV_KEYS } from '@shared/database/kv-keys';
 import { STORAGE_EVENTS } from '@shared/database/events';
-import { getKvItem } from '@shared/services/local-db/kv-key';
+import { getKvItem } from '@/core/storage/kv-key';
 
 interface Props {
   onClose: () => void;

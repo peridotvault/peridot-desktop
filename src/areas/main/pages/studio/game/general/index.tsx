@@ -10,11 +10,10 @@ import { fetchCategories, fetchTags, updateGeneral } from '@features/game/api/ga
 import { CategoryDb, TagDb } from '@shared/interfaces/gameDraft';
 import { fetchDraftGeneralCombined } from '@features/game/services/draft';
 import { InputImage } from '@shared/components/atoms/input-image';
-import { LoadingComponent } from '@shared/components/atoms/loading.component';
 
 export default function StudioGameDetails() {
   const { gameId } = useParams<{ gameId: string }>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [, setLoading] = useState<boolean>(false);
   if (!gameId) {
     // redirect atau tampilkan error
     return <div>Invalid game ID</div>;

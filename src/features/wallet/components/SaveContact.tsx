@@ -3,7 +3,7 @@ import { InputField } from '@shared/components/atoms/InputField';
 import { Contact } from '../views/SendToken';
 import { KV_KEYS } from '@shared/database/kv-keys';
 import { STORAGE_EVENTS } from '@shared/database/events';
-import { getKvItem, setKvItem } from '@shared/services/local-db/kv-key';
+import { getKvItem, setKvItem } from '@/core/storage/kv-key';
 
 interface NavbarProps {
   onClose: () => void;

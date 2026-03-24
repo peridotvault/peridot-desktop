@@ -4,10 +4,10 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useWallet } from '@shared/contexts/WalletContext';
-import { formatTitle } from '@features/library/utils/formatTitle';
-import { useLibraryStore } from '@features/library/hooks/useLibraryStore';
-import { LibrarySidebarItem } from '@features/library/components/SidebarItem';
-import { syncLibraryFromRemote } from '@features/library/services/sync';
+import { LibrarySidebarItem } from '@main/features/library/components/SidebarItem';
+import { useLibraryStore } from '@main/features/library/hooks/useLibraryStore';
+import { syncLibraryFromRemote } from '@main/features/library/services/sync';
+import { formatTitle } from '@main/features/library/utils/formatTitle';
 
 export const LibrarySidebar = () => {
   const location = useLocation();

@@ -3,16 +3,14 @@ import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { useParams } from 'react-router-dom';
 import { PreviewItem } from '@shared/interfaces/game';
 import { API_BASE_STORAGE, initAppStorage, uploadToPrefix } from '@shared/api/wasabi.api'; // ✅
-import { LoadingPage } from '@pages/additional/loading-page';
-import { updatePreviews } from '@features/game/api/game-draft.api';
 import { GamePreview } from '@shared/interfaces/gameDraft';
-import { fetchDraftPreviewsCombined } from '@features/game/services/draft';
-import { LoadingComponent } from '@shared/components/atoms/loading.component';
 import { InputPreviews } from '@shared/components/atoms/input-previews';
+import { updatePreviews } from '@features/game/api/game-draft.api';
+import { fetchDraftPreviewsCombined } from '@features/game/services/draft';
 
 export const StudioGameMedia = () => {
   const { gameId } = useParams<{ gameId: string }>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [, setLoading] = useState<boolean>(false);
   if (!gameId) {
     return <div>Invalid game ID</div>;
   }

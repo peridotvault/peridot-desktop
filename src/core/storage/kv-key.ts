@@ -1,4 +1,4 @@
-import { appDb } from "@shared/database/app-db";
+import { appDb } from "./storage.db";
 
 export async function setKvItem<T>(key: string, value: T): Promise<void> {
     await appDb.kv.put({ key, value, updatedAt: Date.now() });

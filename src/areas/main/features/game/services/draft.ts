@@ -1,5 +1,4 @@
-import { fetchBuilds, fetchGeneral, fetchPreviews, fetchWholeDraft } from '@features/game/api/game-draft.api';
-import { fetchGameMetadata } from '@features/game/api/game';
+
 import type {
   GameBuilds,
   GameDraft,
@@ -11,6 +10,8 @@ import type { OnChainGameMetadata } from '@shared/interfaces/game';
 import type { Metadata } from '@shared/blockchain/icp/types/game';
 import { fetchMetadata } from '@shared/api/metadata.api';
 import { getGameByGameId } from './record';
+import { fetchGameMetadata } from '../api/game';
+import { fetchGeneral, fetchPreviews, fetchBuilds, fetchWholeDraft } from '../api/game-draft.api';
 
 type SettledResult<T> = PromiseSettledResult<T>;
 

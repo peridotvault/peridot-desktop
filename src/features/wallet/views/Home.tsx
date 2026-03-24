@@ -104,6 +104,7 @@ export const Home = () => {
         encryptedPrivateKey: null,
         lock: null,
         verificationData: null,
+        runtimeWallet: null,
       });
       setIsGeneratedSeedPhrase(false);
       redirectToLogin();

@@ -3,13 +3,13 @@ import type {
     CreateLibraryEntryInput,
 } from "@shared/interfaces/library";
 import type { PGCGame } from "@shared/blockchain/icp/types/game";
-import { getMyGames } from "@features/game/services/dto";
 import { libraryService } from "./localDb";
 import {
     createEmptyImageDataUrl,
     downloadAndCompressToDataUrl,
 } from "../utils/imageCompression";
 import { resolveWebBuildUrlFromGame } from "../utils/formatDistribution";
+import { getMyGames } from "@shared/blockchain/icp/services/game";
 
 // pilih URL cover terbaik
 function resolveCoverUrl(game: PGCGame): string | undefined {

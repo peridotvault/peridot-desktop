@@ -1,9 +1,9 @@
 import { UserInterface } from '@shared/interfaces/user/UserInterface';
 import theCurrencies from '../assets/json/currencies.json';
-import { getKvItem, setKvItem } from '@shared/services/local-db/kv-key';
 import { KV_KEYS } from '@shared/database/kv-keys';
-import { Currency } from '@main/features/wallet/interfaces/Currency';
-import { WalletInfo } from '@main/features/wallet/interfaces/Wallet';
+import { Currency } from '@features/wallet/interfaces/Currency';
+import { WalletInfo } from '@features/wallet/interfaces/Wallet';
+import { getKvItem, setKvItem } from '@core/storage/kv-key';
 
 // ✅ User
 export async function saveUserInfo(user: UserInterface) {

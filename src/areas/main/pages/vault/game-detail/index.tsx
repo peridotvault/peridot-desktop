@@ -331,7 +331,7 @@ export default function GameDetail(): React.ReactElement {
   if (!game) {
     return (
       <main className="flex justify-center py-24">
-        <div className="max-w-[720px] text-center">
+        <div className="max-w-180 text-center">
           <h1 className="text-3xl font-semibold mb-4">Game not found</h1>
           <p className="text-muted-foreground">
             We could not find the game you are looking for. It might be unpublished or removed from
@@ -360,7 +360,7 @@ export default function GameDetail(): React.ReactElement {
 
   return (
     <main className="flex justify-center duration-300">
-      <div className="max-w-[1400px] w-full flex flex-col gap-10 duration-300 px-6 sm:px-8 md:px-12">
+      <div className="max-w-350 w-full flex flex-col gap-10 duration-300 px-6 sm:px-8 md:px-12">
         {/* Hero */}
         <section className="relative w-full min-h-80 overflow-hidden shadow-flat-lg">
           <img

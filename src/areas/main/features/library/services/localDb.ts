@@ -1,4 +1,4 @@
-import { appDb } from "@shared/database/app-db";
+import { appDb } from "@core/storage/storage.db";
 import { GameId } from "@shared/interfaces/game";
 import { CreateLibraryEntryInput, InstallInfo, LibraryEntry, LibraryStatus, PlayStats, UpdateLibraryEntryInput } from "@shared/interfaces/library";
 

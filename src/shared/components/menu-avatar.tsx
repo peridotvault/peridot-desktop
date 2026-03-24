@@ -98,6 +98,7 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
         encryptedPrivateKey: null,
         lock: null,
         verificationData: null,
+        runtimeWallet: null,
       });
 
       // 3. UX: tutup menu

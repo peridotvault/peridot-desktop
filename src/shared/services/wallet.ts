@@ -8,7 +8,8 @@ import { Buffer } from 'buffer';
 import * as ecc from 'tiny-secp256k1';
 import { EncryptedData, decryptString, encryptString } from '@shared/security/aes';
 import { KV_KEYS } from '@shared/database/kv-keys';
-import { getKvItem, setKvItem, deleteKvItem } from './local-db/kv-key';
+import { getKvItem, setKvItem, deleteKvItem } from '../../core/storage/kv-key';
+import type { PeridotRuntimeWalletData } from './peridot-runtime.types';
 
 const bip32 = BIP32Factory(ecc);
 
@@ -19,7 +20,19 @@ export interface WalletData {
     encryptedPrivateKey: EncryptedData | null;
     verificationData: EncryptedData | null;
     lock: OpenLockConfig | null;
+    runtimeWallet: PeridotRuntimeWalletData | null;
 }
+
+export const hasLegacyWalletData = (wallet: WalletData): boolean =>
+    Boolean(
+        wallet.principalId &&
+        wallet.accountId &&
+        wallet.encryptedPrivateKey &&
+        wallet.encryptedSeedPhrase &&
+        wallet.verificationData,
+    );
+
+export const hasRuntimeWalletData = (wallet: WalletData): boolean => Boolean(wallet.runtimeWallet);
 
 export interface WalletGenerateSuccess {
     success: true;

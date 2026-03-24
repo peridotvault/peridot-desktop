@@ -1,11 +1,10 @@
-// @ts-ignore
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Wallet } from '../../features/wallet/views/Wallet';
 import { MenuAvatar } from '@shared/components/menu-avatar';
 import { Sidebar } from './Sidebar';
-import DownloadModal from '@features/download/components/layouts/DownloadModal';
-import AIChatbot from '@features/ai/components/AIChatbot';
+import DownloadModal from '@main/features/download/components/layouts/DownloadModal';
+import AIChatbot from '@main/features/ai/components/AIChatbot';
+import { WalletRootPage } from '@features/wallet/WalletRoot';
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
@@ -72,14 +71,12 @@ export default function MainLayout() {
         avatarActive={isOpenMenuAvatar}
       />
 
-      {/* Content Area */}
       <main className="h-full w-full pl-16 pt-12 relative">
         <div className="w-full h-full">
           <Outlet />
         </div>
       </main>
 
-      {/* Store Modal ========================= */}
       <AIChatbot
         open={isOpenPeri}
         onClose={() => setIOpenPeri(false)}
@@ -94,7 +91,11 @@ export default function MainLayout() {
         title="Download Modal"
       />
 
-      <Wallet open={isOpenWallet} onClose={() => setIOpenWallet(false)} leftClassName="left-16" />
+      <WalletRootPage
+        open={isOpenWallet}
+        onClose={() => setIOpenWallet(false)}
+        leftClassName="left-16"
+      />
 
       <MenuAvatar
         open={isOpenMenuAvatar}

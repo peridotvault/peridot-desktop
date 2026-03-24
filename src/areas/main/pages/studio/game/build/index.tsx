@@ -21,12 +21,11 @@ import type {
 } from '@shared/blockchain/icp/types/game';
 import { SetHardwarePayload } from '@shared/interfaces/gameDraft';
 import toast from 'react-hot-toast';
-import { fetchDraftBuildsCombined } from '@features/game/services/draft';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { InputFloating } from '@shared/components/ui/input-floating';
 import { InputTextarea } from '@shared/components/ui/input-textarea';
-import { setHardware, setLive } from '@features/game/api/game-draft.api';
-import { LoadingComponent } from '@shared/components/atoms/loading.component';
+import { setHardware, setLive } from '@main/features/game/api/game-draft.api';
+import { fetchDraftBuildsCombined } from '@main/features/game/services/draft';
 
 type HardwareForm = {
   processor: string;
@@ -122,7 +121,7 @@ export const StudioGameBuilds: React.FC = () => {
     }>
   >([]);
   const [webBuild, setWebBuild] = React.useState<WebDistribution | null>(null);
-  const [loading, setLoading] = React.useState(true);
+  const [, setLoading] = React.useState(true);
   const [search, setSearch] = React.useState('');
   const [viewMode, setViewMode] = React.useState<ViewMode>('live');
   const [distributions, setDistributions] = React.useState<Distribution[]>([]);
@@ -131,7 +130,7 @@ export const StudioGameBuilds: React.FC = () => {
   const [savingHardware, setSavingHardware] = React.useState(false);
   const [settingLive, setSettingLive] = React.useState(false);
   const [savingWeb, setSavingWeb] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [, setError] = React.useState<string | null>(null);
 
   // State untuk hardware form (Native)
   const [hardwareForms, setHardwareForms] = React.useState<Record<Platform, HardwareForm>>({
