@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { MenuAvatar } from '@shared/components/menu-avatar';
 import { Sidebar } from './Sidebar';
@@ -11,6 +11,44 @@ export default function MainLayout() {
   const [isOpenPeri, setIOpenPeri] = useState(false);
   const [isOpenDownload, setIOpenDownload] = useState(false);
   const [isOpenMenuAvatar, setIOpenMenuAvatar] = useState(false);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.target === 'PERIDOT_CS') {
+        const isCurrentlyOpen = isOpenWallet;
+        setIOpenWallet(true);
+        
+        // Dapatkan iframe wallet. Jika baru dibuka (isCurrentlyOpen=false), 
+        // kita perlu menunggu sebentar sampai React me-render-nya di DOM.
+        const forwardMessage = () => {
+          const walletIframe = document.getElementById('peridotwallet') as HTMLIFrameElement;
+          if (walletIframe?.contentWindow) {
+            walletIframe.contentWindow.postMessage(event.data, '*');
+          } else if (!isCurrentlyOpen) {
+            // Jika belum ada, coba lagi sekali setelah delay singkat
+            setTimeout(forwardMessage, 100);
+          }
+        };
+
+        // Jika sidebar sudah terbuka, kirim langsung. Jika baru dibuka, beri jeda.
+        if (isCurrentlyOpen) {
+          forwardMessage();
+        } else {
+          setTimeout(forwardMessage, 300); // 300ms untuk sela animasi awal
+        }
+      }
+      
+      if (event.data?.target === 'PERIDOT_INPAGE') {
+        const vaultIframe = document.querySelector("iframe[title='PeridotVault Store']") as HTMLIFrameElement;
+        if (vaultIframe?.contentWindow) {
+          vaultIframe.contentWindow.postMessage(event.data, '*');
+        }
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [isOpenWallet]);
 
   const togglePeri = () => {
     setIOpenPeri((prev) => {

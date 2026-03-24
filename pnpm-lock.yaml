@@ -175,7 +175,7 @@ importers:
 packages:
 
   '@antigane/peridotwallet-runtime@file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz':
-    resolution: {integrity: sha512-+sVL6wFih/J/mfykU2y5wR1YVQRQLirXWCD15Y2YEzKYzYmi7x58e9HcijQlT6cTeDKk9iP7mz+SU6b6w3xbrQ==, tarball: file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz}
+    resolution: {integrity: sha512-xxVkcJxA3qiih0FHku8PthROBlWHLpl8+MedXDiUKYMZPs+syIYjGwF9Xs5KtcFIpUSvT+g0nJdKbZH+zVLcGA==, tarball: file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz}
     version: 0.0.17
     peerDependencies:
       '@noble/ed25519': ^3.0.0
@@ -2863,7 +2863,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 12.20.55
+      '@types/node': 25.5.0
 
   '@types/estree@1.0.8': {}
 
@@ -2895,7 +2895,7 @@ snapshots:
 
   '@types/ws@7.4.7':
     dependencies:
-      '@types/node': 12.20.55
+      '@types/node': 25.5.0
 
   '@types/ws@8.18.1':
     dependencies:
