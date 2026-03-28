@@ -1,4 +1,4 @@
-import type { Metadata } from '@shared/blockchain/icp/types/game';
+import type { Metadata } from '@shared/interfaces/game';
 
 const handleResponse = async (res: Response) => {
     if (res.ok) {

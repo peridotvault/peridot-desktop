@@ -98,7 +98,7 @@ const deriveAesKey = async (
 ): Promise<CryptoKey> => {
   const keyBytes = await deriveKeyBytes(password, salt, kdfParams);
 
-  return await crypto.subtle.importKey('raw', keyBytes, { name: 'AES-GCM' }, false, [
+  return await crypto.subtle.importKey('raw', keyBytes as any, { name: 'AES-GCM' }, false, [
     'decrypt',
   ]);
 };
@@ -180,16 +180,16 @@ export const decryptPeridotRuntimeSeedPhrase = async (
   const decrypted = await crypto.subtle.decrypt(
     {
       name: 'AES-GCM',
-      iv: decodeBase64(runtimeWallet.secret.iv),
+      iv: decodeBase64(runtimeWallet.secret.iv) as any,
     },
     aesKey,
-    decodeBase64(runtimeWallet.secret.seedPhrase),
+    decodeBase64(runtimeWallet.secret.seedPhrase) as any,
   );
 
   return new TextDecoder().decode(decrypted);
 };
 
-export const migratePeridotRuntimeWalletToLegacy = async (
+export const migratePeridotRuntimeWalletToDesktop = async (
   runtimeWallet: PeridotRuntimeWalletData,
   password: string,
 ): Promise<WalletGenerateSuccess> => {

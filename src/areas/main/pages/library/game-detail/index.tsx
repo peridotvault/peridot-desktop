@@ -2,9 +2,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { faClock, faRocket, faStore } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getGameByGameId } from '@shared/blockchain/icp/services/game';
+import { getGameByGameId } from '@shared/blockchain/evm/services/game';
 import { useParams } from 'react-router-dom';
-import type { Distribution, PGCGame } from '@shared/blockchain/icp/types/game';
+import type { Distribution, PGCGame } from '@shared/interfaces/game';
 import { PriceCoin } from '@shared/components/ui/CoinPrice';
 import { isZeroTokenAmount, resolveTokenInfo } from '@shared/utils/token-info';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';

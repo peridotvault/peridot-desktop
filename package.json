@@ -24,11 +24,6 @@
   ],
   "dependencies": {
     "@antigane/peridotwallet-runtime": "file:/Users/ranaufal/MyWork/Business/__AntiganeInc__/PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz",
-    "@dfinity/agent": "^3.4.3",
-    "@dfinity/candid": "^3.4.3",
-    "@dfinity/identity-secp256k1": "^3.4.3",
-    "@dfinity/ledger-icp": "^7.0.1",
-    "@dfinity/principal": "^3.4.3",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -70,6 +65,7 @@
     "tailwindcss": "^4.2.2",
     "tiny-secp256k1": "^2.2.4",
     "vite-plugin-wasm": "^3.6.0",
+    "viem": "^2.47.6",
     "zustand": "^5.0.12"
   },
   "devDependencies": {

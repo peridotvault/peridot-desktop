@@ -4,7 +4,7 @@ import { useWallet } from '@shared/contexts/WalletContext';
 import { redirectToMain } from '@shared/desktop/windowControls';
 import { getPeridotRuntimeWallet } from '@shared/services/peridot-runtime';
 import { saveWalletData } from '@shared/services/store';
-import { hasLegacyWalletData, hasRuntimeWalletData } from '@shared/services/wallet';
+import { hasRuntimeWalletData } from '@shared/services/wallet';
 
 export interface LoginScreenProps {
   onAuthenticated?: () => void;
@@ -14,9 +14,8 @@ export function LoginScreen({ onAuthenticated }: LoginScreenProps) {
   const { wallet, setWallet } = useWallet();
   const redirectRequestedRef = useRef(false);
 
-  const hasLegacyWallet = useMemo(() => hasLegacyWalletData(wallet), [wallet]);
   const hasRuntimeWallet = useMemo(() => hasRuntimeWalletData(wallet), [wallet]);
-  const hasAnyWallet = hasLegacyWallet || hasRuntimeWallet;
+  const hasAnyWallet = hasRuntimeWallet;
 
   useEffect(() => {
     if (!hasAnyWallet) {

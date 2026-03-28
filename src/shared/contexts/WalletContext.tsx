@@ -17,8 +17,6 @@ const WalletContext = createContext<WalletContextData | undefined>(undefined);
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [wallet, setWallet] = useState<WalletData>({
     encryptedSeedPhrase: null,
-    principalId: null,
-    accountId: null,
     encryptedPrivateKey: null,
     lock: null,
     verificationData: null,

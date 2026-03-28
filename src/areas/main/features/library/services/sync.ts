@@ -1,15 +1,15 @@
-import type { GameId } from "@shared/interfaces/game";
-import type {
-    CreateLibraryEntryInput,
-} from "@shared/interfaces/library";
-import type { PGCGame } from "@shared/blockchain/icp/types/game";
+import { deriveEvmAddressFromSeed } from "@shared/utils/evm";
+import { getMyGamesEvm } from "@shared/blockchain/evm/services/game";
 import { libraryService } from "./localDb";
+import { walletService } from "@shared/services/wallet";
 import {
     createEmptyImageDataUrl,
     downloadAndCompressToDataUrl,
 } from "../utils/imageCompression";
 import { resolveWebBuildUrlFromGame } from "../utils/formatDistribution";
-import { getMyGames } from "@shared/blockchain/icp/services/game";
+
+import type { PGCGame, GameId } from "@shared/interfaces/game";
+import type { CreateLibraryEntryInput } from "@shared/interfaces/library";
 
 // pilih URL cover terbaik
 function resolveCoverUrl(game: PGCGame): string | undefined {
@@ -82,10 +82,10 @@ async function mapPGCGameToLibraryInput(game: PGCGame): Promise<CreateLibraryEnt
         launchType: "web",
         webUrl,
 
-        // belum ada install lokal untuk web game ICP
+        // belum ada install lokal untuk web game
         install: undefined,
 
-        status: "installed", // atau "not-installed" kalau kamu mau beda arti
+        status: "installed", 
         stats: {
             totalPlayTimeSeconds: 0,
             launchCount: 0,
@@ -94,30 +94,68 @@ async function mapPGCGameToLibraryInput(game: PGCGame): Promise<CreateLibraryEnt
 }
 
 /**
- * Sync dari getMyGames → Dexie library.
+ * Sync dari getMyGames (EVM) → Dexie library.
  */
 export async function syncLibraryFromRemote(wallet: any) {
     if (!wallet) return;
 
-    const remoteGames = await getMyGames({ wallet });
-    console.log(remoteGames);
+    try {
+        let seedPhrase: string | null = null;
 
-    for (const game of remoteGames) {
-        const gameId = game.gameId as GameId;
-        const existing = await libraryService.getById(gameId);
-        const mapped = await mapPGCGameToLibraryInput(game);
-
-        if (!existing) {
-            await libraryService.create(mapped);
-        } else {
-            await libraryService.update(gameId, {
-                gameName: mapped.gameName,
-                description: mapped.description,
-                coverVerticalImage: mapped.coverVerticalImage,
-                bannerImage: mapped.bannerImage,
-                launchType: mapped.launchType,
-                webUrl: mapped.webUrl,
-            });
+        // 1. Coba ambil dari runtimeWallet (kalau ada)
+        if (wallet.runtimeWallet?.secret?.seedPhrase) {
+            seedPhrase = wallet.runtimeWallet.secret.seedPhrase;
+            console.log("[sync] Using seed phrase from runtimeWallet");
+        } 
+        // 2. Kalau tidak ada, coba decrypt native seed phrase
+        else if (wallet.encryptedSeedPhrase) {
+            try {
+                // Pastikan lock sudah terbuka
+                const isLockOpen = await walletService.isLockOpen();
+                if (isLockOpen) {
+                    seedPhrase = await walletService.decryptWalletData(wallet.encryptedSeedPhrase);
+                    console.log("[sync] Decrypted native seed phrase for sync");
+                } else {
+                    console.warn("[sync] Wallet is locked, cannot sync library from native seed phrase");
+                }
+            } catch (decryptErr) {
+                console.error("[sync] Failed to decrypt native wallet for sync", decryptErr);
+            }
         }
+
+        if (!seedPhrase) {
+            console.warn("[sync] No seed phrase available for library sync");
+            return;
+        }
+
+        const evmAddress = deriveEvmAddressFromSeed(seedPhrase);
+        console.log("[sync] Syncing library for EVM address:", evmAddress);
+
+        const remoteGames = await getMyGamesEvm({ address: evmAddress });
+        console.log("[sync] Found remote games:", remoteGames.length);
+
+        for (const game of remoteGames) {
+            const gameId = game.gameId as GameId;
+            const existing = await libraryService.getById(gameId);
+            const mapped = await mapPGCGameToLibraryInput(game);
+
+            if (!existing) {
+                await libraryService.create(mapped);
+                console.log("[sync] Created library entry for:", gameId);
+            } else {
+                await libraryService.update(gameId, {
+                    gameName: mapped.gameName,
+                    description: mapped.description,
+                    coverVerticalImage: mapped.coverVerticalImage,
+                    bannerImage: mapped.bannerImage,
+                    launchType: mapped.launchType,
+                    webUrl: mapped.webUrl,
+                });
+                console.log("[sync] Updated library entry for:", gameId);
+            }
+        }
+    } catch (err) {
+        console.error("[sync] Library sync error:", err);
     }
 }
+

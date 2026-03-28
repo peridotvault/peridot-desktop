@@ -5,7 +5,7 @@ import { categories } from '@shared/assets/json/app/categories.json';
 import { VaultCarousel } from '@features/game/components/vault-carousel';
 import { VaultTopGames } from '@features/game/components/vault-top-games';
 import { getPublishedGames } from '@features/game/services/dto';
-import type { PGCGame } from '@shared/blockchain/icp/types/game';
+import type { PGCGame } from '@shared/interfaces/game';
 import { ImageLoading } from '@shared/constants/images';
 import { VerticalCard } from '@shared/components/cards/VerticalCard';
 

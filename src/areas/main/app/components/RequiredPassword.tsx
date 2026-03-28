@@ -10,8 +10,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { clearWalletData } from '@shared/services/store';
 import { redirectToLogin } from '@shared/desktop/windowControls';
 import { LoadingPage } from '@main/pages/additional/loading-page';
-import { migratePeridotRuntimeWalletToLegacy } from '@shared/services/peridot-runtime';
-import { hasLegacyWalletData, hasRuntimeWalletData } from '@shared/services/wallet';
+import { migratePeridotRuntimeWalletToDesktop } from '@shared/services/peridot-runtime';
+import { hasRuntimeWalletData } from '@shared/services/wallet';
 
 export const RequiredPassword = () => {
   const { wallet, isCheckingWallet } = useWallet();
@@ -23,7 +23,7 @@ export const RequiredPassword = () => {
   const [isForgotPassword, setForgotPassword] = React.useState(false);
   const [runtimeError, setRuntimeError] = React.useState<string | null>(null);
 
-  const hasLegacyWallet = hasLegacyWalletData(wallet);
+  const hasDesktopWallet = !!wallet.verificationData; // Check for desktop wallet
   const hasRuntimeWallet = hasRuntimeWalletData(wallet);
 
   // inisialisasi lock di awal
@@ -31,7 +31,7 @@ export const RequiredPassword = () => {
     if (isCheckingWallet) return;
 
     // cek kalau wallet belum lengkap → lempar ke login (sekali saja)
-    if (!hasLegacyWallet && !hasRuntimeWallet && !redirectRequestedRef.current) {
+    if (!hasDesktopWallet && !hasRuntimeWallet && !redirectRequestedRef.current) {
       redirectRequestedRef.current = true;
       redirectToLogin();
       return;
@@ -39,7 +39,7 @@ export const RequiredPassword = () => {
 
     // init lock state dari KV
     useWalletLockStore.getState().initFromStorage();
-  }, [hasLegacyWallet, hasRuntimeWallet, isCheckingWallet]);
+  }, [hasDesktopWallet, hasRuntimeWallet, isCheckingWallet]);
 
   const handleConfirm = async () => {
     try {
@@ -55,12 +55,10 @@ export const RequiredPassword = () => {
         return;
       }
 
-      const migratedWallet = await migratePeridotRuntimeWalletToLegacy(wallet.runtimeWallet, password);
+      const migratedWallet = await migratePeridotRuntimeWalletToDesktop(wallet.runtimeWallet, password);
 
       updateWallet({
         encryptedSeedPhrase: migratedWallet.encryptedSeedPhrase,
-        principalId: migratedWallet.principalId,
-        accountId: migratedWallet.accountId,
         encryptedPrivateKey: migratedWallet.encryptedPrivateKey,
         verificationData: migratedWallet.verificationData,
       });
@@ -82,8 +80,6 @@ export const RequiredPassword = () => {
       // 2. reset in-memory wallet
       updateWallet({
         encryptedSeedPhrase: null,
-        principalId: null,
-        accountId: null,
         encryptedPrivateKey: null,
         lock: null,
         verificationData: null,

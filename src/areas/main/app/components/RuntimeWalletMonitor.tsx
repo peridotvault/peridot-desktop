@@ -41,8 +41,6 @@ export const RuntimeWalletMonitor = () => {
       } finally {
         updateWallet({
           encryptedSeedPhrase: null,
-          principalId: null,
-          accountId: null,
           encryptedPrivateKey: null,
           lock: null,
           verificationData: null,

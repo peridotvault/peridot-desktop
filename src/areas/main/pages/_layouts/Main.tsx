@@ -4,7 +4,7 @@ import { MenuAvatar } from '@shared/components/menu-avatar';
 import { Sidebar } from './Sidebar';
 import DownloadModal from '@main/features/download/components/layouts/DownloadModal';
 import AIChatbot from '@main/features/ai/components/AIChatbot';
-import { WalletRootPage } from '@features/wallet/WalletRoot';
+import { WalletSidebar } from '@features/wallet/components/WalletSidebar';
 
 export default function MainLayout() {
   const [isOpenWallet, setIOpenWallet] = useState(false);
@@ -18,23 +18,19 @@ export default function MainLayout() {
         const isCurrentlyOpen = isOpenWallet;
         setIOpenWallet(true);
         
-        // Dapatkan iframe wallet. Jika baru dibuka (isCurrentlyOpen=false), 
-        // kita perlu menunggu sebentar sampai React me-render-nya di DOM.
         const forwardMessage = () => {
           const walletIframe = document.getElementById('peridotwallet') as HTMLIFrameElement;
           if (walletIframe?.contentWindow) {
             walletIframe.contentWindow.postMessage(event.data, '*');
           } else if (!isCurrentlyOpen) {
-            // Jika belum ada, coba lagi sekali setelah delay singkat
             setTimeout(forwardMessage, 100);
           }
         };
 
-        // Jika sidebar sudah terbuka, kirim langsung. Jika baru dibuka, beri jeda.
         if (isCurrentlyOpen) {
           forwardMessage();
         } else {
-          setTimeout(forwardMessage, 300); // 300ms untuk sela animasi awal
+          setTimeout(forwardMessage, 300);
         }
       }
       
@@ -129,10 +125,11 @@ export default function MainLayout() {
         title="Download Modal"
       />
 
-      <WalletRootPage
-        open={isOpenWallet}
-        onClose={() => setIOpenWallet(false)}
-        leftClassName="left-16"
+      {/* Peridot Wallet Sidebar */}
+      <WalletSidebar 
+        open={isOpenWallet} 
+        onClose={() => setIOpenWallet(false)} 
+        title="Peridot Wallet"
       />
 
       <MenuAvatar

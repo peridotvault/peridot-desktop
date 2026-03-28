@@ -6,18 +6,14 @@ import { faAngleRight, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { useWallet } from '@shared/contexts/WalletContext';
 import CarouselPreview from '@features/game/components/carousel-preview';
 import { PriceCoin } from '@shared/components/ui/CoinPrice';
-import { AppPayment } from '@features/wallet/views/Payment';
 import {
   normalizeDistribution,
   NormalizedDist,
   NativeSpec,
   WebSpec,
-} from '@shared/interfaces/helpers/icp.helpers';
-import { buyGame } from '@features/game/services/purchase';
-import type { PurchaseResult } from '@shared/blockchain/icp/sdk/canisters/pgc1.did.d';
-import { getGameRecordById } from '@features/game/services/record';
+} from '@shared/interfaces/helpers/game.helpers';
 import { getGameByGameId, getPublishedGames } from '@features/game/services/dto';
-import { Distribution, Metadata, PGCGame } from '@shared/blockchain/icp/types/game';
+import { Distribution, Metadata, PGCGame } from '@shared/interfaces/game';
 import { isZeroTokenAmount, resolveTokenInfo, subunitsToNumber } from '@shared/utils/token-info';
 import type { MediaItem } from '@shared/interfaces/app/GameInterface';
 import { TypographyH2 } from '@shared/components/ui/typography-h2';
@@ -97,7 +93,6 @@ export default function GameDetail(): React.ReactElement {
   const [otherGames, setOtherGames] = useState<PGCGame[]>([]);
   const [dist, setDist] = useState<NormalizedDist>({});
   const [activeTab, setActiveTab] = useState<PlatformTab | null>(null);
-  const [canisterId, setCanisterId] = useState<string | null>(null);
   const [isOnPayment, setIsOnPayment] = useState(false);
   const [buying, setBuying] = useState(false);
   const [purchaseState, setPurchaseState] = useState<{
@@ -132,17 +127,6 @@ export default function GameDetail(): React.ReactElement {
         }
       } catch (err) {
         console.error('[GameDetail] Unable to fetch game detail', err);
-      }
-    })();
-
-    (async () => {
-      try {
-        const record = await getGameRecordById({ gameId });
-        if (!record) return;
-        if (!mounted) return;
-        setCanisterId(record.canister_id.toString());
-      } catch (err) {
-        console.error('[GameDetail] Unable to resolve game canister id', err);
       }
     })();
 
@@ -185,7 +169,7 @@ export default function GameDetail(): React.ReactElement {
   const rawPrice = game?.price ?? 0;
   const tokenInfo = resolveTokenInfo(tokenCanister ?? undefined);
   const priceIsFree = isZeroTokenAmount(rawPrice, tokenInfo.decimals);
-  const vaultSpenderId = (import.meta.env.VITE_PERIDOT_CANISTER_VAULT_BACKEND ?? '').trim();
+  const vaultSpenderId = ''; // Legacy ICP spender
   const humanPriceNumber = subunitsToNumber(rawPrice, tokenInfo.decimals);
 
   const availablePlatforms = useMemo(() => {
@@ -204,60 +188,8 @@ export default function GameDetail(): React.ReactElement {
     return Array.from(platforms);
   }, [game?.distribution, metadata?.distribution]);
 
-  const interpretPurchaseResult = (
-    result: PurchaseResult,
-  ): { status: 'success' | 'error'; message: string } => {
-    if (result && typeof result === 'object') {
-      if ('success' in result) {
-        return { status: 'success', message: 'Game added to your library.' };
-      }
-      if ('alreadyOwned' in result) {
-        return { status: 'success', message: 'You already own this game.' };
-      }
-      if ('paymentFailed' in result) {
-        return { status: 'error', message: `Payment failed: ${result.paymentFailed}` };
-      }
-      if ('insufficientAllowance' in result) {
-        return {
-          status: 'error',
-          message:
-            'Purchase failed: insufficient allowance. Please approve more tokens and try again.',
-        };
-      }
-      if ('soldOut' in result) {
-        return { status: 'error', message: 'Purchase failed: this game is sold out.' };
-      }
-      if ('notPublished' in result) {
-        return { status: 'error', message: 'Purchase failed: the game is not published.' };
-      }
-      const [code] = Object.keys(result);
-      if (code) {
-        return { status: 'error', message: `Purchase failed: ${code}` };
-      }
-    }
-    return { status: 'error', message: 'Purchase failed due to an unexpected response.' };
-  };
-
-  const finalizePurchase = async (): Promise<PurchaseResult> => {
-    if (!wallet?.encryptedPrivateKey) {
-      throw new Error('Please connect your wallet before purchasing the game.');
-    }
-    if (!gameId) {
-      throw new Error('Missing game identifier.');
-    }
-
-    const result = await buyGame({
-      gameId,
-      wallet,
-      canisterId: canisterId ?? undefined,
-    });
-
-    const outcome = interpretPurchaseResult(result);
-    setPurchaseState(outcome);
-    if (outcome.status === 'error') {
-      throw new Error(outcome.message);
-    }
-    return result;
+  const finalizePurchase = async (): Promise<any> => {
+    throw new Error('Please purchase from the Vault store.');
   };
 
   const handleBuyClick = async () => {
@@ -581,18 +513,18 @@ export default function GameDetail(): React.ReactElement {
       </div>
 
       {isOnPayment ? (
-        <AppPayment
-          onClose={() => setIsOnPayment(false)}
-          price={humanPriceNumber}
-          tokenCanisterId={tokenCanister ?? undefined}
-          tokenSymbol={tokenInfo.symbol}
-          tokenLogoUrl={tokenInfo.logo ?? undefined}
-          SPENDER={vaultSpenderId}
-          onExecute={async () => {
-            await finalizePurchase();
-            setIsOnPayment(false);
-          }}
-        />
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-background p-8 rounded-3xl border border-white/10 max-w-md text-center shadow-2xl">
+                <h3 className="text-2xl font-bold mb-4">Store Purchase</h3>
+                <p className="text-muted-foreground mb-6">Please use the Store (Vault) tab to purchase games. The native purchase flow is currently being updated for EVM.</p>
+                <button 
+                  onClick={() => setIsOnPayment(false)}
+                  className="px-8 py-3 bg-primary rounded-xl font-bold hover:shadow-flat-lg transition"
+                >
+                  Close
+                </button>
+            </div>
+        </div>
       ) : null}
     </main>
   );
