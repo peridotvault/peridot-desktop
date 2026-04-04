@@ -1,0 +1,34 @@
+{
+  "address": "DzDbFZXZsmFFv1mMFimLaBjAQi7Z5gUaQ61qcDuR6Kor",
+  "metadata": {
+    "name": "pgc1"
+  },
+  "accounts": [
+    {
+      "name": "LicenseAccount",
+      "discriminator": [
+        120,
+        20,
+        28,
+        217,
+        130,
+        168,
+        223,
+        118
+      ]
+    },
+    {
+      "name": "PgcGameAccount",
+      "discriminator": [
+        34,
+        116,
+        14,
+        33,
+        43,
+        198,
+        84,
+        223
+      ]
+    }
+  ]
+}
