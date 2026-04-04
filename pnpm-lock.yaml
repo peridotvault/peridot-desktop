@@ -132,7 +132,7 @@ importers:
         specifier: ^2.2.4
         version: 2.2.4
       viem:
-        specifier: ^2.23.5
+        specifier: ^2.47.6
         version: 2.47.6(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@6.0.6)
       vite-plugin-wasm:
         specifier: ^3.6.0
@@ -166,7 +166,7 @@ packages:
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
 
   '@antigane/peridotwallet-runtime@file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz':
-    resolution: {integrity: sha512-lXnS7T0OhMnOtZtAo5aIWfBu8n/cqo5OB4F8UOcjD7MbqdvTMWRTQoDmx5HhLsDE5tTVQrStcO69owBZEKy1Xw==, tarball: file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz}
+    resolution: {integrity: sha512-VaN8EJWTVjIg6nGvPul3EKQ0XgKqlvh63mUb2q6XBaSBhCY/iDfXygLEHVWCLY31jTsKgvY0g90esYNF6uhI9Q==, tarball: file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz}
     version: 0.0.17
     peerDependencies:
       '@noble/ed25519': ^3.0.0

@@ -11,6 +11,34 @@ import { resolveWebBuildUrlFromGame } from "../utils/formatDistribution";
 import type { PGCGame, GameId } from "@shared/interfaces/game";
 import type { CreateLibraryEntryInput } from "@shared/interfaces/library";
 
+import cflCover from "@shared/assets/images/cfl_cover_vertical.png";
+import cflBanner from "@shared/assets/images/cfl_banner_horizontal.png";
+
+const DEFAULT_GAMES: PGCGame[] = [
+    {
+        gameId: "crypto-fantasy-league",
+        name: "Crypto Fantasy League",
+        description: "Crypto Fantasy League is a browser-based fantasy sports game where you can build your dream team and compete with others in a futuristic, crypto-powered arena.",
+        published: true,
+        price: 0,
+        tokenPayment: "",
+        totalPurchased: 0,
+        maxSupply: 0,
+        coverVerticalImage: cflCover,
+        bannerImage: cflBanner,
+        website: "https://www.cfl.fun/home",
+        metadata: null,
+        distribution: [
+            {
+                web: {
+                    url: "https://www.cfl.fun/home",
+                },
+            },
+        ],
+        previews: [],
+    },
+];
+
 // pilih URL cover terbaik
 function resolveCoverUrl(game: PGCGame): string | undefined {
     return (
@@ -134,7 +162,10 @@ export async function syncLibraryFromRemote(wallet: any) {
         const remoteGames = await getMyGamesEvm({ address: evmAddress });
         console.log("[sync] Found remote games:", remoteGames.length);
 
-        for (const game of remoteGames) {
+        // Merge with default games
+        const allGames = [...DEFAULT_GAMES, ...remoteGames];
+
+        for (const game of allGames) {
             const gameId = game.gameId as GameId;
             const existing = await libraryService.getById(gameId);
             const mapped = await mapPGCGameToLibraryInput(game);

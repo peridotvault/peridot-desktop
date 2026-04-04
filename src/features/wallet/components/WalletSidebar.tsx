@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import walletHtml from '@antigane/peridotwallet-runtime/wallet?url';
 
 interface WalletSidebarProps {
   open: boolean;
@@ -53,15 +52,8 @@ export const WalletSidebar: React.FC<WalletSidebarProps> = ({
             transition={{ type: 'spring', stiffness: 450, damping: 40, mass: 0.8 }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Wallet Runtime Iframe - Full Height */}
-            <div className="flex-1 min-h-0">
-              <iframe
-                id="peridotwallet"
-                title="Peridot Wallet"
-                src={walletHtml}
-                className="w-full h-full border-0"
-              />
-            </div>
+            {/* The iframe is now persistent in MainLayout */}
+            <div className="flex-1" />
           </motion.div>
         </>
       )}
