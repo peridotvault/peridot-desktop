@@ -1,3 +1,4 @@
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 import type { Metadata } from '@shared/interfaces/game';
 
 const handleResponse = async (res: Response) => {
@@ -23,6 +24,6 @@ const handleResponse = async (res: Response) => {
 };
 
 export const fetchMetadata = async (url: string): Promise<Metadata> => {
-    const res = await fetch(url);
+    const res = await tauriFetch(url);
     return handleResponse(res);
 };

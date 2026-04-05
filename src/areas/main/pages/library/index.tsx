@@ -89,15 +89,14 @@ function GameItem({ game, navigate }: { game: RealLibraryGame; navigate: any }) 
 
   return (
     <div className="flex flex-col gap-3 group transition-transform duration-300 hover:scale-[1.02]">
-      <LibraryGameCard 
-        entry={game.localEntry || {
-          gameId: game.gameId as any,
+      <LibraryGameCard
+        entry={{
+          gameId: game.gameId,
           gameName: game.name,
           coverVerticalImage: game.coverVerticalImage,
-          status: 'not-installed',
-          // mock basic entry for the card
-        } as any} 
-        onClick={() => navigate(pathForItem)} 
+          bannerImage: game.bannerImage,
+        }}
+        onClick={() => navigate(pathForItem)}
       />
       <div className="flex flex-col gap-0.5">
         <p className="font-medium text-sm truncate opacity-90 group-hover:opacity-100 transition-opacity">

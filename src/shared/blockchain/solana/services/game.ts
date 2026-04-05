@@ -1,12 +1,29 @@
 import { Connection, PublicKey } from '@solana/web3.js';
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
+import {
+  STORAGE_URL,
+  SVM_RPC_URL,
+  SVM_PGC1_PROGRAM_ID,
+} from '@shared/constants/storage';
 import { decodeLicenseAccount, decodePgcGameAccount } from '../contracts/account.state';
+import { fetchGameAsPGC } from '@shared/api/game.api';
 import type { PGCGame } from '@shared/interfaces/game';
 
-// Default connection from env or fallback
-const RPC_URL = import.meta.env.VITE_SVM_RPC_URL || 'https://api.devnet.solana.com';
-const PGC1_PROGRAM_ID = new PublicKey(
-  import.meta.env.VITE_SVM_PGC1_PROGRAM_ID || 'DzDbFZXZsmFFv1mMFimLaBjAQi7Z5gUaQ61qcDuR6Kor',
-);
+/**
+ * Resolves an image URL to an absolute URL.
+ * If the URL is already absolute (http/https/data), returns as-is.
+ * If relative, prepends the storage URL (includes /storage/files path).
+ */
+function resolveImageUrl(url: string | undefined): string | undefined {
+    if (!url) return undefined;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+        return url;
+    }
+    return `${STORAGE_URL}/${url.startsWith('/') ? url.slice(1) : url}`;
+}
+
+const RPC_URL = SVM_RPC_URL;
+const PGC1_PROGRAM_ID = new PublicKey(SVM_PGC1_PROGRAM_ID);
 
 const connection = new Connection(RPC_URL, 'confirmed');
 
@@ -43,27 +60,44 @@ export async function getMyGamesSvm({ address }: { address: string }): Promise<P
 
         // Fetch metadata from URI
         let metadata: any = {};
+        let hasValidMetadata = false;
+
         try {
           const apiBase = import.meta.env.VITE_API_BASE ?? 'https://api.peridotvault.com';
           const fetchUri = pgcGame.metadataUri.startsWith('http')
             ? pgcGame.metadataUri
             : `${apiBase}${pgcGame.metadataUri}`;
-          const response = await fetch(fetchUri);
+          const response = await tauriFetch(fetchUri);
           if (!response.ok) {
             throw new Error(`Failed to fetch metadata: ${response.status} ${response.statusText}`);
           }
           metadata = await response.json();
+
+          // Check if metadata has valid name
+          if (metadata && metadata.name && metadata.name !== 'Unknown Game') {
+            hasValidMetadata = true;
+          }
         } catch (err) {
           console.warn(`[SVM] Failed to fetch metadata from ${pgcGame.metadataUri}`, err);
         }
 
-        // Skip games with empty or invalid metadata (no name)
-        if (!metadata || !metadata.name) {
-          console.warn(`[SVM] Game ${pgcGame.gameId} has no name in metadata, skipping...`);
+        // If contract metadata is valid, use it
+        if (hasValidMetadata) {
+          ownedGames.push(composePGCGameFromSvm(pgcGame.gameId, metadata));
           continue;
         }
 
-        ownedGames.push(composePGCGameFromSvm(pgcGame.gameId, metadata));
+        // Otherwise, fallback to API
+        console.warn(`[SVM] Contract metadata incomplete for ${pgcGame.gameId}, trying API fallback...`);
+        try {
+          const apiGame = await fetchGameAsPGC(pgcGame.gameId);
+          if (apiGame) {
+            console.log(`[SVM] Successfully fetched ${pgcGame.gameId} from API`);
+            ownedGames.push(apiGame);
+          }
+        } catch (apiErr) {
+          console.warn(`[SVM] API fallback also failed for ${pgcGame.gameId}`, apiErr);
+        }
       } catch (e) {
         console.error(`[Library] Failed to process SVM license:`, e);
       }
@@ -87,13 +121,13 @@ function composePGCGameFromSvm(gameId: string, metadata: any): PGCGame {
     totalPurchased: 0,
     maxSupply: 0,
     requiredAge: metadata.required_age ?? metadata.requiredAge,
-    coverVerticalImage: metadata.cover_vertical_image ?? metadata.coverVerticalImage,
-    coverHorizontalImage: metadata.cover_horizontal_image ?? metadata.coverHorizontalImage,
-    bannerImage: metadata.banner_image ?? metadata.bannerImage,
+    coverVerticalImage: resolveImageUrl(metadata.cover_vertical_image ?? metadata.coverVerticalImage),
+    coverHorizontalImage: resolveImageUrl(metadata.cover_horizontal_image ?? metadata.coverHorizontalImage),
+    bannerImage: resolveImageUrl(metadata.banner_image ?? metadata.bannerImage),
     website: metadata.website,
     metadata: {
       ...metadata,
-      _blockchain: 'solana', // Mark which blockchain this game is from
+      _blockchain: 'solana',
     },
     distribution: metadata.distributions ?? metadata.distribution ?? [],
     previews: metadata.previews ?? [],

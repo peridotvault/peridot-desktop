@@ -1,3 +1,5 @@
+import type { Abi } from "viem";
+
 export const PeridotRegistryAbi = [
   {
     "inputs": [],
@@ -274,7 +276,7 @@ export const PeridotRegistryAbi = [
             "internalType": "uint64",
             "name": "createdAt",
             "type": "uint64"
-            },
+          },
           {
             "internalType": "bool",
             "name": "active",
@@ -376,4 +378,4 @@ export const PeridotRegistryAbi = [
     "stateMutability": "nonpayable",
     "type": "function"
   }
-] as const;
+] as const satisfies Abi;

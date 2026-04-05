@@ -51,12 +51,12 @@ export const LibrarySidebar = () => {
             return (
               <LibrarySidebarItem
                 key={game.gameId}
-                entry={game.localEntry || {
-                  gameId: game.gameId as any,
+                entry={{
+                  gameId: game.gameId,
                   gameName: game.name,
                   coverVerticalImage: game.coverVerticalImage,
-                  // basic mock
-                } as any}
+                  bannerImage: game.bannerImage,
+                }}
                 isActive={isActive}
                 onClick={() => navigate(pathForItem)}
               />

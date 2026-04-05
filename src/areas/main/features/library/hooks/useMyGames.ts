@@ -135,6 +135,7 @@ export function useMyGames() {
         }
       }
 
+      console.log('games: ', Array.from(mergedMap.values()));
       setGames(Array.from(mergedMap.values()));
     } catch (err) {
       console.error('[useMyGames] Error:', err);

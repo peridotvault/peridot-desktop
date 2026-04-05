@@ -1,4 +1,10 @@
-{
+/**
+ * Program IDL in camelCase format in order to be used in JS/TS.
+ *
+ * Note that this is only a type helper and is not the actual IDL. The original
+ * IDL can be found at `target/idl/pgc1.json`.
+ */
+export type Pgc1 = {
   "address": "DzDbFZXZsmFFv1mMFimLaBjAQi7Z5gUaQ61qcDuR6Kor",
   "metadata": {
     "name": "pgc1",
@@ -8,7 +14,7 @@
   },
   "instructions": [
     {
-      "name": "can_access_game",
+      "name": "canAccessGame",
       "discriminator": [
         101,
         154,
@@ -27,7 +33,7 @@
           "name": "user"
         },
         {
-          "name": "license_account",
+          "name": "licenseAccount",
           "pda": {
             "seeds": [
               {
@@ -58,7 +64,7 @@
       "returns": "bool"
     },
     {
-      "name": "create_game",
+      "name": "createGame",
       "discriminator": [
         124,
         69,
@@ -76,7 +82,7 @@
           "signer": true
         },
         {
-          "name": "game_account",
+          "name": "gameAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -91,13 +97,13 @@
               },
               {
                 "kind": "arg",
-                "path": "game_id"
+                "path": "gameId"
               }
             ]
           }
         },
         {
-          "name": "initial_minter_account",
+          "name": "initialMinterAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -114,52 +120,52 @@
               },
               {
                 "kind": "account",
-                "path": "game_account"
+                "path": "gameAccount"
               },
               {
                 "kind": "arg",
-                "path": "initial_minter"
+                "path": "initialMinter"
               }
             ]
           }
         },
         {
-          "name": "registry_program"
+          "name": "registryProgram"
         },
         {
-          "name": "store_program"
+          "name": "storeProgram"
         },
         {
-          "name": "registry_config"
+          "name": "registryConfig"
         },
         {
-          "name": "registry_treasury",
+          "name": "registryTreasury",
           "writable": true
         },
         {
-          "name": "registry_game",
+          "name": "registryGame",
           "writable": true
         },
         {
-          "name": "price_account",
+          "name": "priceAccount",
           "writable": true
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "game_id",
+          "name": "gameId",
           "type": "string"
         },
         {
-          "name": "metadata_uri",
+          "name": "metadataUri",
           "type": "string"
         },
         {
-          "name": "initial_minter",
+          "name": "initialMinter",
           "type": "pubkey"
         },
         {
@@ -173,7 +179,7 @@
       ]
     },
     {
-      "name": "has_license",
+      "name": "hasLicense",
       "discriminator": [
         109,
         97,
@@ -192,7 +198,7 @@
           "name": "user"
         },
         {
-          "name": "license_account",
+          "name": "licenseAccount",
           "pda": {
             "seeds": [
               {
@@ -260,7 +266,7 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -270,13 +276,13 @@
           "type": "pubkey"
         },
         {
-          "name": "authorized_store",
+          "name": "authorizedStore",
           "type": "pubkey"
         }
       ]
     },
     {
-      "name": "mint_license",
+      "name": "mintLicense",
       "discriminator": [
         57,
         204,
@@ -293,7 +299,7 @@
           "signer": true
         },
         {
-          "name": "minter_account"
+          "name": "minterAccount"
         },
         {
           "name": "config",
@@ -322,7 +328,7 @@
           "signer": true
         },
         {
-          "name": "license_account",
+          "name": "licenseAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -350,19 +356,19 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": [
         {
-          "name": "expires_at",
+          "name": "expiresAt",
           "type": "i64"
         }
       ]
     },
     {
-      "name": "revoke_license",
+      "name": "revokeLicense",
       "discriminator": [
         97,
         10,
@@ -379,7 +385,7 @@
           "signer": true
         },
         {
-          "name": "minter_account",
+          "name": "minterAccount",
           "pda": {
             "seeds": [
               {
@@ -411,7 +417,7 @@
           "name": "user"
         },
         {
-          "name": "license_account",
+          "name": "licenseAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -442,7 +448,7 @@
       "args": []
     },
     {
-      "name": "set_minter",
+      "name": "setMinter",
       "discriminator": [
         13,
         170,
@@ -459,14 +465,14 @@
           "writable": true,
           "signer": true,
           "relations": [
-            "game_account"
+            "gameAccount"
           ]
         },
         {
-          "name": "game_account"
+          "name": "gameAccount"
         },
         {
-          "name": "minter_account",
+          "name": "minterAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -483,7 +489,7 @@
               },
               {
                 "kind": "account",
-                "path": "game_account"
+                "path": "gameAccount"
               },
               {
                 "kind": "arg",
@@ -493,7 +499,7 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -509,7 +515,7 @@
       ]
     },
     {
-      "name": "set_publisher",
+      "name": "setPublisher",
       "discriminator": [
         110,
         54,
@@ -522,26 +528,26 @@
       ],
       "accounts": [
         {
-          "name": "game_account",
+          "name": "gameAccount",
           "writable": true
         },
         {
           "name": "publisher",
           "signer": true,
           "relations": [
-            "game_account"
+            "gameAccount"
           ]
         }
       ],
       "args": [
         {
-          "name": "new_publisher",
+          "name": "newPublisher",
           "type": "pubkey"
         }
       ]
     },
     {
-      "name": "update_metadata_uri",
+      "name": "updateMetadataUri",
       "discriminator": [
         27,
         40,
@@ -558,17 +564,17 @@
           "writable": true,
           "signer": true,
           "relations": [
-            "game_account"
+            "gameAccount"
           ]
         },
         {
-          "name": "game_account",
+          "name": "gameAccount",
           "writable": true
         }
       ],
       "args": [
         {
-          "name": "new_uri",
+          "name": "newUri",
           "type": "string"
         }
       ]
@@ -576,7 +582,7 @@
   ],
   "accounts": [
     {
-      "name": "LicenseAccount",
+      "name": "licenseAccount",
       "discriminator": [
         120,
         20,
@@ -589,7 +595,7 @@
       ]
     },
     {
-      "name": "MinterAccount",
+      "name": "minterAccount",
       "discriminator": [
         96,
         76,
@@ -602,7 +608,7 @@
       ]
     },
     {
-      "name": "PgcConfig",
+      "name": "pgcConfig",
       "discriminator": [
         77,
         197,
@@ -615,7 +621,7 @@
       ]
     },
     {
-      "name": "PgcGameAccount",
+      "name": "pgcGameAccount",
       "discriminator": [
         34,
         116,
@@ -630,7 +636,7 @@
   ],
   "events": [
     {
-      "name": "GameCreated",
+      "name": "gameCreated",
       "discriminator": [
         218,
         25,
@@ -643,7 +649,7 @@
       ]
     },
     {
-      "name": "LicenseIssued",
+      "name": "licenseIssued",
       "discriminator": [
         193,
         166,
@@ -656,7 +662,7 @@
       ]
     },
     {
-      "name": "LicenseRevoked",
+      "name": "licenseRevoked",
       "discriminator": [
         185,
         114,
@@ -669,7 +675,7 @@
       ]
     },
     {
-      "name": "MetadataUpdated",
+      "name": "metadataUpdated",
       "discriminator": [
         132,
         36,
@@ -682,7 +688,7 @@
       ]
     },
     {
-      "name": "MinterUpdated",
+      "name": "minterUpdated",
       "discriminator": [
         8,
         124,
@@ -695,7 +701,7 @@
       ]
     },
     {
-      "name": "PublisherUpdated",
+      "name": "publisherUpdated",
       "discriminator": [
         169,
         238,
@@ -711,58 +717,58 @@
   "errors": [
     {
       "code": 6000,
-      "name": "GameAlreadyExists",
+      "name": "gameAlreadyExists",
       "msg": "Game already exists"
     },
     {
       "code": 6001,
-      "name": "LicenseAlreadyExists",
+      "name": "licenseAlreadyExists",
       "msg": "License already exists"
     },
     {
       "code": 6002,
-      "name": "LicenseExpired",
+      "name": "licenseExpired",
       "msg": "License has expired"
     },
     {
       "code": 6003,
-      "name": "Unauthorized",
+      "name": "unauthorized",
       "msg": "Unauthorized access"
     },
     {
       "code": 6004,
-      "name": "InvalidGameId",
+      "name": "invalidGameId",
       "msg": "Invalid game ID"
     },
     {
       "code": 6005,
-      "name": "InvalidMetadataUri",
+      "name": "invalidMetadataUri",
       "msg": "Invalid metadata URI"
     },
     {
       "code": 6006,
-      "name": "RegistryCallFailed",
+      "name": "registryCallFailed",
       "msg": "Registry call failed"
     },
     {
       "code": 6007,
-      "name": "StoreCallFailed",
+      "name": "storeCallFailed",
       "msg": "Store call failed"
     },
     {
       "code": 6008,
-      "name": "InvalidMinter",
+      "name": "invalidMinter",
       "msg": "Invalid minter account"
     }
   ],
   "types": [
     {
-      "name": "GameCreated",
+      "name": "gameCreated",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "game_id",
+            "name": "gameId",
             "type": "string"
           },
           {
@@ -773,7 +779,7 @@
       }
     },
     {
-      "name": "LicenseAccount",
+      "name": "licenseAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -786,11 +792,11 @@
             "type": "pubkey"
           },
           {
-            "name": "issued_at",
+            "name": "issuedAt",
             "type": "i64"
           },
           {
-            "name": "expires_at",
+            "name": "expiresAt",
             "type": "i64"
           },
           {
@@ -801,7 +807,7 @@
       }
     },
     {
-      "name": "LicenseIssued",
+      "name": "licenseIssued",
       "type": {
         "kind": "struct",
         "fields": [
@@ -814,14 +820,14 @@
             "type": "pubkey"
           },
           {
-            "name": "expires_at",
+            "name": "expiresAt",
             "type": "i64"
           }
         ]
       }
     },
     {
-      "name": "LicenseRevoked",
+      "name": "licenseRevoked",
       "type": {
         "kind": "struct",
         "fields": [
@@ -837,7 +843,7 @@
       }
     },
     {
-      "name": "MetadataUpdated",
+      "name": "metadataUpdated",
       "type": {
         "kind": "struct",
         "fields": [
@@ -846,14 +852,14 @@
             "type": "pubkey"
           },
           {
-            "name": "new_uri",
+            "name": "newUri",
             "type": "string"
           }
         ]
       }
     },
     {
-      "name": "MinterAccount",
+      "name": "minterAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -866,7 +872,7 @@
             "type": "pubkey"
           },
           {
-            "name": "is_authorized",
+            "name": "isAuthorized",
             "type": "bool"
           },
           {
@@ -877,7 +883,7 @@
       }
     },
     {
-      "name": "MinterUpdated",
+      "name": "minterUpdated",
       "type": {
         "kind": "struct",
         "fields": [
@@ -890,14 +896,14 @@
             "type": "pubkey"
           },
           {
-            "name": "is_authorized",
+            "name": "isAuthorized",
             "type": "bool"
           }
         ]
       }
     },
     {
-      "name": "PgcConfig",
+      "name": "pgcConfig",
       "type": {
         "kind": "struct",
         "fields": [
@@ -906,7 +912,7 @@
             "type": "pubkey"
           },
           {
-            "name": "authorized_store",
+            "name": "authorizedStore",
             "type": "pubkey"
           },
           {
@@ -917,12 +923,12 @@
       }
     },
     {
-      "name": "PgcGameAccount",
+      "name": "pgcGameAccount",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "game_id",
+            "name": "gameId",
             "type": "string"
           },
           {
@@ -930,11 +936,11 @@
             "type": "pubkey"
           },
           {
-            "name": "metadata_uri",
+            "name": "metadataUri",
             "type": "string"
           },
           {
-            "name": "created_at",
+            "name": "createdAt",
             "type": "i64"
           },
           {
@@ -945,7 +951,7 @@
       }
     },
     {
-      "name": "PublisherUpdated",
+      "name": "publisherUpdated",
       "type": {
         "kind": "struct",
         "fields": [
@@ -954,15 +960,15 @@
             "type": "pubkey"
           },
           {
-            "name": "old_publisher",
+            "name": "oldPublisher",
             "type": "pubkey"
           },
           {
-            "name": "new_publisher",
+            "name": "newPublisher",
             "type": "pubkey"
           }
         ]
       }
     }
   ]
-}
+};

@@ -1,19 +1,68 @@
-import { createPublicClient, http, isAddress } from 'viem';
+import { createPublicClient, custom, isAddress } from 'viem';
 import { baseSepolia } from 'viem/chains';
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
+import {
+  STORAGE_URL,
+  EVM_RPC_URL,
+  EVM_REGISTRY_ADDRESS,
+} from '@shared/constants/storage';
 import { PeridotRegistryAbi } from '../abis/abi.registry';
 import { PGC1Abi } from '../abis/abi.pgc1';
 import { PGCGame } from '@shared/interfaces/game';
+import { fetchGameAsPGC } from '@shared/api/game.api';
 
-// Const from env or fallbacks
-const REGISTRY_ADDRESS = (import.meta.env.VITE_EVM_REGISTRY_ADDRESS ||
-  '0x2091278674cec58296f4e7b868c2c84f5942abad') as `0x${string}`;
-const RPC_URL =
-  import.meta.env.VITE_EVM_RPC_URL || 'https://base-sepolia.g.alchemy.com/v2/1DVQw8E8nb2dYnSH0GwPm';
+/**
+ * Resolves an image URL to an absolute URL.
+ * If the URL is already absolute (http/https/data), returns as-is.
+ * If relative, prepends the storage URL (includes /storage/files path).
+ */
+function resolveImageUrl(url: string | undefined): string | undefined {
+    if (!url) return undefined;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+        return url;
+    }
+    return `${STORAGE_URL}/${url.startsWith('/') ? url.slice(1) : url}`;
+}
+
+const REGISTRY_ADDRESS = EVM_REGISTRY_ADDRESS as `0x${string}`;
+const RPC_URL = EVM_RPC_URL;
 const PGC1_LICENSE_ID = BigInt(1);
+
+// Custom transport using Tauri's HTTP API to bypass CORS
+const tauriHttpTransport = () => {
+  return custom({
+    async request({ method, params }) {
+      const response = await tauriFetch(RPC_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: Math.floor(Math.random() * 1000000),
+          method,
+          params,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || 'RPC error');
+      }
+
+      return data.result;
+    },
+  });
+};
 
 const publicClient = createPublicClient({
   chain: baseSepolia,
-  transport: http(RPC_URL),
+  transport: tauriHttpTransport(),
 });
 
 export async function getMyGamesEvm({ address }: { address: string }): Promise<PGCGame[]> {
@@ -79,13 +128,14 @@ export async function getMyGamesEvm({ address }: { address: string }): Promise<P
     const finalGames = await Promise.all(
       ownedGames.map(async (owned) => {
         try {
+          // First, try to get metadata from the contract
           const headVersion = (await publicClient.readContract({
             address: owned.pgc1 as `0x${string}`,
             abi: PGC1Abi,
             functionName: 'contractMetaHeadVersion',
           })) as number;
 
-          if (headVersion === 0) throw new Error('No metadata');
+          if (headVersion === 0) throw new Error('No metadata on contract');
 
           const meta = (await publicClient.readContract({
             address: owned.pgc1 as `0x${string}`,
@@ -97,23 +147,35 @@ export async function getMyGamesEvm({ address }: { address: string }): Promise<P
           const apiBase = import.meta.env.VITE_API_BASE ?? 'https://api.peridotvault.com';
           const uri = meta.uri.startsWith('http') ? meta.uri : `${apiBase}${meta.uri}`;
           // Fetch the actual JSON metadata from URI
-          const response = await fetch(uri);
+          const response = await tauriFetch(uri);
           if (!response.ok) {
             throw new Error(`Failed to fetch metadata: ${response.status} ${response.statusText}`);
           }
           const metadata = await response.json();
 
-          // Skip games with empty or invalid metadata
-          if (!metadata || !metadata.name) {
-            console.warn(`[EVM] Game ${owned.gameId} has no name in metadata, skipping...`);
-            return null;
+          // If contract metadata has valid name, use it
+          if (metadata && metadata.name && metadata.name !== 'Unknown Game') {
+            return composePGCGameFromEvm(owned.gameId, metadata);
           }
 
-          return composePGCGameFromEvm(owned.gameId, metadata);
+          // Otherwise, fall through to API fallback
+          console.warn(`[EVM] Contract metadata incomplete for ${owned.gameId}, trying API fallback...`);
         } catch (err) {
-          console.warn(`[EVM] Failed to fetch metadata for ${owned.gameId}`, err);
-          return null;
+          console.warn(`[EVM] Contract metadata failed for ${owned.gameId}, trying API fallback...`, err);
         }
+
+        // Fallback: Fetch from API
+        try {
+          const apiGame = await fetchGameAsPGC(owned.gameId);
+          if (apiGame) {
+            console.log(`[EVM] Successfully fetched ${owned.gameId} from API`);
+            return apiGame;
+          }
+        } catch (apiErr) {
+          console.warn(`[EVM] API fallback also failed for ${owned.gameId}`, apiErr);
+        }
+
+        return null;
       }),
     );
 
@@ -187,13 +249,13 @@ function composePGCGameFromEvm(gameId: string, metadata: any): PGCGame {
     totalPurchased: 0,
     maxSupply: 0,
     requiredAge: metadata.required_age ?? metadata.requiredAge,
-    coverVerticalImage: metadata.cover_vertical_image ?? metadata.coverVerticalImage,
-    coverHorizontalImage: metadata.cover_horizontal_image ?? metadata.coverHorizontalImage,
-    bannerImage: metadata.banner_image ?? metadata.bannerImage,
+    coverVerticalImage: resolveImageUrl(metadata.cover_vertical_image ?? metadata.coverVerticalImage),
+    coverHorizontalImage: resolveImageUrl(metadata.cover_horizontal_image ?? metadata.coverHorizontalImage),
+    bannerImage: resolveImageUrl(metadata.banner_image ?? metadata.bannerImage),
     website: metadata.website,
     metadata: {
       ...metadata,
-      _blockchain: 'base-sepolia', // Mark which blockchain this game is from
+      _blockchain: 'base-sepolia',
     },
     distribution: metadata.distributions ?? metadata.distribution ?? [],
     previews: metadata.previews ?? [],
