@@ -28,6 +28,34 @@ const REGISTRY_ADDRESS = EVM_REGISTRY_ADDRESS as `0x${string}`;
 const RPC_URL = EVM_RPC_URL;
 const PGC1_LICENSE_ID = BigInt(1);
 
+// Delay helper to avoid rate limiting
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Batch size for concurrent requests
+const BATCH_SIZE = 5;
+const BATCH_DELAY_MS = 100;
+
+// Process items in batches with delays
+async function processInBatches<T, R>(
+  items: T[],
+  batchSize: number,
+  processor: (item: T, index: number) => Promise<R>,
+  delayMs: number
+): Promise<R[]> {
+  const results: R[] = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.all(
+      batch.map((item, idx) => processor(item, i + idx))
+    );
+    results.push(...batchResults);
+    if (i + batchSize < items.length) {
+      await delay(delayMs);
+    }
+  }
+  return results;
+}
+
 // Custom transport using Tauri's HTTP API to bypass CORS
 const tauriHttpTransport = () => {
   return custom({
@@ -77,49 +105,62 @@ export async function getMyGamesEvm({ address }: { address: string }): Promise<P
 
     if (gameCount === BigInt(0)) return [];
 
-    // 1. Get all game IDs
-    const gameIds = (await Promise.all(
-      Array.from({ length: Number(gameCount) }).map((_, i) =>
-        publicClient.readContract({
+    // 1. Get all game IDs (with batching to avoid rate limits)
+    const gameIds = (await processInBatches(
+      Array.from({ length: Number(gameCount) }).map((_, i) => i),
+      BATCH_SIZE,
+      async (index) => {
+        return publicClient.readContract({
           address: REGISTRY_ADDRESS,
           abi: PeridotRegistryAbi,
           functionName: 'gameIdAt',
-          args: [BigInt(i)],
-        }),
-      ),
+          args: [BigInt(index)],
+        }) as Promise<string>;
+      },
+      BATCH_DELAY_MS
     )) as string[];
 
-    // 2. Get game records
-    const gameRecords = (await Promise.all(
-      gameIds.map((id) =>
-        publicClient.readContract({
+    // 2. Get game records (with batching to avoid rate limits)
+    const gameRecords = (await processInBatches(
+      gameIds,
+      BATCH_SIZE,
+      async (id) => {
+        return publicClient.readContract({
           address: REGISTRY_ADDRESS,
           abi: PeridotRegistryAbi,
           functionName: 'games',
           args: [id],
-        }),
-      ),
+        }) as Promise<[string, string, bigint, boolean]>;
+      },
+      BATCH_DELAY_MS
     )) as Array<[string, string, bigint, boolean]>;
 
-    // 3. Filter owned games
+    // 3. Filter owned games (with batching to avoid rate limits)
     const ownedGames: any[] = [];
-    await Promise.all(
-      gameRecords.map(async (record, index) => {
+    await processInBatches(
+      gameRecords,
+      BATCH_SIZE,
+      async (record, index) => {
         const [pgc1] = record;
-        const balance = (await publicClient.readContract({
-          address: pgc1 as `0x${string}`,
-          abi: PGC1Abi,
-          functionName: 'balanceOf',
-          args: [address as `0x${string}`, PGC1_LICENSE_ID],
-        })) as bigint;
+        try {
+          const balance = (await publicClient.readContract({
+            address: pgc1 as `0x${string}`,
+            abi: PGC1Abi,
+            functionName: 'balanceOf',
+            args: [address as `0x${string}`, PGC1_LICENSE_ID],
+          })) as bigint;
 
-        if (balance > BigInt(0)) {
-          ownedGames.push({
-            gameId: gameIds[index],
-            pgc1,
-          });
+          if (balance > BigInt(0)) {
+            ownedGames.push({
+              gameId: gameIds[index],
+              pgc1,
+            });
+          }
+        } catch (err) {
+          console.warn(`[EVM] Failed to check balance for game at index ${index}:`, err);
         }
-      }),
+      },
+      BATCH_DELAY_MS
     );
 
     if (ownedGames.length === 0) return [];
@@ -187,14 +228,13 @@ export async function getMyGamesEvm({ address }: { address: string }): Promise<P
 }
 
 /**
- * Legacy stubs to fix broken imports after ICP removal
+ * Fetch game by ID - tries local DB first, then fetches from API
  */
 
 export async function getGameByGameId({ gameId }: { gameId: string }): Promise<PGCGame> {
   // Try to get from local library first
-  const local = await (
-    await import('@features/library/services/localDb')
-  ).libraryService.getById(gameId as any);
+  const { libraryService } = await import('@features/library/services/localDb');
+  const local = await libraryService.getById(gameId as any);
   if (local) {
     return {
       gameId: local.gameId,
@@ -212,7 +252,55 @@ export async function getGameByGameId({ gameId }: { gameId: string }): Promise<P
       previews: [],
     };
   }
+
+  // Fetch from API
+  try {
+    const apiGame = await fetchGameAsPGC(gameId);
+    if (apiGame) {
+      // Save to local DB for future use
+      await saveGameToLibrary(apiGame);
+      return apiGame;
+    }
+  } catch (err) {
+    console.error(`[getGameByGameId] Failed to fetch game ${gameId} from API:`, err);
+  }
+
   throw new Error('Game not found');
+}
+
+/**
+ * Save a game to the local library database
+ */
+async function saveGameToLibrary(game: PGCGame): Promise<void> {
+  try {
+    const { libraryService } = await import('@features/library/services/localDb');
+    const existing = await libraryService.getById(game.gameId);
+
+    const webDist = game.distribution?.find((d) => 'web' in d);
+    const webUrl = webDist && 'web' in webDist ? webDist.web.url : undefined;
+
+    const libraryEntry = {
+      gameId: game.gameId,
+      gameName: game.name,
+      description: game.description ?? '',
+      coverVerticalImage: game.coverVerticalImage ?? '',
+      bannerImage: game.bannerImage ?? '',
+      launchType: 'web' as const,
+      webUrl,
+      status: 'installed' as const,
+      stats: {
+        totalPlayTimeSeconds: 0,
+        launchCount: 0,
+      },
+    };
+
+    if (!existing) {
+      await libraryService.create(libraryEntry);
+      console.log(`[saveGameToLibrary] Created library entry for: ${game.gameId}`);
+    }
+  } catch (err) {
+    console.warn(`[saveGameToLibrary] Failed to save game ${game.gameId}:`, err);
+  }
 }
 
 export async function getDeveloperGames() {

@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSync, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { LibraryGameCard } from '@main/features/library/components/GameCard';
 import { useMyGames, RealLibraryGame } from '@main/features/library/hooks/useMyGames';
 import { formatTitle } from '@main/features/library/utils/formatTitle';
 
 export default function LibraryPage() {
   const navigate = useNavigate();
-  const { games, loading, error, isEmpty } = useMyGames();
+  const { games, loading, syncing, error, isEmpty } = useMyGames();
 
   const recentGames = useMemo(() => {
     return games
@@ -15,14 +17,8 @@ export default function LibraryPage() {
       .slice(0, 8);
   }, [games]);
 
-  const allGames = useMemo(() => {
-    // Sort logic: Installed first, then by name or createdAt
-    return [...games].sort((a, b) => {
-      if (a.status === 'installed' && b.status !== 'installed') return -1;
-      if (a.status !== 'installed' && b.status === 'installed') return 1;
-      return a.name.localeCompare(b.name);
-    });
-  }, [games]);
+  // Games are already sorted A-Z from the hook
+  const allGames = games;
 
   if (isEmpty && !loading) {
     return (
@@ -37,13 +33,33 @@ export default function LibraryPage() {
     <div className="flex justify-center min-h-screen pb-20">
       <div className="container max-w-7xl px-6 py-8 flex flex-col gap-12">
         
-        {/* Header  */}
-        <header className="flex flex-col gap-2">
-           <h1 className="text-4xl font-bold tracking-tight">My Games</h1>
-           {error && <p className="text-red-400 text-sm">{error}</p>}
+        {/* Header with Sync Status */}
+        <header className="flex items-center justify-between">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3">
+              <h1 className="text-4xl font-bold tracking-tight">My Games</h1>
+              {/* Sync Status Indicator */}
+              {syncing && (
+                <span className="flex items-center gap-2 text-sm text-accent animate-pulse">
+                  <FontAwesomeIcon icon={faSync} spin />
+                  Syncing...
+                </span>
+              )}
+              {!syncing && !loading && games.length > 0 && (
+                <span className="flex items-center gap-2 text-sm text-foreground/50">
+                  <FontAwesomeIcon icon={faCheck} />
+                  Up to date
+                </span>
+              )}
+            </div>
+            {error && <p className="text-red-400 text-sm">{error}</p>}
+          </div>
+          <span className="text-foreground/50 text-sm">
+            {allGames.length} games
+          </span>
         </header>
 
-        {/* Recently Played  */}
+        {/* Recently Played */}
         {recentGames.length > 0 && (
           <section className="flex flex-col gap-6">
             <h2 className="text-2xl font-semibold opacity-90">Recently Played</h2>
@@ -55,11 +71,13 @@ export default function LibraryPage() {
           </section>
         )}
 
-        {/* All Games  */}
+        {/* All Games - Sorted A to Z */}
         <section className="flex flex-col gap-6">
           <h2 className="text-2xl font-semibold opacity-90">
             {recentGames.length > 0 ? 'All Games' : 'Library'} 
-            {!loading && ` (${allGames.length})`}
+            <span className="text-sm font-normal text-foreground/50 ml-2">
+              (A - Z)
+            </span>
           </h2>
           
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
