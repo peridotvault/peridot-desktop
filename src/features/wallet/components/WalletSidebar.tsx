@@ -40,7 +40,7 @@ export const WalletSidebar: React.FC<WalletSidebarProps> = ({
           {/* Panel (slide from left) */}
           <motion.div
             className={[
-              'fixed bottom-0 top-12 w-[400px] bg-background border-r border-foreground/10 shadow-2xl',
+              'fixed bottom-0 top-12 w-100 bg-background border-r border-foreground/10 shadow-2xl',
               'flex flex-col z-40',
               leftClassName,
             ].join(' ')}

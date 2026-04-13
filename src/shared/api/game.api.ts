@@ -1,5 +1,5 @@
-import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
-import { API_BASE, STORAGE_URL } from '@shared/constants/storage';
+import { STORAGE_URL } from '@shared/constants/storage';
+import { http } from '@shared/lib/http';
 import type { PGCGame, GameId, Distribution, Platform } from '@shared/interfaces/game';
 
 const VALID_PLATFORMS: Platform[] = ['web', 'windows', 'macos', 'linux', 'android', 'ios', 'other'];
@@ -18,32 +18,6 @@ function resolveImageUrl(url: string | undefined): string | undefined {
     // Relative URL - prepend storage URL which includes the /storage/files path
     return `${STORAGE_URL}/${url.startsWith('/') ? url.slice(1) : url}`;
 }
-
-const handleResponse = async <T>(res: Response): Promise<T> => {
-    if (res.ok) {
-        const json = await res.json();
-        // Handle nested data structure from API
-        return json.data ?? json;
-    }
-
-    let message = 'Failed to fetch game data';
-    try {
-        const errorData = await res.json();
-        if (typeof errorData.message === 'string') {
-            message = errorData.message;
-        } else if (Array.isArray(errorData.message)) {
-            message = errorData.message.join('; ');
-        } else if (errorData.error) {
-            message = errorData.error;
-        }
-    } catch {
-        message = `Request failed: ${res.status} ${res.statusText}`;
-    }
-
-    const error = new Error(message);
-    (error as any).statusCode = res.status;
-    throw error;
-};
 
 export interface GameDetailApi {
     game_id: string;
@@ -117,11 +91,10 @@ function convertDistributions(apiDistributions: GameDetailApi['distributions']):
  * This is used as a fallback when contract metadata is incomplete.
  */
 export async function getGameDetailApi(gameId: GameId): Promise<GameDetailApi> {
-    const url = `${API_BASE}/api/games/${gameId}`;
-    console.log('[GameAPI] Fetching game details:', { gameId, url });
+    const endpoint = `/api/games/${gameId}`;
+    console.log('[GameAPI] Fetching game details:', { gameId });
 
-    const response = await tauriFetch(url);
-    return handleResponse<GameDetailApi>(response);
+    return http.get<GameDetailApi>(endpoint);
 }
 
 /**
@@ -194,7 +167,12 @@ export async function fetchGameAsPGC(gameId: GameId): Promise<PGCGame | null> {
         }
         return convertApiGameToPGCGame(gameId, apiGame);
     } catch (err) {
-        console.error('[GameAPI] Failed to fetch game:', gameId, err);
+        // Check if it's a 404 (game not found) - this is expected for some games
+        if ((err as any).statusCode === 404) {
+            console.log(`[GameAPI] Game ${gameId} not found in API (this is normal for unregistered games)`);
+        } else {
+            console.error('[GameAPI] Failed to fetch game:', gameId, err);
+        }
         return null;
     }
 }

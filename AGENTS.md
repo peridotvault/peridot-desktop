@@ -217,6 +217,7 @@ export async function getMyGames({ address }: { address: string }): Promise<PGCG
 - Local database stored in `src/core/storage/storage.db.ts`
 - Tables: `kv` (key-value), `library` (game entries)
 - Use async/await patterns with Dexie queries
+- All game data saved locally for offline access
 
 **Example:**
 
@@ -224,6 +225,194 @@ export async function getMyGames({ address }: { address: string }): Promise<PGCG
 export async function getById(gameId: GameId): Promise<LibraryEntry | undefined> {
   return await libraryService.getById(gameId);
 }
+```
+
+## Performance Best Practices
+
+### Library Page - Instant Loading Pattern
+
+The library page uses a **multi-stage loading strategy** for optimal UX:
+
+**Stage 1: Instant Display (< 50ms)**
+
+```typescript
+// Load from local Dexie database immediately
+const localEntries = await libraryService.getAll();
+if (localEntries.length > 0) {
+  setGames(convertAndSort(localEntries));
+  setLoading(false); // UI becomes responsive NOW
+}
+```
+
+**Stage 2: Incremental Loading**
+
+```typescript
+// Add games one by one as they're fetched
+const addGameIncremental = useCallback((game: PGCGame) => {
+  setGames((prevGames) => {
+    if (prevGames.some((g) => g.gameId === game.gameId)) {
+      return prevGames; // Already loaded
+    }
+    const newGames = [...prevGames, convertToDisplayGame(game)];
+    return newGames.sort((a, b) => a.name.localeCompare(b.name));
+  });
+}, []);
+
+// In fetch loop:
+for (const game of games) {
+  addGameIncremental(game); // Appears in UI immediately
+  await saveGameToLibrary(game); // Saved to Dexie in background
+}
+```
+
+**Stage 3: Background Sync**
+
+```typescript
+// After UI is responsive, sync with blockchain/API
+setSyncing(true);
+// Fetch from API/blockchain
+// Update games incrementally
+setSyncing(false);
+```
+
+### Key Principles for Responsive UI
+
+1. **Never Block the Main Thread**
+   - Load from local storage first
+   - Show data immediately
+   - Fetch fresh data in background
+
+2. **Incremental Updates**
+   - Show first game as soon as it's available
+   - Don't wait for all games to load
+   - Use functional setState to avoid race conditions
+
+3. **Smart Loading States**
+
+   ```typescript
+   // Show loading spinner only when BOTH:
+   // - No cached data AND
+   // - Currently fetching
+   if ((loading || syncing) && games.length === 0) {
+     return <LoadingSpinner />;
+   }
+
+   // Show "empty" only after everything is complete
+   const isEmpty = !loading && !syncing && games.length === 0;
+   ```
+
+4. **Background Persistence**
+   - Save every game to Dexie as it's fetched
+   - Update existing entries with fresh data
+   - Full game details stored for offline mode
+
+### Library State Management (Zustand Store)
+
+The library uses a **shared Zustand store** (`useLibraryStore`) to ensure all components (sidebar, main page, etc.) see the same data:
+
+```typescript
+// src/areas/main/features/library/hooks/useLibraryStore.ts
+export const useLibraryStore = create<LibraryState>((set, get) => ({
+  entries: [],           // Shared library entries
+  isLoading: true,       // Shared loading state
+  isSyncing: false,      // Shared sync state
+
+  // Load from local DB
+  async loadAll() {
+    const entries = await libraryService.getAll();
+    set({ entries, isLoading: false });
+  },
+
+  // Add new entry (prevents duplicates)
+  async addEntry(input: CreateLibraryEntryInput) {
+    const existing = get().entries.find(e => e.gameId === input.gameId);
+    if (existing) return;
+    const entry = await libraryService.create(input);
+    set(state => ({
+      entries: [...state.entries, entry].sort(...)
+    }));
+  },
+
+  // Update existing entry
+  async updateEntry(gameId: string, patch: Partial<LibraryEntry>) {
+    await libraryService.update(gameId, patch);
+    set(state => ({
+      entries: state.entries.map(e =>
+        e.gameId === gameId ? { ...e, ...patch } : e
+      ),
+    }));
+  },
+}));
+```
+
+**Why shared state is critical:**
+- Sidebar and main page both use `useMyGames()` hook
+- Without shared state, each component instance has its own `games` array
+- When sidebar fetches games, main page stays empty
+- Shared store ensures all components update together
+
+**Usage in components:**
+```typescript
+// useMyGames hook wraps the store
+export function useMyGames() {
+  const storeEntries = useLibraryStore((state) => state.entries);
+  const storeLoadAll = useLibraryStore((state) => state.loadAll);
+
+  // Load on mount
+  useEffect(() => {
+    storeLoadAll();
+  }, [storeLoadAll]);
+
+  // Convert entries to display format
+  const games = convertEntriesToGames(storeEntries);
+
+  // Background sync runs separately
+  useEffect(() => {
+    // Fetch from API/blockchain
+    // Call storeAddEntry() for each game
+  }, [...]);
+
+  return { games, loading: storeLoading, ... };
+}
+```
+
+### Anti-Patterns to Avoid
+
+❌ **Don't do this:**
+
+```typescript
+// BAD: Wait for all games before showing anything
+const allGames = await fetchAllGames(); // Takes 5-10 seconds
+setGames(allGames);
+setLoading(false);
+```
+
+✅ **Do this instead:**
+
+```typescript
+// GOOD: Show cached games immediately, add new ones incrementally
+const cachedGames = await libraryService.getAll();
+setGames(cachedGames);
+setLoading(false);
+
+// Then add new games one by one
+for (const game of fetchedGames) {
+  addGameIncremental(game);
+}
+```
+
+❌ **Don't do this:**
+
+```typescript
+// BAD: Replace entire array on each update
+setGames([...games, newGame]); // Loses previous state if re-rendered
+```
+
+✅ **Do this instead:**
+
+```typescript
+// GOOD: Use functional update
+setGames((prevGames) => [...prevGames, newGame]);
 ```
 
 ## Key Principles
@@ -235,6 +424,9 @@ export async function getById(gameId: GameId): Promise<LibraryEntry | undefined>
 5. **Async Best Practices:** Avoid promise hell - use async/await, proper error handling
 6. **Path Aliases:** Always use aliases over relative imports when available
 7. **Component Composition:** Break large components into smaller, focused components
+8. **Performance First:** Never block UI - load instantly, sync in background
+9. **Offline Support:** Save all data to Dexie for offline access
+10. **Incremental Loading:** Show data as soon as it's available, don't batch
 
 ## Repository Info
 
@@ -245,3 +437,4 @@ export async function getById(gameId: GameId): Promise<LibraryEntry | undefined>
 - **State Management:** Zustand 5.0.12
 - **Blockchain:** viem (EVM), @solana/web3.js (Solana)
 - **UI:** Tailwind CSS 4.2.2, Material-UI 7.3.9
+- **Local Database:** Dexie.js (IndexedDB wrapper)

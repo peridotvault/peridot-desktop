@@ -94,10 +94,35 @@ export async function getMyGamesSvm({ address }: { address: string }): Promise<P
           if (apiGame) {
             console.log(`[SVM] Successfully fetched ${pgcGame.gameId} from API`);
             ownedGames.push(apiGame);
+            continue; // Move to next game
           }
         } catch (apiErr) {
           console.warn(`[SVM] API fallback also failed for ${pgcGame.gameId}`, apiErr);
         }
+
+        // If both contract and API fail, still show the game with minimal info
+        // This ensures users see games they own even if metadata is unavailable
+        console.log(`[SVM] Adding game ${pgcGame.gameId} with minimal metadata (game is owned but metadata unavailable)`);
+        ownedGames.push({
+          gameId: pgcGame.gameId,
+          name: pgcGame.gameId, // Use gameId as name since we don't have metadata
+          description: '',
+          published: true,
+          price: 0,
+          tokenPayment: '',
+          totalPurchased: 0,
+          maxSupply: 0,
+          coverVerticalImage: undefined,
+          coverHorizontalImage: undefined,
+          bannerImage: undefined,
+          metadata: {
+            _blockchain: 'solana',
+            _source: 'contract-only',
+            gameId: pgcGame.gameId,
+          },
+          distribution: [],
+          previews: [],
+        });
       } catch (e) {
         console.error(`[Library] Failed to process SVM license:`, e);
       }
@@ -138,4 +163,53 @@ function composePGCGameFromSvm(gameId: string, metadata: any): PGCGame {
   }
 
   return game;
+}
+
+export interface BuyGameSvmResult {
+  success: boolean;
+  transactionHash?: string;
+  error?: string;
+}
+
+/**
+ * Buy a game on Solana.
+ * Note: This requires the runtime wallet for signing transactions.
+ * Currently not fully implemented - returns an error directing users to use EVM.
+ */
+export async function buyGameSvm({
+  gameId,
+  seedPhrase,
+}: {
+  gameId: string;
+  seedPhrase: string;
+}): Promise<BuyGameSvmResult> {
+  try {
+    console.log('[SVM] Initiating game purchase:', { gameId });
+
+    // Import the runtime wallet derivation function
+    // @ts-expect-error - Module doesn't have proper type declarations
+    const walletRuntime = await import('@antigane/peridotwallet-runtime');
+
+    // Derive buyer's keypair from seed phrase
+    const buyerKeypair = walletRuntime.deriveSolanaKeypairFromMnemonic(seedPhrase);
+    console.log('[SVM] Derived buyer keypair:', buyerKeypair.publicKey);
+
+    // TODO: Implement full Solana purchase flow
+    // This requires:
+    // 1. Get game PDA from registry
+    // 2. Get price account PDA
+    // 3. Create and sign the buyGame transaction
+    // For now, return a descriptive error
+    console.warn('[SVM] Solana game purchase requires full implementation');
+
+    return {
+      success: false,
+      error:
+        'Solana game purchase is not yet fully implemented. Please use EVM (Base Sepolia) for purchases.',
+    };
+  } catch (error) {
+    console.error('[SVM] Buy game failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return { success: false, error: errorMessage };
+  }
 }

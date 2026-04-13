@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@antigane/peridotwallet-runtime':
-        specifier: file:/Users/ranaufal/MyWork/Business/__AntiganeInc__/PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz
-        version: file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz(@noble/ed25519@3.0.0)(@scure/base@2.0.0)(@scure/bip39@2.0.1)(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@6.0.6))(@tailwindcss/vite@4.2.2(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)))(bs58@6.0.0)(dexie@4.3.0)(i@0.3.7)(micro-key-producer@0.8.2)(motion@12.38.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-router-dom@7.13.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(tailwindcss@4.2.2)(zustand@5.0.12(@types/react@19.2.14)(react@19.2.4))
+        specifier: file:/Users/ranaufal/MyWork/Business/__AntiganeInc__/PeridotVault/App/DesktopAndWebApp/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz
+        version: file:../peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz(@noble/ed25519@3.0.0)(@scure/base@2.0.0)(@scure/bip39@2.0.1)(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@6.0.6))(@tailwindcss/vite@4.2.2(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)))(bs58@6.0.0)(dexie@4.3.0)(i@0.3.7)(micro-key-producer@0.8.2)(motion@12.38.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-router-dom@7.13.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(tailwindcss@4.2.2)(zustand@5.0.12(@types/react@19.2.14)(react@19.2.4))
       '@dnd-kit/core':
         specifier: ^6.3.1
         version: 6.3.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -168,8 +168,8 @@ packages:
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
 
-  '@antigane/peridotwallet-runtime@file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz':
-    resolution: {integrity: sha512-VaN8EJWTVjIg6nGvPul3EKQ0XgKqlvh63mUb2q6XBaSBhCY/iDfXygLEHVWCLY31jTsKgvY0g90esYNF6uhI9Q==, tarball: file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz}
+  '@antigane/peridotwallet-runtime@file:../peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz':
+    resolution: {integrity: sha512-uMSMoRjnrU1L064WJbtVH1A6Omn3WRfM6sQZqpiv1hWOfSzKw+BGDHLB4b3X1GTY6kpBWzqmVj3aOzF3BbHRrg==, tarball: file:../peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz}
     version: 0.0.17
     peerDependencies:
       '@noble/ed25519': ^3.0.0
@@ -2015,7 +2015,7 @@ snapshots:
 
   '@adraffy/ens-normalize@1.11.1': {}
 
-  '@antigane/peridotwallet-runtime@file:../../../../PeridotWallet/App/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz(@noble/ed25519@3.0.0)(@scure/base@2.0.0)(@scure/bip39@2.0.1)(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@6.0.6))(@tailwindcss/vite@4.2.2(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)))(bs58@6.0.0)(dexie@4.3.0)(i@0.3.7)(micro-key-producer@0.8.2)(motion@12.38.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-router-dom@7.13.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(tailwindcss@4.2.2)(zustand@5.0.12(@types/react@19.2.14)(react@19.2.4))':
+  '@antigane/peridotwallet-runtime@file:../peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz(@noble/ed25519@3.0.0)(@scure/base@2.0.0)(@scure/bip39@2.0.1)(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.8.3)(utf-8-validate@6.0.6))(@tailwindcss/vite@4.2.2(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(lightningcss@1.32.0)))(bs58@6.0.0)(dexie@4.3.0)(i@0.3.7)(micro-key-producer@0.8.2)(motion@12.38.0(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-router-dom@7.13.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(tailwindcss@4.2.2)(zustand@5.0.12(@types/react@19.2.14)(react@19.2.4))':
     dependencies:
       '@noble/curves': 2.0.1
       '@noble/ed25519': 3.0.0

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faApple, faLinux, faWindows } from '@fortawesome/free-brands-svg-icons';
 import { faAngleRight, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { useWallet } from '@shared/contexts/WalletContext';
+import { walletService } from '@shared/services/wallet';
 import CarouselPreview from '@features/game/components/carousel-preview';
 import { PriceCoin } from '@shared/components/ui/CoinPrice';
 import {
@@ -14,11 +15,20 @@ import {
 } from '@shared/interfaces/helpers/game.helpers';
 import { getGameByGameId, getPublishedGames } from '@features/game/services/dto';
 import { Distribution, Metadata, PGCGame } from '@shared/interfaces/game';
-import { isZeroTokenAmount, resolveTokenInfo, subunitsToNumber } from '@shared/utils/token-info';
+
 import type { MediaItem } from '@shared/interfaces/app/GameInterface';
 import { TypographyH2 } from '@shared/components/ui/typography-h2';
 import { ImageLoading } from '@shared/constants/images';
 import { VerticalCard } from '@shared/components/cards/VerticalCard';
+import {
+  createPurchase,
+  completePurchase,
+  type CreatePurchaseRequest,
+} from '@shared/api/purchase.api';
+import { buyGameEvm, checkGameOwnershipEvm } from '@shared/blockchain/evm/services/game';
+import { deriveEvmAddressFromSeed } from '@shared/utils/evm';
+import { libraryService } from '@features/library/services/localDb';
+import { getLibraryGame, convertLibraryGameToPGCGame } from '@shared/api/library.api';
 
 type PlatformTab = keyof Pick<NormalizedDist, 'Website' | 'Windows' | 'macOS' | 'Linux' | 'Other'>;
 
@@ -93,7 +103,6 @@ export default function GameDetail(): React.ReactElement {
   const [otherGames, setOtherGames] = useState<PGCGame[]>([]);
   const [dist, setDist] = useState<NormalizedDist>({});
   const [activeTab, setActiveTab] = useState<PlatformTab | null>(null);
-  const [isOnPayment, setIsOnPayment] = useState(false);
   const [buying, setBuying] = useState(false);
   const [purchaseState, setPurchaseState] = useState<{
     status: 'success' | 'error';
@@ -167,10 +176,6 @@ export default function GameDetail(): React.ReactElement {
 
   const tokenCanister = game?.tokenPayment;
   const rawPrice = game?.price ?? 0;
-  const tokenInfo = resolveTokenInfo(tokenCanister ?? undefined);
-  const priceIsFree = isZeroTokenAmount(rawPrice, tokenInfo.decimals);
-  const vaultSpenderId = ''; // Legacy ICP spender
-  const humanPriceNumber = subunitsToNumber(rawPrice, tokenInfo.decimals);
 
   const availablePlatforms = useMemo(() => {
     const platforms = new Set<string>();
@@ -188,42 +193,221 @@ export default function GameDetail(): React.ReactElement {
     return Array.from(platforms);
   }, [game?.distribution, metadata?.distribution]);
 
-  const finalizePurchase = async (): Promise<any> => {
-    throw new Error('Please purchase from the Vault store.');
+  const finalizePurchase = async (): Promise<void> => {
+    if (!game) {
+      throw new Error('Game data not loaded');
+    }
+
+    if (!wallet?.encryptedSeedPhrase) {
+      throw new Error('Please connect your wallet first.');
+    }
+
+    // Get seed phrase from wallet
+    let seedPhrase: string;
+    try {
+      seedPhrase = await walletService.decryptWalletData(wallet.encryptedSeedPhrase);
+    } catch (err) {
+      throw new Error('Failed to decrypt wallet. Please unlock your wallet.');
+    }
+
+    const gameId = game.gameId;
+    const price = game.price ?? 0;
+    const tokenPayment = game.tokenPayment ?? '0x0000000000000000000000000000000000000000';
+
+    console.log('[Purchase] Starting purchase flow:', { gameId, price, tokenPayment });
+
+    // Check if already owned on-chain
+    const evmAddress = deriveEvmAddressFromSeed(seedPhrase);
+    const isAlreadyOwned = await checkGameOwnershipEvm({ gameId, address: evmAddress });
+    
+    if (isAlreadyOwned) {
+      console.log('[Purchase] Game already owned on-chain:', gameId);
+      // Still save to library in case it's not there
+      await savePurchasedGameToLibrary(gameId);
+      throw new Error('Game already purchased! The game has been added to your library.');
+    }
+
+    let purchaseRecordCreated = false;
+    let transactionHash: string | undefined;
+
+    // Step 1: Try to create pending purchase record via API (non-blocking)
+    try {
+      const pendingTxHash = `pending_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      const createRequest: CreatePurchaseRequest = {
+        gameId,
+        purchasePrice: price.toString(),
+        paymentToken: tokenPayment,
+        paymentTokenId: 1, // License token ID
+        transactionHash: pendingTxHash,
+      };
+
+      console.log('[Purchase] Creating pending purchase record...');
+      await createPurchase(createRequest);
+      purchaseRecordCreated = true;
+      console.log('[Purchase] Pending purchase record created');
+    } catch (apiErr) {
+      console.warn('[Purchase] Failed to create API purchase record (continuing):', apiErr);
+      // Continue with on-chain purchase even if API fails
+    }
+
+    // Step 2: Execute on-chain purchase (EVM only for now)
+    console.log('[Purchase] Executing on-chain purchase...');
+    const buyResult = await buyGameEvm({ gameId, seedPhrase });
+
+    if (!buyResult.success) {
+      throw new Error(buyResult.error ?? 'On-chain purchase failed');
+    }
+
+    // Handle already owned case from buy result
+    if (buyResult.alreadyOwned) {
+      console.log('[Purchase] Game already owned (detected during purchase):', gameId);
+      await savePurchasedGameToLibrary(gameId);
+      throw new Error('Game already purchased! The game has been added to your library.');
+    }
+
+    transactionHash = buyResult.transactionHash;
+    console.log('[Purchase] On-chain purchase successful:', transactionHash);
+
+    // Step 3: Try to complete purchase via API (non-blocking)
+    if (purchaseRecordCreated && transactionHash) {
+      try {
+        console.log('[Purchase] Completing purchase record...');
+        await completePurchase(gameId, {
+          gameId,
+          transactionHash: transactionHash,
+        });
+        console.log('[Purchase] Purchase record completed in API');
+      } catch (apiErr) {
+        console.warn('[Purchase] Failed to complete API purchase record:', apiErr);
+        // Don't throw - on-chain was successful
+      }
+    }
+
+    // Step 4: ALWAYS save game to local library (this is the critical step)
+    console.log('[Purchase] Saving game to local library...');
+    try {
+      await savePurchasedGameToLibrary(gameId);
+      console.log('[Purchase] Game saved to local library successfully');
+    } catch (libErr) {
+      console.error('[Purchase] CRITICAL: Failed to save game to local library:', libErr);
+      // Still don't throw - user owns the game on-chain
+    }
+
+    console.log('[Purchase] Purchase flow completed successfully');
+  };
+
+  const savePurchasedGameToLibrary = async (gameId: string): Promise<void> => {
+    console.log('[Purchase] Attempting to save game to library:', gameId);
+    
+    // Check if already in local library
+    const existing = await libraryService.getById(gameId);
+    if (existing) {
+      console.log('[Purchase] Game already exists in local library');
+      return;
+    }
+
+    // Try to get from Library API first (best data)
+    try {
+      console.log('[Purchase] Fetching from Library API...');
+      const libraryGame = await getLibraryGame(gameId);
+      if (libraryGame) {
+        console.log('[Purchase] Found game in Library API');
+        const apiGame = convertLibraryGameToPGCGame(libraryGame);
+        
+        const webDist = apiGame.distribution?.find((d): d is { web: { url: string } } => 'web' in d);
+        const webUrl = webDist?.web?.url;
+        
+        await libraryService.create({
+          gameId: apiGame.gameId,
+          gameName: apiGame.name,
+          description: apiGame.description ?? '',
+          coverVerticalImage: apiGame.coverVerticalImage ?? '',
+          bannerImage: apiGame.bannerImage ?? '',
+          launchType: 'web',
+          webUrl,
+          status: 'not-installed',
+          stats: {
+            totalPlayTimeSeconds: 0,
+            launchCount: 0,
+          },
+        });
+        console.log('[Purchase] Game saved to local library from API');
+        return;
+      }
+    } catch (err) {
+      console.warn('[Purchase] Library API failed:', err);
+    }
+
+    // Fallback: use current game data from the page
+    if (game) {
+      console.log('[Purchase] Using current game data from page');
+      const webDist = game.distribution?.find((d): d is { web: { url: string } } => 'web' in d);
+      const webUrl = webDist?.web?.url;
+      
+      await libraryService.create({
+        gameId: game.gameId,
+        gameName: game.name,
+        description: game.description ?? '',
+        coverVerticalImage: game.coverVerticalImage ?? '',
+        bannerImage: game.bannerImage ?? '',
+        launchType: 'web',
+        webUrl,
+        status: 'not-installed',
+        stats: {
+          totalPlayTimeSeconds: 0,
+          launchCount: 0,
+        },
+      });
+      console.log('[Purchase] Game saved to local library from page data');
+      return;
+    }
+
+    throw new Error('No game data available to save');
   };
 
   const handleBuyClick = async () => {
     setPurchaseState(null);
 
-    if (!wallet?.encryptedPrivateKey) {
+    if (!wallet?.encryptedSeedPhrase) {
       setPurchaseState({ status: 'error', message: 'Please connect your wallet first.' });
       return;
     }
 
-    if (priceIsFree) {
-      if (buying) return;
-      try {
-        setBuying(true);
-        await finalizePurchase();
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        setPurchaseState((prev) => prev ?? { status: 'error', message });
-      } finally {
-        setBuying(false);
-      }
-      return;
-    }
-
-    if (!vaultSpenderId) {
+    // Check if wallet is unlocked
+    const isLockOpen = await walletService.isLockOpen();
+    if (!isLockOpen) {
       setPurchaseState({
         status: 'error',
-        message:
-          'Payment configuration is missing the spender canister id. Please update your environment variables.',
+        message: 'Please unlock your wallet to make a purchase.',
       });
       return;
     }
 
-    setIsOnPayment(true);
+    if (buying) return;
+
+    try {
+      setBuying(true);
+      await finalizePurchase();
+      setPurchaseState({
+        status: 'success',
+        message: 'Purchase successful! The game has been added to your library.',
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('[Purchase] Purchase failed:', err);
+      
+      // Check if it's an "already purchased" message - treat as success
+      if (message.includes('already purchased') || message.includes('already owned')) {
+        setPurchaseState({
+          status: 'success',
+          message: 'You already own this game! It has been added to your library.',
+        });
+      } else {
+        setPurchaseState({ status: 'error', message });
+      }
+    } finally {
+      setBuying(false);
+    }
   };
 
   const KRow = ({ label, value }: { label: string; value?: React.ReactNode }) => {
@@ -327,7 +511,7 @@ export default function GameDetail(): React.ReactElement {
                 onClick={handleBuyClick}
                 disabled={buying}
               >
-                {buying ? 'Processing…' : priceIsFree ? 'Purchase' : 'Buy Now'}
+                {buying ? 'Processing…' : rawPrice === 0 ? 'Get Free' : 'Buy Now'}
               </button>
               {purchaseState ? (
                 <span
@@ -511,21 +695,6 @@ export default function GameDetail(): React.ReactElement {
           </div>
         </section>
       </div>
-
-      {isOnPayment ? (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-background p-8 rounded-3xl border border-white/10 max-w-md text-center shadow-2xl">
-                <h3 className="text-2xl font-bold mb-4">Store Purchase</h3>
-                <p className="text-muted-foreground mb-6">Please use the Store (Vault) tab to purchase games. The native purchase flow is currently being updated for EVM.</p>
-                <button 
-                  onClick={() => setIsOnPayment(false)}
-                  className="px-8 py-3 bg-primary rounded-xl font-bold hover:shadow-flat-lg transition"
-                >
-                  Close
-                </button>
-            </div>
-        </div>
-      ) : null}
     </main>
   );
 }
