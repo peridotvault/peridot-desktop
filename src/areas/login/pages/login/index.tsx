@@ -47,18 +47,18 @@ export function LoginScreen({ onAuthenticated }: LoginScreenProps) {
 
       redirectRequestedRef.current = true;
 
-      let nextWallet = wallet;
+      // Construct the new wallet data first
+      const nextWallet = {
+        ...wallet,
+        runtimeWallet,
+      };
 
-      setWallet((previousWallet) => {
-        nextWallet = {
-          ...previousWallet,
-          runtimeWallet,
-        };
-
-        return nextWallet;
-      });
-
+      // Save to storage BEFORE updating React state to ensure persistence
       await saveWalletData(nextWallet);
+
+      // Then update React state
+      setWallet(nextWallet);
+
       onAuthenticated?.();
       redirectToMain();
     };

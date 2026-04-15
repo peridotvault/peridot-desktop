@@ -11,6 +11,7 @@ import {
 import { Link } from 'react-router-dom';
 import { ButtonWithSound } from './ui/ButtonWithSound';
 import { clearWalletData } from '@shared/services/store';
+import { logout } from '@shared/services/auth-init.service';
 import { useWalletUpdate } from '@shared/contexts/WalletContext';
 import { redirectToLogin } from '@shared/desktop/windowControls';
 import { Avatar } from '@shared/components/ui/avatar';
@@ -85,7 +86,8 @@ export const MenuAvatar = ({ open, onClose, leftClassName = 'left-24' }: Props) 
 
   const handleLogout = async () => {
     try {
-      // 1. clear persistent storage (Dexie/localStorage, dll)
+      // 1. clear auth session, library data, and wallet data
+      await logout();
       await clearWalletData();
 
       // 2. reset in-memory wallet

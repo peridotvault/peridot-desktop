@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ButtonWithSound } from '@shared/components/ui/ButtonWithSound';
 import { AnimatePresence, motion } from 'framer-motion';
 import { clearWalletData } from '@shared/services/store';
+import { logout } from '@shared/services/auth-init.service';
 import { redirectToLogin } from '@shared/desktop/windowControls';
 import { LoadingPage } from '@main/pages/additional/loading-page';
 import { migratePeridotRuntimeWalletToDesktop } from '@shared/services/peridot-runtime';
@@ -74,7 +75,8 @@ export const RequiredPassword = () => {
 
   const handleLogout = async () => {
     try {
-      // 1. clear persistent storage (Dexie/localStorage, dll)
+      // 1. clear auth session, library data, and wallet data
+      await logout();
       await clearWalletData();
 
       // 2. reset in-memory wallet

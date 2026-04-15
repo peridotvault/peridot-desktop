@@ -2,12 +2,13 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 import {
   STORAGE_URL,
-  SVM_RPC_URL,
+  SVM_RPC_URLS,
   SVM_PGC1_PROGRAM_ID,
 } from '@shared/constants/storage';
 import { decodeLicenseAccount, decodePgcGameAccount } from '../contracts/account.state';
 import { fetchGameAsPGC } from '@shared/api/game.api';
 import type { PGCGame } from '@shared/interfaces/game';
+import { withRetry, CircuitBreaker, isRetryableError } from '@shared/utils/retry';
 
 /**
  * Resolves an image URL to an absolute URL.
@@ -15,33 +16,120 @@ import type { PGCGame } from '@shared/interfaces/game';
  * If relative, prepends the storage URL (includes /storage/files path).
  */
 function resolveImageUrl(url: string | undefined): string | undefined {
-    if (!url) return undefined;
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
-        return url;
-    }
-    return `${STORAGE_URL}/${url.startsWith('/') ? url.slice(1) : url}`;
+  if (!url) return undefined;
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  return `${STORAGE_URL}/${url.startsWith('/') ? url.slice(1) : url}`;
 }
 
-const RPC_URL = SVM_RPC_URL;
 const PGC1_PROGRAM_ID = new PublicKey(SVM_PGC1_PROGRAM_ID);
 
-const connection = new Connection(RPC_URL, 'confirmed');
+// Circuit breaker for SVM operations
+const svmCircuitBreaker = new CircuitBreaker(5, 30000, 'SVM-GameService');
+
+// Track current RPC index for round-robin fallback
+let currentRpcIndex = 0;
+
+/**
+ * Get a connection with the current RPC URL
+ */
+function getConnection(): Connection {
+  const rpcUrl = SVM_RPC_URLS[currentRpcIndex];
+  return new Connection(rpcUrl, 'confirmed');
+}
+
+/**
+ * Rotate to the next RPC URL
+ */
+function rotateToNextRpc(): void {
+  currentRpcIndex = (currentRpcIndex + 1) % SVM_RPC_URLS.length;
+  console.log(`[SVM-GameService] Rotated to RPC: ${SVM_RPC_URLS[currentRpcIndex].split('?')[0]}...`);
+}
+
+/**
+ * Execute an SVM operation with retry logic and RPC fallback
+ */
+async function executeWithFallback<T>(
+  operation: (connection: Connection) => Promise<T>,
+  operationName: string
+): Promise<T> {
+  // Check circuit breaker first
+  if (svmCircuitBreaker.isOpen()) {
+    console.warn('[SVM-GameService] Circuit breaker is open, skipping operation');
+    throw new Error('Solana RPC is currently unavailable. Please try again later.');
+  }
+
+  const errors: Error[] = [];
+  const startIndex = currentRpcIndex;
+
+  // Try each RPC URL
+  for (let i = 0; i < SVM_RPC_URLS.length; i++) {
+    const connection = getConnection();
+
+    try {
+      const result = await withRetry(
+        () => operation(connection),
+        {
+          maxRetries: 2,
+          baseDelayMs: 500,
+          shouldRetry: isRetryableError,
+          onRetry: (error, attempt) => {
+            console.warn(
+              `[SVM-GameService] Retry ${attempt}/2 for ${operationName}:`,
+              error instanceof Error ? error.message : error
+            );
+          },
+        }
+      );
+
+      // Success - record it
+      svmCircuitBreaker.recordSuccess();
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      errors.push(new Error(`${operationName} failed: ${errorMessage}`));
+
+      // Record failure in circuit breaker
+      svmCircuitBreaker.recordFailure();
+
+      // Log the error
+      console.warn(
+        `[SVM-GameService] RPC failed (${SVM_RPC_URLS[currentRpcIndex].split('?')[0]}): ${errorMessage}`
+      );
+
+      // Rotate to next RPC for the next attempt
+      rotateToNextRpc();
+
+      // If we have tried all RPCs, break and throw
+      if (currentRpcIndex === startIndex) {
+        break;
+      }
+    }
+  }
+
+  // All RPCs failed
+  const summary = errors.map((e) => e.message).join('; ');
+  throw new Error(`All Solana RPC endpoints failed. ${summary}`);
+}
 
 export async function getMyGamesSvm({ address }: { address: string }): Promise<PGCGame[]> {
   try {
     const userPubkey = new PublicKey(address);
 
-    // Get all License accounts owned by the user
-    const accounts = await connection.getProgramAccounts(PGC1_PROGRAM_ID, {
-      filters: [
-        {
-          memcmp: {
-            offset: 8, // owner field offset (account.state decoder logic)
-            bytes: userPubkey.toBase58(),
+    // Get all License accounts owned by the user with retry logic
+    const accounts = await executeWithFallback(async (connection) => {
+      return await connection.getProgramAccounts(PGC1_PROGRAM_ID, {
+        filters: [
+          {
+            memcmp: {
+              offset: 8,
+              bytes: userPubkey.toBase58(),
+            },
           },
-        },
-      ],
-    });
+        ],
+      });
+    }, 'getProgramAccounts');
 
     if (accounts.length === 0) return [];
 
@@ -52,8 +140,11 @@ export async function getMyGamesSvm({ address }: { address: string }): Promise<P
         const license = decodeLicenseAccount(new Uint8Array(account.data));
         const gamePda = license.game;
 
-        // Fetch PGC Game Account to get metadataUri
-        const gameAccountInfo = await connection.getAccountInfo(gamePda);
+        // Fetch PGC Game Account to get metadataUri with retry
+        const gameAccountInfo = await executeWithFallback(async (connection) => {
+          return await connection.getAccountInfo(gamePda);
+        }, 'getAccountInfo');
+
         if (!gameAccountInfo) continue;
 
         const pgcGame = decodePgcGameAccount(new Uint8Array(gameAccountInfo.data));
@@ -67,10 +158,23 @@ export async function getMyGamesSvm({ address }: { address: string }): Promise<P
           const fetchUri = pgcGame.metadataUri.startsWith('http')
             ? pgcGame.metadataUri
             : `${apiBase}${pgcGame.metadataUri}`;
-          const response = await tauriFetch(fetchUri);
-          if (!response.ok) {
-            throw new Error(`Failed to fetch metadata: ${response.status} ${response.statusText}`);
-          }
+
+          // Fetch with retry logic
+          const response = await withRetry(
+            async () => {
+              const res = await tauriFetch(fetchUri);
+              if (!res.ok) {
+                throw new Error(`Failed to fetch metadata: ${res.status} ${res.statusText}`);
+              }
+              return res;
+            },
+            {
+              maxRetries: 2,
+              baseDelayMs: 300,
+              shouldRetry: isRetryableError,
+            }
+          );
+
           metadata = await response.json();
 
           // Check if metadata has valid name
@@ -94,18 +198,17 @@ export async function getMyGamesSvm({ address }: { address: string }): Promise<P
           if (apiGame) {
             console.log(`[SVM] Successfully fetched ${pgcGame.gameId} from API`);
             ownedGames.push(apiGame);
-            continue; // Move to next game
+            continue;
           }
         } catch (apiErr) {
           console.warn(`[SVM] API fallback also failed for ${pgcGame.gameId}`, apiErr);
         }
 
         // If both contract and API fail, still show the game with minimal info
-        // This ensures users see games they own even if metadata is unavailable
-        console.log(`[SVM] Adding game ${pgcGame.gameId} with minimal metadata (game is owned but metadata unavailable)`);
+        console.log(`[SVM] Adding game ${pgcGame.gameId} with minimal metadata`);
         ownedGames.push({
           gameId: pgcGame.gameId,
-          name: pgcGame.gameId, // Use gameId as name since we don't have metadata
+          name: pgcGame.gameId,
           description: '',
           published: true,
           price: 0,
@@ -130,7 +233,13 @@ export async function getMyGamesSvm({ address }: { address: string }): Promise<P
 
     return ownedGames;
   } catch (error) {
-    console.error('[Library] SVM Fetch failed:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    // Only log full error if it is not a circuit breaker error
+    if (!errorMessage.includes('Circuit is open')) {
+      console.error('[Library] SVM Fetch failed:', error);
+    } else {
+      console.warn('[Library] SVM RPC temporarily unavailable (circuit breaker open)');
+    }
     return [];
   }
 }
@@ -187,7 +296,7 @@ export async function buyGameSvm({
     console.log('[SVM] Initiating game purchase:', { gameId });
 
     // Import the runtime wallet derivation function
-    // @ts-expect-error - Module doesn't have proper type declarations
+    // @ts-expect-error - Module does not have proper type declarations
     const walletRuntime = await import('@antigane/peridotwallet-runtime');
 
     // Derive buyer's keypair from seed phrase
@@ -195,11 +304,6 @@ export async function buyGameSvm({
     console.log('[SVM] Derived buyer keypair:', buyerKeypair.publicKey);
 
     // TODO: Implement full Solana purchase flow
-    // This requires:
-    // 1. Get game PDA from registry
-    // 2. Get price account PDA
-    // 3. Create and sign the buyGame transaction
-    // For now, return a descriptive error
     console.warn('[SVM] Solana game purchase requires full implementation');
 
     return {

@@ -8,6 +8,8 @@ import {
 } from './auth.service';
 import { signMessageWithEvm, deriveEvmAddressFromSeed } from '../utils/evm';
 import { useWalletLockStore } from '../states/wallet-lock.store';
+import { libraryService } from '@features/library/services/localDb';
+import { useLibraryStore } from '@features/library/hooks/useLibraryStore';
 
 // Track auth attempts to prevent infinite loops
 const authAttemptCache = new Map<string, { count: number; lastAttempt: number }>();
@@ -84,7 +86,7 @@ function recordAuthAttempt(seedPhrase: string, success: boolean): void {
 /**
  * Initialize authentication with the backend.
  * This should be called when the wallet is unlocked.
- * 
+ *
  * @param seedPhrase - The wallet seed phrase (must be valid BIP39 mnemonic)
  * @returns true if authentication is successful or already valid
  */
@@ -92,7 +94,9 @@ export async function initializeAuth(seedPhrase: string): Promise<boolean> {
   try {
     // Validate seed phrase first
     if (!isValidSeedPhrase(seedPhrase)) {
-      console.warn('[AuthInit] Invalid seed phrase provided. Expected 12, 15, 18, 21, or 24 words.');
+      console.warn(
+        '[AuthInit] Invalid seed phrase provided. Expected 12, 15, 18, 21, or 24 words.',
+      );
       return false;
     }
 
@@ -120,11 +124,11 @@ export async function initializeAuth(seedPhrase: string): Promise<boolean> {
     // Need to authenticate - sign a message
     console.log('[AuthInit] Authenticating with backend...');
     const evmAddress = deriveEvmAddressFromSeed(seedPhrase);
-    
+
     // Use a simpler message format without timestamp to avoid timing issues
     // The server should verify the signature against the address
     const message = `Sign this message to authenticate with PeridotVault`;
-    
+
     console.log('[AuthInit] Derived address:', evmAddress);
 
     console.log('[AuthInit] Signing message with EVM wallet...');
@@ -145,15 +149,15 @@ export async function initializeAuth(seedPhrase: string): Promise<boolean> {
       return true;
     } else {
       // Check if it's a server error (500) vs auth error
-      const isServerError = response.error?.includes('500') || 
-                           response.error?.includes('Internal server error');
-      
+      const isServerError =
+        response.error?.includes('500') || response.error?.includes('Internal server error');
+
       if (isServerError) {
         console.error('[AuthInit] Server error (500) - not locking wallet. Error:', response.error);
         // Don't record as failed attempt for server errors
         return false;
       }
-      
+
       console.error('[AuthInit] Authentication failed:', response.error);
       recordAuthAttempt(seedPhrase, false);
       return false;
@@ -167,21 +171,21 @@ export async function initializeAuth(seedPhrase: string): Promise<boolean> {
 
 /**
  * Initialize authentication with the backend.
- * If authentication fails with invalid credentials (not server errors), 
+ * If authentication fails with invalid credentials (not server errors),
  * this will lock the wallet and show the password prompt.
  * This should be called when the wallet is unlocked.
- * 
+ *
  * @param seedPhrase - The wallet seed phrase (must be valid BIP39 mnemonic)
  * @returns true if authentication is successful or already valid
  */
 export async function initializeAuthWithLockOnFailure(seedPhrase: string): Promise<boolean> {
   const success = await initializeAuth(seedPhrase);
-  
+
   if (!success) {
     // Check if we should lock the wallet
     const attemptCheck = shouldAttemptAuth(seedPhrase);
     const attemptData = authAttemptCache.get(getSeedPhraseCacheKey(seedPhrase));
-    
+
     // Only lock if we've exhausted retries or it's an auth error (not server error)
     if (attemptData && attemptData.count >= MAX_AUTH_ATTEMPTS) {
       console.warn('[AuthInit] Auth failed after max retries - locking wallet');
@@ -194,10 +198,12 @@ export async function initializeAuthWithLockOnFailure(seedPhrase: string): Promi
       console.warn('[AuthInit] Auth cooldown active - not locking wallet');
     } else {
       // Server error or other issue - don't lock, just skip API for now
-      console.warn('[AuthInit] Auth failed (server error or other issue) - not locking wallet, will use blockchain fallback');
+      console.warn(
+        '[AuthInit] Auth failed (server error or other issue) - not locking wallet, will use blockchain fallback',
+      );
     }
   }
-  
+
   return success;
 }
 
@@ -210,11 +216,19 @@ export async function isAuthenticated(): Promise<boolean> {
 }
 
 /**
- * Logout - clear authentication session.
+ * Logout - clear authentication session and library data.
  */
 export async function logout(): Promise<void> {
+  // Clear auth session
   await clearAuthSession();
-  console.log('[AuthInit] Logged out');
+
+  // Clear library data from IndexedDB
+  await libraryService.clear();
+
+  // Reset library store state
+  useLibraryStore.getState().clearAll();
+
+  console.log('[AuthInit] Logged out and library data cleared');
 }
 
 /**

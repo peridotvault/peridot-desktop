@@ -14,16 +14,26 @@ export const STORAGE_BASE_PATH =
 // Full storage URL for accessing stored files
 export const STORAGE_URL = `${API_BASE}${STORAGE_BASE_PATH}`;
 
-// RPC URLs
+// RPC URLs - Primary RPC for backward compatibility
 export const EVM_RPC_URL =
   import.meta.env.VITE_EVM_RPC_URL ??
   import.meta.env.VITE_RPC_URL_BASE_TESTNET ??
   'https://base-sepolia.g.alchemy.com/v2/demo';
 
+// Primary SVM RPC URL (backward compatibility)
 export const SVM_RPC_URL =
   import.meta.env.VITE_SVM_RPC_URL ??
   import.meta.env.VITE_RPC_URL_SOLANA_TESTNET ??
   'https://api.devnet.solana.com';
+
+// Multiple SVM RPC URLs with fallback support
+export const SVM_RPC_URLS: string[] = [
+  import.meta.env.VITE_SVM_RPC_URL ??
+  import.meta.env.VITE_RPC_URL_SOLANA_TESTNET ??
+  'https://devnet.helius-rpc.com/?api-key=647e5f6c-1ec1-4999-89d8-794d3f34f433',
+  'https://api.devnet.solana.com',
+  'https://rpc.ankr.com/solana_devnet',
+];
 
 // Contract addresses
 export const EVM_REGISTRY_ADDRESS =

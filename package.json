@@ -23,7 +23,7 @@
     }
   ],
   "dependencies": {
-    "@antigane/peridotwallet-runtime": "file:/Users/ranaufal/MyWork/Business/__AntiganeInc__/PeridotVault/App/DesktopAndWebApp/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.17.tgz",
+    "@antigane/peridotwallet-runtime": "file:/Users/ranaufal/MyWork/Business/__AntiganeInc__/PeridotVault/App/DesktopAndWebApp/peridotwallet-runtime/antigane-peridotwallet-runtime-0.0.18.tgz",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",

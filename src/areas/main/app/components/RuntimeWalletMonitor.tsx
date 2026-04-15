@@ -3,6 +3,7 @@ import { useWallet, useWalletUpdate } from '@shared/contexts/WalletContext';
 import { redirectToLogin } from '@shared/desktop/windowControls';
 import { getPeridotRuntimeWallet } from '@shared/services/peridot-runtime';
 import { clearWalletData } from '@shared/services/store';
+import { logout } from '@shared/services/auth-init.service';
 
 export const RuntimeWalletMonitor = () => {
   const { wallet, isCheckingWallet } = useWallet();
@@ -37,6 +38,7 @@ export const RuntimeWalletMonitor = () => {
       redirectInFlightRef.current = true;
 
       try {
+        await logout();
         await clearWalletData();
       } finally {
         updateWallet({
